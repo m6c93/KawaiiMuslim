@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0e1330; }
+  html, body { height: 100%; }
+  @keyframes kmTwinkle { 0%,100%{opacity:.45} 50%{opacity:.9} }
+  @keyframes kmFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+  @keyframes kmFadeUp { from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:translateY(0)} }
+</style>
+</helmet>
+
+<div style="width:100vw; height:100vh; margin:0; background:#14091a; position:relative;">
+
+  <!-- ===== SCREEN ===== -->
+  <div style="position:relative; width:100%; height:100%; overflow:hidden; font-family:'Nunito',system-ui,sans-serif; color:#fff; background:radial-gradient(130% 100% at 50% -18%, #33419A 0%, #222C66 44%, #141A3C 100%);">
+
+    <!-- stars -->
+    <div style="position:absolute; inset:0; pointer-events:none; opacity:.7; animation:kmTwinkle 6s ease-in-out infinite; background-repeat:no-repeat; background-image:
+      radial-gradient(1.7px 1.7px at 12% 22%, #fff, transparent),
+      radial-gradient(1.4px 1.4px at 68% 14%, #fff, transparent),
+      radial-gradient(1.6px 1.6px at 38% 72%, #ffe9b8, transparent),
+      radial-gradient(1.3px 1.3px at 86% 52%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 52% 30%, #fff, transparent),
+      radial-gradient(1.2px 1.2px at 8% 62%, #fff, transparent),
+      radial-gradient(1.4px 1.4px at 92% 84%, #ffe9b8, transparent),
+      radial-gradient(1.3px 1.3px at 28% 9%, #fff, transparent),
+      radial-gradient(1.6px 1.6px at 60% 88%, #fff, transparent),
+      radial-gradient(1.2px 1.2px at 78% 26%, #fff, transparent),
+      radial-gradient(1.4px 1.4px at 18% 90%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 44% 54%, #fff, transparent);"></div>
+    <!-- moon -->
+    <div style="position:absolute; top:34px; right:46px; width:60px; height:60px; border-radius:50%; pointer-events:none; background:radial-gradient(circle at 38% 35%, #FFF6D6, #FAE08C 60%, #EFC65C); box-shadow:0 0 55px 12px rgba(250,224,140,.34), inset -8px -6px 0 rgba(214,160,60,.18);"></div>
+
+    <!-- ===== TOPBAR ===== -->
+    <div style="position:relative; z-index:3; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 30px;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:46px; height:46px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 0 0 2px rgba(255,255,255,.22);"><img src="brand/assets/mascot-nour.png" alt="Mimi" style="width:56px; height:auto; margin-top:4px;" /></div>
+        <div style="line-height:1;">
+          <p style="font-family:'Baloo 2',cursive; font-weight:700; font-size:18px; margin:0; letter-spacing:.5px; white-space:nowrap;">Kawaii Muslim</p>
+          <p style="font-weight:700; font-size:10px; letter-spacing:2.5px; color:#CFD0E8; text-transform:uppercase; margin:3px 0 0;">Bibliothèque</p>
+        </div>
+      </div>
+      <div style="flex:0 1 380px; display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); border-radius:30px; padding:11px 20px;">
+        <span style="opacity:.7; font-size:15px;">🔍</span>
+        <span style="font-size:14px; color:rgba(255,255,255,.55);">Cherche un livre, une histoire…</span>
+      </div>
+      <sc-if value="{{ subscribed }}" hint-placeholder-val="{{ false }}">
+        <span style="display:flex; align-items:center; gap:7px; background:linear-gradient(150deg,#F0B53F,#D8932A); color:#fff; font-weight:700; font-size:12.5px; padding:9px 18px; border-radius:24px; white-space:nowrap; box-shadow:0 6px 16px rgba(216,147,42,.34);">✨ Abonné Premium</span>
+      </sc-if>
+      <sc-if value="{{ notSubscribed }}" hint-placeholder-val="{{ true }}">
+        <span onClick="{{ openPaywall }}" style="cursor:pointer; display:flex; align-items:center; gap:7px; background:linear-gradient(150deg,#F0AECA,#E27FAE); color:#fff; font-family:'Baloo 2',cursive; font-weight:700; font-size:13px; padding:9px 20px; border-radius:24px; white-space:nowrap; box-shadow:0 8px 18px rgba(226,127,174,.36);">🔓 S'abonner</span>
+      </sc-if>
+      <div onClick="{{ switchProfile }}" style="display:flex; align-items:center; gap:11px; cursor:pointer; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:30px; padding:7px 9px 7px 16px;">
+        <div style="text-align:right; line-height:1.1;"><p style="font-size:13px; font-weight:700; margin:0;">{{ profileName }}</p><p style="font-size:10px; color:#CFD0E8; margin:1px 0 0;">changer</p></div>
+        <div style="width:38px; height:38px; border-radius:50%; background:linear-gradient(150deg,#F0AECA,#E27FAE); display:flex; align-items:center; justify-content:center; font-size:18px;">{{ profileEmoji }}</div>
+      </div>
+    </div>
+
+    <!-- ===== SCROLL BODY ===== -->
+    <div style="position:relative; z-index:2; height:calc(100% - 86px); overflow-y:auto; padding:6px 30px 40px;">
+
+      <!-- greeting -->
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; margin:8px 0 20px;">
+        <div>
+          <h1 style="font-family:'Baloo 2',cursive; font-weight:800; font-size:32px; margin:0; line-height:1.1;">{{ greeting }}</h1>
+          <p style="font-size:14.5px; color:#C9CBE6; margin:8px 0 0;">{{ sub }}</p>
+        </div>
+      </div>
+
+      <!-- SUBSCRIBE BANNER (non-abonnés) -->
+      <sc-if value="{{ notSubscribed }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:20px; background:linear-gradient(120deg, rgba(240,181,63,.18), rgba(226,127,174,.16)); border:1px solid rgba(240,181,63,.4); border-radius:20px; padding:16px 24px; margin-bottom:24px;">
+          <div style="display:flex; align-items:center; gap:14px;">
+            <span style="font-size:26px;">🌟</span>
+            <p style="font-size:14px; color:#EDEFFb; margin:0; line-height:1.5;"><strong style="color:#fff;">Débloque toute la bibliothèque.</strong> Lecture illimitée pour toute la famille — 7 jours d'essai gratuit.</p>
+          </div>
+          <span onClick="{{ openPaywall }}" style="cursor:pointer; flex-shrink:0; font-family:'Baloo 2',cursive; font-weight:700; font-size:14px; color:#fff; background:linear-gradient(150deg,#F0B53F,#D8932A); padding:11px 24px; border-radius:24px; white-space:nowrap; box-shadow:0 8px 18px rgba(216,147,42,.34);">Essayer gratuitement</span>
+        </div>
+      </sc-if>
+
+      <!-- CONTINUE READING HERO -->
+      <div style="display:flex; gap:26px; align-items:stretch; background:linear-gradient(135deg, rgba(226,127,174,.22), rgba(51,65,154,.20)); border:1px solid rgba(255,255,255,.12); border-radius:26px; padding:22px; margin-bottom:30px; backdrop-filter:blur(4px);">
+        <div style="flex:0 0 200px; border-radius:14px; overflow:hidden; box-shadow:0 18px 40px rgba(0,0,0,.45); position:relative;">
+          <img src="brand/assets/scene-tawakkul.png" alt="Tawakkul" style="width:100%; height:100%; object-fit:cover; display:block;" />
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+          <span style="font-weight:800; font-size:11px; letter-spacing:2px; color:#F0B53F; text-transform:uppercase;">On reprend ce soir</span>
+          <h2 style="font-family:'Baloo 2',cursive; font-weight:800; font-size:30px; margin:8px 0 4px;">Tawakkul</h2>
+          <p style="font-size:14px; color:#C9CBE6; margin:0 0 18px; max-width:460px; line-height:1.55;">La confiance en Allah ﷻ, racontée tout en douceur à Aya par sa petite Mimi.</p>
+          <div style="display:flex; align-items:center; gap:14px; margin-bottom:20px; max-width:420px;">
+            <div style="flex:1; height:8px; border-radius:4px; background:rgba(255,255,255,.15); overflow:hidden;"><div style="width:42%; height:100%; background:linear-gradient(90deg,#F0AECA,#E27FAE);"></div></div>
+            <span style="font-size:12px; font-weight:700; color:#C9CBE6;">page 8 / 20</span>
+          </div>
+          <sc-if value="{{ subscribed }}" hint-placeholder-val="{{ false }}">
+            <a href="books/tawakkul.html" style="align-self:flex-start; text-decoration:none; display:flex; align-items:center; gap:10px; background:linear-gradient(150deg,#F0AECA,#E27FAE); color:#fff; font-family:'Baloo 2',cursive; font-weight:700; font-size:16px; padding:13px 30px; border-radius:30px; box-shadow:0 12px 26px rgba(226,127,174,.4);">
+              <span style="font-size:15px;">▶</span> Reprendre la lecture
+            </a>
+          </sc-if>
+          <sc-if value="{{ notSubscribed }}" hint-placeholder-val="{{ true }}">
+            <span onClick="{{ openPaywall }}" style="align-self:flex-start; cursor:pointer; display:flex; align-items:center; gap:10px; background:linear-gradient(150deg,#F0AECA,#E27FAE); color:#fff; font-family:'Baloo 2',cursive; font-weight:700; font-size:16px; padding:13px 30px; border-radius:30px; box-shadow:0 12px 26px rgba(226,127,174,.4);">
+              <span style="font-size:15px;">🔒</span> Débloquer avec l'abonnement
+            </span>
+          </sc-if>
+        </div>
+      </div>
+
+      <!-- PARENT SPACE -->
+      <sc-if value="{{ parentSpace }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:30px;">
+          <div style="background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:20px 24px;"><p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:26px; color:#F0B53F; margin:0;">3 livres</p><p style="font-size:12.5px; color:#C9CBE6; margin:6px 0 0;">lus cette semaine par Aya</p></div>
+          <div style="background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:20px 24px;"><p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:26px; color:#F0AECA; margin:0;">42 min</p><p style="font-size:12.5px; color:#C9CBE6; margin:6px 0 0;">de lecture partagée</p></div>
+          <div style="background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:20px 24px;"><p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:26px; color:#8FD2E4; margin:0;">⭐ 12</p><p style="font-size:12.5px; color:#C9CBE6; margin:6px 0 0;">étoiles gagnées</p></div>
+        </div>
+      </sc-if>
+
+      <!-- FILTERS -->
+      <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+        <span style="background:#E27FAE; color:#fff; font-weight:700; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Tous les livres</span>
+        <span style="background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Tawakkul</span>
+        <span style="background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Prières</span>
+        <span style="background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Ramadan</span>
+        <span style="background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Histoires</span>
+      </div>
+
+      <!-- SHELF -->
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px;">
+        <sc-for list="{{ books }}" as="book" hint-placeholder-count="8">
+          <div style="position:relative;">
+            <div style="position:relative; border-radius:16px; overflow:hidden; aspect-ratio:1/1; background:#fff; box-shadow:0 16px 34px rgba(0,0,0,.4); animation:kmFadeUp .5s ease both;">
+              <sc-if value="{{ book.coverImg }}" hint-placeholder-val="{{ false }}">
+                <img src="{{ book.coverImg }}" alt="{{ book.title }}" style="width:100%; height:100%; object-fit:contain; display:block;" />
+              </sc-if>
+              <sc-if value="{{ book.noCover }}" hint-placeholder-val="{{ true }}">
+                <div style="width:100%; height:100%; background:{{ book.grad }}; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+                  <span style="font-size:48px;">{{ book.emoji }}</span>
+                  <span style="font-family:'Baloo 2',cursive; font-weight:700; font-size:15px; color:#fff; text-align:center; padding:0 14px; text-shadow:0 1px 4px rgba(0,0,0,.25);">{{ book.title }}</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ book.soon }}" hint-placeholder-val="{{ false }}">
+                <span style="position:absolute; top:10px; right:10px; background:rgba(20,10,26,.66); color:#FAE08C; font-weight:700; font-size:10.5px; letter-spacing:.5px; padding:5px 11px; border-radius:14px; text-transform:uppercase;">Bientôt</span>
+              </sc-if>
+              <sc-if value="{{ book.canRead }}" hint-placeholder-val="{{ true }}">
+                <a href="{{ book.url }}" style="position:absolute; inset:0; display:block;"></a>
+                <span style="position:absolute; bottom:10px; left:10px; background:rgba(226,127,174,.92); color:#fff; font-weight:700; font-size:10.5px; letter-spacing:.5px; padding:5px 11px; border-radius:14px; text-transform:uppercase;">▶ Lire</span>
+              </sc-if>
+              <sc-if value="{{ book.locked }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ openPaywall }}" style="position:absolute; inset:0; cursor:pointer; background:rgba(20,26,60,.5); display:flex; align-items:center; justify-content:center;">
+                  <span style="width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,.92); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 6px 16px rgba(0,0,0,.3);">🔒</span>
+                </div>
+                <span style="position:absolute; bottom:10px; left:10px; background:rgba(240,181,63,.95); color:#3a2b06; font-weight:700; font-size:10.5px; letter-spacing:.5px; padding:5px 11px; border-radius:14px; text-transform:uppercase;">Premium</span>
+              </sc-if>
+            </div>
+            <p style="font-family:'Baloo 2',cursive; font-weight:700; font-size:14.5px; margin:12px 0 2px;">{{ book.title }}</p>
+            <p style="font-size:12px; color:#9fa2c8; margin:0;">{{ book.sub }}</p>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- COLORIAGES -->
+      <div style="display:flex; align-items:center; justify-content:space-between; margin:40px 0 18px;">
+        <h2 style="font-family:'Baloo 2',cursive; font-weight:800; font-size:22px; margin:0;">🖍️ Coloriages à imprimer</h2>
+        <p style="font-size:12.5px; color:#9fa2c8; margin:0;">Choisis une page et télécharge-la</p>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:20px; margin-bottom:10px;">
+        <sc-for list="{{ colorings }}" as="page" hint-placeholder-count="5">
+          <div style="position:relative;">
+            <div style="position:relative; border-radius:16px; overflow:hidden; aspect-ratio:3/4; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 26px rgba(0,0,0,.3);">
+              <sc-if value="{{ page.coverImg }}" hint-placeholder-val="{{ false }}">
+                <img src="{{ page.coverImg }}" alt="{{ page.title }}" style="width:100%; height:100%; object-fit:cover; display:block;" />
+              </sc-if>
+              <sc-if value="{{ page.noImg }}" hint-placeholder-val="{{ true }}">
+                <span style="font-size:52px; filter:grayscale(1) opacity(.55);">{{ page.emoji }}</span>
+              </sc-if>
+              <sc-if value="{{ page.canDownload }}" hint-placeholder-val="{{ true }}">
+                <a href="{{ page.url }}" download style="position:absolute; inset:0; display:block;"></a>
+                <span style="position:absolute; bottom:10px; left:10px; background:rgba(79,192,161,.92); color:#fff; font-weight:700; font-size:10.5px; letter-spacing:.5px; padding:5px 11px; border-radius:14px; text-transform:uppercase;">⬇ Télécharger</span>
+              </sc-if>
+              <sc-if value="{{ page.locked }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ openPaywall }}" style="position:absolute; inset:0; cursor:pointer; background:rgba(20,26,60,.45); display:flex; align-items:center; justify-content:center;">
+                  <span style="width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,.92); display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 6px 16px rgba(0,0,0,.3);">🔒</span>
+                </div>
+              </sc-if>
+            </div>
+            <p style="font-family:'Baloo 2',cursive; font-weight:700; font-size:13.5px; margin:10px 0 0; text-align:center;">{{ page.title }}</p>
+          </div>
+        </sc-for>
+      </div>
+
+    </div>
+
+    <!-- ===== LOGIN GATE ===== -->
+    <sc-if value="{{ showGate }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute; inset:0; z-index:20; background:radial-gradient(130% 100% at 50% -10%, rgba(51,65,154,.86), rgba(20,26,60,.96)); backdrop-filter:blur(8px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px;">
+        <div style="width:78px; height:78px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 0 0 3px rgba(255,255,255,.2); margin-bottom:18px; animation:kmFloat 4s ease-in-out infinite;"><img src="brand/assets/mascot-nour.png" alt="Mimi" style="width:96px; height:auto; margin-top:6px;" /></div>
+        <h2 style="font-family:'Baloo 2',cursive; font-weight:800; font-size:34px; margin:0 0 8px; text-align:center;">Qui lit ce soir ? 🌙</h2>
+        <p style="font-size:15px; color:#C9CBE6; margin:0 0 36px; text-align:center;">Choisis ton profil pour ouvrir la bibliothèque.</p>
+        <div style="display:flex; gap:26px;">
+          <div onClick="{{ chooseEnfant }}" style="cursor:pointer; width:240px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.16); border-radius:26px; padding:32px; text-align:center; transition:transform .15s;" style-hover="transform:translateY(-6px); background:rgba(255,255,255,.12);">
+            <div style="width:104px; height:104px; border-radius:50%; margin:0 auto 18px; background:linear-gradient(150deg,#FBDDEA,#F0AECA); display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 12px 28px rgba(226,127,174,.4);"><img src="brand/assets/mascot-nour.png" alt="enfant" style="width:124px; height:auto; margin-top:8px;" /></div>
+            <p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:22px; margin:0 0 4px;">Aya</p>
+            <p style="font-size:12.5px; color:#C9CBE6; margin:0;">Espace enfant</p>
+          </div>
+          <div onClick="{{ chooseMaman }}" style="cursor:pointer; width:240px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.16); border-radius:26px; padding:32px; text-align:center; transition:transform .15s;" style-hover="transform:translateY(-6px); background:rgba(255,255,255,.12);">
+            <div style="width:104px; height:104px; border-radius:50%; margin:0 auto 18px; background:linear-gradient(150deg,#C9D2FF,#7C8BE0); display:flex; align-items:center; justify-content:center; font-size:48px; box-shadow:0 12px 28px rgba(124,139,224,.4);">🌸</div>
+            <p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:22px; margin:0 0 4px;">Maman</p>
+            <p style="font-size:12.5px; color:#C9CBE6; margin:0;">Espace parent</p>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===== PAYWALL / ABONNEMENT ===== -->
+    <sc-if value="{{ showPaywall }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; z-index:30; background:radial-gradient(130% 100% at 50% -10%, rgba(51,65,154,.9), rgba(20,26,60,.97)); backdrop-filter:blur(9px); display:flex; align-items:center; justify-content:center; padding:36px;">
+        <div style="width:760px; max-width:100%; background:linear-gradient(165deg,#222C66,#141A3C); border:1px solid rgba(255,255,255,.14); border-radius:30px; padding:42px 46px; position:relative; box-shadow:0 40px 90px rgba(0,0,0,.5);">
+          <span onClick="{{ closePaywall }}" style="position:absolute; top:20px; right:24px; cursor:pointer; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; font-size:16px; color:#C9CBE6;">✕</span>
+          <div style="text-align:center; margin-bottom:30px;">
+            <div style="width:64px; height:64px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; margin:0 auto 14px; box-shadow:0 0 0 3px rgba(240,181,63,.4);"><img src="brand/assets/mascot-nour.png" alt="Mimi" style="width:80px; height:auto; margin-top:5px;" /></div>
+            <h2 style="font-family:'Baloo 2',cursive; font-weight:800; font-size:30px; color:#fff; margin:0 0 8px;">Ouvre toute la bibliothèque ✨</h2>
+            <p style="font-size:14.5px; color:#C9CBE6; margin:0;">Lecture illimitée, nouveaux livres chaque mois, pour toute la famille.</p>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
+            <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16); border-radius:22px; padding:26px 24px; text-align:center;">
+              <p style="font-family:'Baloo 2',cursive; font-weight:700; font-size:15px; color:#C9CBE6; margin:0 0 6px;">Mensuel</p>
+              <p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:34px; color:#fff; margin:0;">6,99€<span style="font-size:14px; color:#9fa2c8; font-weight:600;">/mois</span></p>
+              <p style="font-size:12px; color:#9fa2c8; margin:8px 0 0;">Sans engagement</p>
+            </div>
+            <div style="background:linear-gradient(160deg, rgba(240,181,63,.2), rgba(226,127,174,.16)); border:2px solid #F0B53F; border-radius:22px; padding:26px 24px; text-align:center; position:relative;">
+              <span style="position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:#F0B53F; color:#3a2b06; font-weight:700; font-size:10.5px; letter-spacing:.5px; padding:4px 14px; border-radius:12px; text-transform:uppercase; white-space:nowrap;">2 mois offerts</span>
+              <p style="font-family:'Baloo 2',cursive; font-weight:700; font-size:15px; color:#FAE08C; margin:0 0 6px;">Annuel</p>
+              <p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:34px; color:#fff; margin:0;">59€<span style="font-size:14px; color:#C9CBE6; font-weight:600;">/an</span></p>
+              <p style="font-size:12px; color:#C9CBE6; margin:8px 0 0;">Soit 4,92€/mois</p>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-wrap:wrap; gap:10px 22px; justify-content:center; margin-bottom:28px;">
+            <span style="font-size:13px; color:#C9CBE6;">✅ Tous les livres</span>
+            <span style="font-size:13px; color:#C9CBE6;">✅ 2 profils (enfant + parent)</span>
+            <span style="font-size:13px; color:#C9CBE6;">✅ Lecture audio</span>
+            <span style="font-size:13px; color:#C9CBE6;">✅ Nouveautés chaque mois</span>
+          </div>
+
+          <div onClick="{{ subscribe }}" style="cursor:pointer; text-align:center; font-family:'Baloo 2',cursive; font-weight:700; font-size:18px; color:#fff; background:linear-gradient(150deg,#F0AECA,#E27FAE); padding:16px; border-radius:30px; box-shadow:0 14px 30px rgba(226,127,174,.4);">Démarrer les 7 jours gratuits</div>
+          <p onClick="{{ closePaywall }}" style="cursor:pointer; text-align:center; font-size:13px; color:#9fa2c8; margin:16px 0 0;">Peut-être plus tard</p>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1312,&quot;height&quot;:872},&quot;defaultProfile&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;demander&quot;,&quot;enfant&quot;,&quot;maman&quot;],&quot;default&quot;:&quot;demander&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;},&quot;parentSpace&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;},&quot;subscribed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;}}">
+class Component extends DCLogic {
+  state = { profile: null, subscribed: true, showPaywall: false };
+
+  componentDidMount() {
+    const dp = this.props.defaultProfile || 'demander';
+    if (dp === 'enfant' || dp === 'maman') this.setState({ profile: dp });
+    this.setState({ subscribed: this.props.subscribed ?? true });
+  }
+
+  renderVals() {
+    const profile = this.state.profile;
+    const subscribed = this.state.subscribed;
+    const isMaman = profile === 'maman';
+    const rawBooks = [
+      { title: 'Tawakkul', sub: 'La confiance en Allah', cover: 'brand/assets/scene-tawakkul.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/tawakkul.html', grad: '', emoji: '' },
+      { title: 'Bubble Tea Time Hijabi', sub: 'Un goûter entre copines', cover: 'brand/assets/coloring-bubble-tea.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/bubble-tea-time-hijabi.html', grad: '', emoji: '' },
+      { title: "Aya et l'Armure de Lumière", sub: 'Une aventure de courage', cover: 'brand/assets/coloring-armure-lumiere.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/aya-armure-de-lumiere.html', grad: '', emoji: '' },
+      { title: "Exploration de l'espace", sub: 'Les planètes du système solaire', cover: 'brand/assets/cover-exploration-espace.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/exploration-espace.html', grad: '', emoji: '' },
+      { title: 'Hijabi Girls', sub: 'Nos héroïnes du quotidien', cover: 'brand/assets/cover-hijabi-girls.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/hijabi-girls.html', grad: '', emoji: '' },
+      { title: 'Les aliments dans le Coran', sub: 'Découvrir les bienfaits de la création', cover: 'brand/assets/cover-aliments-coran.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/aliments-dans-le-coran.html', grad: '', emoji: '' },
+      { title: 'Les animaux du Coran', sub: 'À la rencontre des créatures d\u2019Allah', cover: 'brand/assets/cover-animaux-coran.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/animaux-du-coran.html', grad: '', emoji: '' },
+      { title: 'Vers Allah', sub: 'Le chemin de la foi', cover: 'brand/assets/cover-vers-allah.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/vers-allah.html', grad: '', emoji: '' },
+    ];
+    const books = rawBooks.map((b) => ({
+      ...b,
+      coverImg: b.hasCover && b.cover ? b.cover : false,
+      canRead: b.available && subscribed,
+      locked: b.available && !subscribed,
+    }));
+
+    const rawColorings = [
+      { title: 'La lune de Ramadan', emoji: '🌙' },
+      { title: "L'abeille du Coran", emoji: '🐝' },
+      { title: 'Le tapis de prière', emoji: '🕌' },
+      { title: 'Aya & Mimi', emoji: '🌸' },
+    ];
+    const colorings = rawColorings.map((p) => ({
+      ...p,
+      coverImg: p.cover || false,
+      noImg: !p.cover,
+      url: '#coloriage-' + encodeURIComponent(p.title),
+      canDownload: subscribed,
+      locked: !subscribed,
+    }));
+
+    return {
+      showGate: !profile,
+      isMaman,
+      subscribed,
+      notSubscribed: !subscribed,
+      showPaywall: this.state.showPaywall,
+      parentSpace: (this.props.parentSpace ?? true) && isMaman,
+      greeting: isMaman ? 'Assalamou alaykoum \uD83C\uDF38' : 'Assalamou alaykoum, petit lecteur ! \uD83C\uDF19',
+      sub: isMaman ? "L'espace lecture de votre famille." : "Quel livre lit-on ce soir, Aya ?",
+      profileName: isMaman ? 'Maman' : (profile ? 'Aya' : 'Invité'),
+      profileEmoji: isMaman ? '🌸' : '🐤',
+      books,
+      colorings,
+      chooseEnfant: () => this.setState({ profile: 'enfant' }),
+      chooseMaman: () => this.setState({ profile: 'maman' }),
+      switchProfile: () => this.setState({ profile: null }),
+      openPaywall: () => this.setState({ showPaywall: true }),
+      closePaywall: () => this.setState({ showPaywall: false }),
+      subscribe: () => this.setState({ subscribed: true, showPaywall: false }),
+    };
+  }
+}
+</script>
+</body>
+</html>

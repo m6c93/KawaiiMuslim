@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<style>
+  @page { size: 1240px 1660px; margin: 0; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @media print {
+    html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+    /* reflow the fixed-width container to the page */
+    body > x-dc > div, x-dc > div, body div[style*="width:1240px"] {
+      width: 1240px !important; max-width: none !important; margin: 0 !important; box-shadow: none !important; border-radius: 0 !important;
+    }
+    /* one chapter per page-start, keep colored sections full-bleed */
+    x-dc section { break-before: page; break-inside: auto; }
+    x-dc section:first-of-type { break-before: avoid; }
+    h1, h2, h3 { break-after: avoid; }
+    p { orphans: 3; widows: 3; }
+    /* freeze entrance animations at end state */
+    *, *::before, *::after {
+      animation-delay: -99s !important; animation-duration: .001s !important;
+      animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+      animation-play-state: running !important; transition-duration: 0s !important;
+    }
+  }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#FDEFF5"/><stop offset="0.5" stop-color="#E9F7F1"/><stop offset="1" stop-color="#E6F5FA"/>
+  </linearGradient></defs>
+  <rect width="100" height="100" rx="16" fill="url(#g)"/>
+  <circle cx="50" cy="40" r="16" fill="#fff"/>
+  <circle cx="50" cy="40" r="16" fill="none" stroke="#F2A0C4" stroke-width="2"/>
+  <text x="50" y="46" font-size="16" text-anchor="middle" fill="#4FC0A1" font-family="sans-serif" font-weight="bold">KM</text>
+  <rect x="30" y="64" width="40" height="5" rx="2.5" fill="#4FC0A1"/>
+  <rect x="36" y="74" width="28" height="4" rx="2" fill="#B69BDC"/>
+</svg>
+</template>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #ece7df; }
+  ::selection { background: #F2A0C4; color: #fff; }
+</style>
+</helmet>
+
+<div style="width:1240px; margin:0 auto; background:#FFFBF4; font-family:'Quicksand',sans-serif; color:#3a3f63; overflow:hidden; box-shadow:0 30px 90px rgba(35,42,82,.14);">
+
+  <!-- ============ COVER ============ -->
+  <section style="position:relative; padding:64px 90px 80px; background:linear-gradient(158deg,#FFFBF4 0%,#FDEFF5 46%,#E9F7F1 100%); overflow:hidden;">
+    <div style="position:absolute; top:-90px; right:-70px; width:340px; height:340px; border-radius:50%; background:radial-gradient(circle at 35% 35%,#FBD9E8,#FBD9E800 70%); pointer-events:none;"></div>
+    <div style="position:absolute; bottom:-120px; left:-80px; width:360px; height:360px; border-radius:50%; background:radial-gradient(circle at 50% 50%,#D7F1E8,#D7F1E800 70%); pointer-events:none;"></div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:2;">
+      <span style="font-weight:700; letter-spacing:.32em; font-size:12px; color:#4FC0A1; text-transform:uppercase;">DA</span>
+      <span style="font-weight:600; letter-spacing:.18em; font-size:12px; color:#B69BDC; text-transform:uppercase;">Édition 2026 · v2.0</span>
+    </div>
+
+    <div style="display:flex; flex-direction:column; align-items:center; text-align:center; position:relative; z-index:2; margin-top:34px;">
+      <img src="brand/assets/logo-kawaii-muslim.png" alt="Kawaii Muslim" style="width:560px; height:auto; filter:drop-shadow(0 14px 26px rgba(35,42,82,.10));" />
+      <p style="font-family:'Baloo 2',sans-serif; font-weight:600; font-size:25px; color:#2E7D6B; margin:30px 0 6px; max-width:680px; line-height:1.35;">L'éducation islamique qui fait sourire les enfants.</p>
+      <p style="font-size:16px; color:#9a93a8; margin:0; max-width:560px; line-height:1.6;">Le leader de l'apprentissage de l'islam pour les petits — doux, lumineux et plein de tendresse.</p>
+    </div>
+
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-top:36px; position:relative; z-index:2;">
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; color:#232A52;">kawaiimuslim.com</span>
+        <span style="font-size:13px; color:#a59ec0;">Stratégie, identité, produit & déploiement</span>
+      </div>
+      <div style="width:188px; height:188px; border-radius:50%; background:#fff; box-shadow:0 18px 40px rgba(242,160,196,.30), inset 0 0 0 6px #FDEFF5; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+        <img src="brand/assets/mascot-nour.png" alt="Mimi" style="width:230px; height:auto; margin-top:6px;" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SOMMAIRE ============ -->
+  <section style="padding:56px 90px; background:#FFFBF4; border-bottom:2px dashed #f0e6d6;">
+    <div style="display:flex; align-items:baseline; gap:18px; margin-bottom:30px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:30px; color:#232A52;">Sommaire</span>
+      <span style="height:2px; flex:1; background:linear-gradient(90deg,#F2A0C4,#B69BDC,#8FD2E4,#4FC0A1); border-radius:2px;"></span>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:24px;">
+      <div>
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:12px; letter-spacing:.2em; color:#cf7ba2; text-transform:uppercase; margin:0 0 12px;">Partie I · Stratégie</p>
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px;">
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#FDEFF5; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#F2A0C4; font-size:18px;">01</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Manifeste</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#FDEFF5; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#F2A0C4; font-size:18px;">02</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Raison d'être</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#FDEFF5; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#F2A0C4; font-size:18px;">03</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Vision & plan milliard</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#FDEFF5; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#F2A0C4; font-size:18px;">04</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Architecture de marque</span></div>
+        </div>
+      </div>
+      <div>
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:12px; letter-spacing:.2em; color:#3a9b86; text-transform:uppercase; margin:0 0 12px;">Partie II · Identité</p>
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px;">
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#E9F7F1; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#4FC0A1; font-size:18px;">05</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Le logo</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#E9F7F1; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#4FC0A1; font-size:18px;">06</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Aya & Mimi</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#E9F7F1; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#4FC0A1; font-size:18px;">07</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Expressions de Mimi</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#E9F7F1; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#4FC0A1; font-size:18px;">08</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Les couleurs</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#E9F7F1; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#4FC0A1; font-size:18px;">09</span><span style="font-weight:600; font-size:14px; color:#5a5570;">La typographie</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#E9F7F1; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#4FC0A1; font-size:18px;">10</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Système & grille</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#E9F7F1; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#4FC0A1; font-size:18px;">11</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Iconographie</span></div>
+        </div>
+      </div>
+      <div>
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:12px; letter-spacing:.2em; color:#8a6fc0; text-transform:uppercase; margin:0 0 12px;">Partie III · Expression</p>
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px;">
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#EFEAFA; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#B69BDC; font-size:18px;">12</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Ton & voix</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#EFEAFA; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#B69BDC; font-size:18px;">13</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Motifs & éléments</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#EFEAFA; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#B69BDC; font-size:18px;">14</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Sous-marques</span></div>
+        </div>
+      </div>
+      <div>
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:12px; letter-spacing:.2em; color:#c9962e; text-transform:uppercase; margin:0 0 12px;">Partie IV · Produit & déploiement</p>
+        <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:14px;">
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#FBF1D8; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#E0A93B; font-size:18px;">15</span><span style="font-weight:600; font-size:14px; color:#5a5570;">L'application</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#FBF1D8; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#E0A93B; font-size:18px;">16</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Bibliothèque digitale</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#FBF1D8; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#E0A93B; font-size:18px;">17</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Applications</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#FBF1D8; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#E0A93B; font-size:18px;">18</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Merchandising</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#FBF1D8; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#E0A93B; font-size:18px;">19</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Motion & son</span></div>
+          <div style="display:flex; gap:12px; align-items:center; padding:15px 16px; background:#FBF1D8; border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; color:#E0A93B; font-size:18px;">20</span><span style="font-weight:600; font-size:14px; color:#5a5570;">Récapitulatif</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 01 · MANIFESTE ============ -->
+  <section style="position:relative; padding:90px 90px; background:linear-gradient(155deg,#232A52 0%,#2E7D6B 100%); overflow:hidden;">
+    <div style="position:absolute; top:-60px; right:-40px; width:300px; height:300px; border-radius:50%; background:radial-gradient(circle,#4FC0A155,transparent 70%);"></div>
+    <div style="position:absolute; bottom:-80px; left:-50px; width:320px; height:320px; border-radius:50%; background:radial-gradient(circle,#F2A0C433,transparent 70%);"></div>
+    <div style="position:relative; z-index:2;">
+      <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:26px;">
+        <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#8FD2E4;">01</span>
+        <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#9fd9c9; text-transform:uppercase;">Manifeste</span>
+      </div>
+      <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:46px; line-height:1.22; color:#fff; margin:0 0 30px; max-width:980px;">Nous croyons qu'un enfant qui découvre Allah ﷻ dans la <span style="color:#F2A0C4;">douceur</span> grandit avec un cœur <span style="color:#8FD2E4;">confiant</span>. Alors nous transformons la foi en <span style="color:#FBE08A;">émerveillement</span> — une histoire, un sourire, une étoile à la fois.</p>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; max-width:960px;">
+        <p style="font-size:15px; line-height:1.7; color:rgba(255,255,255,.82); margin:0; border-top:2px solid rgba(255,255,255,.2); padding-top:16px;">Là où l'éducation religieuse fait souvent peur, nous choisissons la tendresse. Pas de menace — de la lumière.</p>
+        <p style="font-size:15px; line-height:1.7; color:rgba(255,255,255,.82); margin:0; border-top:2px solid rgba(255,255,255,.2); padding-top:16px;">Chaque enfant musulman, partout dans le monde, mérite des contenus aussi beaux et soignés que les plus grandes marques.</p>
+        <p style="font-size:15px; line-height:1.7; color:rgba(255,255,255,.82); margin:0; border-top:2px solid rgba(255,255,255,.2); padding-top:16px;">Aya & Mimi ne sont pas des personnages — ce sont des amis qui accompagnent toute une enfance.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 01 · ESSENCE ============ -->
+  <section style="padding:70px 90px; background:#FDEFF5;">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#F2A0C4;">02</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#cf7ba2; text-transform:uppercase;">Notre raison d'être</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 14px; line-height:1.1; max-width:760px;">Faire grandir la foi dans la douceur.</h2>
+    <p style="font-size:18px; line-height:1.7; color:#6a6480; max-width:720px; margin:0 0 40px;">Kawaii Muslim accompagne les enfants musulmans dans la découverte de leur religion à travers un univers tendre, coloré et rassurant. Chaque histoire, chaque dessin et chaque mot est pensé pour semer l'amour d'Allah ﷻ dans le cœur des plus petits.</p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-bottom:22px;">
+      <div style="background:#fff; border-radius:24px; padding:30px 32px; box-shadow:0 12px 30px rgba(242,160,196,.16);">
+        <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; letter-spacing:.16em; color:#4FC0A1; text-transform:uppercase;">Mission</span>
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:600; font-size:21px; color:#2E7D6B; line-height:1.45; margin:12px 0 0;">Rendre l'éducation islamique joyeuse, accessible et inoubliable pour chaque enfant.</p>
+      </div>
+      <div style="background:#fff; border-radius:24px; padding:30px 32px; box-shadow:0 12px 30px rgba(182,155,220,.16);">
+        <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; letter-spacing:.16em; color:#B69BDC; text-transform:uppercase;">Vision</span>
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:600; font-size:21px; color:#7a5fb0; line-height:1.45; margin:12px 0 0;">Devenir la référence mondiale du contenu islamique tendre pour les enfants.</p>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px;">
+      <div style="background:#fff; border-radius:20px; padding:24px; text-align:center;">
+        <div style="width:54px; height:54px; margin:0 auto 14px; border-radius:50%; background:#FDEFF5; display:flex; align-items:center; justify-content:center; font-size:24px;">🤍</div>
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#232A52; margin:0 0 6px;">Douceur</p>
+        <p style="font-size:13px; color:#8a8499; line-height:1.5; margin:0;">Une parole toujours bienveillante et rassurante.</p>
+      </div>
+      <div style="background:#fff; border-radius:20px; padding:24px; text-align:center;">
+        <div style="width:54px; height:54px; margin:0 auto 14px; border-radius:50%; background:#E9F7F1; display:flex; align-items:center; justify-content:center; font-size:24px;">🌱</div>
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#232A52; margin:0 0 6px;">Transmission</p>
+        <p style="font-size:13px; color:#8a8499; line-height:1.5; margin:0;">Des savoirs authentiques, adaptés à leur âge.</p>
+      </div>
+      <div style="background:#fff; border-radius:20px; padding:24px; text-align:center;">
+        <div style="width:54px; height:54px; margin:0 auto 14px; border-radius:50%; background:#EFEAFA; display:flex; align-items:center; justify-content:center; font-size:24px;">✨</div>
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#232A52; margin:0 0 6px;">Émerveillement</p>
+        <p style="font-size:13px; color:#8a8499; line-height:1.5; margin:0;">L'envie d'apprendre par la beauté et le jeu.</p>
+      </div>
+      <div style="background:#fff; border-radius:20px; padding:24px; text-align:center;">
+        <div style="width:54px; height:54px; margin:0 auto 14px; border-radius:50%; background:#FBF1D8; display:flex; align-items:center; justify-content:center; font-size:24px;">🕊️</div>
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#232A52; margin:0 0 6px;">Tawakkul</p>
+        <p style="font-size:13px; color:#8a8499; line-height:1.5; margin:0;">La confiance sereine placée en Allah ﷻ.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 03 · VISION & TRAJECTOIRE ============ -->
+  <section style="padding:70px 90px; background:#FFFBF4;">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#B69BDC;">03</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#8a6fc0; text-transform:uppercase;">Vision & plan milliard</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 14px; line-height:1.1;">Cap sur le milliard.</h2>
+    <p style="font-size:18px; line-height:1.7; color:#6a6480; max-width:760px; margin:0 0 36px;">Un marché immense et mal servi, une marque aimée, un univers transposable à l'infini. Voici la trajectoire qui fait de Kawaii Muslim un leader valorisé <strong style="color:#7a5fb0;">au-delà du milliard d'ici 2031</strong>.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:34px;">
+      <div style="background:linear-gradient(160deg,#FDEFF5,#fff); border-radius:22px; padding:28px 26px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:38px; color:#F2A0C4; margin:0;">1,9 Md</p><p style="font-size:13px; color:#7a7490; line-height:1.55; margin:8px 0 0;">de musulmans dans le monde — la communauté qui croît le plus vite.</p></div>
+      <div style="background:linear-gradient(160deg,#E9F7F1,#fff); border-radius:22px; padding:28px 26px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:38px; color:#4FC0A1; margin:0;">~600 M</p><p style="font-size:13px; color:#7a7490; line-height:1.55; margin:8px 0 0;">d'enfants musulmans de moins de 15 ans, notre cœur de cible.</p></div>
+      <div style="background:linear-gradient(160deg,#EFEAFA,#fff); border-radius:22px; padding:28px 26px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:38px; color:#B69BDC; margin:0;">+15 %</p><p style="font-size:13px; color:#7a7490; line-height:1.55; margin:8px 0 0;">de croissance annuelle de l'EdTech & du contenu jeunesse halal.</p></div>
+      <div style="background:linear-gradient(160deg,#FBF1D8,#fff); border-radius:22px; padding:28px 26px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:38px; color:#E0A93B; margin:0;">≈ 0</p><p style="font-size:13px; color:#7a7490; line-height:1.55; margin:8px 0 0;">marque jeunesse islamique premium d'envergure mondiale. La place est à prendre.</p></div>
+    </div>
+    <p style="font-size:11.5px; color:#bcb6c8; font-style:italic; margin:-22px 0 36px;">Ordres de grandeur indicatifs servant à dimensionner l'ambition, à affiner avec une étude de marché.</p>
+
+    <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; letter-spacing:.06em; color:#9a93a8; text-transform:uppercase; margin:0 0 22px;">La trajectoire en 5 actes</p>
+    <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:0; position:relative;">
+      <div style="position:absolute; top:21px; left:8%; right:8%; height:3px; background:linear-gradient(90deg,#F2A0C4,#B69BDC,#8FD2E4,#4FC0A1,#EAB84C); border-radius:2px;"></div>
+      <div style="position:relative; text-align:center; padding:0 8px;"><div style="width:44px; height:44px; border-radius:50%; background:#F2A0C4; color:#fff; font-family:'Baloo 2',sans-serif; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; box-shadow:0 6px 16px rgba(242,160,196,.4); position:relative; z-index:2;">26</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#232A52; margin:0 0 6px;">Fondations</p><p style="font-size:12px; color:#8a8499; line-height:1.5; margin:0;">Livres, podcast & communauté. La marque et ses héros s'installent.</p></div>
+      <div style="position:relative; text-align:center; padding:0 8px;"><div style="width:44px; height:44px; border-radius:50%; background:#B69BDC; color:#fff; font-family:'Baloo 2',sans-serif; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; box-shadow:0 6px 16px rgba(182,155,220,.4); position:relative; z-index:2;">27</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#232A52; margin:0 0 6px;">L'app</p><p style="font-size:12px; color:#8a8499; line-height:1.5; margin:0;">Lancement de l'application & de l'abonnement famille.</p></div>
+      <div style="position:relative; text-align:center; padding:0 8px;"><div style="width:44px; height:44px; border-radius:50%; background:#8FD2E4; color:#fff; font-family:'Baloo 2',sans-serif; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; box-shadow:0 6px 16px rgba(143,210,228,.5); position:relative; z-index:2;">28</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#232A52; margin:0 0 6px;">Produits</p><p style="font-size:12px; color:#8a8499; line-height:1.5; margin:0;">Peluches, jouets & coffrets. La marque entre dans les foyers.</p></div>
+      <div style="position:relative; text-align:center; padding:0 8px;"><div style="width:44px; height:44px; border-radius:50%; background:#4FC0A1; color:#fff; font-family:'Baloo 2',sans-serif; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; box-shadow:0 6px 16px rgba(79,192,161,.4); position:relative; z-index:2;">29</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#232A52; margin:0 0 6px;">International</p><p style="font-size:12px; color:#8a8499; line-height:1.5; margin:0;">Versions EN & AR. Expansion Golfe, Asie & Amérique du Nord.</p></div>
+      <div style="position:relative; text-align:center; padding:0 8px;"><div style="width:44px; height:44px; border-radius:50%; background:#EAB84C; color:#fff; font-family:'Baloo 2',sans-serif; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; box-shadow:0 6px 16px rgba(234,184,76,.45); position:relative; z-index:2;">31</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#232A52; margin:0 0 6px;">Le milliard</p><p style="font-size:12px; color:#8a8499; line-height:1.5; margin:0;">Écosystème complet & école en ligne. Valorisation &gt; 1 Md.</p></div>
+    </div>
+
+    <!-- ===== LE PLAN ===== -->
+    <div style="margin-top:54px; padding-top:46px; border-top:2px dashed #f0e6d6;">
+      <h3 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:30px; color:#232A52; margin:0 0 8px;">Le plan pour y arriver</h3>
+      <p style="font-size:16px; line-height:1.7; color:#6a6480; max-width:760px; margin:0 0 32px;">Simple, réaliste, mesurable. Quatre leviers, un modèle récurrent, et une arithmétique claire.</p>
+
+      <!-- A. Marché & concurrence -->
+      <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; letter-spacing:.14em; color:#B69BDC; text-transform:uppercase; margin:0 0 16px;">A · Le marché & la concurrence</p>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:14px;">
+        <div style="background:#fff; border-radius:18px; padding:20px 22px; box-shadow:0 8px 20px rgba(35,42,82,.05);"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#232A52; margin:0 0 4px;">Muslim Kids TV</p><p style="font-size:12px; color:#9a93a8; margin:0 0 8px;">~1 M+ installs</p><p style="font-size:12.5px; color:#7a7490; line-height:1.55; margin:0;">Vidéo passive « Netflix halal ». L'enfant regarde, n'agit pas.</p></div>
+        <div style="background:#fff; border-radius:18px; padding:20px 22px; box-shadow:0 8px 20px rgba(35,42,82,.05);"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#232A52; margin:0 0 4px;">NOOR</p><p style="font-size:12px; color:#9a93a8; margin:0 0 8px;">~1 M+ familles</p><p style="font-size:12.5px; color:#7a7490; line-height:1.55; margin:0;">Coran gamifié avec mascotte. Fort, mais mono-sujet.</p></div>
+        <div style="background:#fff; border-radius:18px; padding:20px 22px; box-shadow:0 8px 20px rgba(35,42,82,.05);"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#232A52; margin:0 0 4px;">Ali & Sumaya · Miraj</p><p style="font-size:12px; color:#9a93a8; margin:0 0 8px;">Curriculum & stories</p><p style="font-size:12.5px; color:#7a7490; line-height:1.55; margin:0;">Contenu solide, mais marque & DA datées, peu de produits.</p></div>
+        <div style="background:linear-gradient(160deg,#FDEFF5,#fff); border-radius:18px; padding:20px 22px; box-shadow:0 8px 20px rgba(242,160,196,.12); border:2px solid #F2A0C4;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#cf7ba2; margin:0 0 4px;">Le trou dans le marché</p><p style="font-size:12.5px; color:#7a7490; line-height:1.55; margin:0;">Aucun acteur n'a une <strong>IP de personnage aimée + une marque premium</strong> déclinable en produits.</p></div>
+      </div>
+      <p style="font-size:12px; color:#bcb6c8; font-style:italic; margin:0 0 34px;">Repères publics indicatifs (stores & sites des éditeurs), à consolider en due diligence.</p>
+
+      <!-- B. Notre angle -->
+      <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; letter-spacing:.14em; color:#4FC0A1; text-transform:uppercase; margin:0 0 16px;">B · Notre angle d'attaque</p>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-bottom:34px;">
+        <div style="background:#fff; border-radius:20px; padding:26px; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="font-size:30px; margin-bottom:10px;">🧸</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#232A52; margin:0 0 6px;">Une IP, pas une app</p><p style="font-size:13px; color:#7a7490; line-height:1.6; margin:0;">Aya & Mimi deviennent le « personnage doudou » musulman — comme Peppa ou Hello Kitty. Une IP se vend en livres, jouets, dessins animés et licences.</p></div>
+        <div style="background:#fff; border-radius:20px; padding:26px; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="font-size:30px; margin-bottom:10px;">💎</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#232A52; margin:0 0 6px;">Une DA premium</p><p style="font-size:13px; color:#7a7490; line-height:1.6; margin:0;">Là où les concurrents sont fonctionnels, nous sommes beaux. L'esthétique kawaii justifie un prix premium et fait la différence pour les parents.</p></div>
+        <div style="background:#fff; border-radius:20px; padding:26px; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="font-size:30px; margin-bottom:10px;">🔁</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#232A52; margin:0 0 6px;">Un écosystème</p><p style="font-size:13px; color:#7a7490; line-height:1.6; margin:0;">Livre → app → jouet → club. Chaque canal acquiert et nourrit les autres, et multiplie la valeur par famille.</p></div>
+      </div>
+
+      <!-- C. Modèle économique -->
+      <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; letter-spacing:.14em; color:#E0A93B; text-transform:uppercase; margin:0 0 16px;">C · Le modèle économique</p>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:34px;">
+        <div style="background:linear-gradient(160deg,#E9F7F1,#fff); border-radius:20px; padding:24px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:22px; color:#2E7D6B; margin:0;">Abonnement</p><p style="font-size:12.5px; color:#7a7490; line-height:1.55; margin:8px 0 0;">Le moteur récurrent. ~7 €/mois par famille, app + contenus illimités.</p></div>
+        <div style="background:linear-gradient(160deg,#FDEFF5,#fff); border-radius:20px; padding:24px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:22px; color:#cf7ba2; margin:0;">Livres</p><p style="font-size:12.5px; color:#7a7490; line-height:1.55; margin:8px 0 0;">Marge forte, acquisition & cadeau. La porte d'entrée de la marque.</p></div>
+        <div style="background:linear-gradient(160deg,#EFEAFA,#fff); border-radius:20px; padding:24px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:22px; color:#7a5fb0; margin:0;">Produits</p><p style="font-size:12.5px; color:#7a7490; line-height:1.55; margin:8px 0 0;">Peluches & coffrets : panier élevé, fidélité, présence au foyer.</p></div>
+        <div style="background:linear-gradient(160deg,#FBF1D8,#fff); border-radius:20px; padding:24px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:22px; color:#c9962e; margin:0;">Licence</p><p style="font-size:12.5px; color:#7a7490; line-height:1.55; margin:8px 0 0;">À terme : dessin animé & licensing de l'IP. Revenu quasi-pur.</p></div>
+      </div>
+
+      <!-- D. L'arithmétique -->
+      <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; letter-spacing:.14em; color:#F2A0C4; text-transform:uppercase; margin:0 0 16px;">D · L'arithmétique du milliard</p>
+      <div style="background:linear-gradient(150deg,#232A52,#2E7D6B); border-radius:24px; padding:38px 40px; color:#fff;">
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:28px;">
+          <div>
+            <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:34px; color:#8FD2E4; margin:0;">1 M</p>
+            <p style="font-size:13px; color:rgba(255,255,255,.82); line-height:1.55; margin:8px 0 0;">familles abonnées visées — soit ~0,17 % des ~600 M d'enfants musulmans. Atteignable.</p>
+          </div>
+          <div>
+            <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:34px; color:#F2A0C4; margin:0;">~100 M€</p>
+            <p style="font-size:13px; color:rgba(255,255,255,.82); line-height:1.55; margin:8px 0 0;">de revenu annuel récurrent (1 M × ~7 €/mois) + produits & livres en surcouche.</p>
+          </div>
+          <div>
+            <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:34px; color:#FBE08A; margin:0;">&gt; 1 Md€</p>
+            <p style="font-size:13px; color:rgba(255,255,255,.82); line-height:1.55; margin:8px 0 0;">de valorisation, en appliquant un multiple ~10× courant pour une marque IP + abonnement.</p>
+          </div>
+        </div>
+        <p style="font-size:12px; color:rgba(255,255,255,.55); font-style:italic; margin:24px 0 0;">Modèle illustratif simplifié destiné à montrer la logique — les hypothèses (prix, churn, multiple) sont à valider avec la finance.</p>
+      </div>
+
+      <!-- E. Jalons & KPIs -->
+      <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; letter-spacing:.14em; color:#5BB8D4; text-transform:uppercase; margin:34px 0 16px;">E · Prochains jalons & indicateurs</p>
+      <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:18px;">
+        <div style="background:#fff; border-radius:20px; padding:26px 28px; box-shadow:0 8px 20px rgba(35,42,82,.05);">
+          <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#232A52; margin:0 0 14px;">Les 12 prochains mois</p>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; gap:12px; align-items:center;"><span style="width:24px; height:24px; border-radius:50%; background:#E9F7F1; color:#2E7D6B; font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">1</span><p style="font-size:13px; color:#5a5570; margin:0;">Publier 3 livres & lancer le podcast — construire l'audience.</p></div>
+            <div style="display:flex; gap:12px; align-items:center;"><span style="width:24px; height:24px; border-radius:50%; background:#EFEAFA; color:#7a5fb0; font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">2</span><p style="font-size:13px; color:#5a5570; margin:0;">Atteindre 100 k abonnés réseaux & une liste e-mail engagée.</p></div>
+            <div style="display:flex; gap:12px; align-items:center;"><span style="width:24px; height:24px; border-radius:50%; background:#FDEFF5; color:#cf7ba2; font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">3</span><p style="font-size:13px; color:#5a5570; margin:0;">Sortir la peluche Mimi & le 1ᵉʳ coffret pour l'Aïd.</p></div>
+            <div style="display:flex; gap:12px; align-items:center;"><span style="width:24px; height:24px; border-radius:50%; background:#FBF1D8; color:#c9962e; font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">4</span><p style="font-size:13px; color:#5a5570; margin:0;">Beta de l'app & boucle d'abonnement validée.</p></div>
+          </div>
+        </div>
+        <div style="background:#fff; border-radius:20px; padding:26px 28px; box-shadow:0 8px 20px rgba(35,42,82,.05);">
+          <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#232A52; margin:0 0 14px;">Les chiffres à suivre</p>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-size:13px; color:#7a7490;">Abonnés actifs</span><span style="font-size:12px; font-weight:700; color:#4FC0A1;">croissance</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-size:13px; color:#7a7490;">Taux de rétention (churn)</span><span style="font-size:12px; font-weight:700; color:#B69BDC;">&lt; 5 %/mois</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-size:13px; color:#7a7490;">Coût d'acquisition / LTV</span><span style="font-size:12px; font-weight:700; color:#E0A93B;">&gt; 3×</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-size:13px; color:#7a7490;">Revenu par famille</span><span style="font-size:12px; font-weight:700; color:#cf7ba2;">app + produits</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 04 · ARCHITECTURE DE MARQUE ============ -->
+  <section style="padding:70px 90px; background:linear-gradient(160deg,#E9F7F1,#E6F5FA);">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#4FC0A1;">04</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#5aa892; text-transform:uppercase;">Architecture de marque</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 14px; line-height:1.1;">Pas un livre. Un écosystème.</h2>
+    <p style="font-size:18px; line-height:1.7; color:#6a6480; max-width:760px; margin:0 0 38px;">Une marque-mère forte, Kawaii Muslim, qui irrigue six territoires produits. Chacun nourrit les autres : le livre amène à l'app, l'app au club, le club aux produits.</p>
+
+    <!-- hub & spokes -->
+    <div style="background:#fff; border-radius:28px; padding:44px; box-shadow:0 16px 40px rgba(35,42,82,.08); margin-bottom:24px;">
+      <div style="display:flex; flex-direction:column; align-items:center;">
+        <div style="display:flex; align-items:center; justify-content:center; width:200px; height:200px; border-radius:50%; background:linear-gradient(150deg,#FFFBF4,#FDEFF5); box-shadow:0 14px 34px rgba(242,160,196,.28); margin-bottom:34px;">
+          <img src="brand/assets/logo-kawaii-muslim.png" alt="marque mère" style="width:150px; height:auto;" />
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:16px; width:100%;">
+          <div style="text-align:center;"><div style="height:84px; border-radius:18px; background:#FDEFF5; display:flex; align-items:center; justify-content:center; font-size:34px; margin-bottom:10px;">📚</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#232A52; margin:0 0 3px;">Livres</p><p style="font-size:11px; color:#9a93a8; margin:0; line-height:1.4;">Albums & collections</p></div>
+          <div style="text-align:center;"><div style="height:84px; border-radius:18px; background:#E9F7F1; display:flex; align-items:center; justify-content:center; font-size:34px; margin-bottom:10px;">📱</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#232A52; margin:0 0 3px;">Application</p><p style="font-size:11px; color:#9a93a8; margin:0; line-height:1.4;">Leçons & jeux</p></div>
+          <div style="text-align:center;"><div style="height:84px; border-radius:18px; background:#EFEAFA; display:flex; align-items:center; justify-content:center; font-size:34px; margin-bottom:10px;">🎧</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#232A52; margin:0 0 3px;">Podcast</p><p style="font-size:11px; color:#9a93a8; margin:0; line-height:1.4;">Histoires audio</p></div>
+          <div style="text-align:center;"><div style="height:84px; border-radius:18px; background:#E6F5FA; display:flex; align-items:center; justify-content:center; font-size:34px; margin-bottom:10px;">🧸</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#232A52; margin:0 0 3px;">Jouets</p><p style="font-size:11px; color:#9a93a8; margin:0; line-height:1.4;">Peluches Mimi</p></div>
+          <div style="text-align:center;"><div style="height:84px; border-radius:18px; background:#FBF1D8; display:flex; align-items:center; justify-content:center; font-size:34px; margin-bottom:10px;">⭐️</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#232A52; margin:0 0 3px;">Club</p><p style="font-size:11px; color:#9a93a8; margin:0; line-height:1.4;">Abonnement famille</p></div>
+          <div style="text-align:center;"><div style="height:84px; border-radius:18px; background:#FDEFF5; display:flex; align-items:center; justify-content:center; font-size:34px; margin-bottom:10px;">🏫</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#232A52; margin:0 0 3px;">École</p><p style="font-size:11px; color:#9a93a8; margin:0; line-height:1.4;">Cursus en ligne</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:18px;">
+      <div style="background:#fff; border-radius:20px; padding:24px 26px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#4FC0A1; margin:0 0 8px;">Marque-mère</p><p style="font-size:13px; color:#7a7490; line-height:1.6; margin:0;">« Kawaii Muslim » signe tout. Le logo et le duo Aya & Mimi restent constants sur chaque produit.</p></div>
+      <div style="background:#fff; border-radius:20px; padding:24px 26px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#B69BDC; margin:0 0 8px;">Collections</p><p style="font-size:13px; color:#7a7490; line-height:1.6; margin:0;">Chaque thème (Tawakkul, Prières…) a sa couleur de la palette — jamais une nouvelle marque.</p></div>
+      <div style="background:#fff; border-radius:20px; padding:24px 26px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#E0A93B; margin:0 0 8px;">Effet volant</p><p style="font-size:13px; color:#7a7490; line-height:1.6; margin:0;">Gratuit → contenu → abonnement → produits. Chaque brique augmente la valeur vie client.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ 02 · LOGO ============ -->
+  <section style="padding:70px 90px; background:#FFFBF4;">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#4FC0A1;">05</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#5aa892; text-transform:uppercase;">Le logo</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 14px; line-height:1.1;">Notre signature.</h2>
+    <p style="font-size:18px; line-height:1.7; color:#6a6480; max-width:720px; margin:0 0 36px;">Le logotype associe deux mots manuscrits arrondis : <strong style="color:#cf7ba2;">kawaii</strong>, en dégradé pastel arc-en-ciel, et <strong style="color:#2E7D6B;">muslim</strong>, en crème lumineux. Les contours épais et les terminaisons rondes incarnent la tendresse et l'esprit enfantin de la marque.</p>
+
+    <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:24px; margin-bottom:24px;">
+      <div style="background:#fff; border-radius:24px; padding:48px; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 30px rgba(35,42,82,.07); position:relative;">
+        <span style="position:absolute; top:18px; left:22px; font-size:12px; font-weight:700; letter-spacing:.14em; color:#bcb6c8; text-transform:uppercase;">Logo principal</span>
+        <img src="brand/assets/logo-kawaii-muslim.png" alt="Logo principal" style="width:330px; height:auto;" />
+      </div>
+      <div style="background:linear-gradient(90deg,#F2A0C4,#B69BDC,#8FD2E4,#4FC0A1); border-radius:24px; padding:48px; display:flex; align-items:center; justify-content:center; position:relative;">
+        <span style="position:absolute; top:18px; left:22px; font-size:12px; font-weight:700; letter-spacing:.14em; color:#fff; text-transform:uppercase;">Sur dégradé signature</span>
+        <img src="brand/assets/logo-kawaii-muslim.png" alt="Logo sur dégradé signature" style="width:230px; height:auto; filter:drop-shadow(0 6px 14px rgba(35,42,82,.18));" />
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:30px;">
+      <div style="background:#fff; border-radius:22px; padding:30px 34px; box-shadow:0 8px 22px rgba(35,42,82,.05);">
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; color:#232A52; margin:0 0 10px;">Zone de protection</p>
+        <p style="font-size:14px; color:#8a8499; line-height:1.6; margin:0 0 18px;">Conservez autour du logo un espace libre égal à la hauteur de la lettre « k » de <em>kawaii</em>. Aucun élément ne doit empiéter sur cette zone.</p>
+        <div style="border:2px dashed #d9cfe6; border-radius:14px; padding:22px; display:flex; align-items:center; justify-content:center;">
+          <img src="brand/assets/logo-kawaii-muslim.png" alt="Zone de protection" style="width:200px; height:auto;" />
+        </div>
+      </div>
+      <div style="background:#fff; border-radius:22px; padding:30px 34px; box-shadow:0 8px 22px rgba(35,42,82,.05);">
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; color:#232A52; margin:0 0 10px;">Taille minimale</p>
+        <p style="font-size:14px; color:#8a8499; line-height:1.6; margin:0 0 18px;">Pour rester lisible, le logo ne descend jamais sous <strong style="color:#4FC0A1;">120 px</strong> de large à l'écran, ni <strong style="color:#4FC0A1;">32 mm</strong> en impression.</p>
+        <div style="display:flex; align-items:flex-end; gap:26px; justify-content:center; padding-top:10px;">
+          <div style="text-align:center;"><img src="brand/assets/logo-kawaii-muslim.png" style="width:180px; height:auto;" alt="grand"/><p style="font-size:11px; color:#bcb6c8; margin:8px 0 0;">Standard</p></div>
+          <div style="text-align:center;"><img src="brand/assets/logo-kawaii-muslim.png" style="width:120px; height:auto;" alt="min"/><p style="font-size:11px; color:#bcb6c8; margin:8px 0 0;">Minimum</p></div>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; color:#232A52; margin:0 0 16px;">À éviter absolument</p>
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px;">
+      <div style="background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 8px 22px rgba(35,42,82,.05);">
+        <div style="padding:28px 18px; display:flex; align-items:center; justify-content:center; height:120px;"><img src="brand/assets/logo-kawaii-muslim.png" style="width:140px; height:60px; object-fit:fill;" alt="ne pas déformer"/></div>
+        <div style="background:#FCE4EC; padding:12px 16px; display:flex; gap:8px; align-items:center;"><span style="color:#E5557A; font-weight:800;">✕</span><span style="font-size:12.5px; color:#b54467; font-weight:600;">Ne pas déformer</span></div>
+      </div>
+      <div style="background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 8px 22px rgba(35,42,82,.05);">
+        <div style="padding:28px 18px; display:flex; align-items:center; justify-content:center; height:120px;"><img src="brand/assets/logo-kawaii-muslim.png" style="width:150px; height:auto; filter:grayscale(1);" alt="ne pas désaturer"/></div>
+        <div style="background:#FCE4EC; padding:12px 16px; display:flex; gap:8px; align-items:center;"><span style="color:#E5557A; font-weight:800;">✕</span><span style="font-size:12.5px; color:#b54467; font-weight:600;">Pas de niveaux de gris</span></div>
+      </div>
+      <div style="background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 8px 22px rgba(35,42,82,.05);">
+        <div style="padding:28px 18px; display:flex; align-items:center; justify-content:center; height:120px;"><img src="brand/assets/logo-kawaii-muslim.png" style="width:150px; height:auto; transform:rotate(-12deg);" alt="ne pas pivoter"/></div>
+        <div style="background:#FCE4EC; padding:12px 16px; display:flex; gap:8px; align-items:center;"><span style="color:#E5557A; font-weight:800;">✕</span><span style="font-size:12.5px; color:#b54467; font-weight:600;">Ne pas incliner</span></div>
+      </div>
+      <div style="background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 8px 22px rgba(35,42,82,.05);">
+        <div style="padding:0; display:flex; align-items:center; justify-content:center; height:120px; background:url('brand/assets/scene-podcast.png') center/cover;"><img src="brand/assets/logo-kawaii-muslim.png" style="width:150px; height:auto;" alt="fond chargé"/></div>
+        <div style="background:#FCE4EC; padding:12px 16px; display:flex; gap:8px; align-items:center;"><span style="color:#E5557A; font-weight:800;">✕</span><span style="font-size:12.5px; color:#b54467; font-weight:600;">Pas de fond chargé</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 03 · PERSONNAGES ============ -->
+  <section style="padding:70px 90px; background:linear-gradient(160deg,#EFEAFA,#E6F5FA);">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#B69BDC;">06</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#8a6fc0; text-transform:uppercase;">Nos personnages</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 14px; line-height:1.1;">Aya & Mimi 🌸</h2>
+    <p style="font-size:18px; line-height:1.7; color:#6a6480; max-width:740px; margin:0 0 36px;">Un duo inséparable : <strong style="color:#cf7ba2;">Aya</strong>, une petite fille curieuse et pleine de cœur, et <strong style="color:#7a5fb0;">Mimi</strong>, son oiseau complice toujours posé sur son épaule. Ensemble, ils guident l'enfant à travers chaque histoire.</p>
+
+    <!-- AYA -->
+    <div style="display:grid; grid-template-columns:1fr 1.05fr; gap:26px; align-items:stretch; margin-bottom:24px;">
+      <div style="background:#fff; border-radius:28px; padding:24px; display:flex; align-items:center; justify-content:center; box-shadow:0 16px 40px rgba(242,160,196,.20); position:relative;">
+        <span style="position:absolute; top:18px; left:24px; font-family:'Baloo 2',sans-serif; font-weight:800; font-size:22px; color:#F2A0C4;">Aya</span>
+        <img src="brand/assets/aya.png" alt="Aya" style="width:100%; max-width:340px; height:auto;" />
+      </div>
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div style="background:#fff; border-radius:22px; padding:24px 28px;">
+          <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0 0 12px;">Qui est Aya ?</p>
+          <p style="font-size:14px; color:#7a7490; line-height:1.65; margin:0;">Notre jeune héroïne de tous les jours. Voile rose poudré, pull crème tout doux et jupe émeraude : Aya découvre l'islam avec émerveillement et pose les mille questions des enfants de son âge.</p>
+        </div>
+        <div style="background:#fff; border-radius:22px; padding:24px 28px;">
+          <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0 0 12px;">Sa personnalité</p>
+          <div style="display:flex; flex-wrap:wrap; gap:10px;">
+            <span style="background:#FDEFF5; color:#cf7ba2; font-weight:600; font-size:13px; padding:8px 16px; border-radius:20px;">Curieuse</span>
+            <span style="background:#E9F7F1; color:#3a9b86; font-weight:600; font-size:13px; padding:8px 16px; border-radius:20px;">Attachante</span>
+            <span style="background:#EFEAFA; color:#7a5fb0; font-weight:600; font-size:13px; padding:8px 16px; border-radius:20px;">Espiègle</span>
+            <span style="background:#FBF1D8; color:#c9962e; font-weight:600; font-size:13px; padding:8px 16px; border-radius:20px;">Généreuse</span>
+          </div>
+        </div>
+        <div style="background:#fff; border-radius:22px; padding:20px 26px;">
+          <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#4FC0A1; margin:0 0 6px;">Sa garde-robe signature</p>
+          <p style="font-size:12.5px; color:#8a8499; line-height:1.55; margin:0;">Voile rose poudré · pull crème · jupe émeraude · baskets roses. Ces couleurs ne changent pas — c'est ainsi qu'on la reconnaît.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIMI -->
+    <div style="display:grid; grid-template-columns:1.05fr 1fr; gap:26px; align-items:stretch;">
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div style="background:#fff; border-radius:22px; padding:24px 28px;">
+          <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0 0 12px;">Qui est Mimi ?</p>
+          <p style="font-size:14px; color:#7a7490; line-height:1.65; margin:0;">Le petit oiseau d'Aya, au voile menthe et aux ailes arc-en-ciel scintillantes. <strong style="color:#7a5fb0;">Mimi</strong> est la voix douce qui rassure, encourage et émerveille à chaque page.</p>
+        </div>
+        <div style="background:#fff; border-radius:22px; padding:24px 28px;">
+          <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0 0 12px;">Ce qu'elle représente</p>
+          <p style="font-size:14px; color:#7a7490; line-height:1.65; margin:0;">Mimi incarne le <em>tawakkul</em> — la confiance sereine en Allah ﷻ. Son voile menthe et ses ailes pastel rappellent la pureté et l'émerveillement de l'enfance qui découvre sa foi.</p>
+        </div>
+        <div style="display:flex; gap:16px;">
+          <div style="flex:1; background:#fff; border-radius:22px; padding:20px 22px;">
+            <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#4FC0A1; margin:0 0 6px;">À faire</p>
+            <p style="font-size:12.5px; color:#8a8499; line-height:1.55; margin:0;">La montrer souriante, en vol ou posée sur l'épaule d'Aya.</p>
+          </div>
+          <div style="flex:1; background:#fff; border-radius:22px; padding:20px 22px;">
+            <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#E5557A; margin:0 0 6px;">À éviter</p>
+            <p style="font-size:12.5px; color:#8a8499; line-height:1.55; margin:0;">La recolorer, lui retirer son voile ou modifier ses proportions.</p>
+          </div>
+        </div>
+      </div>
+      <div style="background:#fff; border-radius:28px; padding:30px; display:flex; align-items:center; justify-content:center; box-shadow:0 16px 40px rgba(182,155,220,.22); position:relative;">
+        <span style="position:absolute; top:18px; right:24px; font-family:'Baloo 2',sans-serif; font-weight:800; font-size:22px; color:#B69BDC;">Mimi</span>
+        <img src="brand/assets/mascot-nour.png" alt="Mimi la mascotte" style="width:100%; max-width:380px; height:auto;" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 07 · EXPRESSIONS DE MIMI ============ -->
+  <section style="padding:70px 90px; background:#FFFBF4;">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#4FC0A1;">07</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#5aa892; text-transform:uppercase;">Expressions de Mimi</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 14px; line-height:1.1;">Une amie pleine d'émotions.</h2>
+    <p style="font-size:18px; line-height:1.7; color:#6a6480; max-width:760px; margin:0 0 36px;">Pour vivre dans l'app, les stickers et les histoires, Mimi se décline en une banque d'expressions. Toutes gardent son voile menthe, ses ailes pastel et ses grands yeux doux — seule l'émotion change.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:16px; margin-bottom:24px;">
+      <div style="background:#FDEFF5; border-radius:22px; padding:20px 12px; text-align:center;"><div style="width:96px; height:96px; margin:0 auto 12px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 6px 16px rgba(242,160,196,.2);"><img src="brand/assets/mascot-nour.png" style="width:120px; height:auto; margin-top:6px;" alt="Mimi joyeuse"/></div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13.5px; color:#232A52; margin:0;">Joyeuse 😊</p></div>
+      <div style="background:#E9F7F1; border-radius:22px; padding:20px 12px; text-align:center;"><div style="width:96px; height:96px; margin:0 auto 12px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 6px 16px rgba(79,192,161,.2);"><img src="brand/assets/mascot-nour.png" style="width:120px; height:auto; margin-top:6px; transform:rotate(-8deg);" alt="Mimi curieuse"/></div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13.5px; color:#232A52; margin:0;">Curieuse 🤔</p></div>
+      <div style="background:#EFEAFA; border-radius:22px; padding:20px 12px; text-align:center;"><div style="width:96px; height:96px; margin:0 auto 12px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 6px 16px rgba(182,155,220,.2);"><img src="brand/assets/mascot-nour.png" style="width:120px; height:auto; margin-top:6px;" alt="Mimi rassurante"/></div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13.5px; color:#232A52; margin:0;">Rassurante 🤍</p></div>
+      <div style="background:#E6F5FA; border-radius:22px; padding:20px 12px; text-align:center;"><div style="width:96px; height:96px; margin:0 auto 12px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 6px 16px rgba(143,210,228,.25);"><img src="brand/assets/mascot-nour.png" style="width:120px; height:auto; margin-top:6px; transform:scaleX(-1);" alt="Mimi fière"/></div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13.5px; color:#232A52; margin:0;">Fière 🌟</p></div>
+      <div style="background:#FBF1D8; border-radius:22px; padding:20px 12px; text-align:center;"><div style="width:96px; height:96px; margin:0 auto 12px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 6px 16px rgba(234,184,76,.22);"><img src="brand/assets/mascot-nour.png" style="width:120px; height:auto; margin-top:6px; transform:rotate(6deg);" alt="Mimi en doua"/></div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13.5px; color:#232A52; margin:0;">En du'a 🤲</p></div>
+      <div style="background:#FDEFF5; border-radius:22px; padding:20px 12px; text-align:center;"><div style="width:96px; height:96px; margin:0 auto 12px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 6px 16px rgba(242,160,196,.2);"><img src="brand/assets/mascot-nour.png" style="width:120px; height:auto; margin-top:6px; opacity:.85;" alt="Mimi endormie"/></div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13.5px; color:#232A52; margin:0;">Endormie 😴</p></div>
+    </div>
+    <div style="background:linear-gradient(120deg,#FDEFF5,#E9F7F1); border-radius:22px; padding:24px 32px; display:flex; align-items:center; gap:18px;">
+      <span style="font-size:30px;">🎨</span>
+      <p style="font-size:14px; color:#5a5570; line-height:1.65; margin:0;">Banque d'expressions <strong>à illustrer dans le style officiel</strong> (mêmes proportions, mêmes couleurs). Objectif : un sticker pack de 24 poses pour l'app et les messageries.</p>
+    </div>
+  </section>
+
+  <!-- ============ 04 · COULEURS ============ -->
+  <section style="padding:70px 90px; background:#FFFBF4;">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#5BB8D4;">08</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#3f93b5; text-transform:uppercase;">Les couleurs</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 14px; line-height:1.1;">Une palette pastel & lumineuse.</h2>
+    <p style="font-size:18px; line-height:1.7; color:#6a6480; max-width:720px; margin:0 0 36px;">Des teintes douces inspirées de l'aube et des fleurs, équilibrées par un menthe profond et un encre marine qui structurent l'ensemble.</p>
+
+    <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; letter-spacing:.06em; color:#9a93a8; text-transform:uppercase; margin:0 0 14px;">Couleurs principales</p>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-bottom:30px;">
+      <div style="border-radius:20px; overflow:hidden; box-shadow:0 10px 26px rgba(79,192,161,.18);">
+        <div style="height:120px; background:#4FC0A1;"></div>
+        <div style="padding:16px 20px; background:#fff;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0;">Menthe Mimi</p><p style="font-size:13px; color:#9a93a8; margin:4px 0 0; font-family:monospace;">#4FC0A1</p></div>
+      </div>
+      <div style="border-radius:20px; overflow:hidden; box-shadow:0 10px 26px rgba(46,125,107,.18);">
+        <div style="height:120px; background:#2E7D6B;"></div>
+        <div style="padding:16px 20px; background:#fff;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0;">Émeraude</p><p style="font-size:13px; color:#9a93a8; margin:4px 0 0; font-family:monospace;">#2E7D6B</p></div>
+      </div>
+      <div style="border-radius:20px; overflow:hidden; box-shadow:0 10px 26px rgba(35,42,82,.18);">
+        <div style="height:120px; background:#232A52;"></div>
+        <div style="padding:16px 20px; background:#fff;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0;">Encre Marine</p><p style="font-size:13px; color:#9a93a8; margin:4px 0 0; font-family:monospace;">#232A52</p></div>
+      </div>
+    </div>
+
+    <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; letter-spacing:.06em; color:#9a93a8; text-transform:uppercase; margin:0 0 14px;">Pastels arc-en-ciel</p>
+    <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:30px;">
+      <div style="border-radius:18px; overflow:hidden; box-shadow:0 8px 20px rgba(35,42,82,.07);"><div style="height:96px; background:#F2A0C4;"></div><div style="padding:12px 14px; background:#fff;"><p style="font-weight:700; font-size:13.5px; color:#232A52; margin:0;">Fleur</p><p style="font-size:11.5px; color:#9a93a8; margin:3px 0 0; font-family:monospace;">#F2A0C4</p></div></div>
+      <div style="border-radius:18px; overflow:hidden; box-shadow:0 8px 20px rgba(35,42,82,.07);"><div style="height:96px; background:#B69BDC;"></div><div style="padding:12px 14px; background:#fff;"><p style="font-weight:700; font-size:13.5px; color:#232A52; margin:0;">Lavande</p><p style="font-size:11.5px; color:#9a93a8; margin:3px 0 0; font-family:monospace;">#B69BDC</p></div></div>
+      <div style="border-radius:18px; overflow:hidden; box-shadow:0 8px 20px rgba(35,42,82,.07);"><div style="height:96px; background:#8FD2E4;"></div><div style="padding:12px 14px; background:#fff;"><p style="font-weight:700; font-size:13.5px; color:#232A52; margin:0;">Ciel</p><p style="font-size:11.5px; color:#9a93a8; margin:3px 0 0; font-family:monospace;">#8FD2E4</p></div></div>
+      <div style="border-radius:18px; overflow:hidden; box-shadow:0 8px 20px rgba(35,42,82,.07);"><div style="height:96px; background:#FBF1D8;"></div><div style="padding:12px 14px; background:#fff;"><p style="font-weight:700; font-size:13.5px; color:#232A52; margin:0;">Crème</p><p style="font-size:11.5px; color:#9a93a8; margin:3px 0 0; font-family:monospace;">#FBF1D8</p></div></div>
+      <div style="border-radius:18px; overflow:hidden; box-shadow:0 8px 20px rgba(35,42,82,.07);"><div style="height:96px; background:#EAB84C;"></div><div style="padding:12px 14px; background:#fff;"><p style="font-weight:700; font-size:13.5px; color:#232A52; margin:0;">Or</p><p style="font-size:11.5px; color:#9a93a8; margin:3px 0 0; font-family:monospace;">#EAB84C</p></div></div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:20px;">
+      <div style="border-radius:20px; height:120px; background:linear-gradient(90deg,#F2A0C4,#B69BDC,#8FD2E4,#4FC0A1); display:flex; align-items:flex-end; padding:18px 22px;"><span style="color:#fff; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; text-shadow:0 1px 4px rgba(0,0,0,.2);">Dégradé signature — réservé aux moments forts</span></div>
+      <div style="border-radius:20px; padding:22px 26px; background:#fff; box-shadow:0 8px 20px rgba(35,42,82,.06); display:flex; flex-direction:column; justify-content:center;">
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#232A52; margin:0 0 8px;">Règle 60 · 30 · 10</p>
+        <p style="font-size:13px; color:#8a8499; line-height:1.6; margin:0;">60 % crème & blanc · 30 % menthe · 10 % accents pastel / or pour la vie et la gaieté.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 · TYPO ============ -->
+  <section style="padding:70px 90px; background:#FBF1D8;">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#E0A93B;">09</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#c9962e; text-transform:uppercase;">La typographie</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 36px; line-height:1.1;">Ronde, claire, accueillante.</h2>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+      <div style="background:#fff; border-radius:24px; padding:38px 40px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; letter-spacing:.16em; color:#4FC0A1; text-transform:uppercase;">Titres</span><span style="font-size:12px; color:#bcb6c8;">Display</span></div>
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:64px; color:#232A52; margin:0; line-height:1;">Baloo 2</p>
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:500; font-size:28px; color:#5a5570; margin:14px 0 22px;">Aa Bb Cc · 0123456789</p>
+        <p style="font-size:13.5px; color:#8a8499; line-height:1.6; margin:0;">Arrondie et chaleureuse, elle rappelle les formes du logo. Réservée aux titres et aux mots forts. Graisses : 600 à 800.</p>
+      </div>
+      <div style="background:#fff; border-radius:24px; padding:38px 40px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; letter-spacing:.16em; color:#B69BDC; text-transform:uppercase;">Texte courant</span><span style="font-size:12px; color:#bcb6c8;">Body</span></div>
+        <p style="font-family:'Quicksand',sans-serif; font-weight:700; font-size:64px; color:#232A52; margin:0; line-height:1;">Quicksand</p>
+        <p style="font-family:'Quicksand',sans-serif; font-weight:500; font-size:28px; color:#5a5570; margin:14px 0 22px;">Aa Bb Cc · 0123456789</p>
+        <p style="font-size:13.5px; color:#8a8499; line-height:1.6; margin:0;">Nette et douce, parfaite pour les paragraphes et l'interface. Très lisible par les jeunes lecteurs. Graisses : 400 à 700.</p>
+      </div>
+    </div>
+    <div style="display:flex; gap:16px; margin-top:20px;">
+      <div style="flex:1; background:#fff; border-radius:18px; padding:20px 26px; display:flex; align-items:baseline; gap:18px;"><span style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:30px; color:#232A52;">H1 / 42px</span><span style="font-size:13px; color:#9a93a8;">Baloo 2 ExtraBold · interligne 1.1</span></div>
+      <div style="flex:1; background:#fff; border-radius:18px; padding:20px 26px; display:flex; align-items:baseline; gap:18px;"><span style="font-family:'Quicksand',sans-serif; font-weight:500; font-size:18px; color:#5a5570;">Corps / 18px</span><span style="font-size:13px; color:#9a93a8;">Quicksand Medium · interligne 1.7</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 10 · SYSTÈME & GRILLE ============ -->
+  <section style="padding:70px 90px; background:#FFFBF4;">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#5BB8D4;">10</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#3f93b5; text-transform:uppercase;">Système & grille</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 14px; line-height:1.1;">Un système qui passe à l'échelle.</h2>
+    <p style="font-size:18px; line-height:1.7; color:#6a6480; max-width:760px; margin:0 0 36px;">Des règles simples et reproductibles pour que dix designers produisent mille écrans qui se ressemblent. Tout repose sur une base de 8 points.</p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:22px;">
+      <!-- spacing -->
+      <div style="background:#fff; border-radius:24px; padding:32px 34px; box-shadow:0 10px 26px rgba(35,42,82,.06);">
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#232A52; margin:0 0 18px;">Échelle d'espacement · base 8</p>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; align-items:center; gap:14px;"><span style="width:54px; font-size:12px; color:#9a93a8; font-family:monospace;">8 px</span><div style="height:18px; width:8px; background:#8FD2E4; border-radius:3px;"></div></div>
+          <div style="display:flex; align-items:center; gap:14px;"><span style="width:54px; font-size:12px; color:#9a93a8; font-family:monospace;">16 px</span><div style="height:18px; width:16px; background:#8FD2E4; border-radius:3px;"></div></div>
+          <div style="display:flex; align-items:center; gap:14px;"><span style="width:54px; font-size:12px; color:#9a93a8; font-family:monospace;">24 px</span><div style="height:18px; width:24px; background:#4FC0A1; border-radius:3px;"></div></div>
+          <div style="display:flex; align-items:center; gap:14px;"><span style="width:54px; font-size:12px; color:#9a93a8; font-family:monospace;">32 px</span><div style="height:18px; width:32px; background:#4FC0A1; border-radius:3px;"></div></div>
+          <div style="display:flex; align-items:center; gap:14px;"><span style="width:54px; font-size:12px; color:#9a93a8; font-family:monospace;">48 px</span><div style="height:18px; width:48px; background:#B69BDC; border-radius:3px;"></div></div>
+          <div style="display:flex; align-items:center; gap:14px;"><span style="width:54px; font-size:12px; color:#9a93a8; font-family:monospace;">64 px</span><div style="height:18px; width:64px; background:#F2A0C4; border-radius:3px;"></div></div>
+        </div>
+      </div>
+      <!-- radius -->
+      <div style="background:#fff; border-radius:24px; padding:32px 34px; box-shadow:0 10px 26px rgba(35,42,82,.06);">
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#232A52; margin:0 0 18px;">Rayons d'angle · tout est rond</p>
+        <div style="display:flex; align-items:flex-end; gap:18px;">
+          <div style="text-align:center;"><div style="width:72px; height:72px; background:#FDEFF5; border:2px solid #F2A0C4; border-radius:10px;"></div><p style="font-size:11px; color:#9a93a8; margin:8px 0 0; font-family:monospace;">10 px</p><p style="font-size:10.5px; color:#bcb6c8; margin:2px 0 0;">puces</p></div>
+          <div style="text-align:center;"><div style="width:72px; height:72px; background:#E9F7F1; border:2px solid #4FC0A1; border-radius:18px;"></div><p style="font-size:11px; color:#9a93a8; margin:8px 0 0; font-family:monospace;">18 px</p><p style="font-size:10.5px; color:#bcb6c8; margin:2px 0 0;">cartes</p></div>
+          <div style="text-align:center;"><div style="width:72px; height:72px; background:#EFEAFA; border:2px solid #B69BDC; border-radius:28px;"></div><p style="font-size:11px; color:#9a93a8; margin:8px 0 0; font-family:monospace;">28 px</p><p style="font-size:10.5px; color:#bcb6c8; margin:2px 0 0;">blocs</p></div>
+          <div style="text-align:center;"><div style="width:72px; height:72px; background:#E6F5FA; border:2px solid #5BB8D4; border-radius:50%;"></div><p style="font-size:11px; color:#9a93a8; margin:8px 0 0; font-family:monospace;">plein</p><p style="font-size:10.5px; color:#bcb6c8; margin:2px 0 0;">pilules</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1.1fr 1fr; gap:24px;">
+      <!-- elevation -->
+      <div style="background:#fff; border-radius:24px; padding:32px 34px; box-shadow:0 10px 26px rgba(35,42,82,.06);">
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#232A52; margin:0 0 22px;">Élévation · ombres douces & colorées</p>
+        <div style="display:flex; gap:22px;">
+          <div style="text-align:center;"><div style="width:90px; height:64px; background:#fff; border-radius:16px; box-shadow:0 4px 12px rgba(35,42,82,.08);"></div><p style="font-size:11px; color:#9a93a8; margin:10px 0 0;">Niveau 1</p></div>
+          <div style="text-align:center;"><div style="width:90px; height:64px; background:#fff; border-radius:16px; box-shadow:0 10px 26px rgba(182,155,220,.22);"></div><p style="font-size:11px; color:#9a93a8; margin:10px 0 0;">Niveau 2</p></div>
+          <div style="text-align:center;"><div style="width:90px; height:64px; background:#fff; border-radius:16px; box-shadow:0 18px 40px rgba(242,160,196,.32);"></div><p style="font-size:11px; color:#9a93a8; margin:10px 0 0;">Niveau 3</p></div>
+        </div>
+        <p style="font-size:12.5px; color:#8a8499; line-height:1.6; margin:22px 0 0;">Les ombres prennent une teinte de la palette plutôt que du gris pur — c'est ce qui rend l'interface « douce ».</p>
+      </div>
+      <!-- buttons -->
+      <div style="background:#fff; border-radius:24px; padding:32px 34px; box-shadow:0 10px 26px rgba(35,42,82,.06);">
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#232A52; margin:0 0 22px;">Boutons</p>
+        <div style="display:flex; flex-direction:column; gap:14px; align-items:flex-start;">
+          <span style="background:#4FC0A1; color:#fff; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; padding:13px 30px; border-radius:30px; box-shadow:0 8px 18px rgba(79,192,161,.35);">Commencer</span>
+          <span style="background:#FDEFF5; color:#cf7ba2; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; padding:13px 30px; border-radius:30px;">Plus tard</span>
+          <span style="background:transparent; color:#B69BDC; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; padding:13px 30px; border-radius:30px; border:2px solid #D9CFE6;">En savoir plus</span>
+        </div>
+        <p style="font-size:12.5px; color:#8a8499; line-height:1.6; margin:22px 0 0;">Toujours en pilule, hauteur min. 48 px pour les petits doigts.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 11 · ICONOGRAPHIE ============ -->
+  <section style="padding:70px 90px; background:linear-gradient(160deg,#E6F5FA,#EFEAFA);">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#5BB8D4;">11</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#3f93b5; text-transform:uppercase;">Iconographie</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 14px; line-height:1.1;">Des icônes toutes douces.</h2>
+    <p style="font-size:18px; line-height:1.7; color:#6a6480; max-width:760px; margin:0 0 36px;">Trait épais et arrondi, angles jamais pointus, remplissage pastel. La même main que le logo. Voici les fonctions clés de l'univers.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:16px; margin-bottom:24px;">
+      <div style="background:#fff; border-radius:20px; padding:24px 12px; text-align:center; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="width:64px; height:64px; margin:0 auto 12px; border-radius:20px; background:#FDEFF5; display:flex; align-items:center; justify-content:center; font-size:30px;">🕌</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; color:#232A52; margin:0;">Prière</p></div>
+      <div style="background:#fff; border-radius:20px; padding:24px 12px; text-align:center; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="width:64px; height:64px; margin:0 auto 12px; border-radius:20px; background:#E9F7F1; display:flex; align-items:center; justify-content:center; font-size:30px;">📖</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; color:#232A52; margin:0;">Coran</p></div>
+      <div style="background:#fff; border-radius:20px; padding:24px 12px; text-align:center; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="width:64px; height:64px; margin:0 auto 12px; border-radius:20px; background:#EFEAFA; display:flex; align-items:center; justify-content:center; font-size:30px;">🤲</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; color:#232A52; margin:0;">Du'a</p></div>
+      <div style="background:#fff; border-radius:20px; padding:24px 12px; text-align:center; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="width:64px; height:64px; margin:0 auto 12px; border-radius:20px; background:#FBF1D8; display:flex; align-items:center; justify-content:center; font-size:30px;">📿</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; color:#232A52; margin:0;">Dhikr</p></div>
+      <div style="background:#fff; border-radius:20px; padding:24px 12px; text-align:center; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="width:64px; height:64px; margin:0 auto 12px; border-radius:20px; background:#E6F5FA; display:flex; align-items:center; justify-content:center; font-size:30px;">✨</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; color:#232A52; margin:0;">Histoires</p></div>
+      <div style="background:#fff; border-radius:20px; padding:24px 12px; text-align:center; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="width:64px; height:64px; margin:0 auto 12px; border-radius:20px; background:#FDEFF5; display:flex; align-items:center; justify-content:center; font-size:30px;">🏆</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; color:#232A52; margin:0;">Récompenses</p></div>
+      <div style="background:#fff; border-radius:20px; padding:24px 12px; text-align:center; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="width:64px; height:64px; margin:0 auto 12px; border-radius:20px; background:#E9F7F1; display:flex; align-items:center; justify-content:center; font-size:30px;">🎮</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; color:#232A52; margin:0;">Jeux</p></div>
+      <div style="background:#fff; border-radius:20px; padding:24px 12px; text-align:center; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="width:64px; height:64px; margin:0 auto 12px; border-radius:20px; background:#EFEAFA; display:flex; align-items:center; justify-content:center; font-size:30px;">🌙</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; color:#232A52; margin:0;">Ramadan</p></div>
+      <div style="background:#fff; border-radius:20px; padding:24px 12px; text-align:center; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="width:64px; height:64px; margin:0 auto 12px; border-radius:20px; background:#FBF1D8; display:flex; align-items:center; justify-content:center; font-size:30px;">👪</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; color:#232A52; margin:0;">Famille</p></div>
+      <div style="background:#fff; border-radius:20px; padding:24px 12px; text-align:center; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="width:64px; height:64px; margin:0 auto 12px; border-radius:20px; background:#E6F5FA; display:flex; align-items:center; justify-content:center; font-size:30px;">🗓️</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; color:#232A52; margin:0;">Calendrier</p></div>
+      <div style="background:#fff; border-radius:20px; padding:24px 12px; text-align:center; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="width:64px; height:64px; margin:0 auto 12px; border-radius:20px; background:#FDEFF5; display:flex; align-items:center; justify-content:center; font-size:30px;">💛</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; color:#232A52; margin:0;">Bonnes actions</p></div>
+      <div style="background:#fff; border-radius:20px; padding:24px 12px; text-align:center; box-shadow:0 8px 20px rgba(35,42,82,.05);"><div style="width:64px; height:64px; margin:0 auto 12px; border-radius:20px; background:#E9F7F1; display:flex; align-items:center; justify-content:center; font-size:30px;">⭐️</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; color:#232A52; margin:0;">Progrès</p></div>
+    </div>
+    <div style="background:#fff; border-radius:22px; padding:24px 32px; display:flex; align-items:center; gap:18px; box-shadow:0 8px 20px rgba(35,42,82,.05);">
+      <span style="font-size:28px;">✏️</span>
+      <p style="font-size:14px; color:#5a5570; line-height:1.65; margin:0;">Les pictogrammes ci-dessus indiquent les <strong>sujets</strong> à couvrir. Jeu d'icônes maison à dessiner en trait arrondi 3 px, coins ronds, avec une touche pastel — cohérent avec Mimi.</p>
+    </div>
+  </section>
+
+  <!-- ============ 06 · TON ============ -->
+  <section style="padding:70px 90px; background:#FDEFF5;">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#F2A0C4;">12</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#cf7ba2; text-transform:uppercase;">Ton & voix</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 14px; line-height:1.1;">On parle au cœur des enfants.</h2>
+    <p style="font-size:18px; line-height:1.7; color:#6a6480; max-width:720px; margin:0 0 36px;">Toujours à hauteur d'enfant : des phrases simples, des images poétiques, jamais de peur ni de jugement. On encourage, on rassure, on émerveille.</p>
+
+    <!-- SIGNATURE VERBALE -->
+    <div style="display:grid; grid-template-columns:1.15fr 1fr; gap:24px; margin-bottom:24px;">
+      <div style="background:linear-gradient(150deg,#4FC0A1,#2E7D6B); border-radius:26px; padding:40px 44px; position:relative; overflow:hidden;">
+        <div style="position:absolute; top:-30px; right:-20px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,.08);"></div>
+        <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:12px; letter-spacing:.16em; color:rgba(255,255,255,.75); text-transform:uppercase;">Notre signature verbale</span>
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:34px; color:#fff; line-height:1.2; margin:16px 0 14px; position:relative; z-index:2;">« Assalamou alaykoum, c'est Aya et Mimi ! »</p>
+        <p style="font-size:14.5px; color:rgba(255,255,255,.85); line-height:1.65; margin:0; max-width:440px;">La phrase d'accroche qui ouvre nos vidéos. Joyeuse, reconnaissable dès la première seconde — c'est notre « générique » que les enfants attendent et répètent. Un actif de marque aussi fort que le logo.</p>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div style="background:#fff; border-radius:22px; padding:24px 28px;">
+          <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#232A52; margin:0 0 10px;">Pourquoi elle est puissante</p>
+          <p style="font-size:13.5px; color:#7a7490; line-height:1.6; margin:0;">Elle crée un rituel : l'enfant reconnaît la marque les yeux fermés, l'associe à un moment heureux, et la rejoue dans la cour de récré. C'est de la mémorisation gratuite.</p>
+        </div>
+        <div style="background:#fff; border-radius:22px; padding:24px 28px;">
+          <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#232A52; margin:0 0 10px;">La règle d'usage</p>
+          <p style="font-size:13.5px; color:#7a7490; line-height:1.6; margin:0;">Toujours ton chaleureux, même intonation montante, suivie d'un petit signe de Mimi. Jamais modifiée — c'est ce qui la rend mémorable.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORMATS VIDÉO -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:24px;">
+      <div style="background:#fff; border-radius:22px; padding:26px 30px; border-top:5px solid #4FC0A1;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+          <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0;">Format « Aya & Mimi »</p>
+          <span style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:20px; color:#4FC0A1;">~50 %</span>
+        </div>
+        <p style="font-size:13.5px; color:#7a7490; line-height:1.6; margin:0;">Vidéos qui s'ouvrent sur la phrase d'accroche. Aya et Mimi s'adressent directement à l'enfant : leçons, du'as, découvertes. Le cœur de la marque.</p>
+      </div>
+      <div style="background:#fff; border-radius:22px; padding:26px 30px; border-top:5px solid #F2A0C4;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+          <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0;">Format « La vie d'Aya »</p>
+          <span style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:20px; color:#F2A0C4;">~50 %</span>
+        </div>
+        <p style="font-size:13.5px; color:#7a7490; line-height:1.6; margin:0;">Sans l'accroche : Aya dans son quotidien — avec son papa, sa copine, à la maison. On apprend l'islam par l'exemple et les petits moments de tous les jours.</p>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-bottom:24px;">
+      <div style="background:#fff; border-radius:20px; padding:26px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; color:#4FC0A1; margin:0 0 8px;">Doux</p><p style="font-size:14px; color:#8a8499; line-height:1.6; margin:0;">Une voix calme et enveloppante, comme une histoire du soir.</p></div>
+      <div style="background:#fff; border-radius:20px; padding:26px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; color:#B69BDC; margin:0 0 8px;">Bienveillant</p><p style="font-size:14px; color:#8a8499; line-height:1.6; margin:0;">On valorise l'effort et la curiosité, sans culpabiliser.</p></div>
+      <div style="background:#fff; border-radius:20px; padding:26px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; color:#E0A93B; margin:0 0 8px;">Lumineux</p><p style="font-size:14px; color:#8a8499; line-height:1.6; margin:0;">L'islam présenté comme une source de joie et de beauté.</p></div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div style="background:#fff; border-radius:22px; padding:28px 32px; border-left:6px solid #4FC0A1;">
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#4FC0A1; margin:0 0 16px;">✓ On dit</p>
+        <p style="font-size:15px; color:#5a5570; line-height:1.7; margin:0 0 12px;">« Allah t'aime plus qu'une maman aime son bébé 🤍 »</p>
+        <p style="font-size:15px; color:#5a5570; line-height:1.7; margin:0;">« Chaque petit pas vers le bien fait sourire ton cœur. »</p>
+      </div>
+      <div style="background:#fff; border-radius:22px; padding:28px 32px; border-left:6px solid #E5557A;">
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#E5557A; margin:0 0 16px;">✕ On évite</p>
+        <p style="font-size:15px; color:#a59ec0; line-height:1.7; margin:0 0 12px; text-decoration:line-through;">Un ton moralisateur ou culpabilisant.</p>
+        <p style="font-size:15px; color:#a59ec0; line-height:1.7; margin:0; text-decoration:line-through;">Un vocabulaire trop complexe ou théologique.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 07 · MOTIFS ============ -->
+  <section style="padding:70px 90px; background:#FFFBF4;">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#4FC0A1;">13</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#5aa892; text-transform:uppercase;">Motifs & éléments</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 36px; line-height:1.1;">Le petit monde d'Aya & Mimi.</h2>
+
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px;">
+      <div style="background:linear-gradient(160deg,#FDEFF5,#EFEAFA); border-radius:22px; padding:30px 20px; text-align:center;"><div style="font-size:46px; margin-bottom:12px;">⭐️</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0 0 4px;">Étoiles</p><p style="font-size:12.5px; color:#8a8499; margin:0; line-height:1.5;">Le ciel, le rêve, l'émerveillement.</p></div>
+      <div style="background:linear-gradient(160deg,#E9F7F1,#E6F5FA); border-radius:22px; padding:30px 20px; text-align:center;"><div style="font-size:46px; margin-bottom:12px;">🌙</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0 0 4px;">Croissant</p><p style="font-size:12.5px; color:#8a8499; margin:0; line-height:1.5;">Le repère doux de l'islam.</p></div>
+      <div style="background:linear-gradient(160deg,#FDEFF5,#FBF1D8); border-radius:22px; padding:30px 20px; text-align:center;"><div style="font-size:46px; margin-bottom:12px;">🌸</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0 0 4px;">Fleurs</p><p style="font-size:12.5px; color:#8a8499; margin:0; line-height:1.5;">La pureté et la croissance.</p></div>
+      <div style="background:linear-gradient(160deg,#E6F5FA,#EFEAFA); border-radius:22px; padding:30px 20px; text-align:center;"><div style="font-size:46px; margin-bottom:12px;">☁️</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0 0 4px;">Nuages</p><p style="font-size:12.5px; color:#8a8499; margin:0; line-height:1.5;">La légèreté et la sérénité.</p></div>
+    </div>
+    <div style="margin-top:20px; background:linear-gradient(120deg,#E9F7F1,#FDEFF5); border-radius:22px; padding:26px 32px; display:flex; align-items:center; gap:20px;">
+      <span style="font-size:34px;">🪄</span>
+      <p style="font-size:14.5px; color:#5a5570; line-height:1.65; margin:0;">Ces motifs s'utilisent <strong>avec parcimonie</strong>, comme des petites touches scintillantes autour de Mimi ou des titres — jamais en surcharge. Le blanc et l'espace restent rois.</p>
+    </div>
+  </section>
+
+  <!-- ============ 14 · SOUS-MARQUES ============ -->
+  <section style="padding:70px 90px; background:#FFFBF4;">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#B69BDC;">14</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#8a6fc0; text-transform:uppercase;">Sous-marques & collections</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 14px; line-height:1.1;">Une marque, mille histoires.</h2>
+    <p style="font-size:18px; line-height:1.7; color:#6a6480; max-width:760px; margin:0 0 36px;">Chaque grand thème devient une collection identifiée par une couleur de la palette. Même logo, même duo — un code couleur qui guide l'enfant et le parent.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:18px; margin-bottom:24px;">
+      <div style="border-radius:22px; overflow:hidden; box-shadow:0 12px 28px rgba(79,192,161,.2);">
+        <div style="height:140px; background:linear-gradient(160deg,#4FC0A1,#2E7D6B); display:flex; align-items:center; justify-content:center;"><span style="font-size:50px;">🕊️</span></div>
+        <div style="padding:18px 20px; background:#fff;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0 0 3px;">Tawakkul</p><p style="font-size:12px; color:#9a93a8; margin:0;">La confiance en Allah</p></div>
+      </div>
+      <div style="border-radius:22px; overflow:hidden; box-shadow:0 12px 28px rgba(143,210,228,.25);">
+        <div style="height:140px; background:linear-gradient(160deg,#8FD2E4,#5BB8D4); display:flex; align-items:center; justify-content:center;"><span style="font-size:50px;">🕌</span></div>
+        <div style="padding:18px 20px; background:#fff;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0 0 3px;">Mes Prières</p><p style="font-size:12px; color:#9a93a8; margin:0;">Apprendre la salât</p></div>
+      </div>
+      <div style="border-radius:22px; overflow:hidden; box-shadow:0 12px 28px rgba(182,155,220,.25);">
+        <div style="height:140px; background:linear-gradient(160deg,#B69BDC,#8a6fc0); display:flex; align-items:center; justify-content:center;"><span style="font-size:50px;">🌙</span></div>
+        <div style="padding:18px 20px; background:#fff;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0 0 3px;">Ramadan</p><p style="font-size:12px; color:#9a93a8; margin:0;">Le mois de la lumière</p></div>
+      </div>
+      <div style="border-radius:22px; overflow:hidden; box-shadow:0 12px 28px rgba(234,184,76,.25);">
+        <div style="height:140px; background:linear-gradient(160deg,#EAB84C,#cf9320); display:flex; align-items:center; justify-content:center;"><span style="font-size:50px;">⭐️</span></div>
+        <div style="padding:18px 20px; background:#fff;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0 0 3px;">Les 99 Noms</p><p style="font-size:12px; color:#9a93a8; margin:0;">Découvrir Allah ﷻ</p></div>
+      </div>
+      <div style="border-radius:22px; overflow:hidden; box-shadow:0 12px 28px rgba(242,160,196,.25);">
+        <div style="height:140px; background:linear-gradient(160deg,#F2A0C4,#cf7ba2); display:flex; align-items:center; justify-content:center;"><span style="font-size:50px;">🤲</span></div>
+        <div style="padding:18px 20px; background:#fff;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52; margin:0 0 3px;">Doua du jour</p><p style="font-size:12px; color:#9a93a8; margin:0;">Les petites invocations</p></div>
+      </div>
+    </div>
+    <div style="background:linear-gradient(120deg,#EFEAFA,#FDEFF5); border-radius:22px; padding:24px 32px; display:flex; align-items:center; gap:18px;">
+      <span style="font-size:28px;">🎨</span>
+      <p style="font-size:14px; color:#5a5570; line-height:1.65; margin:0;">Règle d'or : la couleur de collection habille la couverture et le bandeau, mais le <strong>logo Kawaii Muslim</strong> et la <strong>typographie</strong> restent identiques partout. La marque-mère prime toujours.</p>
+    </div>
+  </section>
+
+  <!-- ============ 15 · L'APPLICATION ============ -->
+  <section style="padding:70px 90px; background:linear-gradient(165deg,#EFEAFA,#E6F5FA);">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#E0A93B;">15</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#c9962e; text-transform:uppercase;">Le produit · l'application</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 14px; line-height:1.1;">La marque, vivante dans la main.</h2>
+    <p style="font-size:18px; line-height:1.7; color:#6a6480; max-width:760px; margin:0 0 40px;">L'application est le cœur de l'écosystème : un compagnon quotidien où Aya & Mimi guident l'enfant de leçon en leçon, de récompense en récompense. Voici la DA appliquée à l'écran.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:22px;">
+      <!-- Phone 1: Accueil -->
+      <div>
+        <div style="background:#fff; border-radius:34px; padding:10px; box-shadow:0 22px 50px rgba(35,42,82,.18);">
+          <div style="border-radius:26px; overflow:hidden; background:linear-gradient(170deg,#FFFBF4,#FDEFF5); height:380px; position:relative;">
+            <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:90px; height:20px; background:#fff; border-radius:0 0 14px 14px;"></div>
+            <div style="padding:32px 18px 0;">
+              <p style="font-size:11px; color:#a59ec0; margin:0 0 2px;">Assalamou alaykoum</p>
+              <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:19px; color:#232A52; margin:0 0 14px;">Yusuf 🌟</p>
+              <div style="background:linear-gradient(150deg,#4FC0A1,#2E7D6B); border-radius:20px; padding:16px; display:flex; align-items:center; gap:10px; margin-bottom:12px; box-shadow:0 8px 18px rgba(79,192,161,.3);">
+                <div style="width:46px; height:46px; border-radius:14px; background:rgba(255,255,255,.9); display:flex; align-items:center; justify-content:center; overflow:hidden;"><img src="brand/assets/mascot-nour.png" style="width:56px; height:auto; margin-top:4px;" alt="Mimi"/></div>
+                <div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px; color:#fff; margin:0;">Leçon du jour</p><p style="font-size:10.5px; color:rgba(255,255,255,.85); margin:2px 0 0;">Le Tawakkul ✨</p></div>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div style="background:#fff; border-radius:16px; padding:14px 12px; text-align:center; box-shadow:0 4px 12px rgba(35,42,82,.06);"><div style="font-size:24px;">📖</div><p style="font-size:10.5px; font-weight:700; color:#232A52; margin:6px 0 0; font-family:'Baloo 2',sans-serif;">Histoires</p></div>
+                <div style="background:#fff; border-radius:16px; padding:14px 12px; text-align:center; box-shadow:0 4px 12px rgba(35,42,82,.06);"><div style="font-size:24px;">🤲</div><p style="font-size:10.5px; font-weight:700; color:#232A52; margin:6px 0 0; font-family:'Baloo 2',sans-serif;">Mes du'as</p></div>
+                <div style="background:#fff; border-radius:16px; padding:14px 12px; text-align:center; box-shadow:0 4px 12px rgba(35,42,82,.06);"><div style="font-size:24px;">🎮</div><p style="font-size:10.5px; font-weight:700; color:#232A52; margin:6px 0 0; font-family:'Baloo 2',sans-serif;">Jeux</p></div>
+                <div style="background:#fff; border-radius:16px; padding:14px 12px; text-align:center; box-shadow:0 4px 12px rgba(35,42,82,.06);"><div style="font-size:24px;">🏆</div><p style="font-size:10.5px; font-weight:700; color:#232A52; margin:6px 0 0; font-family:'Baloo 2',sans-serif;">Trophées</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p style="text-align:center; font-size:12.5px; color:#7a7490; font-weight:600; margin:14px 0 0;">Accueil enfant</p>
+      </div>
+
+      <!-- Phone 2: Leçon -->
+      <div>
+        <div style="background:#fff; border-radius:34px; padding:10px; box-shadow:0 22px 50px rgba(35,42,82,.18);">
+          <div style="border-radius:26px; overflow:hidden; background:linear-gradient(170deg,#E9F7F1,#FFFBF4); height:380px; position:relative;">
+            <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:90px; height:20px; background:#fff; border-radius:0 0 14px 14px;"></div>
+            <div style="padding:32px 18px 0; display:flex; flex-direction:column; height:100%;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+                <div style="flex:1; height:8px; background:#fff; border-radius:4px; overflow:hidden;"><div style="width:60%; height:100%; background:#4FC0A1;"></div></div>
+                <span style="font-size:11px; font-weight:700; color:#4FC0A1; font-family:'Baloo 2',sans-serif;">3/5</span>
+              </div>
+              <div style="background:#fff; border-radius:22px; padding:18px; text-align:center; box-shadow:0 8px 20px rgba(35,42,82,.08); margin-bottom:14px;">
+                <div style="width:80px; height:80px; margin:0 auto 10px; border-radius:50%; background:#FDEFF5; display:flex; align-items:center; justify-content:center; overflow:hidden;"><img src="brand/assets/mascot-nour.png" style="width:96px; height:auto; margin-top:6px;" alt="Mimi"/></div>
+                <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#232A52; margin:0; line-height:1.4;">« Allah veille toujours sur toi 🤍 »</p>
+              </div>
+              <p style="font-size:11px; color:#8a8499; text-align:center; margin:0 0 12px;">Que veut dire « avoir confiance » ?</p>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="background:#fff; border:2px solid #4FC0A1; border-radius:14px; padding:11px; font-size:11.5px; font-weight:600; color:#2E7D6B; text-align:center;">S'en remettre à Allah 🌟</div>
+                <div style="background:#fff; border-radius:14px; padding:11px; font-size:11.5px; font-weight:600; color:#9a93a8; text-align:center;">Avoir peur du noir</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p style="text-align:center; font-size:12.5px; color:#7a7490; font-weight:600; margin:14px 0 0;">Leçon interactive</p>
+      </div>
+
+      <!-- Phone 3: Bibliothèque -->
+      <div>
+        <div style="background:#fff; border-radius:34px; padding:10px; box-shadow:0 22px 50px rgba(35,42,82,.18);">
+          <div style="border-radius:26px; overflow:hidden; background:linear-gradient(170deg,#FDEFF5,#FFFBF4); height:380px; position:relative;">
+            <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:90px; height:20px; background:#fff; border-radius:0 0 14px 14px;"></div>
+            <div style="padding:32px 18px 0;">
+              <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:17px; color:#232A52; margin:0 0 14px;">Ma bibliothèque 📚</p>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div style="border-radius:14px; overflow:hidden; box-shadow:0 6px 14px rgba(35,42,82,.12); height:120px;"><img src="brand/assets/scene-tawakkul.png" style="width:100%; height:100%; object-fit:cover;" alt="livre"/></div>
+                <div style="border-radius:14px; background:linear-gradient(160deg,#8FD2E4,#5BB8D4); height:120px; display:flex; align-items:center; justify-content:center; font-size:38px;">🕌</div>
+                <div style="border-radius:14px; background:linear-gradient(160deg,#B69BDC,#8a6fc0); height:120px; display:flex; align-items:center; justify-content:center; font-size:38px;">🌙</div>
+                <div style="border-radius:14px; background:linear-gradient(160deg,#EAB84C,#cf9320); height:120px; display:flex; align-items:center; justify-content:center; font-size:38px;">⭐️</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p style="text-align:center; font-size:12.5px; color:#7a7490; font-weight:600; margin:14px 0 0;">Bibliothèque</p>
+      </div>
+
+      <!-- Phone 4: Profil / récompenses -->
+      <div>
+        <div style="background:#fff; border-radius:34px; padding:10px; box-shadow:0 22px 50px rgba(35,42,82,.18);">
+          <div style="border-radius:26px; overflow:hidden; background:linear-gradient(170deg,#232A52,#2E7D6B); height:380px; position:relative;">
+            <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:90px; height:20px; background:#fff; border-radius:0 0 14px 14px; opacity:.9;"></div>
+            <div style="padding:36px 18px 0; text-align:center;">
+              <div style="width:78px; height:78px; margin:0 auto 10px; border-radius:50%; background:rgba(255,255,255,.95); display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,.25);"><img src="brand/assets/mascot-nour.png" style="width:92px; height:auto; margin-top:6px;" alt="Mimi"/></div>
+              <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:16px; color:#fff; margin:0;">Yusuf, 6 ans</p>
+              <p style="font-size:11px; color:#8FD2E4; margin:4px 0 16px;">Niveau 4 · Petit explorateur 🌟</p>
+              <div style="display:flex; justify-content:center; gap:8px; margin-bottom:14px;">
+                <div style="width:50px; height:50px; border-radius:14px; background:rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; font-size:24px;">🏆</div>
+                <div style="width:50px; height:50px; border-radius:14px; background:rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; font-size:24px;">🌙</div>
+                <div style="width:50px; height:50px; border-radius:14px; background:rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; font-size:24px;">⭐️</div>
+                <div style="width:50px; height:50px; border-radius:14px; background:rgba(255,255,255,.06); display:flex; align-items:center; justify-content:center; font-size:24px; opacity:.5;">🔒</div>
+              </div>
+              <div style="background:rgba(255,255,255,.12); border-radius:16px; padding:14px;">
+                <p style="font-size:10.5px; color:rgba(255,255,255,.8); margin:0 0 6px;">Étoiles cette semaine</p>
+                <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:26px; color:#FBE08A; margin:0;">★ 128</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p style="text-align:center; font-size:12.5px; color:#7a7490; font-weight:600; margin:14px 0 0;">Profil & récompenses</p>
+      </div>
+    </div>
+    <p style="font-size:11.5px; color:#a59ec0; font-style:italic; margin:26px 0 0; text-align:center;">Maquettes d'intention illustrant la direction artistique — non contractuelles.</p>
+  </section>
+
+  <!-- ============ 16 · BIBLIOTHÈQUE DIGITALE ============ -->
+  <section style="padding:70px 90px; background:radial-gradient(130% 100% at 50% -20%, #33419A 0%, #222C66 46%, #141A3C 100%); position:relative; overflow:hidden;">
+    <div style="position:absolute; inset:0; pointer-events:none; opacity:.6; background-repeat:no-repeat; background-image:
+      radial-gradient(1.7px 1.7px at 14% 20%, #fff, transparent),
+      radial-gradient(1.4px 1.4px at 70% 12%, #fff, transparent),
+      radial-gradient(1.6px 1.6px at 40% 70%, #ffe9b8, transparent),
+      radial-gradient(1.3px 1.3px at 88% 50%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 54% 28%, #fff, transparent),
+      radial-gradient(1.4px 1.4px at 90% 82%, #ffe9b8, transparent),
+      radial-gradient(1.3px 1.3px at 24% 88%, #fff, transparent);"></div>
+    <div style="position:absolute; top:40px; right:60px; width:54px; height:54px; border-radius:50%; background:radial-gradient(circle at 38% 35%, #FFF6D6, #FAE08C 60%, #EFC65C); box-shadow:0 0 50px 10px rgba(250,224,140,.3);"></div>
+
+    <div style="position:relative; z-index:2;">
+      <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+        <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#F0AECA;">16</span>
+        <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#e6a8c8; text-transform:uppercase;">Le produit · bibliothèque digitale</span>
+      </div>
+      <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#fff; margin:0 0 14px; line-height:1.1;">Une étagère de livres, sur tablette.</h2>
+      <p style="font-size:18px; line-height:1.7; color:#C9CBE6; max-width:780px; margin:0 0 38px;">Le pilier le plus différenciant : de vrais livres qu'on feuillette, réunis dans une bibliothèque où enfant et maman se connectent. Calme, premium, et au cœur de l'abonnement récurrent — là où les concurrents n'offrent que de la vidéo passive.</p>
+
+      <div style="display:grid; grid-template-columns:1.25fr 1fr; gap:26px; margin-bottom:26px;">
+        <!-- screen mock -->
+        <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); border-radius:24px; padding:22px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="width:34px; height:34px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden;"><img src="brand/assets/mascot-nour.png" style="width:42px; height:auto; margin-top:3px;" alt="Mimi"/></div>
+              <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#fff;">Ma bibliothèque</span>
+            </div>
+            <div style="display:flex; gap:7px;">
+              <span style="background:#E27FAE; color:#fff; font-weight:700; font-size:10px; padding:5px 12px; border-radius:14px;">Aya</span>
+              <span style="background:rgba(255,255,255,.12); color:#C9CBE6; font-weight:600; font-size:10px; padding:5px 12px; border-radius:14px;">Maman</span>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px;">
+            <div style="border-radius:11px; overflow:hidden; aspect-ratio:3/4; box-shadow:0 10px 22px rgba(0,0,0,.4);"><img src="brand/assets/scene-tawakkul.png" style="width:100%; height:100%; object-fit:cover;" alt="Tawakkul"/></div>
+            <div style="border-radius:11px; aspect-ratio:3/4; background:linear-gradient(160deg,#8FD2E4,#3f93b5); display:flex; align-items:center; justify-content:center; font-size:30px;">🕌</div>
+            <div style="border-radius:11px; aspect-ratio:3/4; background:linear-gradient(160deg,#B69BDC,#7a5fb0); display:flex; align-items:center; justify-content:center; font-size:30px;">🌙</div>
+            <div style="border-radius:11px; aspect-ratio:3/4; background:linear-gradient(160deg,#F0B53F,#D8932A); display:flex; align-items:center; justify-content:center; font-size:30px;">⭐️</div>
+          </div>
+        </div>
+        <!-- why it matters -->
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div style="background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:22px 26px;">
+            <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#fff; margin:0 0 8px;">Deux profils, un foyer</p>
+            <p style="font-size:13px; color:#C9CBE6; line-height:1.6; margin:0;">L'enfant ouvre ses livres en autonomie ; la maman suit la lecture et lit le soir avec lui. Un compte par famille.</p>
+          </div>
+          <div style="background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:22px 26px;">
+            <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#fff; margin:0 0 8px;">Le moteur de l'abonnement</p>
+            <p style="font-size:13px; color:#C9CBE6; line-height:1.6; margin:0;">Chaque mois, de nouveaux livres. Une raison concrète de rester abonné — et un coût marginal quasi nul.</p>
+          </div>
+          <div style="background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:22px 26px;">
+            <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#fff; margin:0 0 8px;">Le feuilletage premium</p>
+            <p style="font-size:13px; color:#C9CBE6; line-height:1.6; margin:0;">La page tourne comme un vrai livre. Une expérience douce, sans défilement infini, qui rassure les parents.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:linear-gradient(120deg, rgba(226,127,174,.2), rgba(143,210,228,.16)); border:1px solid rgba(255,255,255,.14); border-radius:22px; padding:24px 32px; display:flex; align-items:center; gap:18px;">
+        <span style="font-size:30px;">📖</span>
+        <p style="font-size:14px; color:#EDEFFb; line-height:1.65; margin:0;"><strong style="color:#fff;">Prototype vivant disponible.</strong> <span style="color:#C9CBE6;">La bibliothèque et le premier livre « Tawakkul » sont déjà jouables — connexion, étagère et feuilletage réel sur cadre tablette.</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 08 · APPLICATIONS ============ -->
+  <section style="padding:70px 90px; background:linear-gradient(165deg,#232A52,#2E7D6B);">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#8FD2E4;">17</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#9fd9c9; text-transform:uppercase;">Applications</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#fff; margin:0 0 14px; line-height:1.1;">La marque en action.</h2>
+    <p style="font-size:18px; line-height:1.7; color:rgba(255,255,255,.78); max-width:720px; margin:0 0 38px;">Du livre à l'application, en passant par les réseaux et le podcast — un univers cohérent et reconnaissable au premier regard.</p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px;">
+      <!-- App icon + posts -->
+      <div style="display:flex; flex-direction:column; gap:24px;">
+        <div style="background:rgba(255,255,255,.08); border-radius:24px; padding:30px; display:flex; gap:26px; align-items:center;">
+          <div style="width:120px; height:120px; border-radius:28px; background:linear-gradient(160deg,#FFFBF4,#FDEFF5); display:flex; align-items:center; justify-content:center; box-shadow:0 12px 30px rgba(0,0,0,.25); flex-shrink:0; overflow:hidden;">
+            <img src="brand/assets/mascot-nour.png" style="width:150px; height:auto; margin-top:8px;" alt="app icon Mimi"/>
+          </div>
+          <div>
+            <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:19px; color:#fff; margin:0 0 6px;">Icône d'application</p>
+            <p style="font-size:13.5px; color:rgba(255,255,255,.7); line-height:1.6; margin:0;">Mimi seule, centrée sur un fond pastel arrondi. Reconnaissable même en tout petit.</p>
+          </div>
+        </div>
+        <div style="background:#fff; border-radius:24px; padding:30px; text-align:center;">
+          <img src="brand/assets/logo-kawaii-muslim.png" style="width:200px; height:auto; margin-bottom:8px;" alt="post"/>
+          <p style="font-family:'Baloo 2',sans-serif; font-weight:600; font-size:17px; color:#2E7D6B; margin:8px 0 4px;">« Bismillah, on apprend en s'amusant ! »</p>
+          <p style="font-size:12px; color:#bcb6c8; margin:0;">Post réseaux sociaux · format carré</p>
+        </div>
+      </div>
+
+      <!-- Book cover Tawakkul -->
+      <div style="background:rgba(255,255,255,.08); border-radius:24px; padding:24px; display:flex; flex-direction:column;">
+        <div style="border-radius:16px; overflow:hidden; box-shadow:0 16px 40px rgba(0,0,0,.3); flex:1;">
+          <img src="brand/assets/scene-tawakkul.png" style="width:100%; height:100%; object-fit:cover; display:block;" alt="couverture livre"/>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:18px;">
+          <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; color:#fff; margin:0;">Couverture de livre</p>
+          <span style="font-size:12px; color:rgba(255,255,255,.6);">Collection « Tawakkul »</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Podcast wide -->
+    <div style="background:rgba(255,255,255,.08); border-radius:24px; padding:24px; display:flex; gap:26px; align-items:center;">
+      <div style="width:240px; height:200px; border-radius:16px; overflow:hidden; flex-shrink:0; box-shadow:0 12px 30px rgba(0,0,0,.3);">
+        <img src="brand/assets/scene-podcast.png" style="width:100%; height:100%; object-fit:cover; display:block;" alt="podcast"/>
+      </div>
+      <div>
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:19px; color:#fff; margin:0 0 8px;">Visuel podcast & vidéo</p>
+        <p style="font-size:14px; color:rgba(255,255,255,.75); line-height:1.65; margin:0 0 14px; max-width:560px;">Des décors illustrés chaleureux, dans la lignée de l'univers d'Aya & Mimi, où chaque scène respire la sérénité et l'intimité d'un moment partagé.</p>
+        <div style="display:flex; gap:10px;">
+          <span style="background:rgba(255,255,255,.16); color:#fff; font-size:12px; font-weight:600; padding:7px 14px; border-radius:16px;">Speak · Inspire · Impact</span>
+          <span style="background:rgba(255,255,255,.16); color:#fff; font-size:12px; font-weight:600; padding:7px 14px; border-radius:16px;">Be Kind · Be You</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 17 · MERCHANDISING ============ -->
+  <section style="padding:70px 90px; background:#FFFBF4;">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#F2A0C4;">18</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#cf7ba2; text-transform:uppercase;">Merchandising</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 14px; line-height:1.1;">Mimi entre dans les foyers.</h2>
+    <p style="font-size:18px; line-height:1.7; color:#6a6480; max-width:760px; margin:0 0 36px;">Les produits dérivés transforment une marque aimée en présence quotidienne — et en source de revenus à forte marge. Tout reste doux, sûr et premium.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:20px;">
+      <div style="border-radius:24px; overflow:hidden; box-shadow:0 12px 30px rgba(242,160,196,.2);">
+        <div style="height:200px; background:linear-gradient(160deg,#FDEFF5,#EFEAFA); display:flex; align-items:center; justify-content:center;"><div style="width:150px; height:150px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 14px 30px rgba(182,155,220,.3);"><img src="brand/assets/mascot-nour.png" style="width:180px; height:auto; margin-top:8px;" alt="peluche Mimi"/></div></div>
+        <div style="padding:20px 24px; background:#fff;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#232A52; margin:0 0 4px;">Peluche Mimi</p><p style="font-size:12.5px; color:#9a93a8; margin:0; line-height:1.5;">Le produit signature. Douce, brodée, lavable — l'amie qu'on serre fort.</p></div>
+      </div>
+      <div style="border-radius:24px; overflow:hidden; box-shadow:0 12px 30px rgba(79,192,161,.18);">
+        <div style="height:200px; background:linear-gradient(160deg,#E9F7F1,#E6F5FA); display:flex; align-items:center; justify-content:center; position:relative;"><div style="width:130px; height:150px; background:#fff; border-radius:8px 8px 0 0; box-shadow:0 12px 26px rgba(35,42,82,.12); display:flex; align-items:center; justify-content:center; padding:14px;"><img src="brand/assets/logo-kawaii-muslim.png" style="width:100%; height:auto;" alt="tote bag"/></div></div>
+        <div style="padding:20px 24px; background:#fff;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#232A52; margin:0 0 4px;">Tote bag & textile</p><p style="font-size:12.5px; color:#9a93a8; margin:0; line-height:1.5;">Logo et motifs sur coton naturel. Pour les sorties en famille.</p></div>
+      </div>
+      <div style="border-radius:24px; overflow:hidden; box-shadow:0 12px 30px rgba(234,184,76,.18);">
+        <div style="height:200px; background:linear-gradient(160deg,#FBF1D8,#FDEFF5); display:flex; align-items:center; justify-content:center;"><div style="width:160px; height:140px; background:linear-gradient(150deg,#4FC0A1,#2E7D6B); border-radius:16px; box-shadow:0 14px 30px rgba(46,125,107,.3); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;"><span style="font-size:34px;">🎁</span><span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:12px; color:#fff;">Coffret Tawakkul</span></div></div>
+        <div style="padding:20px 24px; background:#fff;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#232A52; margin:0 0 4px;">Coffrets cadeaux</p><p style="font-size:12.5px; color:#9a93a8; margin:0; line-height:1.5;">Livre + peluche + stickers. Le cadeau d'Aïd idéal.</p></div>
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px;">
+      <div style="background:#FDEFF5; border-radius:18px; padding:20px; text-align:center;"><div style="font-size:30px; margin-bottom:8px;">🏷️</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13.5px; color:#232A52; margin:0;">Stickers & autocollants</p></div>
+      <div style="background:#E9F7F1; border-radius:18px; padding:20px; text-align:center;"><div style="font-size:30px; margin-bottom:8px;">👕</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13.5px; color:#232A52; margin:0;">Vêtements enfants</p></div>
+      <div style="background:#EFEAFA; border-radius:18px; padding:20px; text-align:center;"><div style="font-size:30px; margin-bottom:8px;">🛏️</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13.5px; color:#232A52; margin:0;">Linge & déco chambre</p></div>
+      <div style="background:#FBF1D8; border-radius:18px; padding:20px; text-align:center;"><div style="font-size:30px; margin-bottom:8px;">🍽️</div><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13.5px; color:#232A52; margin:0;">Vaisselle repas</p></div>
+    </div>
+  </section>
+
+  <!-- ============ 18 · MOTION & SON ============ -->
+  <section style="padding:70px 90px; background:linear-gradient(160deg,#EFEAFA,#E9F7F1);">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#B69BDC;">19</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#8a6fc0; text-transform:uppercase;">Motion & identité sonore</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 14px; line-height:1.1;">Ça bouge et ça chante doucement.</h2>
+    <p style="font-size:18px; line-height:1.7; color:#6a6480; max-width:760px; margin:0 0 36px;">Le mouvement et le son prolongent la douceur de la marque. Rien de brusque : tout flotte, rebondit et scintille avec tendresse.</p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+      <div style="background:#fff; border-radius:24px; padding:34px 36px; box-shadow:0 10px 26px rgba(35,42,82,.06);">
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; color:#B69BDC; margin:0 0 18px;">Principes d'animation</p>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div style="display:flex; gap:14px; align-items:flex-start;"><span style="font-size:22px;">🎈</span><p style="font-size:13.5px; color:#5a5570; line-height:1.55; margin:0;"><strong style="color:#232A52;">Flottement</strong> — Mimi et les éléments oscillent doucement, jamais immobiles.</p></div>
+          <div style="display:flex; gap:14px; align-items:flex-start;"><span style="font-size:22px;">🫧</span><p style="font-size:13.5px; color:#5a5570; line-height:1.55; margin:0;"><strong style="color:#232A52;">Rebond doux</strong> — apparitions en « squash & stretch » léger, courbes élastiques.</p></div>
+          <div style="display:flex; gap:14px; align-items:flex-start;"><span style="font-size:22px;">✨</span><p style="font-size:13.5px; color:#5a5570; line-height:1.55; margin:0;"><strong style="color:#232A52;">Scintillement</strong> — les réussites déclenchent une pluie d'étoiles pastel.</p></div>
+          <div style="display:flex; gap:14px; align-items:flex-start;"><span style="font-size:22px;">📖</span><p style="font-size:13.5px; color:#5a5570; line-height:1.55; margin:0;"><strong style="color:#232A52;">Tourne-page</strong> — transitions inspirées d'un livre qu'on feuillette.</p></div>
+        </div>
+      </div>
+      <div style="background:#fff; border-radius:24px; padding:34px 36px; box-shadow:0 10px 26px rgba(35,42,82,.06);">
+        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; color:#4FC0A1; margin:0 0 18px;">Identité sonore</p>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div style="display:flex; gap:14px; align-items:flex-start;"><span style="font-size:22px;">🎵</span><p style="font-size:13.5px; color:#5a5570; line-height:1.55; margin:0;"><strong style="color:#232A52;">Jingle</strong> — 3 notes douces de carillon, montantes et lumineuses.</p></div>
+          <div style="display:flex; gap:14px; align-items:flex-start;"><span style="font-size:22px;">🔔</span><p style="font-size:13.5px; color:#5a5570; line-height:1.55; margin:0;"><strong style="color:#232A52;">Sons d'interface</strong> — clochettes & gouttes feutrées, jamais stridentes.</p></div>
+          <div style="display:flex; gap:14px; align-items:flex-start;"><span style="font-size:22px;">🗣️</span><p style="font-size:13.5px; color:#5a5570; line-height:1.55; margin:0;"><strong style="color:#232A52;">Voix narrateur</strong> — chaleureuse et posée, comme un parent qui raconte.</p></div>
+          <div style="display:flex; gap:14px; align-items:flex-start;"><span style="font-size:22px;">🌙</span><p style="font-size:13.5px; color:#5a5570; line-height:1.55; margin:0;"><strong style="color:#232A52;">Ambiances</strong> — nappes calmes inspirées de l'aube et du soir.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 09 · RÉCAP / FOOTER ============ -->
+  <section style="padding:70px 90px 64px; background:#FFFBF4;">
+    <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:8px;">
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:#E0A93B;">20</span>
+      <span style="font-weight:700; letter-spacing:.28em; font-size:12px; color:#c9962e; text-transform:uppercase;">Récapitulatif</span>
+    </div>
+    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:42px; color:#232A52; margin:0 0 30px; line-height:1.1;">L'essentiel en un coup d'œil.</h2>
+
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-bottom:40px;">
+      <div style="background:#FDEFF5; border-radius:20px; padding:24px 26px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#cf7ba2; margin:0 0 8px;">Personnalité</p><p style="font-size:13.5px; color:#7a7490; line-height:1.6; margin:0;">Tendre · lumineuse · rassurante · joyeuse.</p></div>
+      <div style="background:#E9F7F1; border-radius:20px; padding:24px 26px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#3a9b86; margin:0 0 8px;">Couleurs clés</p><p style="font-size:13.5px; color:#7a7490; line-height:1.6; margin:0;">Menthe #4FC0A1 · Crème #FBF1D8 · pastels.</p></div>
+      <div style="background:#FBF1D8; border-radius:20px; padding:24px 26px;"><p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#c9962e; margin:0 0 8px;">Typographie</p><p style="font-size:13.5px; color:#7a7490; line-height:1.6; margin:0;">Baloo 2 (titres) · Quicksand (texte).</p></div>
+    </div>
+
+    <div style="background:linear-gradient(150deg,#FDEFF5,#E9F7F1); border-radius:28px; padding:50px; text-align:center; position:relative; overflow:hidden;">
+      <img src="brand/assets/logo-kawaii-muslim.png" style="width:300px; height:auto; margin-bottom:8px;" alt="logo final"/>
+      <p style="font-family:'Baloo 2',sans-serif; font-weight:600; font-size:20px; color:#2E7D6B; margin:18px 0 6px;">L'éducation islamique qui fait sourire les enfants.</p>
+      <p style="font-size:15px; color:#9a93a8; margin:0 0 6px;">kawaiimuslim.com</p>
+      <p style="font-size:13px; color:#bcb6c8; margin:0; font-style:italic;">Baraka Allahu fikum · Guide de marque 2026</p>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script>
+addEventListener('load', () => {
+  (async () => {
+    // wait for the DC runtime to mount the rendered content
+    const start = Date.now();
+    while (!document.querySelector('x-dc section') && Date.now() - start < 8000) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    try { await document.fonts.ready; } catch (e) {}
+    const imgs = Array.from(document.images).filter((i) => !i.complete);
+    await Promise.race([
+      Promise.allSettled(imgs.map((i) => i.decode())),
+      new Promise((r) => setTimeout(r, 8000)),
+    ]);
+    setTimeout(() => window.print(), 600);
+  })();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./km-auth.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #FFFBF4; }
+  a { color: #2E7D6B; text-decoration: none; }
+  a:hover { color: #4FC0A1; }
+  input { font-family: 'Quicksand', sans-serif; }
+  input:focus { outline: none; border-color: #4FC0A1 !important; }
+  ::selection { background: #F2A0C4; color: #fff; }
+</style>
+</helmet>
+
+<div style="width:1160px; margin:0 auto; font-family:'Quicksand',sans-serif; color:#3a3f63;">
+
+  <!-- topbar -->
+  <nav style="display:flex; align-items:center; justify-content:space-between; padding:18px 40px; border-bottom:1px solid #f2e9db;">
+    <a href="Kawaii Muslim - Site Web.dc.html" style="display:flex; align-items:center; gap:11px;">
+      <div style="width:42px; height:42px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 4px 12px rgba(242,160,196,.25);"><img src="brand/assets/mascot-nour.png" style="width:52px; height:auto; margin-top:4px;" alt="Mimi"/></div>
+      <span style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:19px; color:#232A52;">Kawaii Muslim</span>
+    </a>
+    <div style="display:flex; align-items:center; gap:24px;">
+      <a href="Bibliotheque Kawaii Muslim.dc.html" style="font-weight:600; font-size:15px; color:#5a5570;">Bibliothèque</a>
+      <span onClick="{{ logout }}" style="cursor:pointer; font-weight:700; font-size:14px; color:#E27FAE;">Déconnexion</span>
+    </div>
+  </nav>
+
+  <div style="padding:44px 40px 60px;">
+    <h1 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:32px; color:#232A52; margin:0 0 4px;">{{ hello }}</h1>
+    <p style="font-size:15px; color:#8a8499; margin:0 0 34px;">{{ email }}</p>
+
+    <div style="display:grid; grid-template-columns:1.1fr 1fr; gap:24px;">
+
+      <!-- ABONNEMENT -->
+      <div style="background:#fff; border:1px solid #f2e9db; border-radius:24px; padding:32px 34px; box-shadow:0 10px 26px rgba(35,42,82,.05);">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+          <h2 style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:20px; color:#232A52; margin:0;">Mon abonnement</h2>
+          <span style="background:{{ statusBg }}; color:{{ statusColor }}; font-weight:700; font-size:11.5px; padding:6px 14px; border-radius:14px; text-transform:uppercase; letter-spacing:.04em;">{{ statusLabel }}</span>
+        </div>
+
+        <div style="background:#FFFBF4; border:1px solid #f2e9db; border-radius:18px; padding:22px 24px; margin-bottom:22px;">
+          <div style="display:flex; align-items:flex-end; justify-content:space-between;">
+            <div>
+              <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#8a8499; margin:0 0 4px;">Formule {{ planName }}</p>
+              <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:30px; color:#232A52; margin:0;">{{ planPrice }}</p>
+            </div>
+            <span style="font-size:13px; color:#9a93a8;">{{ renewInfo }}</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-bottom:10px;">
+          <div onClick="{{ switchPlan }}" style="cursor:pointer; flex:1; text-align:center; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#2E7D6B; background:#E9F7F1; padding:13px; border-radius:22px;">{{ switchLabel }}</div>
+          <sc-if value="{{ isSubscribed }}" hint-placeholder-val="{{ true }}">
+            <div onClick="{{ cancel }}" style="cursor:pointer; flex:1; text-align:center; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#c2607f; background:#FDEFF5; padding:13px; border-radius:22px;">Résilier</div>
+          </sc-if>
+          <sc-if value="{{ isCancelled }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ resume }}" style="cursor:pointer; flex:1; text-align:center; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#fff; background:linear-gradient(150deg,#F0AECA,#E27FAE); padding:13px; border-radius:22px;">Réactiver</div>
+          </sc-if>
+        </div>
+        <p style="font-size:12px; color:#bcb6c8; margin:14px 0 0; line-height:1.5;">💳 La facturation et le paiement seront gérés par Stripe une fois le site en ligne.</p>
+      </div>
+
+      <!-- PROFILS ENFANTS -->
+      <div style="background:#fff; border:1px solid #f2e9db; border-radius:24px; padding:32px 34px; box-shadow:0 10px 26px rgba(35,42,82,.05);">
+        <h2 style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:20px; color:#232A52; margin:0 0 20px;">Profils enfants</h2>
+
+        <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:22px;">
+          <sc-for list="{{ children }}" as="child" hint-placeholder-count="1">
+            <div style="display:flex; align-items:center; justify-content:space-between; background:#FFFBF4; border:1px solid #f2e9db; border-radius:16px; padding:12px 16px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="width:40px; height:40px; border-radius:50%; background:#FDEFF5; display:flex; align-items:center; justify-content:center; font-size:20px;">{{ child.emoji }}</span>
+                <span style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:#232A52;">{{ child.name }}</span>
+              </div>
+              <span onClick="{{ child.remove }}" style="cursor:pointer; color:#c2607f; font-size:13px; font-weight:700;">Retirer</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <input id="km-child" type="text" placeholder="Prénom de l'enfant" style="flex:1; padding:12px 16px; border:1.5px solid #e6dfd2; border-radius:14px; font-size:14px; color:#3a3f63; background:#FFFBF4;" />
+          <div onClick="{{ addChild }}" style="cursor:pointer; display:flex; align-items:center; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#fff; background:#4FC0A1; padding:12px 22px; border-radius:14px; white-space:nowrap;">+ Ajouter</div>
+        </div>
+        <p style="font-size:12px; color:#bcb6c8; margin:16px 0 0; line-height:1.5;">Chaque enfant a son profil : sa progression et ses étoiles lui sont propres.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { user: null };
+
+  componentDidMount() {
+    let u = null;
+    try { u = window.KMAuth.getUser(); } catch (e) {}
+    // fallback démo pour que la page s'affiche même sans connexion
+    if (!u) { try { u = window.KMAuth.login({ email: 'demo@kawaiimuslim.com' }); } catch (e) {} }
+    this.setState({ user: u });
+  }
+
+  refresh() { try { this.setState({ user: window.KMAuth.getUser() }); } catch (e) {} }
+
+  renderVals() {
+    const u = this.state.user || {};
+    const subscribed = !!u.subscribed;
+    const plan = u.plan || 'annuel';
+    const isAnnuel = plan === 'annuel';
+    const children = (u.children || []).map((c) => ({
+      emoji: c.emoji, name: c.name,
+      remove: () => { try { window.KMAuth.removeChild(c.id); } catch (e) {} this.refresh(); },
+    }));
+
+    return {
+      hello: 'Assalamou alaykoum' + (u.name ? ', ' + u.name : '') + ' \uD83C\uDF38',
+      email: u.email || '',
+      isSubscribed: subscribed,
+      isCancelled: !subscribed,
+      statusLabel: subscribed ? 'Essai actif' : 'Résilié',
+      statusBg: subscribed ? '#E9F7F1' : '#FDEFF5',
+      statusColor: subscribed ? '#2E7D6B' : '#c2607f',
+      planName: isAnnuel ? 'Annuelle' : 'Mensuelle',
+      planPrice: isAnnuel ? '59€ /an' : '6,99€ /mois',
+      renewInfo: subscribed ? 'Essai gratuit — 7 jours' : 'Accès jusqu\u2019à la fin de la période',
+      switchLabel: isAnnuel ? 'Passer au mensuel' : 'Passer à l\u2019annuel',
+      children,
+      switchPlan: () => { try { window.KMAuth.setPlan(isAnnuel ? 'mensuel' : 'annuel'); } catch (e) {} this.refresh(); },
+      cancel: () => { try { window.KMAuth.cancel(); } catch (e) {} this.refresh(); },
+      resume: () => { try { window.KMAuth.resume(); } catch (e) {} this.refresh(); },
+      addChild: () => {
+        const el = document.getElementById('km-child');
+        const name = (el && el.value || '').trim();
+        if (!name) { alert('Indique le prénom de l\u2019enfant 🌸'); return; }
+        const emojis = ['🧒', '👦', '👧', '🐤', '🌟'];
+        try { window.KMAuth.addChild(name, emojis[(this.state.user.children || []).length % emojis.length]); } catch (e) {}
+        if (el) el.value = '';
+        this.refresh();
+      },
+      logout: () => { try { window.KMAuth.logout(); } catch (e) {} window.location.href = 'Kawaii Muslim - Site Web.dc.html'; },
+    };
+  }
+}
+</script>
+</body>
+</html>
