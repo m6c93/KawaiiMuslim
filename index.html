@@ -105,25 +105,6 @@
       background: #1c2354;
     }
 
-    .skip {
-      position: absolute;
-      z-index: 5;
-      top: 22px;
-      right: 22px;
-      cursor: pointer;
-      min-height: 42px;
-      padding: 8px 17px;
-      color: rgba(255,255,255,.84);
-      font-size: 12px;
-      font-weight: 800;
-      border: 1px solid rgba(255,255,255,.16);
-      border-radius: 24px;
-      background: rgba(255,255,255,.08);
-      backdrop-filter: blur(10px);
-      transition: color .2s ease, background .2s ease;
-    }
-    .skip:hover { color: #fff; background: rgba(255,255,255,.14); }
-
     .content {
       position: relative;
       z-index: 2;
@@ -254,7 +235,6 @@
     @keyframes load { to { transform: translateX(0); } }
 
     @media (max-width: 640px) {
-      .skip { top: 14px; right: 14px; min-height: 38px; padding: 7px 14px; }
       .content { padding-top: 62px; }
       .video-wrap { width: 112vw; border-radius: 22px; }
       .tagline { width: min(92vw, 520px); margin-top: -3vw; }
@@ -263,8 +243,6 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
       .video-wrap, .tagline, .subline, .moon { opacity: 1; transform: none; }
-      video { display: none; }
-      .fallback-logo { display: grid; }
     }
   </style>
 </head>
@@ -272,7 +250,6 @@
   <main class="intro" id="intro">
     <div class="stars" aria-hidden="true"></div>
     <div class="moon" aria-hidden="true"></div>
-    <button class="skip" id="skip" type="button">Passer&nbsp; →</button>
 
     <div class="content">
       <div class="video-wrap" id="videoWrap">
@@ -281,7 +258,7 @@
           <source src="brand/assets/kawaii-muslim-intro.mp4" type="video/mp4">
         </video>
         <div class="sound-start" id="soundStart">
-          <button id="startWithSound" type="button">Découvrir avec le son&nbsp; ♪</button>
+          <button id="startWithSound" type="button">Entrer dans l’univers avec le son&nbsp; ♪</button>
         </div>
         <div class="fallback-logo" aria-hidden="true">Kawaii Muslim</div>
       </div>
@@ -295,10 +272,7 @@
   <script>
     (() => {
       const destination = "./Bibliotheque%20Kawaii%20Muslim.dc.html";
-      const params = new URLSearchParams(location.search);
-      const forceIntro = params.get("intro") === "1";
       const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const alreadySeen = sessionStorage.getItem("km-intro-seen") === "1";
       const intro = document.getElementById("intro");
       const video = document.getElementById("introVideo");
       const videoWrap = document.getElementById("videoWrap");
@@ -307,20 +281,13 @@
       let leaving = false;
       let safetyTimer;
 
-      if (alreadySeen && !forceIntro) {
-        location.replace(destination);
-        return;
-      }
-
       const enterSite = () => {
         if (leaving) return;
         leaving = true;
-        sessionStorage.setItem("km-intro-seen", "1");
         intro.classList.add("leaving");
         setTimeout(() => location.replace(destination), reducedMotion ? 0 : 390);
       };
 
-      document.getElementById("skip").addEventListener("click", enterSite);
       video.addEventListener("loadedmetadata", () => {
         video.classList.toggle("is-transparent", video.currentSrc.endsWith(".webm"));
       });
@@ -335,22 +302,18 @@
         setTimeout(enterSite, 2100);
       });
 
-      if (reducedMotion && !forceIntro) {
-        setTimeout(enterSite, 250);
-      } else {
+      video.muted = false;
+      video.play().catch(() => {
+        soundStart.classList.add("visible");
+      });
+      startWithSound.addEventListener("click", () => {
         video.muted = false;
+        video.currentTime = 0;
         video.play().catch(() => {
-          soundStart.classList.add("visible");
+          video.muted = true;
+          video.play();
         });
-        startWithSound.addEventListener("click", () => {
-          video.muted = false;
-          video.currentTime = 0;
-          video.play().catch(() => {
-            video.muted = true;
-            video.play();
-          });
-        });
-      }
+      });
     })();
   </script>
 </body>
