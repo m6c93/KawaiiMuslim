@@ -161,6 +161,29 @@
       height: 100%;
       display: block;
       object-fit: contain;
+      mix-blend-mode: screen;
+    }
+
+    .sound-start {
+      position: absolute;
+      z-index: 4;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(21, 26, 62, .28);
+      backdrop-filter: blur(2px);
+    }
+    .sound-start.visible { display: grid; }
+    .sound-start button {
+      cursor: pointer;
+      min-height: 50px;
+      padding: 11px 22px;
+      color: #fff;
+      font-weight: 800;
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(226,127,174,.96), rgba(124,103,196,.96));
+      box-shadow: 0 12px 32px rgba(0,0,0,.24);
     }
 
     .fallback-logo {
@@ -187,7 +210,7 @@
       letter-spacing: .2px;
       opacity: 0;
       transform: translateY(12px);
-      animation: tagline .62s 2.05s ease forwards;
+      animation: tagline .62s 4.6s ease forwards;
     }
     .tagline strong { color: #fae08c; font-weight: 800; }
     .subline {
@@ -198,7 +221,7 @@
       letter-spacing: 1.7px;
       text-transform: uppercase;
       opacity: 0;
-      animation: appear .55s 2.35s ease forwards;
+      animation: appear .55s 4.9s ease forwards;
     }
 
     .loader {
@@ -220,7 +243,7 @@
       border-radius: inherit;
       background: linear-gradient(90deg, var(--pink), var(--gold), var(--sky));
       transform: translateX(-100%);
-      animation: load 3.35s linear forwards;
+      animation: load 10s linear forwards;
     }
 
     @keyframes twinkle { 0%,100% { opacity: .58; } 50% { opacity: 1; } }
@@ -252,9 +275,12 @@
 
     <div class="content">
       <div class="video-wrap" id="videoWrap">
-        <video id="introVideo" autoplay muted playsinline preload="auto" aria-label="Animation du logo Kawaii Muslim">
+        <video id="introVideo" playsinline preload="auto" aria-label="Animation du logo Kawaii Muslim">
           <source src="brand/assets/kawaii-muslim-intro.mp4" type="video/mp4">
         </video>
+        <div class="sound-start" id="soundStart">
+          <button id="startWithSound" type="button">Découvrir avec le son&nbsp; ♪</button>
+        </div>
         <div class="fallback-logo" aria-hidden="true">Kawaii Muslim</div>
       </div>
       <p class="tagline">Grandir, apprendre et se rapprocher <strong>doucement d’Allah</strong>.</p>
@@ -274,7 +300,10 @@
       const intro = document.getElementById("intro");
       const video = document.getElementById("introVideo");
       const videoWrap = document.getElementById("videoWrap");
+      const soundStart = document.getElementById("soundStart");
+      const startWithSound = document.getElementById("startWithSound");
       let leaving = false;
+      let safetyTimer;
 
       if (alreadySeen && !forceIntro) {
         location.replace(destination);
@@ -291,6 +320,11 @@
 
       document.getElementById("skip").addEventListener("click", enterSite);
       video.addEventListener("ended", enterSite);
+      video.addEventListener("playing", () => {
+        soundStart.classList.remove("visible");
+        clearTimeout(safetyTimer);
+        safetyTimer = setTimeout(enterSite, 11000);
+      });
       video.addEventListener("error", () => {
         videoWrap.classList.add("video-failed");
         setTimeout(enterSite, 2100);
@@ -299,11 +333,18 @@
       if (reducedMotion && !forceIntro) {
         setTimeout(enterSite, 250);
       } else {
+        video.muted = false;
         video.play().catch(() => {
-          videoWrap.classList.add("video-failed");
-          setTimeout(enterSite, 2100);
+          soundStart.classList.add("visible");
         });
-        setTimeout(enterSite, 4300);
+        startWithSound.addEventListener("click", () => {
+          video.muted = false;
+          video.currentTime = 0;
+          video.play().catch(() => {
+            video.muted = true;
+            video.play();
+          });
+        });
       }
     })();
   </script>
