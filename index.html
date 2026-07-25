@@ -163,6 +163,7 @@
       object-fit: contain;
       mix-blend-mode: screen;
     }
+    video.is-transparent { mix-blend-mode: normal; }
 
     .sound-start {
       position: absolute;
@@ -276,6 +277,7 @@
     <div class="content">
       <div class="video-wrap" id="videoWrap">
         <video id="introVideo" playsinline preload="auto" aria-label="Animation du logo Kawaii Muslim">
+          <source src="brand/assets/kawaii-muslim-intro.webm" type="video/webm">
           <source src="brand/assets/kawaii-muslim-intro.mp4" type="video/mp4">
         </video>
         <div class="sound-start" id="soundStart">
@@ -319,6 +321,9 @@
       };
 
       document.getElementById("skip").addEventListener("click", enterSite);
+      video.addEventListener("loadedmetadata", () => {
+        video.classList.toggle("is-transparent", video.currentSrc.endsWith(".webm"));
+      });
       video.addEventListener("ended", enterSite);
       video.addEventListener("playing", () => {
         soundStart.classList.remove("visible");
