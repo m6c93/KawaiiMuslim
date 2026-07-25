@@ -1,11 +1,311 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=./Bibliotheque Kawaii Muslim.dc.html">
-<title>Kawaii Muslim</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171b3f">
+  <title>Kawaii Muslim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --night: #151a3e;
+      --night-soft: #222c66;
+      --pink: #e27fae;
+      --gold: #f0b53f;
+      --sky: #8fd2e4;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; min-height: 100%; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      color: #fff;
+      font-family: "Nunito", system-ui, sans-serif;
+      background:
+        radial-gradient(75% 70% at 50% 32%, #35439b 0%, var(--night-soft) 43%, var(--night) 100%);
+    }
+
+    button { font: inherit; }
+
+    .intro {
+      position: relative;
+      isolation: isolate;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      opacity: 1;
+      transition: opacity .42s ease, transform .42s ease;
+    }
+    .intro.leaving { opacity: 0; transform: scale(1.025); }
+
+    .stars, .stars::before, .stars::after {
+      position: absolute;
+      inset: 0;
+      content: "";
+      pointer-events: none;
+      background-repeat: no-repeat;
+    }
+    .stars {
+      opacity: .8;
+      background-image:
+        radial-gradient(1.7px 1.7px at 8% 18%, #fff, transparent),
+        radial-gradient(1.2px 1.2px at 15% 72%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 29% 11%, #ffe6a0, transparent),
+        radial-gradient(1.2px 1.2px at 42% 78%, #fff, transparent),
+        radial-gradient(1.6px 1.6px at 57% 15%, #fff, transparent),
+        radial-gradient(1.3px 1.3px at 69% 66%, #ffe6a0, transparent),
+        radial-gradient(1.7px 1.7px at 86% 24%, #fff, transparent),
+        radial-gradient(1.2px 1.2px at 95% 76%, #fff, transparent);
+      animation: twinkle 3.4s ease-in-out infinite;
+    }
+    .stars::before {
+      opacity: .55;
+      background-image:
+        radial-gradient(2.5px 2.5px at 21% 38%, rgba(240,174,202,.9), transparent),
+        radial-gradient(2px 2px at 35% 88%, rgba(143,210,228,.9), transparent),
+        radial-gradient(2.5px 2.5px at 74% 36%, rgba(240,181,63,.9), transparent),
+        radial-gradient(2px 2px at 91% 57%, rgba(240,174,202,.9), transparent);
+      animation: drift 5s ease-in-out infinite;
+    }
+    .stars::after {
+      left: 50%;
+      top: 50%;
+      width: min(84vw, 900px);
+      height: min(62vw, 620px);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(226,127,174,.12), rgba(143,210,228,.06) 42%, transparent 68%);
+      filter: blur(12px);
+    }
+
+    .moon {
+      position: absolute;
+      top: clamp(26px, 6vw, 58px);
+      right: clamp(28px, 7vw, 92px);
+      width: clamp(44px, 6vw, 70px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #fff9dc, #f7dc84 67%, #dfa943);
+      box-shadow: 0 0 48px rgba(250, 224, 140, .36);
+      opacity: 0;
+      animation: appear .7s .25s ease forwards;
+    }
+    .moon::after {
+      content: "";
+      position: absolute;
+      width: 82%;
+      height: 82%;
+      top: -8%;
+      right: -15%;
+      border-radius: 50%;
+      background: #1c2354;
+    }
+
+    .skip {
+      position: absolute;
+      z-index: 5;
+      top: 22px;
+      right: 22px;
+      cursor: pointer;
+      min-height: 42px;
+      padding: 8px 17px;
+      color: rgba(255,255,255,.84);
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 24px;
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+      transition: color .2s ease, background .2s ease;
+    }
+    .skip:hover { color: #fff; background: rgba(255,255,255,.14); }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      width: min(100%, 1100px);
+      display: grid;
+      justify-items: center;
+      padding: 48px 18px 34px;
+      text-align: center;
+    }
+
+    .video-wrap {
+      position: relative;
+      width: min(92vw, 900px);
+      aspect-ratio: 16 / 9;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 42px;
+      opacity: 0;
+      animation: appear .36s .08s ease forwards;
+      -webkit-mask-image: radial-gradient(ellipse 76% 72% at center, #000 48%, transparent 84%);
+      mask-image: radial-gradient(ellipse 76% 72% at center, #000 48%, transparent 84%);
+    }
+    .video-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 13% 14%;
+      z-index: -1;
+      border-radius: 50%;
+      background: rgba(240,174,202,.15);
+      filter: blur(38px);
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+
+    .fallback-logo {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: center;
+      font-family: "Baloo 2", cursive;
+      font-size: clamp(42px, 10vw, 94px);
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 4px 24px rgba(0,0,0,.3);
+    }
+    .video-failed video { display: none; }
+    .video-failed .fallback-logo { display: grid; }
+
+    .tagline {
+      max-width: 680px;
+      margin: clamp(-26px, -3vw, -10px) 0 0;
+      font-family: "Baloo 2", cursive;
+      font-size: clamp(18px, 3.2vw, 29px);
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: .2px;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: tagline .62s 2.05s ease forwards;
+    }
+    .tagline strong { color: #fae08c; font-weight: 800; }
+    .subline {
+      margin: 8px 0 0;
+      color: #cfd2ec;
+      font-size: clamp(10px, 1.6vw, 13px);
+      font-weight: 800;
+      letter-spacing: 1.7px;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: appear .55s 2.35s ease forwards;
+    }
+
+    .loader {
+      position: absolute;
+      left: 50%;
+      bottom: max(20px, env(safe-area-inset-bottom));
+      width: min(240px, 54vw);
+      height: 3px;
+      overflow: hidden;
+      border-radius: 3px;
+      background: rgba(255,255,255,.12);
+      transform: translateX(-50%);
+    }
+    .loader::after {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--pink), var(--gold), var(--sky));
+      transform: translateX(-100%);
+      animation: load 3.35s linear forwards;
+    }
+
+    @keyframes twinkle { 0%,100% { opacity: .58; } 50% { opacity: 1; } }
+    @keyframes drift { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    @keyframes appear { to { opacity: 1; } }
+    @keyframes tagline { to { opacity: 1; transform: translateY(0); } }
+    @keyframes load { to { transform: translateX(0); } }
+
+    @media (max-width: 640px) {
+      .skip { top: 14px; right: 14px; min-height: 38px; padding: 7px 14px; }
+      .content { padding-top: 62px; }
+      .video-wrap { width: 112vw; border-radius: 22px; }
+      .tagline { width: min(92vw, 520px); margin-top: -3vw; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .video-wrap, .tagline, .subline, .moon { opacity: 1; transform: none; }
+      video { display: none; }
+      .fallback-logo { display: grid; }
+    }
+  </style>
 </head>
 <body>
-<p>Redirection… <a href="./Bibliotheque Kawaii Muslim.dc.html">Clique ici si rien ne se passe</a>.</p>
+  <main class="intro" id="intro">
+    <div class="stars" aria-hidden="true"></div>
+    <div class="moon" aria-hidden="true"></div>
+    <button class="skip" id="skip" type="button">Passer&nbsp; →</button>
+
+    <div class="content">
+      <div class="video-wrap" id="videoWrap">
+        <video id="introVideo" autoplay muted playsinline preload="auto" aria-label="Animation du logo Kawaii Muslim">
+          <source src="brand/assets/kawaii-muslim-intro.mp4" type="video/mp4">
+        </video>
+        <div class="fallback-logo" aria-hidden="true">Kawaii Muslim</div>
+      </div>
+      <p class="tagline">Grandir, apprendre et se rapprocher <strong>doucement d’Allah</strong>.</p>
+      <p class="subline">Bienvenue dans notre univers</p>
+    </div>
+
+    <div class="loader" aria-hidden="true"></div>
+  </main>
+
+  <script>
+    (() => {
+      const destination = "./Bibliotheque%20Kawaii%20Muslim.dc.html";
+      const params = new URLSearchParams(location.search);
+      const forceIntro = params.get("intro") === "1";
+      const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const alreadySeen = sessionStorage.getItem("km-intro-seen") === "1";
+      const intro = document.getElementById("intro");
+      const video = document.getElementById("introVideo");
+      const videoWrap = document.getElementById("videoWrap");
+      let leaving = false;
+
+      if (alreadySeen && !forceIntro) {
+        location.replace(destination);
+        return;
+      }
+
+      const enterSite = () => {
+        if (leaving) return;
+        leaving = true;
+        sessionStorage.setItem("km-intro-seen", "1");
+        intro.classList.add("leaving");
+        setTimeout(() => location.replace(destination), reducedMotion ? 0 : 390);
+      };
+
+      document.getElementById("skip").addEventListener("click", enterSite);
+      video.addEventListener("ended", enterSite);
+      video.addEventListener("error", () => {
+        videoWrap.classList.add("video-failed");
+        setTimeout(enterSite, 2100);
+      });
+
+      if (reducedMotion && !forceIntro) {
+        setTimeout(enterSite, 250);
+      } else {
+        video.play().catch(() => {
+          videoWrap.classList.add("video-failed");
+          setTimeout(enterSite, 2100);
+        });
+        setTimeout(enterSite, 4300);
+      }
+    })();
+  </script>
 </body>
 </html>
