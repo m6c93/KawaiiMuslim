@@ -146,28 +146,6 @@
     }
     video.is-transparent { mix-blend-mode: normal; }
 
-    .sound-start {
-      position: absolute;
-      z-index: 4;
-      inset: 0;
-      display: none;
-      place-items: center;
-      background: rgba(21, 26, 62, .28);
-      backdrop-filter: blur(2px);
-    }
-    .sound-start.visible { display: grid; }
-    .sound-start button {
-      cursor: pointer;
-      min-height: 50px;
-      padding: 11px 22px;
-      color: #fff;
-      font-weight: 800;
-      border: 1px solid rgba(255,255,255,.24);
-      border-radius: 28px;
-      background: linear-gradient(135deg, rgba(226,127,174,.96), rgba(124,103,196,.96));
-      box-shadow: 0 12px 32px rgba(0,0,0,.24);
-    }
-
     .fallback-logo {
       position: absolute;
       inset: 0;
@@ -253,13 +231,10 @@
 
     <div class="content">
       <div class="video-wrap" id="videoWrap">
-        <video id="introVideo" playsinline preload="auto" aria-label="Animation du logo Kawaii Muslim">
+        <video id="introVideo" autoplay muted playsinline preload="auto" aria-label="Animation du logo Kawaii Muslim">
           <source src="brand/assets/kawaii-muslim-intro.webm" type="video/webm">
           <source src="brand/assets/kawaii-muslim-intro.mp4" type="video/mp4">
         </video>
-        <div class="sound-start" id="soundStart">
-          <button id="startWithSound" type="button">Entrer dans l’univers avec le son&nbsp; ♪</button>
-        </div>
         <div class="fallback-logo" aria-hidden="true">Kawaii Muslim</div>
       </div>
       <p class="tagline">Grandir, apprendre et se rapprocher <strong>doucement d’Allah</strong>.</p>
@@ -276,8 +251,6 @@
       const intro = document.getElementById("intro");
       const video = document.getElementById("introVideo");
       const videoWrap = document.getElementById("videoWrap");
-      const soundStart = document.getElementById("soundStart");
-      const startWithSound = document.getElementById("startWithSound");
       let leaving = false;
       let safetyTimer;
 
@@ -293,7 +266,6 @@
       });
       video.addEventListener("ended", enterSite);
       video.addEventListener("playing", () => {
-        soundStart.classList.remove("visible");
         clearTimeout(safetyTimer);
         safetyTimer = setTimeout(enterSite, 11000);
       });
@@ -304,15 +276,8 @@
 
       video.muted = false;
       video.play().catch(() => {
-        soundStart.classList.add("visible");
-      });
-      startWithSound.addEventListener("click", () => {
-        video.muted = false;
-        video.currentTime = 0;
-        video.play().catch(() => {
-          video.muted = true;
-          video.play();
-        });
+        video.muted = true;
+        video.play();
       });
     })();
   </script>
