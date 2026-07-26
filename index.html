@@ -223,7 +223,7 @@
     @keyframes tagline { to { opacity: 1; transform: translateY(0); } }
     @keyframes load { to { transform: translateX(0); } }
 
-    @media (max-width: 1024px) {
+    @media (max-width: 1400px), (hover: none), (pointer: coarse) {
       .intro-animation {
         display: block;
       }
@@ -291,7 +291,7 @@
       const intro = document.getElementById("intro");
       const video = document.getElementById("introVideo");
       const videoWrap = document.getElementById("videoWrap");
-      const tabletMode = matchMedia("(max-width: 1024px)").matches;
+      const tabletMode = matchMedia("(max-width: 1400px), (hover: none), (pointer: coarse)").matches;
       let leaving = false;
       let safetyTimer;
 
