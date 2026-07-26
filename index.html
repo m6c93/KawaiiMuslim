@@ -143,6 +143,8 @@
       height: 100%;
       display: block;
       object-fit: contain;
+      object-position: center center;
+      background: transparent;
       mix-blend-mode: screen;
     }
     video.is-transparent { mix-blend-mode: normal; }
@@ -213,9 +215,30 @@
     @keyframes tagline { to { opacity: 1; transform: translateY(0); } }
     @keyframes load { to { transform: translateX(0); } }
 
+    @media (max-width: 1024px) {
+      video,
+      video.is-transparent {
+        mix-blend-mode: screen;
+      }
+      .video-wrap {
+        width: min(96vw, 760px);
+        margin-inline: auto;
+        background: transparent;
+      }
+    }
+
     @media (max-width: 640px) {
-      .content { padding-top: 62px; }
-      .video-wrap { width: 112vw; border-radius: 22px; }
+      .content {
+        width: 100%;
+        padding: clamp(44px, 8svh, 62px) 0 30px;
+      }
+      .video-wrap {
+        width: min(96vw, 560px);
+        max-width: 100%;
+        margin-inline: auto;
+        border-radius: 22px;
+        transform: translateX(0);
+      }
       .tagline { width: min(92vw, 520px); margin-top: -3vw; }
     }
 
