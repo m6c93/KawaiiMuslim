@@ -154,6 +154,21 @@
     .brand .t small{display:none}
     .book{width:min(96vw, 170vh, 1480px)}
   }
+  @media (orientation:landscape) and (max-height:520px) and (max-width:980px){
+    .topbar{
+      flex:0 0 auto;
+      min-height:58px;
+      padding:max(10px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) 8px max(18px, env(safe-area-inset-left));
+      position:relative;
+      z-index:60;
+    }
+    [data-km-back]{margin-right:18px !important;flex:0 0 auto}
+    .stage{
+      padding:12px max(10px, env(safe-area-inset-right)) 4px max(10px, env(safe-area-inset-left));
+    }
+    .book{width:min(80vw, 138vh, 1480px)}
+    .book.single{width:min(70vw, 70vh, 720px)}
+  }
   @media (max-width:760px) and (orientation:portrait){ .rotate-hint{display:flex} }
   @media (prefers-reduced-motion:reduce){ .stars,.hint{animation:none} }
 </style>
