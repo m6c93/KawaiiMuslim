@@ -15,7 +15,7 @@ html {
   width: 100%;
   max-width: 100%;
   min-height: 100%;
-  background: #0e1330;
+  background: #141a3c;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-behavior: smooth;
@@ -31,7 +31,7 @@ body {
 }
 
 body.km-library {
-  background: #0e1330;
+  background: #141a3c;
   min-height: 100vh;
   min-height: 100dvh;
 }
@@ -315,7 +315,7 @@ a, button, [role="button"], [onclick], [onClick] {
     min-width: 100%;
     min-height: 100%;
     min-height: 100dvh;
-    background: #0e1330 !important;
+    background: #141a3c !important;
     overflow-x: clip;
   }
 
@@ -331,7 +331,7 @@ a, button, [role="button"], [onclick], [onClick] {
   .km-library #dc-root {
     min-height: 100vh !important;
     min-height: 100dvh !important;
-    background: #0e1330 !important;
+    background: #141a3c !important;
   }
 
   .km-library [style*="padding: 20px 30px"] {
