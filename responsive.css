@@ -433,7 +433,7 @@ a, button, [role="button"], [onclick], [onClick] {
     padding: 24px 16px !important;
   }
 
-  .km-library [style*="display: flex; gap: 26px"] {
+  .km-library .km-profile-choices {
     width: 100% !important;
     max-width: 360px !important;
     flex-direction: row !important;
@@ -441,12 +441,12 @@ a, button, [role="button"], [onclick], [onClick] {
     justify-content: center !important;
   }
 
-  .km-library [style*="width: 240px"] {
+  .km-library .km-profile-card {
     width: calc(50% - 6px) !important;
     padding: 18px 10px !important;
   }
 
-  .km-library [style*="width: 104px"][style*="height: 104px"] {
+  .km-library .km-profile-card > div {
     width: 78px !important;
     height: 78px !important;
     margin-bottom: 12px !important;
