@@ -91,6 +91,15 @@ a, button, [role="button"], [onclick], [onClick] {
   min-height: 100dvh !important;
 }
 
+/* Le lecteur transforme parfois <x-dc> en #dc-root sur le site publié. */
+.km-library #dc-root,
+.km-library #dc-root > .sc-host,
+.km-library #dc-root > .sc-host > div,
+.km-library #dc-root > .sc-host > div > div {
+  width: 100% !important;
+  max-width: none !important;
+}
+
 @media (max-width: 820px) {
   .km-library x-dc > div { height: auto !important; }
 
@@ -285,6 +294,36 @@ a, button, [role="button"], [onclick], [onClick] {
   .km-library [style*="padding:20px 24px"],
   .km-landing [style*="padding:60px"] {
     padding: 18px !important;
+  }
+}
+
+/* Plein écran bord à bord sur les téléphones tournés en paysage. */
+@media (orientation: landscape) and (max-height: 520px) and (max-width: 980px) {
+  html,
+  body.km-library {
+    width: 100%;
+    min-width: 100%;
+    min-height: 100dvh;
+    background: #141a3c;
+  }
+
+  .km-library #dc-root,
+  .km-library #dc-root > .sc-host,
+  .km-library #dc-root > .sc-host > div,
+  .km-library #dc-root > .sc-host > div > div {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  .km-library [style*="padding: 20px 30px"] {
+    padding-left: max(18px, env(safe-area-inset-left)) !important;
+    padding-right: max(18px, env(safe-area-inset-right)) !important;
+  }
+
+  .km-library [style*="height: calc(100% - 86px)"] {
+    padding-left: max(18px, env(safe-area-inset-left)) !important;
+    padding-right: max(18px, env(safe-area-inset-right)) !important;
   }
 }
 
