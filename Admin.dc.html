@@ -508,6 +508,10 @@
       if (!selectedColoringFile && currentUrl.includes("/content-colorings/")) {
         storedColoringUrlToDelete = currentUrl;
         $("#contentUrl").value = "";
+        if ($("#contentCover").value.includes("/content-colorings/")) {
+          $("#contentCover").value = "";
+          $("#contentCoverPreview").hidden = true;
+        }
       }
       selectedColoringFile = null;
       $("#contentColoringFile").value = "";
