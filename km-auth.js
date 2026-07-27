@@ -327,6 +327,29 @@ window.KMAuth = (() => {
       return publicUrl.data.publicUrl;
     },
 
+    uploadBook: async file => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      if (!file) throw new Error("Choisis le fichier PDF du livre.");
+      const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+      if (!isPdf) throw new Error("Le fichier du livre doit être un PDF.");
+      if (file.size > 50 * 1024 * 1024) {
+        throw new Error("Le PDF doit peser moins de 50 Mo.");
+      }
+      const safeName = file.name.replace(/\.pdf$/i, "").normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "").toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80) || "livre";
+      const path = `${session.user.id}/${Date.now()}-${safeName}.pdf`;
+      const uploaded = await client().storage.from("content-books").upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: "application/pdf"
+      });
+      requireSuccess(uploaded);
+      const publicUrl = client().storage.from("content-books").getPublicUrl(path);
+      return publicUrl.data.publicUrl;
+    },
+
     listTickets: async () => {
       return requireSuccess(await client().from("support_tickets")
         .select("id,requester_id,subject,category,message,status,priority,staff_note,assigned_to,created_at,updated_at")

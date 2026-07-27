@@ -96,7 +96,17 @@
               <label>Public<select class="admin-select" id="contentAudience"><option value="famille">Famille</option><option value="maman">Maman</option><option value="enfant">Enfant</option></select></label>
               <label>Statut<select class="admin-select" id="contentStatus"><option value="draft">Brouillon</option><option value="published">Publié</option><option value="archived">Archivé</option></select></label>
               <label class="wide">Description<textarea class="admin-textarea" id="contentDescription" maxlength="600" required placeholder="Présente le livre en quelques phrases…"></textarea></label>
-              <label class="wide">Lien de lecture <small>(facultatif)</small><input class="admin-input" id="contentUrl" placeholder="Laisse vide si le livre arrive bientôt"></label>
+              <div class="admin-book-upload">
+                <label for="contentBookFile">Fichier du livre</label>
+                <input id="contentBookFile" type="file" accept="application/pdf,.pdf">
+                <small>Choisis ton PDF · 50 Mo maximum. La page de lecture sera créée automatiquement.</small>
+                <div class="admin-file-preview" id="contentBookPreview" hidden>
+                  <span aria-hidden="true">📘</span>
+                  <strong id="contentBookName"></strong>
+                  <button class="admin-button secondary" id="removeBookFile" type="button">Retirer</button>
+                </div>
+              </div>
+              <label class="wide">Lien de lecture <small>(option avancée)</small><input class="admin-input" id="contentUrl" placeholder="Créé automatiquement quand tu choisis un PDF"></label>
               <div class="admin-cover-upload">
                 <label for="contentCoverFile">Image de couverture</label>
                 <input id="contentCoverFile" type="file" accept="image/jpeg,image/png,image/webp">
@@ -217,6 +227,7 @@
     let pendingCriticalAction = null;
     let selectedCoverFile = null;
     let coverObjectUrl = null;
+    let selectedBookFile = null;
 
     const permissions = () => ({
       families: ["admin", "support"].includes(state.context.profile.role),
@@ -335,6 +346,10 @@
       $("#contentForm").reset(); $("#contentId").value = ""; $("#contentOrder").value = "0";
       $("#contentCover").value = "";
       selectedCoverFile = null;
+      selectedBookFile = null;
+      $("#contentBookFile").value = "";
+      $("#contentBookPreview").hidden = true;
+      $("#contentBookName").textContent = "";
       if (coverObjectUrl) URL.revokeObjectURL(coverObjectUrl);
       coverObjectUrl = null;
       $("#contentCoverPreview").hidden = true;
@@ -417,6 +432,21 @@
       if (coverObjectUrl) URL.revokeObjectURL(coverObjectUrl);
       coverObjectUrl = null; $("#contentCoverPreview").hidden = true;
     });
+    $("#contentBookFile").addEventListener("change", event => {
+      const file = event.target.files?.[0] || null;
+      selectedBookFile = file;
+      $("#contentBookPreview").hidden = !file;
+      $("#contentBookName").textContent = file
+        ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} Mo`
+        : "";
+      if (file) $("#contentUrl").value = "";
+    });
+    $("#removeBookFile").addEventListener("click", () => {
+      selectedBookFile = null;
+      $("#contentBookFile").value = "";
+      $("#contentBookPreview").hidden = true;
+      $("#contentBookName").textContent = "";
+    });
 
     const handleFamilyAction = event => {
       const planButton = event.target.closest("[data-family-plan]");
@@ -449,16 +479,21 @@
           throw new Error("Choisis l’image de couverture du livre.");
         }
         saveButton.disabled = true;
-        saveButton.textContent = selectedCoverFile ? "Envoi de l’image…" : "Enregistrement…";
+        saveButton.textContent = selectedBookFile ? "Création du livre…" : selectedCoverFile ? "Envoi de l’image…" : "Enregistrement…";
         let coverUrl = $("#contentCover").value;
         if (selectedCoverFile) coverUrl = await KMAuth.uploadCover(selectedCoverFile);
+        let contentUrl = $("#contentUrl").value.trim();
+        if (selectedBookFile) {
+          const pdfUrl = await KMAuth.uploadBook(selectedBookFile);
+          contentUrl = `Livre.dc.html?src=${encodeURIComponent(pdfUrl)}&title=${encodeURIComponent($("#contentTitle").value.trim())}`;
+        }
         await KMAuth.saveContent({
           id: $("#contentId").value, title: $("#contentTitle").value, slug: $("#contentSlug").value,
           content_type: $("#contentType").value, audience: $("#contentAudience").value,
           status: $("#contentStatus").value, description: $("#contentDescription").value,
-          url: $("#contentUrl").value, cover_url: coverUrl, sort_order: $("#contentOrder").value
+          url: contentUrl, cover_url: coverUrl, sort_order: $("#contentOrder").value
         });
-        resetContentForm(); await refreshData(); showMessage("Contenu enregistré.", true);
+        resetContentForm(); await refreshData(); showMessage("Livre créé et enregistré.", true);
       } catch (error) { showMessage(KMAuth.friendlyError(error)); }
       finally { saveButton.disabled = false; saveButton.textContent = "Enregistrer le livre"; }
     });
@@ -473,6 +508,9 @@
         $("#contentDescription").value = item.description; $("#contentUrl").value = item.url; $("#contentCover").value = item.cover_url;
         $("#contentOrder").value = item.sort_order; $("#contentFormTitle").textContent = "Modifier le contenu";
         selectedCoverFile = null; $("#contentCoverFile").value = "";
+        selectedBookFile = null; $("#contentBookFile").value = "";
+        $("#contentBookPreview").hidden = !item.url;
+        $("#contentBookName").textContent = item.url ? "Livre actuellement enregistré" : "";
         if (item.cover_url) showCoverPreview(item.cover_url, "Couverture actuellement enregistrée");
         else $("#contentCoverPreview").hidden = true;
       }

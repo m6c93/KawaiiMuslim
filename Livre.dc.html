@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#211e56">
+  <title>Lecture — Kawaii Muslim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: light; --night:#211e56; --ink:#34325f; --pink:#ef9fc3; --paper:#f7f4fb; }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--night); }
+    body { font-family: "Nunito", sans-serif; }
+    .reader { height: 100dvh; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+    .reader-bar {
+      position: relative; z-index: 2; display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center; gap: 12px; min-height: 68px;
+      padding: calc(10px + env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 10px max(14px, env(safe-area-inset-left));
+      color: #fff; background: linear-gradient(135deg, #211e56, #3d3679);
+      box-shadow: 0 8px 28px rgba(17,15,51,.25);
+    }
+    .reader-home, .reader-download {
+      min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 9px 14px; border: 1px solid rgba(255,255,255,.2); border-radius: 14px;
+      color: #fff; background: rgba(255,255,255,.11); text-decoration: none; font-weight: 900;
+    }
+    .reader-download { background: linear-gradient(135deg, #ef9fc3, #db79aa); border-color: transparent; }
+    .reader-title { min-width: 0; text-align: center; }
+    .reader-title strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 800 clamp(16px,3vw,22px)/1.1 "Baloo 2", cursive; }
+    .reader-title small { color: #d6d3ed; }
+    .reader-frame { width: 100%; height: 100%; border: 0; background: var(--paper); }
+    .reader-error { display: none; place-items: center; padding: 24px; text-align: center; color: var(--ink); background: var(--paper); }
+    .reader-error.show { display: grid; }
+    .reader-error h1 { font: 800 28px "Baloo 2", cursive; }
+    @media (max-width: 620px) {
+      .reader-bar { grid-template-columns: auto minmax(0, 1fr); }
+      .reader-download { grid-column: 1 / -1; min-height: 38px; padding: 7px 12px; }
+      .reader-home span:last-child { display: none; }
+      .reader-title { text-align: left; }
+    }
+    @media (max-height: 500px) and (orientation: landscape) {
+      .reader-bar { min-height: 52px; padding-top: max(6px, env(safe-area-inset-top)); padding-bottom: 6px; }
+      .reader-title small { display: none; }
+      .reader-home, .reader-download { min-height: 36px; padding: 6px 11px; }
+      .reader-download { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="reader">
+    <header class="reader-bar">
+      <a class="reader-home" href="Bibliotheque%20Kawaii%20Muslim.dc.html" aria-label="Retour à la bibliothèque"><span aria-hidden="true">⌂</span><span>Bibliothèque</span></a>
+      <div class="reader-title"><strong id="bookTitle">Mon livre</strong><small>Kawaii Muslim</small></div>
+      <a class="reader-download" id="downloadBook" href="#" target="_blank" rel="noopener">Ouvrir le PDF</a>
+    </header>
+    <iframe class="reader-frame" id="bookFrame" title="Livre au format PDF"></iframe>
+    <section class="reader-error" id="readerError">
+      <div><h1>Ce livre n’est pas disponible</h1><p>Retourne dans la bibliothèque et réessaie.</p></div>
+    </section>
+  </main>
+  <script>
+    (() => {
+      const params = new URLSearchParams(location.search);
+      const source = params.get("src") || "";
+      const title = (params.get("title") || "Mon livre").slice(0, 160);
+      const allowedHost = "pasgxojzybmvbjhuokkk.supabase.co";
+      let sourceUrl;
+      try {
+        sourceUrl = new URL(source);
+        const valid = sourceUrl.protocol === "https:"
+          && sourceUrl.hostname === allowedHost
+          && sourceUrl.pathname.startsWith("/storage/v1/object/public/content-books/")
+          && sourceUrl.pathname.toLowerCase().endsWith(".pdf");
+        if (!valid) throw new Error("Adresse non autorisée");
+        document.title = `${title} — Kawaii Muslim`;
+        document.getElementById("bookTitle").textContent = title;
+        document.getElementById("bookFrame").src = `${sourceUrl.href}#view=FitH`;
+        document.getElementById("downloadBook").href = sourceUrl.href;
+      } catch (error) {
+        document.getElementById("bookFrame").remove();
+        document.getElementById("downloadBook").hidden = true;
+        document.getElementById("readerError").classList.add("show");
+      }
+    })();
+  </script>
+</body>
+</html>
