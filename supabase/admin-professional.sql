@@ -499,6 +499,51 @@ values
   ('announcement', '', 'Message important affichable dans l’univers Kawaii Muslim')
 on conflict (key) do nothing;
 
+-- Couvertures envoyées depuis l’administration.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'content-covers',
+  'content-covers',
+  true,
+  5242880,
+  array['image/jpeg', 'image/png', 'image/webp']
+)
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "content_covers_staff_insert" on storage.objects;
+create policy "content_covers_staff_insert"
+  on storage.objects for insert
+  to authenticated
+  with check (
+    bucket_id = 'content-covers'
+    and public.can_manage_content()
+  );
+
+drop policy if exists "content_covers_staff_update" on storage.objects;
+create policy "content_covers_staff_update"
+  on storage.objects for update
+  to authenticated
+  using (
+    bucket_id = 'content-covers'
+    and public.can_manage_content()
+  )
+  with check (
+    bucket_id = 'content-covers'
+    and public.can_manage_content()
+  );
+
+drop policy if exists "content_covers_staff_delete" on storage.objects;
+create policy "content_covers_staff_delete"
+  on storage.objects for delete
+  to authenticated
+  using (
+    bucket_id = 'content-covers'
+    and public.can_manage_content()
+  );
+
 revoke all on function public.write_admin_log(text, text, text, jsonb) from public, anon, authenticated;
 revoke all on function public.audit_managed_change() from public, anon, authenticated;
 revoke all on function public.audit_setting_change() from public, anon, authenticated;
