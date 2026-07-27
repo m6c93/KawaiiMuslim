@@ -83,6 +83,7 @@ create trigger on_auth_user_created
 create or replace function public.touch_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();
@@ -212,9 +213,20 @@ end;
 $$;
 
 revoke all on function public.admin_set_user_status(uuid, boolean) from public;
+revoke all on function public.admin_set_user_status(uuid, boolean) from anon;
 grant execute on function public.admin_set_user_status(uuid, boolean) to authenticated;
 revoke all on function public.admin_set_user_role(uuid, text) from public;
+revoke all on function public.admin_set_user_role(uuid, text) from anon;
 grant execute on function public.admin_set_user_role(uuid, text) to authenticated;
+
+-- Les fonctions utilisées uniquement par les triggers ne sont jamais exposées
+-- aux visiteurs ni aux membres connectés.
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+revoke all on function public.touch_updated_at() from public, anon, authenticated;
+
+-- Cette vérification est nécessaire aux politiques RLS, mais pas aux visiteurs.
+revoke all on function public.is_admin() from public, anon;
+grant execute on function public.is_admin() to authenticated;
 
 -- Après avoir créé ton propre compte sur le site, remplace l’adresse ci-dessous
 -- puis exécute uniquement ces deux lignes pour activer ton tableau de bord :
