@@ -228,6 +228,7 @@
     let selectedCoverFile = null;
     let coverObjectUrl = null;
     let selectedBookFile = null;
+    let storedBookUrlToDelete = "";
 
     const permissions = () => ({
       families: ["admin", "support"].includes(state.context.profile.role),
@@ -347,6 +348,7 @@
       $("#contentCover").value = "";
       selectedCoverFile = null;
       selectedBookFile = null;
+      storedBookUrlToDelete = "";
       $("#contentBookFile").value = "";
       $("#contentBookPreview").hidden = true;
       $("#contentBookName").textContent = "";
@@ -439,9 +441,18 @@
       $("#contentBookName").textContent = file
         ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} Mo`
         : "";
-      if (file) $("#contentUrl").value = "";
+      if (file) {
+        const currentUrl = $("#contentUrl").value.trim();
+        if (currentUrl.includes("/content-books/")) storedBookUrlToDelete = currentUrl;
+        $("#contentUrl").value = "";
+      }
     });
     $("#removeBookFile").addEventListener("click", () => {
+      const currentUrl = $("#contentUrl").value.trim();
+      if (!selectedBookFile && currentUrl.includes("/content-books/")) {
+        storedBookUrlToDelete = currentUrl;
+        $("#contentUrl").value = "";
+      }
       selectedBookFile = null;
       $("#contentBookFile").value = "";
       $("#contentBookPreview").hidden = true;
@@ -493,6 +504,9 @@
           status: $("#contentStatus").value, description: $("#contentDescription").value,
           url: contentUrl, cover_url: coverUrl, sort_order: $("#contentOrder").value
         });
+        if (storedBookUrlToDelete && storedBookUrlToDelete !== contentUrl) {
+          await KMAuth.deleteBook(storedBookUrlToDelete);
+        }
         resetContentForm(); await refreshData(); showMessage("Livre créé et enregistré.", true);
       } catch (error) { showMessage(KMAuth.friendlyError(error)); }
       finally { saveButton.disabled = false; saveButton.textContent = "Enregistrer le livre"; }
@@ -509,6 +523,7 @@
         $("#contentOrder").value = item.sort_order; $("#contentFormTitle").textContent = "Modifier le contenu";
         selectedCoverFile = null; $("#contentCoverFile").value = "";
         selectedBookFile = null; $("#contentBookFile").value = "";
+        storedBookUrlToDelete = "";
         $("#contentBookPreview").hidden = !item.url;
         $("#contentBookName").textContent = item.url ? "Livre actuellement enregistré" : "";
         if (item.cover_url) showCoverPreview(item.cover_url, "Couverture actuellement enregistrée");
