@@ -290,6 +290,50 @@ create trigger audit_content_changes
   after insert or update or delete on public.content_items
   for each row execute procedure public.audit_managed_change();
 
+create or replace function public.audit_setting_change()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  perform public.write_admin_log(
+    'update_setting',
+    'site_setting',
+    new.key,
+    jsonb_build_object('key', new.key)
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists audit_setting_changes on public.site_settings;
+create trigger audit_setting_changes
+  after insert or update on public.site_settings
+  for each row execute procedure public.audit_setting_change();
+
+create or replace function public.staff_log_export(export_type text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not (
+    public.can_manage_families()
+    or public.can_manage_content()
+    or public.can_manage_support()
+  ) then
+    raise exception 'Accès équipe requis';
+  end if;
+  perform public.write_admin_log(
+    'export_data',
+    'export',
+    left(coalesce(export_type, 'unknown'), 80)
+  );
+end;
+$$;
+
 create or replace function public.staff_list_families()
 returns table (
   id uuid,
@@ -457,6 +501,9 @@ on conflict (key) do nothing;
 
 revoke all on function public.write_admin_log(text, text, text, jsonb) from public, anon, authenticated;
 revoke all on function public.audit_managed_change() from public, anon, authenticated;
+revoke all on function public.audit_setting_change() from public, anon, authenticated;
+revoke all on function public.staff_log_export(text) from public, anon;
+grant execute on function public.staff_log_export(text) to authenticated;
 revoke all on function public.staff_list_families() from public, anon;
 grant execute on function public.staff_list_families() to authenticated;
 revoke all on function public.admin_set_user_status(uuid, boolean) from public, anon;
