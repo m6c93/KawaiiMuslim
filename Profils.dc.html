@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#20285e">
+  <title>Choisir mon profil — Kawaii Muslim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./responsive.css">
+  <link rel="stylesheet" href="./account.css">
+</head>
+<body>
+  <div class="account-shell">
+    <nav class="account-nav">
+      <a class="account-brand" href="Bibliotheque%20Kawaii%20Muslim.dc.html">
+        <img src="brand/assets/mascot-nour.png" alt="Mimi">
+        <strong>Kawaii Muslim</strong>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" href="Compte.dc.html">⚙️ <span>Mon compte</span></a>
+        <button class="ghost-button" id="logout" type="button">Déconnexion</button>
+      </div>
+    </nav>
+
+    <main class="dashboard">
+      <header class="page-head">
+        <div>
+          <h1 class="page-title">Qui utilise Kawaii Muslim ?</h1>
+          <p>Choisis ton espace. Chaque profil garde sa propre progression.</p>
+        </div>
+        <span class="badge">Espace familial sécurisé</span>
+      </header>
+
+      <div class="mode-grid" id="profiles">
+        <p class="loading">Chargement de ta famille…</p>
+      </div>
+      <p class="form-message" id="message"></p>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./km-config.js"></script>
+  <script src="./km-auth.js"></script>
+  <script>
+    const profiles = document.getElementById("profiles");
+    const message = document.getElementById("message");
+
+    const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+    })[character]);
+
+    const choose = (selection, target = "Bibliotheque%20Kawaii%20Muslim.dc.html") => {
+      KMAuth.setActiveProfile(selection);
+      window.location.href = target;
+    };
+
+    KMAuth.getContext().then(context => {
+      if (!context) {
+        window.location.href = "Connexion.dc.html";
+        return;
+      }
+      const cards = [{
+        type: "parent",
+        id: null,
+        name: context.profile.full_name || "Espace parent",
+        avatar: context.profile.avatar || "🌸",
+        label: "Compte parent"
+      }, ...context.children.map(child => ({
+        type: "child",
+        id: child.id,
+        name: child.name,
+        avatar: child.avatar,
+        label: `Profil enfant · ${child.age_group} ans`
+      }))];
+
+      profiles.innerHTML = cards.map(card => `
+        <button class="mode-card" type="button"
+          data-type="${card.type}" data-id="${card.id || ""}"
+          data-name="${escapeHtml(card.name)}" data-avatar="${escapeHtml(card.avatar)}">
+          <span class="profile-avatar">${escapeHtml(card.avatar)}</span>
+          <strong>${escapeHtml(card.name)}</strong>
+          <small>${escapeHtml(card.label)}</small>
+        </button>
+      `).join("") + (context.profile.role === "admin" ? `
+        <button class="mode-card" type="button" data-admin="true">
+          <span class="profile-avatar">🛡️</span>
+          <strong>Administration</strong>
+          <small>Gérer Kawaii Muslim</small>
+        </button>
+      ` : "");
+    }).catch(error => {
+      message.textContent = KMAuth.friendlyError(error);
+      profiles.innerHTML = "";
+    });
+
+    profiles.addEventListener("click", event => {
+      const card = event.target.closest(".mode-card");
+      if (!card) return;
+      if (card.dataset.admin) {
+        window.location.href = "Admin.dc.html";
+        return;
+      }
+      choose({
+        type: card.dataset.type,
+        id: card.dataset.id || null,
+        name: card.dataset.name,
+        avatar: card.dataset.avatar
+      });
+    });
+
+    document.getElementById("logout").addEventListener("click", async () => {
+      await KMAuth.logout();
+      window.location.href = "Connexion.dc.html";
+    });
+  </script>
+</body>
+</html>

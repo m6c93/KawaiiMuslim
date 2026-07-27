@@ -1,94 +1,196 @@
-/* ============================================================
-   Kawaii Muslim — moteur de comptes (MODE DÉMO)
-   ------------------------------------------------------------
-   Ce fichier fait "comme si" pour que le site fonctionne tout
-   de suite, SANS serveur : les comptes sont stockés dans le
-   navigateur (localStorage).
+/* Kawaii Muslim — authentification Supabase sécurisée */
+window.KMAuth = (() => {
+  const ACTIVE_PROFILE_KEY = "km-active-profile-v2";
+  let clientInstance = null;
 
-   ⚠️  POUR LA VRAIE MISE EN LIGNE : remplace le contenu des
-   fonctions marquées « BRANCHEMENT » par des appels à Supabase
-   (comptes + base de données) et Stripe (paiement). Les endroits
-   exacts sont indiqués par des commentaires « === BRANCHEMENT ... ».
-   La logique du site (les pages) n'aura pas besoin de changer.
-   ============================================================ */
-window.KMAuth = (function () {
-  var KEY = 'km_user';
+  const client = () => {
+    if (clientInstance) return clientInstance;
+    const config = window.KM_CONFIG || {};
+    if (!window.supabase?.createClient || !config.supabaseUrl || !config.supabaseAnonKey) {
+      throw new Error("Le service de connexion n’est pas encore configuré.");
+    }
+    clientInstance = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
+    return clientInstance;
+  };
 
-  function read() {
-    try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; }
-  }
-  function write(u) { localStorage.setItem(KEY, JSON.stringify(u)); return u; }
+  const friendlyError = error => {
+    const message = String(error?.message || error || "");
+    if (/invalid login/i.test(message)) return "E-mail ou mot de passe incorrect.";
+    if (/already registered|already been registered/i.test(message)) return "Un compte existe déjà avec cet e-mail.";
+    if (/password/i.test(message) && /6 characters/i.test(message)) return "Le mot de passe doit contenir au moins 8 caractères.";
+    if (/email rate limit/i.test(message)) return "Trop d’e-mails ont été envoyés. Réessaie dans quelques minutes.";
+    if (/network|fetch/i.test(message)) return "Connexion impossible. Vérifie internet puis réessaie.";
+    return message || "Une erreur est survenue. Réessaie doucement.";
+  };
 
-  function freshUser(email, name, plan) {
-    return {
-      name: name || '',
-      email: email,
-      plan: plan || 'annuel',           // 'mensuel' | 'annuel'
-      trialStart: Date.now(),           // début de l'essai gratuit
-      subscribed: true,                 // essai actif = accès complet
-      children: [{ id: 1, name: 'Aya', emoji: '🐤' }],
-    };
-  }
+  const requireSuccess = result => {
+    if (result?.error) throw new Error(friendlyError(result.error));
+    return result?.data;
+  };
+
+  const getSession = async () => {
+    const data = requireSuccess(await client().auth.getSession());
+    return data.session || null;
+  };
+
+  const getProfile = async userId => {
+    const result = await client().from("profiles").select("*").eq("id", userId).single();
+    return requireSuccess(result);
+  };
+
+  const getChildren = async parentId => {
+    const result = await client()
+      .from("child_profiles")
+      .select("*")
+      .eq("parent_id", parentId)
+      .order("created_at", { ascending: true });
+    return requireSuccess(result) || [];
+  };
+
+  const getContext = async () => {
+    const session = await getSession();
+    if (!session) return null;
+    const profile = await getProfile(session.user.id);
+    if (!profile.is_active) {
+      await client().auth.signOut();
+      throw new Error("Ce compte est actuellement désactivé. Contacte Kawaii Muslim.");
+    }
+    const children = await getChildren(session.user.id);
+    return { session, user: session.user, profile, children };
+  };
+
+  const setActiveProfile = selection => {
+    const clean = selection?.type === "child"
+      ? { type: "child", id: String(selection.id), name: String(selection.name || ""), avatar: String(selection.avatar || "🐤") }
+      : { type: "parent", id: null, name: String(selection?.name || ""), avatar: String(selection?.avatar || "🌸") };
+    localStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(clean));
+    return clean;
+  };
+
+  const getActiveProfile = () => {
+    try {
+      return JSON.parse(localStorage.getItem(ACTIVE_PROFILE_KEY)) || { type: "parent", id: null };
+    } catch {
+      return { type: "parent", id: null };
+    }
+  };
+
+  const validateActiveProfile = context => {
+    const active = getActiveProfile();
+    if (active.type !== "child") {
+      return setActiveProfile({
+        type: "parent",
+        name: context.profile.full_name,
+        avatar: context.profile.avatar
+      });
+    }
+    const child = context.children.find(item => item.id === active.id);
+    if (!child) {
+      return setActiveProfile({
+        type: "parent",
+        name: context.profile.full_name,
+        avatar: context.profile.avatar
+      });
+    }
+    return setActiveProfile({ type: "child", ...child });
+  };
 
   return {
-    getUser: read,
-    isLoggedIn: function () { return !!read(); },
+    client,
+    friendlyError,
+    getSession,
+    getContext,
+    getActiveProfile,
+    validateActiveProfile,
+    setActiveProfile,
 
-    /* Inscription -------------------------------------------------- */
-    signup: function (opts) {
-      opts = opts || {};
-      // === BRANCHEMENT SUPABASE + STRIPE ===========================
-      // 1) créer le compte :        supabase.auth.signUp({email, password})
-      // 2) créer l'abonnement :      redirection vers Stripe Checkout
-      //    (prix mensuel 6,99€ ou annuel 59€, essai de 7 jours)
-      // 3) stocker le profil en base (table "profiles")
-      // -------------------------------------------------------------
-      return write(freshUser(opts.email, opts.name, opts.plan));
-    },
-
-    /* Connexion ---------------------------------------------------- */
-    login: function (opts) {
-      opts = opts || {};
-      // === BRANCHEMENT SUPABASE ====================================
-      //    supabase.auth.signInWithPassword({email, password})
-      //    puis charger le profil + l'état d'abonnement depuis la base
-      // -------------------------------------------------------------
-      var u = read();
-      if (!u) u = freshUser(opts.email, '', 'annuel');
-      u.email = opts.email;
-      return write(u);
+    signup: async ({ name, email, password }) => {
+      const data = requireSuccess(await client().auth.signUp({
+        email: email.trim().toLowerCase(),
+        password,
+        options: {
+          data: { full_name: name.trim() },
+          emailRedirectTo: `${window.location.origin}/Profils.dc.html`
+        }
+      }));
+      return data;
     },
 
-    /* Déconnexion -------------------------------------------------- */
-    logout: function () {
-      // === BRANCHEMENT SUPABASE : supabase.auth.signOut() ==========
-      localStorage.removeItem(KEY);
+    login: async ({ email, password }) => {
+      return requireSuccess(await client().auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password
+      }));
     },
 
-    /* Abonnement --------------------------------------------------- */
-    setPlan: function (plan) { var u = read(); if (u) { u.plan = plan; write(u); } return u; },
-    cancel: function () {
-      // === BRANCHEMENT STRIPE : annuler l'abonnement ===============
-      var u = read(); if (u) { u.subscribed = false; write(u); } return u;
+    logout: async () => {
+      localStorage.removeItem(ACTIVE_PROFILE_KEY);
+      requireSuccess(await client().auth.signOut());
     },
-    resume: function () {
-      // === BRANCHEMENT STRIPE : réactiver l'abonnement =============
-      var u = read(); if (u) { u.subscribed = true; write(u); } return u;
-    },
-    isSubscribed: function () { var u = read(); return !!(u && u.subscribed); },
 
-    /* Profils enfants --------------------------------------------- */
-    getChildren: function () { var u = read(); return (u && u.children) || []; },
-    addChild: function (name, emoji) {
-      var u = read(); if (!u) return null;
-      u.children = u.children || [];
-      u.children.push({ id: Date.now(), name: name || 'Nouvel enfant', emoji: emoji || '🧒' });
-      return write(u);
+    resetPassword: async email => {
+      return requireSuccess(await client().auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+        redirectTo: `${window.location.origin}/Connexion.dc.html?reset=1`
+      }));
     },
-    removeChild: function (id) {
-      var u = read(); if (!u) return null;
-      u.children = (u.children || []).filter(function (c) { return c.id !== id; });
-      return write(u);
+
+    updateParent: async ({ fullName, avatar }) => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      return requireSuccess(await client().from("profiles")
+        .update({ full_name: fullName.trim(), avatar })
+        .eq("id", session.user.id)
+        .select()
+        .single());
     },
+
+    addChild: async ({ name, avatar, ageGroup }) => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      return requireSuccess(await client().from("child_profiles").insert({
+        parent_id: session.user.id,
+        name: name.trim(),
+        avatar,
+        age_group: ageGroup
+      }).select().single());
+    },
+
+    updateChild: async (id, changes) => {
+      return requireSuccess(await client().from("child_profiles")
+        .update(changes)
+        .eq("id", id)
+        .select()
+        .single());
+    },
+
+    removeChild: async id => {
+      return requireSuccess(await client().from("child_profiles").delete().eq("id", id));
+    },
+
+    listFamilies: async () => {
+      const profiles = requireSuccess(await client().from("profiles")
+        .select("id,email,full_name,avatar,role,plan,is_active,created_at")
+        .order("created_at", { ascending: false }));
+      const children = requireSuccess(await client().from("child_profiles")
+        .select("id,parent_id,name,avatar,age_group,created_at")
+        .order("created_at", { ascending: true }));
+      return { profiles: profiles || [], children: children || [] };
+    },
+
+    setUserStatus: async (userId, enabled) => {
+      return requireSuccess(await client().rpc("admin_set_user_status", {
+        target_user: userId,
+        enabled
+      }));
+    },
+
+    setUserRole: async (userId, role) => {
+      return requireSuccess(await client().rpc("admin_set_user_role", {
+        target_user: userId,
+        new_role: role
+      }));
+    }
   };
 })();

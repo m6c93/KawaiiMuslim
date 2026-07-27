@@ -23,6 +23,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./km-config.js"></script>
+<script src="./km-auth.js"></script>
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; background: #0e1330; }
@@ -310,12 +313,28 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1312,&quot;height&quot;:872},&quot;defaultProfile&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;demander&quot;,&quot;enfant&quot;,&quot;maman&quot;],&quot;default&quot;:&quot;demander&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;},&quot;parentSpace&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;},&quot;subscribed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;}}">
 class Component extends DCLogic {
-  state = { profile: null, subscribed: true, showPaywall: false };
+  state = { profile: null, profileName: '', profileEmoji: '', subscribed: true, showPaywall: false };
 
   componentDidMount() {
-    const dp = this.props.defaultProfile || 'demander';
-    if (dp === 'enfant' || dp === 'maman') this.setState({ profile: dp });
     this.setState({ subscribed: this.props.subscribed ?? true });
+    if (!window.KMAuth) {
+      window.location.href = 'Connexion.dc.html';
+      return;
+    }
+    window.KMAuth.getContext().then((context) => {
+      if (!context) {
+        window.location.href = 'Connexion.dc.html';
+        return;
+      }
+      const active = window.KMAuth.validateActiveProfile(context);
+      this.setState({
+        profile: active.type === 'child' ? 'enfant' : 'maman',
+        profileName: active.name || (active.type === 'child' ? 'Mon enfant' : 'Maman'),
+        profileEmoji: active.avatar || (active.type === 'child' ? '🐤' : '🌸'),
+      });
+    }).catch(() => {
+      window.location.href = 'Connexion.dc.html';
+    });
   }
 
   renderVals() {
@@ -362,14 +381,14 @@ class Component extends DCLogic {
       showPaywall: this.state.showPaywall,
       parentSpace: (this.props.parentSpace ?? true) && isMaman,
       greeting: isMaman ? 'Assalamou alaykoum \uD83C\uDF38' : 'Assalamou alaykoum, petit lecteur ! \uD83C\uDF19',
-      sub: isMaman ? "L'espace lecture de votre famille." : "Quel livre lit-on ce soir, Aya ?",
-      profileName: isMaman ? 'Maman' : (profile ? 'Aya' : 'Invité'),
-      profileEmoji: isMaman ? '🌸' : '🐤',
+      sub: isMaman ? "L'espace lecture de votre famille." : `Quel livre lit-on ce soir, ${this.state.profileName || 'petit lecteur'} ?`,
+      profileName: this.state.profileName || (isMaman ? 'Maman' : 'Invité'),
+      profileEmoji: this.state.profileEmoji || (isMaman ? '🌸' : '🐤'),
       books,
       colorings,
-      chooseEnfant: () => this.setState({ profile: 'enfant' }),
-      chooseMaman: () => this.setState({ profile: 'maman' }),
-      switchProfile: () => this.setState({ profile: null }),
+      chooseEnfant: () => { window.location.href = 'Profils.dc.html'; },
+      chooseMaman: () => { window.location.href = 'Profils.dc.html'; },
+      switchProfile: () => { window.location.href = 'Profils.dc.html'; },
       openPaywall: () => this.setState({ showPaywall: true }),
       closePaywall: () => this.setState({ showPaywall: false }),
       subscribe: () => this.setState({ subscribed: true, showPaywall: false }),

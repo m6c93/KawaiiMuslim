@@ -1,64 +1,117 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="./responsive.css">
-<script src="./support.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#20285e">
+  <title>Connexion — Kawaii Muslim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./responsive.css">
+  <link rel="stylesheet" href="./account.css">
 </head>
-<body class="km-responsive km-login">
-<x-dc>
-<helmet>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="./km-auth.js"></script>
-<style>
-  * { box-sizing: border-box; }
-  body { margin: 0; background: linear-gradient(160deg,#FDEFF5,#E9F7F1); }
-  a { color: #2E7D6B; text-decoration: none; }
-  a:hover { color: #4FC0A1; }
-  input { font-family: 'Quicksand', sans-serif; }
-  input:focus { outline: none; border-color: #4FC0A1 !important; }
-  ::selection { background: #F2A0C4; color: #fff; }
-  @keyframes kmFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
-</style>
-</helmet>
+<body>
+  <div class="account-shell">
+    <nav class="account-nav">
+      <a class="account-brand" href="Kawaii%20Muslim%20-%20Site%20Web.dc.html">
+        <img src="brand/assets/mascot-nour.png" alt="Mimi">
+        <strong>Kawaii Muslim</strong>
+      </a>
+      <a class="nav-link" href="Bibliotheque%20Kawaii%20Muslim.dc.html">← <span>Bibliothèque</span></a>
+    </nav>
 
-<div style="width:1160px; margin:0 auto; min-height:760px; display:flex; align-items:center; justify-content:center; padding:40px; font-family:'Quicksand',sans-serif; color:#3a3f63;">
-  <div style="width:440px; background:#fff; border-radius:30px; padding:48px 46px; box-shadow:0 30px 80px rgba(35,42,82,.16);">
-    <a href="Kawaii Muslim - Site Web.dc.html" style="display:flex; align-items:center; gap:11px; justify-content:center; margin-bottom:8px;">
-      <div style="width:56px; height:56px; border-radius:50%; background:#FDEFF5; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 8px 20px rgba(242,160,196,.3); animation:kmFloat 5s ease-in-out infinite;"><img src="brand/assets/mascot-nour.png" style="width:70px; height:auto; margin-top:5px;" alt="Mimi"/></div>
-    </a>
-    <h1 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:27px; color:#232A52; text-align:center; margin:14px 0 4px;">Content de te revoir ! 🌙</h1>
-    <p style="font-size:14px; color:#8a8499; text-align:center; margin:0 0 30px;">Connecte-toi pour retrouver tes livres.</p>
+    <main class="auth-layout">
+      <section class="auth-story">
+        <span class="story-kicker">Ton univers familial sécurisé</span>
+        <h1>Heureuse de te retrouver 🌙</h1>
+        <p>Reconnecte-toi pour retrouver les profils de tes enfants, vos progrès et tous vos petits souvenirs.</p>
+        <div class="story-points">
+          <div class="story-point"><span>👩‍👧‍👦</span> Un espace parent et des profils enfants</div>
+          <div class="story-point"><span>☁️</span> Une progression retrouvée sur tous tes appareils</div>
+          <div class="story-point"><span>🔒</span> Des données protégées et privées</div>
+        </div>
+      </section>
 
-    <label style="font-size:13px; font-weight:700; color:#5a5570; margin-bottom:7px; display:block;">E-mail</label>
-    <input id="km-email" type="email" placeholder="ton@email.com" style="width:100%; padding:14px 18px; border:1.5px solid #e6dfd2; border-radius:14px; font-size:15px; color:#3a3f63; margin-bottom:18px; background:#FFFBF4;" />
+      <section class="auth-panel">
+        <form class="auth-form" id="loginForm" novalidate>
+          <h2>Se connecter</h2>
+          <p class="form-subtitle">Pas encore de compte ? <a href="Inscription.dc.html">Créer mon compte parent</a></p>
 
-    <label style="font-size:13px; font-weight:700; color:#5a5570; margin-bottom:7px; display:block;">Mot de passe</label>
-    <input id="km-pass" type="password" placeholder="••••••••" style="width:100%; padding:14px 18px; border:1.5px solid #e6dfd2; border-radius:14px; font-size:15px; color:#3a3f63; margin-bottom:10px; background:#FFFBF4;" />
-    <p style="text-align:right; margin:0 0 24px;"><a href="#" style="font-size:12.5px; color:#B69BDC; font-weight:600;">Mot de passe oublié ?</a></p>
+          <label class="field-label" for="email">E-mail</label>
+          <input class="field-input" id="email" type="email" autocomplete="email" placeholder="ton@email.com" required>
 
-    <div onClick="{{ submit }}" style="cursor:pointer; text-align:center; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#fff; background:linear-gradient(150deg,#4FC0A1,#2E7D6B); padding:16px; border-radius:28px; box-shadow:0 12px 26px rgba(79,192,161,.32);">Se connecter</div>
+          <label class="field-label" for="password">Mot de passe</label>
+          <div class="password-wrap">
+            <input class="field-input" id="password" type="password" autocomplete="current-password" placeholder="8 caractères minimum" required>
+            <button class="password-toggle" id="togglePassword" type="button" aria-label="Afficher le mot de passe">👁️</button>
+          </div>
 
-    <p style="font-size:13.5px; color:#8a8499; text-align:center; margin:24px 0 0;">Pas encore de compte ? <a href="Inscription.dc.html" style="font-weight:700;">S'inscrire gratuitement</a></p>
+          <div class="form-row">
+            <span></span>
+            <button class="tiny-link" id="forgotPassword" type="button">Mot de passe oublié ?</button>
+          </div>
+
+          <button class="primary-button" id="submitButton" type="submit">Entrer dans mon univers</button>
+          <p class="form-message" id="message" role="status" aria-live="polite"></p>
+          <p class="privacy-note">Kawaii Muslim ne voit jamais ton mot de passe.</p>
+        </form>
+      </section>
+    </main>
   </div>
-</div>
-</x-dc>
-<script type="text/x-dc" data-dc-script>
-class Component extends DCLogic {
-  renderVals() {
-    return {
-      submit: () => {
-        const email = (document.getElementById('km-email') || {}).value || '';
-        if (!email) { alert('Merci de renseigner ton e-mail 🌸'); return; }
-        try { window.KMAuth.login({ email }); } catch (e) {}
-        window.location.href = 'Bibliotheque Kawaii Muslim.dc.html';
-      },
-    };
-  }
-}
-</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./km-config.js"></script>
+  <script src="./km-auth.js"></script>
+  <script>
+    const form = document.getElementById("loginForm");
+    const message = document.getElementById("message");
+    const submitButton = document.getElementById("submitButton");
+    const password = document.getElementById("password");
+
+    document.getElementById("togglePassword").addEventListener("click", () => {
+      password.type = password.type === "password" ? "text" : "password";
+    });
+
+    document.getElementById("forgotPassword").addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      if (!email) {
+        message.textContent = "Écris d’abord ton adresse e-mail.";
+        document.getElementById("email").focus();
+        return;
+      }
+      try {
+        await KMAuth.resetPassword(email);
+        message.className = "form-message success";
+        message.textContent = "Un e-mail de récupération vient de t’être envoyé.";
+      } catch (error) {
+        message.className = "form-message";
+        message.textContent = KMAuth.friendlyError(error);
+      }
+    });
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      message.className = "form-message";
+      message.textContent = "";
+      submitButton.disabled = true;
+      submitButton.textContent = "Connexion…";
+      try {
+        await KMAuth.login({
+          email: document.getElementById("email").value,
+          password: password.value
+        });
+        window.location.href = "Profils.dc.html";
+      } catch (error) {
+        message.textContent = KMAuth.friendlyError(error);
+        submitButton.disabled = false;
+        submitButton.textContent = "Entrer dans mon univers";
+      }
+    });
+
+    KMAuth.getSession().then(session => {
+      if (session) window.location.href = "Profils.dc.html";
+    }).catch(() => {});
+  </script>
 </body>
 </html>

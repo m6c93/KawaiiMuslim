@@ -1,114 +1,113 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="./responsive.css">
-<script src="./support.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#20285e">
+  <title>Créer mon compte parent — Kawaii Muslim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./responsive.css">
+  <link rel="stylesheet" href="./account.css">
 </head>
-<body class="km-responsive km-signup">
-<x-dc>
-<helmet>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="./km-auth.js"></script>
-<style>
-  * { box-sizing: border-box; }
-  body { margin: 0; background: #FFFBF4; }
-  a { color: #2E7D6B; text-decoration: none; }
-  a:hover { color: #4FC0A1; }
-  input { font-family: 'Quicksand', sans-serif; }
-  input:focus { outline: none; border-color: #4FC0A1 !important; }
-  ::selection { background: #F2A0C4; color: #fff; }
-  @keyframes kmFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
-</style>
-</helmet>
+<body>
+  <div class="account-shell">
+    <nav class="account-nav">
+      <a class="account-brand" href="Kawaii%20Muslim%20-%20Site%20Web.dc.html">
+        <img src="brand/assets/mascot-nour.png" alt="Mimi">
+        <strong>Kawaii Muslim</strong>
+      </a>
+      <a class="nav-link" href="Bibliotheque%20Kawaii%20Muslim.dc.html">← <span>Bibliothèque</span></a>
+    </nav>
 
-<div style="width:1160px; margin:0 auto; min-height:760px; display:grid; grid-template-columns:1fr 1.05fr; background:#fff; border-radius:32px; overflow:hidden; box-shadow:0 30px 80px rgba(35,42,82,.14); font-family:'Quicksand',sans-serif; color:#3a3f63;">
+    <main class="auth-layout">
+      <section class="auth-story">
+        <span class="story-kicker">Bienvenue dans la famille</span>
+        <h1>Un compte parent, plusieurs petits univers 🌸</h1>
+        <p>Crée ton espace familial, puis ajoute un profil pour chaque enfant. Chacun retrouvera sa progression.</p>
+        <div class="story-points">
+          <div class="story-point"><span>👩</span> Le parent garde le contrôle du compte</div>
+          <div class="story-point"><span>🐤</span> Chaque enfant possède son propre profil</div>
+          <div class="story-point"><span>✨</span> Les étoiles et souvenirs restent séparés</div>
+        </div>
+      </section>
 
-  <!-- LEFT · brand panel -->
-  <div style="position:relative; padding:52px 46px; background:linear-gradient(160deg,#FDEFF5,#E9F7F1); overflow:hidden;">
-    <div style="position:absolute; top:-70px; right:-50px; width:240px; height:240px; border-radius:50%; background:radial-gradient(circle,#FBD9E8,transparent 70%);"></div>
-    <a href="Kawaii Muslim - Site Web.dc.html" style="display:flex; align-items:center; gap:11px; position:relative; z-index:2;">
-      <div style="width:44px; height:44px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 4px 12px rgba(242,160,196,.25);"><img src="brand/assets/mascot-nour.png" alt="Mimi" style="width:54px; height:auto; margin-top:4px;" /></div>
-      <span style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:19px; color:#232A52;">Kawaii Muslim</span>
-    </a>
-    <div style="position:relative; z-index:2; margin-top:40px;">
-      <h1 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:34px; color:#232A52; line-height:1.15; margin:0 0 14px;">Rejoins la famille Kawaii Muslim 🌸</h1>
-      <p style="font-size:15.5px; line-height:1.65; color:#6a6480; margin:0 0 28px;">7 jours gratuits pour découvrir toute la bibliothèque avec tes enfants.</p>
-      <div style="display:flex; flex-direction:column; gap:13px;">
-        <div style="display:flex; align-items:center; gap:12px;"><span style="width:30px; height:30px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; font-size:15px;">📖</span><span style="font-size:14.5px; color:#5a5570;">Tous les livres à feuilleter</span></div>
-        <div style="display:flex; align-items:center; gap:12px;"><span style="width:30px; height:30px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; font-size:15px;">👪</span><span style="font-size:14.5px; color:#5a5570;">Un compte parent + profils enfants</span></div>
-        <div style="display:flex; align-items:center; gap:12px;"><span style="width:30px; height:30px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; font-size:15px;">🌙</span><span style="font-size:14.5px; color:#5a5570;">Sans engagement, résiliable en 1 clic</span></div>
-      </div>
-    </div>
-    <div style="position:relative; z-index:2; margin-top:44px; display:flex; align-items:center; gap:16px;">
-      <div style="width:96px; height:96px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 12px 28px rgba(182,155,220,.3); animation:kmFloat 5s ease-in-out infinite;"><img src="brand/assets/mascot-nour.png" style="width:118px; height:auto; margin-top:7px;" alt="Mimi"/></div>
-      <p style="font-family:'Baloo 2',sans-serif; font-weight:600; font-size:15px; color:#2E7D6B; margin:0; max-width:180px;">« Assalamou alaykoum, c'est Aya et Mimi ! »</p>
-    </div>
+      <section class="auth-panel">
+        <form class="auth-form" id="signupForm" novalidate>
+          <h2>Créer mon compte parent</h2>
+          <p class="form-subtitle">Déjà membre ? <a href="Connexion.dc.html">Se connecter</a></p>
+
+          <label class="field-label" for="name">Ton prénom</label>
+          <input class="field-input" id="name" type="text" autocomplete="name" maxlength="60" placeholder="Ton prénom" required>
+
+          <label class="field-label" for="email">E-mail</label>
+          <input class="field-input" id="email" type="email" autocomplete="email" placeholder="ton@email.com" required>
+
+          <label class="field-label" for="password">Mot de passe</label>
+          <div class="password-wrap">
+            <input class="field-input" id="password" type="password" autocomplete="new-password" minlength="8" placeholder="8 caractères minimum" required>
+            <button class="password-toggle" id="togglePassword" type="button" aria-label="Afficher le mot de passe">👁️</button>
+          </div>
+
+          <label class="field-label" for="passwordConfirm">Confirme le mot de passe</label>
+          <input class="field-input" id="passwordConfirm" type="password" autocomplete="new-password" minlength="8" placeholder="Écris-le une deuxième fois" required>
+
+          <button class="primary-button pink" id="submitButton" type="submit">Créer mon espace familial</button>
+          <p class="form-message" id="message" role="status" aria-live="polite"></p>
+          <p class="privacy-note">En créant ton compte, tu acceptes les conditions d’utilisation et la politique de confidentialité.</p>
+        </form>
+      </section>
+    </main>
   </div>
 
-  <!-- RIGHT · form -->
-  <div style="padding:52px 56px; display:flex; flex-direction:column; justify-content:center;">
-    <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:28px; color:#232A52; margin:0 0 6px;">Créer mon compte</h2>
-    <p style="font-size:14px; color:#8a8499; margin:0 0 28px;">Déjà membre ? <a href="Connexion.dc.html" style="font-weight:700;">Se connecter</a></p>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./km-config.js"></script>
+  <script src="./km-auth.js"></script>
+  <script>
+    const form = document.getElementById("signupForm");
+    const message = document.getElementById("message");
+    const submitButton = document.getElementById("submitButton");
+    const password = document.getElementById("password");
 
-    <label style="font-size:13px; font-weight:700; color:#5a5570; margin-bottom:7px; display:block;">Prénom</label>
-    <input id="km-name" type="text" placeholder="Ton prénom" style="width:100%; padding:14px 18px; border:1.5px solid #e6dfd2; border-radius:14px; font-size:15px; color:#3a3f63; margin-bottom:18px; background:#FFFBF4;" />
-
-    <label style="font-size:13px; font-weight:700; color:#5a5570; margin-bottom:7px; display:block;">E-mail</label>
-    <input id="km-email" type="email" placeholder="ton@email.com" style="width:100%; padding:14px 18px; border:1.5px solid #e6dfd2; border-radius:14px; font-size:15px; color:#3a3f63; margin-bottom:18px; background:#FFFBF4;" />
-
-    <label style="font-size:13px; font-weight:700; color:#5a5570; margin-bottom:7px; display:block;">Mot de passe</label>
-    <input id="km-pass" type="password" placeholder="••••••••" style="width:100%; padding:14px 18px; border:1.5px solid #e6dfd2; border-radius:14px; font-size:15px; color:#3a3f63; margin-bottom:24px; background:#FFFBF4;" />
-
-    <label style="font-size:13px; font-weight:700; color:#5a5570; margin-bottom:10px; display:block;">Ta formule</label>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:28px;">
-      <div onClick="{{ pickMensuel }}" style="cursor:pointer; border:2px solid {{ mensuelBorder }}; background:{{ mensuelBg }}; border-radius:16px; padding:16px 18px;">
-        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#5a5570; margin:0 0 3px;">Mensuel</p>
-        <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:22px; color:#232A52; margin:0;">6,99€<span style="font-size:12px; color:#9a93a8; font-weight:600;">/mois</span></p>
-      </div>
-      <div onClick="{{ pickAnnuel }}" style="cursor:pointer; position:relative; border:2px solid {{ annuelBorder }}; background:{{ annuelBg }}; border-radius:16px; padding:16px 18px;">
-        <span style="position:absolute; top:-10px; right:12px; background:#F0B53F; color:#3a2b06; font-weight:700; font-size:9.5px; letter-spacing:.4px; padding:3px 10px; border-radius:10px; text-transform:uppercase;">2 mois offerts</span>
-        <p style="font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#5a5570; margin:0 0 3px;">Annuel</p>
-        <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:22px; color:#232A52; margin:0;">59€<span style="font-size:12px; color:#9a93a8; font-weight:600;">/an</span></p>
-      </div>
-    </div>
-
-    <div onClick="{{ submit }}" style="cursor:pointer; text-align:center; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:#fff; background:linear-gradient(150deg,#F2A0C4,#E27FAE); padding:16px; border-radius:28px; box-shadow:0 12px 28px rgba(226,127,174,.36);">Démarrer les 7 jours gratuits</div>
-    <p style="font-size:11.5px; color:#bcb6c8; text-align:center; margin:16px 0 0; line-height:1.5;">En continuant, tu acceptes nos conditions. Aucun prélèvement pendant l'essai.</p>
-  </div>
-</div>
-</x-dc>
-<script type="text/x-dc" data-dc-script>
-class Component extends DCLogic {
-  state = { plan: 'annuel' };
-
-  renderVals() {
-    const plan = this.state.plan;
-    const sel = (p) => ({
-      border: plan === p ? '#4FC0A1' : '#e6dfd2',
-      bg: plan === p ? '#E9F7F1' : '#FFFBF4',
+    document.getElementById("togglePassword").addEventListener("click", () => {
+      password.type = password.type === "password" ? "text" : "password";
     });
-    const m = sel('mensuel');
-    const a = sel('annuel');
-    return {
-      mensuelBorder: m.border, mensuelBg: m.bg,
-      annuelBorder: a.border, annuelBg: a.bg,
-      pickMensuel: () => this.setState({ plan: 'mensuel' }),
-      pickAnnuel: () => this.setState({ plan: 'annuel' }),
-      submit: () => {
-        const g = (id) => (document.getElementById(id) || {}).value || '';
-        const name = g('km-name');
-        const email = g('km-email');
-        if (!email) { alert('Merci de renseigner ton e-mail 🌸'); return; }
-        try { window.KMAuth.signup({ name, email, plan: this.state.plan }); } catch (e) {}
-        window.location.href = 'Bibliotheque Kawaii Muslim.dc.html';
-      },
-    };
-  }
-}
-</script>
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      message.className = "form-message";
+      message.textContent = "";
+      const confirmation = document.getElementById("passwordConfirm").value;
+      if (password.value.length < 8) {
+        message.textContent = "Choisis un mot de passe d’au moins 8 caractères.";
+        return;
+      }
+      if (password.value !== confirmation) {
+        message.textContent = "Les deux mots de passe ne sont pas identiques.";
+        return;
+      }
+      submitButton.disabled = true;
+      submitButton.textContent = "Création de ton espace…";
+      try {
+        const data = await KMAuth.signup({
+          name: document.getElementById("name").value,
+          email: document.getElementById("email").value,
+          password: password.value
+        });
+        if (data.session) {
+          window.location.href = "Profils.dc.html";
+          return;
+        }
+        message.className = "form-message success";
+        message.textContent = "Ton compte est créé. Ouvre l’e-mail reçu pour confirmer ton adresse.";
+        submitButton.textContent = "E-mail envoyé ✓";
+      } catch (error) {
+        message.textContent = KMAuth.friendlyError(error);
+        submitButton.disabled = false;
+        submitButton.textContent = "Créer mon espace familial";
+      }
+    });
+  </script>
 </body>
 </html>

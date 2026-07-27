@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#20285e">
+  <title>Administration — Kawaii Muslim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./responsive.css">
+  <link rel="stylesheet" href="./account.css">
+</head>
+<body>
+  <div class="account-shell">
+    <nav class="account-nav">
+      <a class="account-brand" href="Bibliotheque%20Kawaii%20Muslim.dc.html">
+        <img src="brand/assets/mascot-nour.png" alt="Mimi">
+        <strong>Kawaii Muslim</strong>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" href="Profils.dc.html">⇄ <span>Changer de profil</span></a>
+        <a class="nav-link" href="Compte.dc.html">⚙️ <span>Mon compte</span></a>
+      </div>
+    </nav>
+
+    <main class="dashboard">
+      <header class="page-head">
+        <div>
+          <h1 class="page-title">Tableau de bord administratrice</h1>
+          <p>Vue générale des familles et de leurs accès.</p>
+        </div>
+        <span class="badge">🛡️ Accès protégé</span>
+      </header>
+
+      <div class="dashboard-grid" id="adminContent">
+        <section class="dash-card admin-hero full">
+          <h2>Vue d’ensemble</h2>
+          <div class="stats">
+            <div class="stat"><strong id="familyCount">—</strong><span>comptes parents</span></div>
+            <div class="stat"><strong id="childCount">—</strong><span>profils enfants</span></div>
+            <div class="stat"><strong id="activeCount">—</strong><span>familles actives</span></div>
+          </div>
+        </section>
+        <section class="dash-card full">
+          <h2>Familles inscrites</h2>
+          <div class="family-list" id="families"><p class="loading">Chargement sécurisé…</p></div>
+          <p class="form-message" id="message"></p>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./km-config.js"></script>
+  <script src="./km-auth.js"></script>
+  <script>
+    const families = document.getElementById("families");
+    const message = document.getElementById("message");
+    let currentProfile = null;
+    let familyData = null;
+
+    const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+    })[character]);
+
+    const render = () => {
+      const { profiles, children } = familyData;
+      document.getElementById("familyCount").textContent = profiles.filter(item => item.role === "parent").length;
+      document.getElementById("childCount").textContent = children.length;
+      document.getElementById("activeCount").textContent = profiles.filter(item => item.is_active).length;
+
+      families.innerHTML = profiles.map(profile => {
+        const childItems = children.filter(child => child.parent_id === profile.id);
+        return `
+          <article class="profile-card">
+            <div class="profile-main">
+              <span class="profile-avatar">${escapeHtml(profile.role === "admin" ? "🛡️" : profile.avatar)}</span>
+              <div class="profile-copy">
+                <strong>${escapeHtml(profile.full_name || "Sans prénom")}</strong>
+                <small>${escapeHtml(profile.email)} · ${childItems.length} enfant${childItems.length > 1 ? "s" : ""} · ${profile.role}</small>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="small-button" type="button" data-preview="${profile.id}">Voir parent</button>
+              ${profile.id !== currentProfile.id ? `
+                <button class="small-button ${profile.is_active ? "danger" : ""}" type="button"
+                  data-status="${profile.id}" data-enabled="${profile.is_active ? "false" : "true"}">
+                  ${profile.is_active ? "Désactiver" : "Réactiver"}
+                </button>
+              ` : ""}
+            </div>
+          </article>
+        `;
+      }).join("") || '<p class="loading">Aucune famille pour le moment.</p>';
+    };
+
+    const load = async () => {
+      const context = await KMAuth.getContext();
+      if (!context) {
+        window.location.href = "Connexion.dc.html";
+        return;
+      }
+      if (context.profile.role !== "admin") {
+        window.location.href = "Profils.dc.html";
+        return;
+      }
+      currentProfile = context.profile;
+      familyData = await KMAuth.listFamilies();
+      render();
+    };
+
+    families.addEventListener("click", async event => {
+      const statusButton = event.target.closest("[data-status]");
+      const previewButton = event.target.closest("[data-preview]");
+      if (previewButton) {
+        const profile = familyData.profiles.find(item => item.id === previewButton.dataset.preview);
+        KMAuth.setActiveProfile({ type: "parent", name: profile.full_name, avatar: profile.avatar });
+        window.location.href = "Bibliotheque%20Kawaii%20Muslim.dc.html?preview=parent";
+        return;
+      }
+      if (!statusButton) return;
+      statusButton.disabled = true;
+      try {
+        await KMAuth.setUserStatus(statusButton.dataset.status, statusButton.dataset.enabled === "true");
+        familyData = await KMAuth.listFamilies();
+        render();
+      } catch (error) {
+        message.textContent = KMAuth.friendlyError(error);
+        statusButton.disabled = false;
+      }
+    });
+
+    load().catch(error => {
+      families.innerHTML = "";
+      message.textContent = KMAuth.friendlyError(error);
+    });
+  </script>
+</body>
+</html>
