@@ -49,6 +49,48 @@ window.KMAuth = (() => {
     return requireSuccess(result) || [];
   };
 
+  const getPlannerDays = async () => {
+    const session = await getSession();
+    if (!session) throw new Error("Connexion requise.");
+    const result = await client()
+      .from("planner_days")
+      .select("id,day,content,updated_at")
+      .eq("owner_id", session.user.id)
+      .is("child_profile_id", null)
+      .order("day", { ascending: true });
+    return requireSuccess(result) || [];
+  };
+
+  const savePlannerDay = async (day, content) => {
+    const session = await getSession();
+    if (!session) throw new Error("Connexion requise.");
+
+    const existing = await client()
+      .from("planner_days")
+      .select("id")
+      .eq("owner_id", session.user.id)
+      .is("child_profile_id", null)
+      .eq("day", day)
+      .maybeSingle();
+    const row = requireSuccess(existing);
+
+    if (row?.id) {
+      return requireSuccess(await client()
+        .from("planner_days")
+        .update({ content })
+        .eq("id", row.id)
+        .select()
+        .single());
+    }
+
+    return requireSuccess(await client().from("planner_days").insert({
+      owner_id: session.user.id,
+      child_profile_id: null,
+      day,
+      content
+    }).select().single());
+  };
+
   const getContext = async () => {
     const session = await getSession();
     if (!session) return null;
@@ -105,6 +147,8 @@ window.KMAuth = (() => {
     getActiveProfile,
     validateActiveProfile,
     setActiveProfile,
+    getPlannerDays,
+    savePlannerDay,
 
     signup: async ({ name, email, password }) => {
       const data = requireSuccess(await client().auth.signUp({

@@ -68,6 +68,10 @@
     const message = document.getElementById("message");
     const submitButton = document.getElementById("submitButton");
     const password = document.getElementById("password");
+    const requestedPage = new URLSearchParams(window.location.search).get("next");
+    const destination = requestedPage?.startsWith("/") && !requestedPage.startsWith("//")
+      ? requestedPage
+      : "Profils.dc.html";
 
     document.getElementById("togglePassword").addEventListener("click", () => {
       password.type = password.type === "password" ? "text" : "password";
@@ -101,7 +105,7 @@
           email: document.getElementById("email").value,
           password: password.value
         });
-        window.location.href = "Profils.dc.html";
+        window.location.href = destination;
       } catch (error) {
         message.textContent = KMAuth.friendlyError(error);
         submitButton.disabled = false;
@@ -110,7 +114,7 @@
     });
 
     KMAuth.getSession().then(session => {
-      if (session) window.location.href = "Profils.dc.html";
+      if (session) window.location.href = destination;
     }).catch(() => {});
   </script>
 </body>

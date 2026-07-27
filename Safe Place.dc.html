@@ -1045,7 +1045,7 @@
         </div>
         <textarea class="reflection" id="reflection" placeholder="Aujourd’hui, je veux me souvenir que…"></textarea>
         <div class="reflection-actions">
-          <span class="autosave-note">🔒 Enregistré uniquement sur cet appareil</span>
+          <span class="autosave-note" id="cloudNote">☁️ Synchronisation sécurisée avec ton compte</span>
           <button class="save-reflection" id="saveReflection" type="button">Garder ce souvenir</button>
         </div>
         <div class="memories" id="memories" aria-label="Mes souvenirs de maman"></div>
@@ -1061,8 +1061,11 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./km-config.js"></script>
+  <script src="./km-auth.js"></script>
   <script>
-    (() => {
+    (async () => {
       const STORAGE_KEY = "km-planner-cocon-v1";
       const today = new Date();
       today.setHours(12, 0, 0, 0);
@@ -1170,6 +1173,8 @@
       const $$ = selector => [...document.querySelectorAll(selector)];
       const savedPill = $("#savedPill");
       let saveTimer;
+      const cloudTimers = new Map();
+      let cloudReady = false;
 
       const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
         "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
@@ -1177,7 +1182,11 @@
 
       const setSaveState = state => {
         savedPill.classList.toggle("saving", state === "saving");
-        savedPill.textContent = state === "saving" ? "• Sauvegarde…" : "✓ Tout est sauvegardé";
+        savedPill.textContent = state === "saving"
+          ? "• Sauvegarde…"
+          : state === "offline"
+            ? "✓ Sauvegardé sur cet appareil"
+            : "✓ Synchronisé";
       };
 
       const hasDayContent = value => Boolean(
@@ -1198,14 +1207,34 @@
         return Math.min(6, priorities + spiritual + challenge + reflection);
       };
 
+      const scheduleCloudSave = (dateKey, content) => {
+        if (!cloudReady) return;
+        clearTimeout(cloudTimers.get(dateKey));
+        cloudTimers.set(dateKey, setTimeout(async () => {
+          try {
+            await window.KMAuth.savePlannerDay(dateKey, content);
+            setSaveState("saved");
+          } catch (error) {
+            console.warn("Synchronisation du planner impossible", error);
+            setSaveState("offline");
+            toast("Ton planner reste sauvegardé sur cet appareil. La synchronisation reprendra avec internet.");
+          } finally {
+            cloudTimers.delete(dateKey);
+          }
+        }, 700));
+      };
+
       const persist = () => {
         setSaveState("saving");
         allData.days[selectedDateKey] = day;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
+        scheduleCloudSave(selectedDateKey, JSON.parse(JSON.stringify(day)));
         renderCalendar();
         updateDaySummary();
         clearTimeout(saveTimer);
-        saveTimer = setTimeout(() => setSaveState("saved"), 320);
+        saveTimer = setTimeout(() => {
+          if (!cloudReady) setSaveState("offline");
+        }, 320);
       };
 
       const toast = message => {
@@ -1451,7 +1480,53 @@
         if (button) selectDay(button.dataset.date);
       });
 
-      renderDay();
+      const rebuildMemories = () => {
+        allData.memories = Object.entries(allData.days)
+          .filter(([, value]) => value?.reflectionSaved && value?.reflection?.trim())
+          .map(([date, value]) => ({ date, text: value.reflection.trim() }));
+      };
+
+      const initialize = async () => {
+        setSaveState("saving");
+        try {
+          const context = await window.KMAuth.getContext();
+          if (!context) {
+            const next = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
+            window.location.replace(`Connexion.dc.html?next=${next}`);
+            return;
+          }
+
+          const localDays = { ...allData.days };
+          const cloudRows = await window.KMAuth.getPlannerDays();
+          const cloudDates = new Set(cloudRows.map(row => row.day));
+          cloudRows.forEach(row => {
+            allData.days[row.day] = normalizeDay(row.content);
+          });
+          rebuildMemories();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
+
+          day = normalizeDay(allData.days[selectedDateKey]);
+          cloudReady = true;
+          renderDay();
+          $("#cloudNote").textContent = `☁️ Synchronisé pour ${context.profile.full_name || "mon compte"}`;
+
+          const daysToMigrate = Object.entries(localDays)
+            .filter(([dateKey, value]) => !cloudDates.has(dateKey) && hasDayContent(value));
+          for (const [dateKey, value] of daysToMigrate) {
+            await window.KMAuth.savePlannerDay(dateKey, normalizeDay(value));
+          }
+          setSaveState("saved");
+        } catch (error) {
+          console.warn("Mode local du Planner Cocon", error);
+          cloudReady = false;
+          renderDay();
+          $("#cloudNote").textContent = "🔒 Sauvegardé sur cet appareil — synchronisation en attente";
+          setSaveState("offline");
+          toast("Le mode hors connexion reste disponible. Tes données ne sont pas perdues.");
+        }
+      };
+
+      await initialize();
     })();
   </script>
 </body>
