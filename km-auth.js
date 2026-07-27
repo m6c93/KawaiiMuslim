@@ -338,6 +338,12 @@ window.KMAuth = (() => {
         .limit(200)) || [];
     },
 
+    logExport: async type => {
+      return requireSuccess(await client().rpc("staff_log_export", {
+        export_type: type
+      }));
+    },
+
     getSettings: async () => {
       return requireSuccess(await client().from("site_settings")
         .select("*").order("key", { ascending: true })) || [];

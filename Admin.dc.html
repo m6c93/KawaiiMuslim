@@ -200,7 +200,7 @@
     const actionLabels = {
       deactivate_account: "Compte désactivé", reactivate_account: "Compte réactivé",
       change_plan: "Abonnement modifié", change_role: "Rôle modifié",
-      update_ticket: "Demande support mise à jour",
+      update_ticket: "Demande support mise à jour", update_setting: "Paramètre modifié", export_data: "Données exportées",
       insert_content_items: "Contenu ajouté", update_content_items: "Contenu modifié", delete_content_items: "Contenu supprimé"
     };
     const state = { context: null, families: [], content: [], tickets: [], logs: [], settings: [] };
@@ -446,14 +446,22 @@
       } catch (error) { $("#reauthMessage").textContent = KMAuth.friendlyError(error); }
     });
 
-    $("#exportFamilies").addEventListener("click", () => downloadCsv("kawaii-muslim-familles.csv", [
+    $("#exportFamilies").addEventListener("click", async () => {
+      await KMAuth.logExport("families_csv");
+      downloadCsv("kawaii-muslim-familles.csv", [
       ["Prénom","E-mail","Rôle","Abonnement","Actif","Profils enfants","Création"],
       ...state.families.map(item => [item.full_name,item.email,item.role,item.plan,item.is_active,item.children_count,item.created_at])
-    ]));
-    $("#exportLogs").addEventListener("click", () => downloadCsv("kawaii-muslim-journal.csv", [
+      ]);
+      await refreshData();
+    });
+    $("#exportLogs").addEventListener("click", async () => {
+      await KMAuth.logExport("audit_log_csv");
+      downloadCsv("kawaii-muslim-journal.csv", [
       ["Date","Action","Type","Cible"],
       ...state.logs.map(item => [item.created_at,item.action,item.target_type,item.target_id])
-    ]));
+      ]);
+      await refreshData();
+    });
 
     $("#supportEmailForm").addEventListener("submit", async event => {
       event.preventDefault(); await KMAuth.saveSetting({ key: "support_email", value: $("#supportEmail").value.trim(), description: "Adresse de contact affichée aux familles" }); await refreshData(); showMessage("Adresse du support enregistrée.", true);
