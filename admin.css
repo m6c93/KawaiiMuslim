@@ -93,6 +93,7 @@ body.admin-body { background: var(--admin-bg); }
 .admin-cover-preview img { width: 82px; height: 82px; object-fit: contain; border-radius: 10px; background: #f0eef6; }
 .admin-cover-preview span { min-width: 0; color: var(--admin-muted); font-size: 12px; overflow-wrap: anywhere; }
 .admin-book-upload { grid-column: 1 / -1; padding: 13px; border: 1px dashed #aeb9df; border-radius: 15px; background: #f4f6ff; }
+.admin-book-upload[hidden] { display: none; }
 .admin-book-upload input[type="file"] { width: 100%; margin-top: 7px; color: var(--admin-muted); }
 .admin-book-upload small { display: block; margin-top: 6px; color: var(--admin-muted); line-height: 1.45; }
 .admin-file-preview { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; margin-top: 11px; padding: 10px; border-radius: 13px; background: #fff; border: 1px solid var(--admin-line); }

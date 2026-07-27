@@ -96,7 +96,7 @@
               <label>Public<select class="admin-select" id="contentAudience"><option value="famille">Famille</option><option value="maman">Maman</option><option value="enfant">Enfant</option></select></label>
               <label>Statut<select class="admin-select" id="contentStatus"><option value="draft">Brouillon</option><option value="published">Publié</option><option value="archived">Archivé</option></select></label>
               <label class="wide">Description<textarea class="admin-textarea" id="contentDescription" maxlength="600" required placeholder="Présente le livre en quelques phrases…"></textarea></label>
-              <div class="admin-book-upload">
+              <div class="admin-book-upload" id="contentBookUpload">
                 <label for="contentBookFile">Fichier du livre</label>
                 <input id="contentBookFile" type="file" accept="application/pdf,.pdf">
                 <small>Choisis ton PDF · 50 Mo maximum. La page de lecture sera créée automatiquement.</small>
@@ -104,6 +104,16 @@
                   <span aria-hidden="true">📘</span>
                   <strong id="contentBookName"></strong>
                   <button class="admin-button secondary" id="removeBookFile" type="button">Retirer</button>
+                </div>
+              </div>
+              <div class="admin-book-upload" id="contentColoringUpload" hidden>
+                <label for="contentColoringFile">Coloriage à imprimer</label>
+                <input id="contentColoringFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf">
+                <small>Choisis une image JPG, PNG, WebP ou un PDF · 20 Mo maximum.</small>
+                <div class="admin-file-preview" id="contentColoringPreview" hidden>
+                  <span aria-hidden="true">🖍️</span>
+                  <strong id="contentColoringName"></strong>
+                  <button class="admin-button secondary" id="removeColoringFile" type="button">Retirer</button>
                 </div>
               </div>
               <label class="wide">Lien de lecture <small>(option avancée)</small><input class="admin-input" id="contentUrl" placeholder="Créé automatiquement quand tu choisis un PDF"></label>
@@ -229,6 +239,8 @@
     let coverObjectUrl = null;
     let selectedBookFile = null;
     let storedBookUrlToDelete = "";
+    let selectedColoringFile = null;
+    let storedColoringUrlToDelete = "";
 
     const permissions = () => ({
       families: ["admin", "support"].includes(state.context.profile.role),
@@ -349,21 +361,40 @@
       selectedCoverFile = null;
       selectedBookFile = null;
       storedBookUrlToDelete = "";
+      selectedColoringFile = null;
+      storedColoringUrlToDelete = "";
       $("#contentBookFile").value = "";
       $("#contentBookPreview").hidden = true;
       $("#contentBookName").textContent = "";
+      $("#contentColoringFile").value = "";
+      $("#contentColoringPreview").hidden = true;
+      $("#contentColoringName").textContent = "";
       if (coverObjectUrl) URL.revokeObjectURL(coverObjectUrl);
       coverObjectUrl = null;
       $("#contentCoverPreview").hidden = true;
       $("#contentCoverImage").removeAttribute("src");
       $("#contentCoverName").textContent = "";
       $("#contentFormTitle").textContent = "Ajouter un contenu";
+      updateContentFormForType();
     };
 
     const showCoverPreview = (url, name) => {
       $("#contentCoverImage").src = url;
       $("#contentCoverName").textContent = name || "Couverture enregistrée";
       $("#contentCoverPreview").hidden = false;
+    };
+
+    const updateContentFormForType = () => {
+      const type = $("#contentType").value;
+      $("#contentBookUpload").hidden = type !== "livre";
+      $("#contentColoringUpload").hidden = type !== "coloriage";
+      $("#contentDescription").placeholder = type === "coloriage"
+        ? "Présente le coloriage et ce que l’enfant va découvrir…"
+        : "Présente le livre en quelques phrases…";
+      if (!$("#contentId").value) {
+        $("#contentFormTitle").textContent = type === "coloriage" ? "Ajouter un coloriage" : "Ajouter un contenu";
+      }
+      $("#saveContentButton").textContent = type === "coloriage" ? "Enregistrer le coloriage" : "Enregistrer le livre";
     };
 
     const requestPassword = action => {
@@ -421,6 +452,7 @@
     $("#contentTitle").addEventListener("input", () => {
       if (!$("#contentId").value) $("#contentSlug").value = slugify($("#contentTitle").value);
     });
+    $("#contentType").addEventListener("change", updateContentFormForType);
     $("#contentCoverFile").addEventListener("change", event => {
       const file = event.target.files?.[0] || null;
       selectedCoverFile = file;
@@ -458,6 +490,30 @@
       $("#contentBookPreview").hidden = true;
       $("#contentBookName").textContent = "";
     });
+    $("#contentColoringFile").addEventListener("change", event => {
+      const file = event.target.files?.[0] || null;
+      selectedColoringFile = file;
+      $("#contentColoringPreview").hidden = !file;
+      $("#contentColoringName").textContent = file
+        ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} Mo`
+        : "";
+      if (file) {
+        const currentUrl = $("#contentUrl").value.trim();
+        if (currentUrl.includes("/content-colorings/")) storedColoringUrlToDelete = currentUrl;
+        $("#contentUrl").value = "";
+      }
+    });
+    $("#removeColoringFile").addEventListener("click", () => {
+      const currentUrl = $("#contentUrl").value.trim();
+      if (!selectedColoringFile && currentUrl.includes("/content-colorings/")) {
+        storedColoringUrlToDelete = currentUrl;
+        $("#contentUrl").value = "";
+      }
+      selectedColoringFile = null;
+      $("#contentColoringFile").value = "";
+      $("#contentColoringPreview").hidden = true;
+      $("#contentColoringName").textContent = "";
+    });
 
     const handleFamilyAction = event => {
       const planButton = event.target.closest("[data-family-plan]");
@@ -486,17 +542,33 @@
       event.preventDefault();
       const saveButton = $("#saveContentButton");
       try {
-        if ($("#contentType").value === "livre" && !selectedCoverFile && !$("#contentCover").value) {
+        const contentType = $("#contentType").value;
+        if (contentType === "livre" && !selectedCoverFile && !$("#contentCover").value) {
           throw new Error("Choisis l’image de couverture du livre.");
         }
+        if (contentType === "coloriage" && $("#contentStatus").value === "published"
+          && !selectedColoringFile && !$("#contentUrl").value.trim()) {
+          throw new Error("Choisis le fichier du coloriage avant de le publier.");
+        }
         saveButton.disabled = true;
-        saveButton.textContent = selectedBookFile ? "Création du livre…" : selectedCoverFile ? "Envoi de l’image…" : "Enregistrement…";
+        saveButton.textContent = contentType === "coloriage" && selectedColoringFile
+          ? "Préparation du coloriage…"
+          : contentType === "livre" && selectedBookFile
+            ? "Création du livre…"
+            : selectedCoverFile ? "Envoi de l’image…" : "Enregistrement…";
         let coverUrl = $("#contentCover").value;
         if (selectedCoverFile) coverUrl = await KMAuth.uploadCover(selectedCoverFile);
         let contentUrl = $("#contentUrl").value.trim();
-        if (selectedBookFile) {
+        if (contentType === "livre" && selectedBookFile) {
           const pdfUrl = await KMAuth.uploadBook(selectedBookFile);
           contentUrl = `Livre.dc.html?src=${encodeURIComponent(pdfUrl)}&title=${encodeURIComponent($("#contentTitle").value.trim())}`;
+        }
+        if (contentType === "coloriage" && selectedColoringFile) {
+          const coloring = await KMAuth.uploadColoring(selectedColoringFile);
+          contentUrl = `Coloriage.dc.html?src=${encodeURIComponent(coloring.url)}&title=${encodeURIComponent($("#contentTitle").value.trim())}&format=${coloring.kind}`;
+          if (!coverUrl || coverUrl.includes("/content-colorings/")) {
+            coverUrl = coloring.kind === "image" ? coloring.url : "";
+          }
         }
         await KMAuth.saveContent({
           id: $("#contentId").value, title: $("#contentTitle").value, slug: $("#contentSlug").value,
@@ -507,9 +579,13 @@
         if (storedBookUrlToDelete && storedBookUrlToDelete !== contentUrl) {
           await KMAuth.deleteBook(storedBookUrlToDelete);
         }
-        resetContentForm(); await refreshData(); showMessage("Livre créé et enregistré.", true);
+        if (storedColoringUrlToDelete && storedColoringUrlToDelete !== contentUrl) {
+          await KMAuth.deleteColoring(storedColoringUrlToDelete);
+        }
+        resetContentForm(); await refreshData();
+        showMessage(contentType === "coloriage" ? "Coloriage enregistré." : "Livre créé et enregistré.", true);
       } catch (error) { showMessage(KMAuth.friendlyError(error)); }
-      finally { saveButton.disabled = false; saveButton.textContent = "Enregistrer le livre"; }
+      finally { saveButton.disabled = false; updateContentFormForType(); }
     });
     $("#cancelContentEdit").addEventListener("click", resetContentForm);
     $("#contentList").addEventListener("click", async event => {
@@ -524,8 +600,13 @@
         selectedCoverFile = null; $("#contentCoverFile").value = "";
         selectedBookFile = null; $("#contentBookFile").value = "";
         storedBookUrlToDelete = "";
-        $("#contentBookPreview").hidden = !item.url;
-        $("#contentBookName").textContent = item.url ? "Livre actuellement enregistré" : "";
+        selectedColoringFile = null; $("#contentColoringFile").value = "";
+        storedColoringUrlToDelete = "";
+        $("#contentBookPreview").hidden = item.content_type !== "livre" || !item.url;
+        $("#contentBookName").textContent = item.content_type === "livre" && item.url ? "Livre actuellement enregistré" : "";
+        $("#contentColoringPreview").hidden = item.content_type !== "coloriage" || !item.url;
+        $("#contentColoringName").textContent = item.content_type === "coloriage" && item.url ? "Coloriage actuellement enregistré" : "";
+        updateContentFormForType();
         if (item.cover_url) showCoverPreview(item.cover_url, "Couverture actuellement enregistrée");
         else $("#contentCoverPreview").hidden = true;
       }

@@ -372,6 +372,63 @@ window.KMAuth = (() => {
       }
     },
 
+    uploadColoring: async file => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      if (!file) throw new Error("Choisis le fichier du coloriage.");
+      const extension = (file.name.split(".").pop() || "").toLowerCase();
+      const typeByExtension = {
+        jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png",
+        webp: "image/webp", pdf: "application/pdf"
+      };
+      const contentType = file.type || typeByExtension[extension] || "";
+      const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+      if (!allowed.includes(contentType)) {
+        throw new Error("Choisis une image JPG, PNG, WebP ou un PDF.");
+      }
+      if (file.size > 20 * 1024 * 1024) {
+        throw new Error("Le coloriage doit peser moins de 20 Mo.");
+      }
+      const safeName = file.name.replace(/\.[^.]+$/, "").normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "").toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80) || "coloriage";
+      const safeExtension = extension === "jpeg" ? "jpg" : extension;
+      const path = `${session.user.id}/${Date.now()}-${safeName}.${safeExtension}`;
+      const uploaded = await client().storage.from("content-colorings").upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType
+      });
+      requireSuccess(uploaded);
+      const publicUrl = client().storage.from("content-colorings").getPublicUrl(path);
+      return {
+        url: publicUrl.data.publicUrl,
+        kind: contentType === "application/pdf" ? "pdf" : "image"
+      };
+    },
+
+    deleteColoring: async url => {
+      if (!url) return;
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      let source = url;
+      try {
+        const viewerUrl = new URL(url, window.location.href);
+        if (viewerUrl.pathname.endsWith("/Coloriage.dc.html") || viewerUrl.pathname.endsWith("Coloriage.dc.html")) {
+          source = viewerUrl.searchParams.get("src") || "";
+        }
+        const objectUrl = new URL(source);
+        const marker = "/storage/v1/object/public/content-colorings/";
+        const markerIndex = objectUrl.pathname.indexOf(marker);
+        if (objectUrl.hostname !== "pasgxojzybmvbjhuokkk.supabase.co" || markerIndex < 0) return;
+        const path = decodeURIComponent(objectUrl.pathname.slice(markerIndex + marker.length));
+        if (!path) return;
+        requireSuccess(await client().storage.from("content-colorings").remove([path]));
+      } catch (error) {
+        if (error?.message === "Connexion requise.") throw error;
+      }
+    },
+
     listTickets: async () => {
       return requireSuccess(await client().from("support_tickets")
         .select("id,requester_id,subject,category,message,status,priority,staff_note,assigned_to,created_at,updated_at")

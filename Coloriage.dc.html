@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#211e56">
+  <title>Coloriage — Kawaii Muslim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: light; --night:#211e56; --ink:#36345f; --mint:#4fc0a1; --pink:#e789b6; --paper:#f8f6fb; }
+    * { box-sizing: border-box; }
+    html, body { min-width:100%; min-height:100%; margin:0; background:var(--night); }
+    body { font-family:"Nunito",sans-serif; color:#fff; }
+    .coloring-reader { min-height:100dvh; display:grid; grid-template-rows:auto minmax(0,1fr); background:
+      radial-gradient(circle at 12% 18%,rgba(231,137,182,.17),transparent 24%),
+      radial-gradient(circle at 86% 72%,rgba(79,192,161,.15),transparent 25%),
+      linear-gradient(145deg,#17143e,#302968 60%,#211e56); }
+    .coloring-bar {
+      position:sticky; top:0; z-index:10; display:grid; grid-template-columns:auto minmax(0,1fr) auto;
+      align-items:center; gap:12px; min-height:70px;
+      padding:calc(10px + env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));
+      background:rgba(25,22,63,.9); border-bottom:1px solid rgba(255,255,255,.1); backdrop-filter:blur(14px);
+    }
+    .coloring-title { min-width:0; text-align:center; }
+    .coloring-title strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:800 clamp(17px,3vw,23px)/1.1 "Baloo 2",cursive; }
+    .coloring-title small { color:#d6d3ed; }
+    .action {
+      min-height:42px; display:inline-flex; align-items:center; justify-content:center; gap:7px;
+      padding:9px 14px; border:1px solid rgba(255,255,255,.18); border-radius:14px;
+      color:#fff; background:rgba(255,255,255,.1); text-decoration:none; font:900 13px "Nunito",sans-serif; cursor:pointer;
+    }
+    .action.print { border:0; background:linear-gradient(135deg,#66ccb0,#3bac8d); box-shadow:0 9px 24px rgba(59,172,141,.28); }
+    .actions { display:flex; gap:7px; }
+    .coloring-stage { min-height:0; display:grid; place-items:center; padding:clamp(15px,3vw,34px); overflow:auto; }
+    .paper {
+      position:relative; width:min(820px,100%); min-height:min(1000px,calc(100dvh - 138px));
+      display:grid; place-items:center; overflow:hidden; border-radius:12px; background:#fff;
+      box-shadow:0 26px 70px rgba(5,4,24,.5);
+    }
+    .paper img { display:block; width:100%; height:auto; max-height:calc(100dvh - 138px); object-fit:contain; background:#fff; }
+    .paper iframe { width:100%; height:calc(100dvh - 138px); min-height:620px; border:0; background:#fff; }
+    .loading { position:absolute; inset:0; display:grid; place-items:center; color:var(--ink); background:var(--paper); text-align:center; }
+    .loading[hidden] { display:none; }
+    .loading span { display:block; margin-bottom:9px; font-size:38px; }
+    .error { display:none; padding:30px; color:var(--ink); text-align:center; }
+    .error.show { display:block; }
+    .error h1 { font:800 28px "Baloo 2",cursive; }
+    @media (max-width:680px) {
+      .coloring-bar { grid-template-columns:auto minmax(0,1fr); }
+      .actions { grid-column:1/-1; display:grid; grid-template-columns:1fr 1fr; }
+      .coloring-title { text-align:left; }
+      .coloring-title small, .home-label { display:none; }
+      .coloring-stage { padding:12px; }
+      .paper { min-height:calc(100dvh - 126px); }
+      .paper iframe { min-height:calc(100dvh - 126px); height:calc(100dvh - 126px); }
+      .paper img { max-height:none; }
+    }
+    @media print {
+      @page { size:auto; margin:8mm; }
+      html, body, .coloring-reader, .coloring-stage { width:100%; min-height:0; margin:0; padding:0; overflow:visible; background:#fff; }
+      .coloring-bar { display:none !important; }
+      .paper { width:100%; min-height:0; border-radius:0; box-shadow:none; overflow:visible; }
+      .paper img { width:100%; max-width:100%; max-height:calc(100vh - 16mm); object-fit:contain; }
+      .paper iframe, .loading, .error { display:none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="coloring-reader">
+    <header class="coloring-bar">
+      <a class="action" href="Bibliotheque%20Kawaii%20Muslim.dc.html"><span aria-hidden="true">⌂</span><span class="home-label">Bibliothèque</span></a>
+      <div class="coloring-title"><strong id="coloringTitle">Mon coloriage</strong><small>À consulter et à imprimer</small></div>
+      <div class="actions">
+        <button class="action print" id="printButton" type="button"><span aria-hidden="true">🖨</span><span>Imprimer</span></button>
+        <a class="action" id="downloadButton" href="#" download><span aria-hidden="true">⇩</span><span>Télécharger</span></a>
+      </div>
+    </header>
+    <section class="coloring-stage">
+      <article class="paper" id="paper">
+        <div class="loading" id="loading"><div><span aria-hidden="true">🖍️</span><strong>Préparation du coloriage…</strong></div></div>
+        <img id="coloringImage" alt="" hidden>
+        <iframe id="coloringPdf" title="Coloriage au format PDF" hidden></iframe>
+        <div class="error" id="error"><h1>Coloriage indisponible</h1><p>Retourne dans la bibliothèque et réessaie.</p></div>
+      </article>
+    </section>
+  </main>
+  <script>
+    (() => {
+      const params = new URLSearchParams(location.search);
+      const source = params.get("src") || "";
+      const title = (params.get("title") || "Mon coloriage").slice(0,160);
+      const requestedFormat = params.get("format") || "";
+      const allowedHost = "pasgxojzybmvbjhuokkk.supabase.co";
+      const loading = document.getElementById("loading");
+      const image = document.getElementById("coloringImage");
+      const pdf = document.getElementById("coloringPdf");
+      const error = document.getElementById("error");
+      const printButton = document.getElementById("printButton");
+      let sourceUrl;
+      let format;
+      const fail = () => {
+        loading.hidden = true;
+        image.hidden = true;
+        pdf.hidden = true;
+        error.classList.add("show");
+        printButton.disabled = true;
+      };
+      try {
+        sourceUrl = new URL(source);
+        const valid = sourceUrl.protocol === "https:"
+          && sourceUrl.hostname === allowedHost
+          && sourceUrl.pathname.startsWith("/storage/v1/object/public/content-colorings/");
+        if (!valid) throw new Error("Adresse non autorisée");
+        format = requestedFormat === "pdf" || sourceUrl.pathname.toLowerCase().endsWith(".pdf") ? "pdf" : "image";
+        document.title = `${title} — Kawaii Muslim`;
+        document.getElementById("coloringTitle").textContent = title;
+        document.getElementById("downloadButton").href = sourceUrl.href;
+        document.getElementById("downloadButton").download = title;
+        if (format === "pdf") {
+          pdf.src = `${sourceUrl.href}#view=FitH`;
+          pdf.hidden = false;
+          loading.hidden = true;
+        } else {
+          image.alt = title;
+          image.addEventListener("load", () => loading.hidden = true, { once:true });
+          image.addEventListener("error", fail, { once:true });
+          image.src = sourceUrl.href;
+          image.hidden = false;
+        }
+      } catch (exception) {
+        fail();
+      }
+      printButton.addEventListener("click", () => {
+        if (!sourceUrl) return;
+        if (format === "pdf") {
+          window.open(sourceUrl.href, "_blank", "noopener");
+        } else {
+          window.print();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
