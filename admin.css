@@ -86,6 +86,12 @@ body.admin-body { background: var(--admin-bg); }
 .admin-form .wide { grid-column: 1 / -1; }
 .admin-form label { color: var(--admin-muted); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .6px; }
 .admin-form label > * { display: block; width: 100%; margin-top: 5px; }
+.admin-cover-upload { grid-column: 1 / -1; padding: 13px; border: 1px dashed #c9c6dc; border-radius: 15px; background: #faf9fd; }
+.admin-cover-upload input[type="file"] { width: 100%; margin-top: 7px; color: var(--admin-muted); }
+.admin-cover-preview { display: flex; align-items: center; gap: 12px; margin-top: 11px; padding: 10px; border-radius: 13px; background: #fff; border: 1px solid var(--admin-line); }
+.admin-cover-preview[hidden] { display: none; }
+.admin-cover-preview img { width: 82px; height: 82px; object-fit: contain; border-radius: 10px; background: #f0eef6; }
+.admin-cover-preview span { min-width: 0; color: var(--admin-muted); font-size: 12px; overflow-wrap: anywhere; }
 .admin-message { min-height: 20px; color: #aa4358; font-size: 13px; font-weight: 800; margin: 10px 0; }
 .admin-message.success { color: #2b806a; }
 .admin-notice { padding: 14px; border-radius: 15px; color: #3b3d67; background: #f0f1fa; font-size: 13px; }

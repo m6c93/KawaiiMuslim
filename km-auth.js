@@ -305,6 +305,28 @@ window.KMAuth = (() => {
         .eq("id", id).select().single());
     },
 
+    uploadCover: async file => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      if (!file) throw new Error("Choisis une image de couverture.");
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        throw new Error("Choisis une image JPG, PNG ou WebP.");
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error("L’image doit peser moins de 5 Mo.");
+      }
+      const extension = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const path = `${session.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${extension}`;
+      const uploaded = await client().storage.from("content-covers").upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type
+      });
+      requireSuccess(uploaded);
+      const publicUrl = client().storage.from("content-covers").getPublicUrl(path);
+      return publicUrl.data.publicUrl;
+    },
+
     listTickets: async () => {
       return requireSuccess(await client().from("support_tickets")
         .select("id,requester_id,subject,category,message,status,priority,staff_note,assigned_to,created_at,updated_at")

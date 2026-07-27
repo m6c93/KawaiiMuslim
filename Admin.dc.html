@@ -91,15 +91,25 @@
             <form class="admin-form" id="contentForm">
               <input type="hidden" id="contentId">
               <label class="wide">Titre<input class="admin-input" id="contentTitle" maxlength="160" required></label>
-              <label>Identifiant<input class="admin-input" id="contentSlug" maxlength="120" placeholder="mon-contenu" required></label>
+              <label>Identifiant automatique<input class="admin-input" id="contentSlug" maxlength="120" placeholder="Créé depuis le titre" required></label>
               <label>Type<select class="admin-select" id="contentType"><option value="livre">Livre</option><option value="coloriage">Coloriage</option><option value="quiz">Quiz</option><option value="audio">Audio</option><option value="planner">Planner</option><option value="activite">Activité</option></select></label>
               <label>Public<select class="admin-select" id="contentAudience"><option value="famille">Famille</option><option value="maman">Maman</option><option value="enfant">Enfant</option></select></label>
               <label>Statut<select class="admin-select" id="contentStatus"><option value="draft">Brouillon</option><option value="published">Publié</option><option value="archived">Archivé</option></select></label>
-              <label class="wide">Description<textarea class="admin-textarea" id="contentDescription" maxlength="600"></textarea></label>
-              <label class="wide">Lien<input class="admin-input" id="contentUrl" placeholder="books/mon-livre.html"></label>
-              <label class="wide">Image de couverture<input class="admin-input" id="contentCover" placeholder="brand/assets/cover.png"></label>
+              <label class="wide">Description<textarea class="admin-textarea" id="contentDescription" maxlength="600" required placeholder="Présente le livre en quelques phrases…"></textarea></label>
+              <label class="wide">Lien de lecture <small>(facultatif)</small><input class="admin-input" id="contentUrl" placeholder="Laisse vide si le livre arrive bientôt"></label>
+              <div class="admin-cover-upload">
+                <label for="contentCoverFile">Image de couverture</label>
+                <input id="contentCoverFile" type="file" accept="image/jpeg,image/png,image/webp">
+                <input id="contentCover" type="hidden">
+                <small>JPG, PNG ou WebP · 5 Mo maximum. L’image sera conservée automatiquement.</small>
+                <div class="admin-cover-preview" id="contentCoverPreview" hidden>
+                  <img id="contentCoverImage" alt="Aperçu de la couverture">
+                  <span id="contentCoverName"></span>
+                  <button class="admin-button secondary" id="removeCover" type="button">Retirer</button>
+                </div>
+              </div>
               <label>Ordre<input class="admin-input" id="contentOrder" type="number" value="0"></label>
-              <div class="admin-actions wide"><button class="admin-button" type="submit">Enregistrer</button><button class="admin-button secondary" id="cancelContentEdit" type="button">Nouveau</button></div>
+              <div class="admin-actions wide"><button class="admin-button" id="saveContentButton" type="submit">Enregistrer le livre</button><button class="admin-button secondary" id="cancelContentEdit" type="button">Nouveau</button></div>
             </form>
           </article>
           <article class="admin-card" style="grid-column:span 8">
@@ -205,6 +215,8 @@
     };
     const state = { context: null, families: [], content: [], tickets: [], logs: [], settings: [] };
     let pendingCriticalAction = null;
+    let selectedCoverFile = null;
+    let coverObjectUrl = null;
 
     const permissions = () => ({
       families: ["admin", "support"].includes(state.context.profile.role),
@@ -218,6 +230,8 @@
       if (text) window.scrollTo({ top: 0, behavior: "smooth" });
     };
     const formatDate = value => new Date(value).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
+    const slugify = value => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 120);
 
     const switchView = name => {
       $$(".admin-tab").forEach(button => button.classList.toggle("active", button.dataset.view === name));
@@ -319,7 +333,20 @@
 
     const resetContentForm = () => {
       $("#contentForm").reset(); $("#contentId").value = ""; $("#contentOrder").value = "0";
+      $("#contentCover").value = "";
+      selectedCoverFile = null;
+      if (coverObjectUrl) URL.revokeObjectURL(coverObjectUrl);
+      coverObjectUrl = null;
+      $("#contentCoverPreview").hidden = true;
+      $("#contentCoverImage").removeAttribute("src");
+      $("#contentCoverName").textContent = "";
       $("#contentFormTitle").textContent = "Ajouter un contenu";
+    };
+
+    const showCoverPreview = (url, name) => {
+      $("#contentCoverImage").src = url;
+      $("#contentCoverName").textContent = name || "Couverture enregistrée";
+      $("#contentCoverPreview").hidden = false;
     };
 
     const requestPassword = action => {
@@ -374,6 +401,22 @@
     ["familySearch","familyStatusFilter"].forEach(id => $(`#${id}`).addEventListener("input", renderFamilies));
     ["contentSearch","contentStatusFilter"].forEach(id => $(`#${id}`).addEventListener("input", renderContent));
     $("#ticketFilter").addEventListener("change", renderTickets);
+    $("#contentTitle").addEventListener("input", () => {
+      if (!$("#contentId").value) $("#contentSlug").value = slugify($("#contentTitle").value);
+    });
+    $("#contentCoverFile").addEventListener("change", event => {
+      const file = event.target.files?.[0] || null;
+      selectedCoverFile = file;
+      if (coverObjectUrl) URL.revokeObjectURL(coverObjectUrl);
+      coverObjectUrl = file ? URL.createObjectURL(file) : null;
+      if (file) showCoverPreview(coverObjectUrl, `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} Mo`);
+      else $("#contentCoverPreview").hidden = !$("#contentCover").value;
+    });
+    $("#removeCover").addEventListener("click", () => {
+      selectedCoverFile = null; $("#contentCoverFile").value = ""; $("#contentCover").value = "";
+      if (coverObjectUrl) URL.revokeObjectURL(coverObjectUrl);
+      coverObjectUrl = null; $("#contentCoverPreview").hidden = true;
+    });
 
     const handleFamilyAction = event => {
       const planButton = event.target.closest("[data-family-plan]");
@@ -400,15 +443,24 @@
 
     $("#contentForm").addEventListener("submit", async event => {
       event.preventDefault();
+      const saveButton = $("#saveContentButton");
       try {
+        if ($("#contentType").value === "livre" && !selectedCoverFile && !$("#contentCover").value) {
+          throw new Error("Choisis l’image de couverture du livre.");
+        }
+        saveButton.disabled = true;
+        saveButton.textContent = selectedCoverFile ? "Envoi de l’image…" : "Enregistrement…";
+        let coverUrl = $("#contentCover").value;
+        if (selectedCoverFile) coverUrl = await KMAuth.uploadCover(selectedCoverFile);
         await KMAuth.saveContent({
           id: $("#contentId").value, title: $("#contentTitle").value, slug: $("#contentSlug").value,
           content_type: $("#contentType").value, audience: $("#contentAudience").value,
           status: $("#contentStatus").value, description: $("#contentDescription").value,
-          url: $("#contentUrl").value, cover_url: $("#contentCover").value, sort_order: $("#contentOrder").value
+          url: $("#contentUrl").value, cover_url: coverUrl, sort_order: $("#contentOrder").value
         });
         resetContentForm(); await refreshData(); showMessage("Contenu enregistré.", true);
       } catch (error) { showMessage(KMAuth.friendlyError(error)); }
+      finally { saveButton.disabled = false; saveButton.textContent = "Enregistrer le livre"; }
     });
     $("#cancelContentEdit").addEventListener("click", resetContentForm);
     $("#contentList").addEventListener("click", async event => {
@@ -420,6 +472,9 @@
         $("#contentType").value = item.content_type; $("#contentAudience").value = item.audience; $("#contentStatus").value = item.status;
         $("#contentDescription").value = item.description; $("#contentUrl").value = item.url; $("#contentCover").value = item.cover_url;
         $("#contentOrder").value = item.sort_order; $("#contentFormTitle").textContent = "Modifier le contenu";
+        selectedCoverFile = null; $("#contentCoverFile").value = "";
+        if (item.cover_url) showCoverPreview(item.cover_url, "Couverture actuellement enregistrée");
+        else $("#contentCoverPreview").hidden = true;
       }
       if (archive) {
         await KMAuth.archiveContent(archive.dataset.contentArchive, archive.dataset.restore === "true");
