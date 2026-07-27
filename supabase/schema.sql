@@ -8,7 +8,7 @@ create table if not exists public.profiles (
   email text not null,
   full_name text not null default '',
   avatar text not null default '🌸',
-  role text not null default 'parent' check (role in ('parent', 'admin')),
+  role text not null default 'parent' check (role in ('parent', 'admin', 'content_admin', 'support')),
   plan text not null default 'gratuit' check (plan in ('gratuit', 'mensuel', 'annuel')),
   is_active boolean not null default true,
   created_at timestamptz not null default now(),
@@ -124,10 +124,11 @@ create policy "profile_update_own"
   with check (id = auth.uid() and is_active = true);
 
 drop policy if exists "children_read_family_or_admin" on public.child_profiles;
-create policy "children_read_family_or_admin"
+drop policy if exists "children_read_own_family" on public.child_profiles;
+create policy "children_read_own_family"
   on public.child_profiles for select
   to authenticated
-  using (parent_id = auth.uid() or public.is_admin());
+  using (parent_id = auth.uid());
 
 drop policy if exists "children_create_by_parent" on public.child_profiles;
 create policy "children_create_by_parent"
@@ -136,23 +137,26 @@ create policy "children_create_by_parent"
   with check (parent_id = auth.uid());
 
 drop policy if exists "children_update_by_parent_or_admin" on public.child_profiles;
-create policy "children_update_by_parent_or_admin"
+drop policy if exists "children_update_by_parent" on public.child_profiles;
+create policy "children_update_by_parent"
   on public.child_profiles for update
   to authenticated
-  using (parent_id = auth.uid() or public.is_admin())
-  with check (parent_id = auth.uid() or public.is_admin());
+  using (parent_id = auth.uid())
+  with check (parent_id = auth.uid());
 
 drop policy if exists "children_delete_by_parent_or_admin" on public.child_profiles;
-create policy "children_delete_by_parent_or_admin"
+drop policy if exists "children_delete_by_parent" on public.child_profiles;
+create policy "children_delete_by_parent"
   on public.child_profiles for delete
   to authenticated
-  using (parent_id = auth.uid() or public.is_admin());
+  using (parent_id = auth.uid());
 
 drop policy if exists "planner_family_or_admin" on public.planner_days;
-create policy "planner_family_or_admin"
+drop policy if exists "planner_owner_only" on public.planner_days;
+create policy "planner_owner_only"
   on public.planner_days for all
   to authenticated
-  using (owner_id = auth.uid() or public.is_admin())
+  using (owner_id = auth.uid())
   with check (
     owner_id = auth.uid()
     and (
