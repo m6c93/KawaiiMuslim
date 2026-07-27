@@ -195,7 +195,7 @@
     }
     .journey {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 8px;
       padding: 12px;
       border: 1px solid rgba(68, 65, 119, .1);
@@ -214,7 +214,9 @@
       color: var(--muted);
       font-size: 12px;
       font-weight: 800;
+      min-width: 0;
     }
+    .journey-label { min-width: 0; line-height: 1.2; }
     .journey-step.done { color: #443965; background: #faf0f6; }
     .step-number {
       flex: 0 0 28px;
@@ -326,6 +328,23 @@
     .reminder-kicker { margin: 0; color: #a67620; font-size: 10px; font-weight: 900; letter-spacing: 1.3px; text-transform: uppercase; }
     .reminder-text { margin: 4px 0 0; color: #3f4165; font-size: 14px; font-weight: 700; line-height: 1.55; }
     .reminder-action { margin: 10px 0 0; color: #8a4870; font-size: 12px; line-height: 1.5; }
+    .reminder-source {
+      display: inline-flex;
+      margin: 10px 0 0;
+      padding: 5px 9px;
+      color: #725415;
+      font-size: 10px;
+      font-weight: 900;
+      border: 1px solid rgba(166, 118, 32, .2);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .72);
+    }
+    .source-note {
+      margin: 12px 0 0;
+      color: #9895a8;
+      font-size: 10px;
+      line-height: 1.5;
+    }
 
     .planner-sections { display: grid; gap: 22px; }
     .planner-block {
@@ -603,6 +622,128 @@
       border: 1px dashed #dedbe9;
       border-radius: 16px;
     }
+    .memory {
+      position: relative;
+      padding-right: 95px;
+    }
+    .memory-edit {
+      position: absolute;
+      top: 9px;
+      right: 10px;
+      cursor: pointer;
+      padding: 6px 9px;
+      color: #8a4870;
+      font-size: 10px;
+      font-weight: 900;
+      border-radius: 13px;
+      background: #fff0f7;
+    }
+
+    .calendar-card { margin-bottom: 24px; }
+    .calendar-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(250px, .65fr);
+      gap: 22px;
+      align-items: stretch;
+    }
+    .calendar-shell {
+      padding: 16px;
+      border: 1px solid #eceaf3;
+      border-radius: 22px;
+      background: #fcfbfd;
+    }
+    .calendar-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .calendar-nav strong {
+      font-family: "Baloo 2", cursive;
+      font-size: 19px;
+      text-transform: capitalize;
+    }
+    .month-button, .today-button {
+      cursor: pointer;
+      min-height: 36px;
+      padding: 7px 12px;
+      color: #575a83;
+      font-size: 11px;
+      font-weight: 900;
+      border: 1px solid #e4e1ed;
+      border-radius: 18px;
+      background: #fff;
+    }
+    .month-button:disabled { cursor: default; opacity: .35; }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+    }
+    .weekday {
+      padding: 3px 0 5px;
+      color: #9a9cb5;
+      font-size: 9px;
+      font-weight: 900;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .calendar-day {
+      position: relative;
+      cursor: pointer;
+      aspect-ratio: 1;
+      min-width: 0;
+      color: #5e6083;
+      font-size: 11px;
+      font-weight: 900;
+      border: 1px solid transparent;
+      border-radius: 13px;
+      background: #fff;
+    }
+    .calendar-day:hover { border-color: #e9bfd3; }
+    .calendar-day.is-today { border-color: #efc5d8; }
+    .calendar-day.is-selected {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(145deg, var(--pink), #c85f94);
+      box-shadow: 0 7px 16px rgba(226, 127, 174, .24);
+    }
+    .calendar-day.has-data::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 4px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--mint);
+      transform: translateX(-50%);
+    }
+    .calendar-day.is-selected::after { background: #fff; }
+    .calendar-day:disabled { cursor: default; color: #d2d0dc; background: transparent; }
+    .calendar-empty { aspect-ratio: 1; }
+    .day-summary {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 22px;
+      color: #fff;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 100% 0, rgba(240, 174, 202, .34), transparent 15rem),
+        linear-gradient(145deg, #33419a, #20285e);
+    }
+    .day-summary small {
+      color: var(--gold-soft);
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .day-summary h3 { margin: 6px 0 0; font-size: 24px; line-height: 1.1; }
+    .day-summary p { margin: 9px 0 16px; color: #d4d7ee; font-size: 12px; line-height: 1.55; }
+    .day-summary .today-button { align-self: flex-start; color: #3f4165; border: 0; }
 
     .promise {
       position: relative;
@@ -651,7 +792,9 @@
     @media (max-width: 930px) {
       .grid { grid-template-columns: 1fr; }
       .sky-card { position: relative; top: 0; }
-      .journey { overflow-x: auto; grid-template-columns: repeat(5, minmax(150px, 1fr)); }
+      .journey { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .journey-step { justify-content: center; gap: 6px; padding: 8px 5px; text-align: center; }
+      .calendar-layout { grid-template-columns: 1fr; }
     }
     @media (max-width: 700px) {
       .top { padding: 16px 18px 62px; }
@@ -666,12 +809,24 @@
       .field-grid, .spiritual-grid { grid-template-columns: 1fr; }
       .card { border-radius: 23px; }
       .memory { grid-template-columns: 1fr; gap: 4px; }
+      .journey-wrap { padding: 0 10px; }
+      .journey { gap: 4px; padding: 7px; border-radius: 20px; }
+      .journey-step { min-height: 50px; padding: 6px 2px; }
+      .journey-label { font-size: 9px; }
+      .step-number { flex-basis: 24px; width: 24px; height: 24px; font-size: 10px; }
+      .calendar-card { padding-inline: 16px; }
+      .calendar-shell { padding: 11px; }
+      .calendar-grid { gap: 4px; }
+      .calendar-day { border-radius: 10px; }
     }
     @media (max-width: 430px) {
       .brand-sub, .back span { display: none; }
       .section-head { display: block; }
       .gentle-tag { display: inline-block; margin-top: 10px; }
       .reflection-actions { align-items: flex-start; flex-direction: column; }
+      .journey-label { display: none; }
+      .journey-step { min-height: 42px; }
+      .memory { padding-right: 82px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
@@ -701,7 +856,7 @@
           <h1>Mon Planner Cocon</h1>
           <p class="hero-copy">Organise l’essentiel, dépose ce qui pèse et garde un petit moment avec Allah — sans pression, un pas doux à la fois.</p>
         </div>
-        <div class="date-card" aria-label="Date du jour">
+        <div class="date-card" aria-label="Journée affichée">
           <strong id="dayLabel"></strong>
           <span id="fullDate"></span>
         </div>
@@ -710,15 +865,42 @@
 
     <div class="journey-wrap">
       <div class="journey" aria-label="Parcours quotidien">
-        <div class="journey-step" data-step="mood"><span class="step-number">1</span> Mon émotion</div>
-        <div class="journey-step" data-step="reminder"><span class="step-number">2</span> Mon rappel</div>
-        <div class="journey-step" data-step="priorities"><span class="step-number">3</span> Mes priorités</div>
-        <div class="journey-step" data-step="challenge"><span class="step-number">4</span> Mon défi doux</div>
-        <div class="journey-step" data-step="reflection"><span class="step-number">5</span> Ma réflexion</div>
+        <div class="journey-step" data-step="mood"><span class="step-number">1</span><span class="journey-label">Mon émotion</span></div>
+        <div class="journey-step" data-step="reminder"><span class="step-number">2</span><span class="journey-label">Mon rappel</span></div>
+        <div class="journey-step" data-step="priorities"><span class="step-number">3</span><span class="journey-label">Mes priorités</span></div>
+        <div class="journey-step" data-step="challenge"><span class="step-number">4</span><span class="journey-label">Mon défi doux</span></div>
+        <div class="journey-step" data-step="reflection"><span class="step-number">5</span><span class="journey-label">Ma réflexion</span></div>
       </div>
     </div>
 
     <main>
+      <section class="card calendar-card" aria-labelledby="calendarTitle">
+        <div class="section-head">
+          <div>
+            <span class="section-index">Mon calendrier cocon</span>
+            <h2 id="calendarTitle">Retrouver mes journées</h2>
+            <p class="section-note">Choisis une date passée pour relire ou modifier ton planner. Le petit point vert indique une journée commencée.</p>
+          </div>
+          <span class="gentle-tag">Ton histoire, à ton rythme</span>
+        </div>
+        <div class="calendar-layout">
+          <div class="calendar-shell">
+            <div class="calendar-nav">
+              <button class="month-button" id="previousMonth" type="button" aria-label="Mois précédent">←</button>
+              <strong id="calendarMonth"></strong>
+              <button class="month-button" id="nextMonth" type="button" aria-label="Mois suivant">→</button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid" aria-label="Calendrier du planner"></div>
+          </div>
+          <div class="day-summary">
+            <small>Journée sélectionnée</small>
+            <h3 id="selectedDayTitle"></h3>
+            <p id="selectedDaySummary"></p>
+            <button class="today-button" id="todayButton" type="button">Revenir à aujourd’hui</button>
+          </div>
+        </div>
+      </section>
+
       <div class="grid">
         <div class="stack">
           <section class="card" aria-labelledby="moodTitle">
@@ -743,9 +925,11 @@
               <div>
                 <p class="reminder-kicker">Ton rappel tout doux</p>
                 <p class="reminder-text" id="reminderText"></p>
+                <p class="reminder-source" id="reminderSource"></p>
                 <p class="reminder-action" id="reminderAction"></p>
               </div>
             </div>
+            <p class="source-note">Les références indiquent la sourate et le verset du rappel. Les traductions françaises expriment le sens rapproché.</p>
           </section>
 
           <section class="card" aria-labelledby="plannerTitle">
@@ -866,41 +1050,53 @@
     (() => {
       const STORAGE_KEY = "km-planner-cocon-v1";
       const today = new Date();
-      const dateKey = [
-        today.getFullYear(),
-        String(today.getMonth() + 1).padStart(2, "0"),
-        String(today.getDate()).padStart(2, "0")
+      today.setHours(12, 0, 0, 0);
+
+      const toDateKey = date => [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0")
       ].join("-");
+      const fromDateKey = key => new Date(`${key}T12:00:00`);
+      const todayKey = toDateKey(today);
+      let selectedDateKey = todayKey;
+      let calendarCursor = new Date(today.getFullYear(), today.getMonth(), 1, 12);
 
       const moods = {
         fatiguee: {
           icon: "🌙",
-          text: "Allah voit les efforts que personne ne remarque. Aujourd’hui, avancer doucement est déjà avancer.",
+          text: "« À côté de la difficulté est, certes, une facilité. À côté de la difficulté est, certes, une facilité. »",
+          reference: "Coran — Sourate Ash-Sharh, 94:5-6",
           action: "Petite action : pose une main sur ton cœur, respire trois fois et accorde-toi dix minutes sans culpabilité."
         },
         debordee: {
           icon: "🤍",
-          text: "« Allah n’impose à aucune âme une charge supérieure à sa capacité. » — Coran 2:286",
+          text: "« Allah n’impose à aucune âme une charge supérieure à sa capacité. »",
+          reference: "Coran — Sourate Al-Baqara, 2:286",
           action: "Petite action : choisis une seule priorité maintenant, puis répète doucement trois fois : Al-hamdoulillah."
         },
         triste: {
           icon: "🌦️",
-          text: "« À côté de la difficulté est, certes, une facilité. » — Coran 94:5",
+          text: "« Ne t’afflige pas, car Allah est avec nous. »",
+          reference: "Coran — Sourate At-Tawbah, 9:40",
           action: "Petite action : confie à Allah ce qui pèse dans ton cœur, même avec quelques mots seulement."
         },
         reconnaissante: {
           icon: "✨",
-          text: "« Si vous êtes reconnaissants, très certainement J’augmenterai Mes bienfaits pour vous. » — Coran 14:7",
+          text: "« Si vous êtes reconnaissants, très certainement J’augmenterai Mes bienfaits pour vous. »",
+          reference: "Coran — Sourate Ibrahim, 14:7",
           action: "Petite action : nomme trois petites choses qui ont apporté de la douceur à ta journée."
         },
         apaisee: {
           icon: "🕊️",
-          text: "« C’est par l’évocation d’Allah que les cœurs se tranquillisent. » — Coran 13:28",
+          text: "« C’est par l’évocation d’Allah que les cœurs se tranquillisent. »",
+          reference: "Coran — Sourate Ar-Ra’d, 13:28",
           action: "Petite action : garde ce calme un instant et fais un dhikr lentement, sans te presser."
         },
         motivee: {
           icon: "🌱",
-          text: "Une intention sincère peut transformer les gestes ordinaires d’une maman en actes précieux.",
+          text: "« L’homme n’obtient que le fruit de ses efforts. »",
+          reference: "Coran — Sourate An-Najm, 53:39",
           action: "Petite action : commence par ce qui compte le plus et dis Bismillah avant ton premier pas."
         }
       };
@@ -931,6 +1127,16 @@
         reflectionSaved: false
       });
 
+      const normalizeDay = stored => {
+        const normalized = { ...defaultDay(), ...(stored || {}) };
+        normalized.priorities = [0, 1, 2].map(index => ({
+          ...defaultDay().priorities[index],
+          ...(normalized.priorities?.[index] || {})
+        }));
+        normalized.spiritual = Array.isArray(normalized.spiritual) ? normalized.spiritual : [];
+        return normalized;
+      };
+
       const loadAll = () => {
         try {
           const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
@@ -941,71 +1147,88 @@
       };
 
       let allData = loadAll();
-      let day = { ...defaultDay(), ...(allData.days?.[dateKey] || {}) };
-      day.priorities = [0, 1, 2].map(i => ({
-        ...defaultDay().priorities[i],
-        ...(day.priorities?.[i] || {})
-      }));
-      day.spiritual = Array.isArray(day.spiritual) ? day.spiritual : [];
-      allData.days = allData.days || {};
+      allData.days = allData.days && typeof allData.days === "object" ? allData.days : {};
       allData.memories = Array.isArray(allData.memories) ? allData.memories : [];
+      let day = normalizeDay(allData.days[selectedDateKey]);
 
       const $ = selector => document.querySelector(selector);
       const $$ = selector => [...document.querySelectorAll(selector)];
       const savedPill = $("#savedPill");
       let saveTimer;
 
+      const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+      })[character]);
+
       const setSaveState = state => {
         savedPill.classList.toggle("saving", state === "saving");
         savedPill.textContent = state === "saving" ? "• Sauvegarde…" : "✓ Tout est sauvegardé";
       };
 
+      const hasDayContent = value => Boolean(
+        value?.mood ||
+        value?.priorities?.some(item => item.text?.trim()) ||
+        value?.appointment ||
+        value?.selfCare ||
+        value?.spiritual?.length ||
+        value?.challengeDone ||
+        value?.reflection?.trim()
+      );
+
+      const computeStarsFor = value => {
+        const priorities = value.priorities.filter(item => item.done && item.text.trim()).length;
+        const spiritual = value.spiritual.length > 0 ? 1 : 0;
+        const challenge = value.challengeDone ? 1 : 0;
+        const reflection = value.reflectionSaved && value.reflection.trim() ? 1 : 0;
+        return Math.min(6, priorities + spiritual + challenge + reflection);
+      };
+
       const persist = () => {
         setSaveState("saving");
-        allData.days[dateKey] = day;
+        allData.days[selectedDateKey] = day;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
+        renderCalendar();
+        updateDaySummary();
         clearTimeout(saveTimer);
         saveTimer = setTimeout(() => setSaveState("saved"), 320);
       };
 
       const toast = message => {
-        const el = $("#toast");
-        el.textContent = message;
-        el.classList.add("show");
-        setTimeout(() => el.classList.remove("show"), 2200);
+        const element = $("#toast");
+        element.textContent = message;
+        element.classList.add("show");
+        setTimeout(() => element.classList.remove("show"), 2200);
       };
 
       const setDates = () => {
-        $("#dayLabel").textContent = today.toLocaleDateString("fr-FR", { weekday: "long" });
-        $("#fullDate").textContent = today.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+        const selectedDate = fromDateKey(selectedDateKey);
+        $("#dayLabel").textContent = selectedDate.toLocaleDateString("fr-FR", { weekday: "long" });
+        $("#fullDate").textContent = selectedDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
       };
 
-      const setMood = mood => {
-        day.mood = mood;
+      const displayMood = mood => {
         $$(".mood").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.mood === mood)));
         const content = moods[mood];
         if (content) {
           $("#reminderIcon").textContent = content.icon;
           $("#reminderText").textContent = content.text;
+          $("#reminderSource").textContent = content.reference;
           $("#reminderAction").textContent = content.action;
           $("#reminder").classList.add("show");
         } else {
           $("#reminder").classList.remove("show");
         }
+      };
+
+      const setMood = mood => {
+        day.mood = mood;
+        displayMood(mood);
         persist();
         updateProgress();
       };
 
-      const computeStars = () => {
-        const priorities = day.priorities.filter(item => item.done && item.text.trim()).length;
-        const spiritual = day.spiritual.length > 0 ? 1 : 0;
-        const challenge = day.challengeDone ? 1 : 0;
-        const reflection = day.reflectionSaved && day.reflection.trim() ? 1 : 0;
-        return Math.min(6, priorities + spiritual + challenge + reflection);
-      };
-
       const updateProgress = () => {
-        const stars = computeStars();
+        const stars = computeStarsFor(day);
         $$(".star").forEach((star, index) => star.classList.toggle("lit", index < stars));
         $("#starCount").textContent = stars;
         $("#skyMessage").textContent = stars === 0
@@ -1028,27 +1251,68 @@
         });
       };
 
+      const updateDaySummary = () => {
+        const selectedDate = fromDateKey(selectedDateKey);
+        const stars = computeStarsFor(day);
+        const isToday = selectedDateKey === todayKey;
+        $("#selectedDayTitle").textContent = selectedDate.toLocaleDateString("fr-FR", {
+          weekday: "long", day: "numeric", month: "long"
+        });
+        $("#selectedDaySummary").textContent = hasDayContent(day)
+          ? `${stars} étoile${stars > 1 ? "s" : ""} allumée${stars > 1 ? "s" : ""}. Tu peux relire ou modifier cette journée quand tu le souhaites.`
+          : "Cette page est encore toute neuve. Tu peux y déposer ce qui compte pour toi.";
+        $("#todayButton").hidden = isToday;
+      };
+
+      const renderCalendar = () => {
+        const grid = $("#calendarGrid");
+        const year = calendarCursor.getFullYear();
+        const month = calendarCursor.getMonth();
+        const firstDay = new Date(year, month, 1, 12);
+        const daysInMonth = new Date(year, month + 1, 0, 12).getDate();
+        const startOffset = (firstDay.getDay() + 6) % 7;
+        const weekdays = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+        const pieces = weekdays.map(dayName => `<span class="weekday">${dayName}</span>`);
+
+        for (let index = 0; index < startOffset; index += 1) pieces.push('<span class="calendar-empty"></span>');
+        for (let dateNumber = 1; dateNumber <= daysInMonth; dateNumber += 1) {
+          const current = new Date(year, month, dateNumber, 12);
+          const key = toDateKey(current);
+          const storedDay = normalizeDay(allData.days[key]);
+          const classes = [
+            "calendar-day",
+            key === todayKey ? "is-today" : "",
+            key === selectedDateKey ? "is-selected" : "",
+            hasDayContent(storedDay) ? "has-data" : ""
+          ].filter(Boolean).join(" ");
+          const disabled = key > todayKey ? " disabled" : "";
+          const label = current.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+          pieces.push(`<button class="${classes}" type="button" data-date="${key}" aria-label="${escapeHtml(label)}"${disabled}>${dateNumber}</button>`);
+        }
+        grid.innerHTML = pieces.join("");
+        $("#calendarMonth").textContent = firstDay.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+        const nextMonth = new Date(year, month + 1, 1, 12);
+        const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1, 12);
+        $("#nextMonth").disabled = nextMonth > currentMonth;
+      };
+
       const renderMemories = () => {
-        const memories = [...allData.memories].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+        const memories = [...allData.memories].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
         const wrap = $("#memories");
         if (!memories.length) {
           wrap.innerHTML = '<p class="empty-memory">Tes futures réflexions apparaîtront ici, comme de petits souvenirs datés.</p>';
           return;
         }
         wrap.innerHTML = memories.map(memory => {
-          const date = new Date(memory.date + "T12:00:00");
+          const date = fromDateKey(memory.date);
           const label = date.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
-          const safeText = memory.text.replace(/[&<>"']/g, char => ({
-            "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
-          })[char]);
-          return `<article class="memory"><time datetime="${memory.date}">${label}</time><p>${safeText}</p></article>`;
+          return `<article class="memory"><time datetime="${memory.date}">${label}</time><p>${escapeHtml(memory.text)}</p><button class="memory-edit" type="button" data-date="${memory.date}">Ouvrir</button></article>`;
         }).join("");
       };
 
-      const hydrate = () => {
+      const renderDay = () => {
         setDates();
-        if (day.mood) setMood(day.mood);
-
+        displayMood(day.mood);
         $$(".priority-text").forEach(input => {
           input.value = day.priorities[Number(input.dataset.index)].text;
         });
@@ -1061,14 +1325,26 @@
         $$(".spiritual").forEach(input => input.checked = day.spiritual.includes(input.value));
         $("#reflection").value = day.reflection;
 
-        const challengeIndex = Math.floor(new Date(dateKey + "T12:00:00").getTime() / 86400000) % challenges.length;
+        const challengeIndex = Math.abs(Math.floor(fromDateKey(selectedDateKey).getTime() / 86400000)) % challenges.length;
         $("#challengeText").textContent = challenges[challengeIndex];
         $("#challengeDone").classList.toggle("done", day.challengeDone);
         $("#challengeDone").textContent = day.challengeDone ? "★ Mon étoile est allumée" : "☆ J’ai fait mon petit pas";
 
         renderMemories();
+        renderCalendar();
         updateProgress();
+        updateDaySummary();
         setSaveState("saved");
+      };
+
+      const selectDay = key => {
+        if (!key || key > todayKey) return;
+        selectedDateKey = key;
+        day = normalizeDay(allData.days[selectedDateKey]);
+        const selectedDate = fromDateKey(key);
+        calendarCursor = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1, 12);
+        renderDay();
+        window.scrollTo({ top: 0, behavior: "smooth" });
       };
 
       $$(".mood").forEach(button => button.addEventListener("click", () => setMood(button.dataset.mood)));
@@ -1132,8 +1408,8 @@
           return;
         }
         day.reflectionSaved = true;
-        const existing = allData.memories.findIndex(item => item.date === dateKey);
-        const memory = { date: dateKey, text };
+        const existing = allData.memories.findIndex(item => item.date === selectedDateKey);
+        const memory = { date: selectedDateKey, text };
         if (existing >= 0) allData.memories[existing] = memory;
         else allData.memories.push(memory);
         persist();
@@ -1142,7 +1418,25 @@
         toast("Ton souvenir est gardé avec douceur 🌙");
       });
 
-      hydrate();
+      $("#calendarGrid").addEventListener("click", event => {
+        const button = event.target.closest("[data-date]");
+        if (button && !button.disabled) selectDay(button.dataset.date);
+      });
+      $("#previousMonth").addEventListener("click", () => {
+        calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() - 1, 1, 12);
+        renderCalendar();
+      });
+      $("#nextMonth").addEventListener("click", () => {
+        calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + 1, 1, 12);
+        renderCalendar();
+      });
+      $("#todayButton").addEventListener("click", () => selectDay(todayKey));
+      $("#memories").addEventListener("click", event => {
+        const button = event.target.closest(".memory-edit");
+        if (button) selectDay(button.dataset.date);
+      });
+
+      renderDay();
     })();
   </script>
 </body>
