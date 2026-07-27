@@ -165,6 +165,10 @@
         </div>
       </div>
 
+      <sc-if value="{{ announcement }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-bottom:22px; padding:13px 18px; border:1px solid rgba(240,181,63,.45); border-radius:16px; color:#fff5cf; background:rgba(240,181,63,.13); font-size:13px; font-weight:700;">📣 {{ announcement }}</div>
+      </sc-if>
+
       <!-- PARENT SPACE -->
       <sc-if value="{{ parentSpace }}" hint-placeholder-val="{{ false }}">
         <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:30px;">
@@ -313,24 +317,31 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1312,&quot;height&quot;:872},&quot;defaultProfile&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;demander&quot;,&quot;enfant&quot;,&quot;maman&quot;],&quot;default&quot;:&quot;demander&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;},&quot;parentSpace&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;},&quot;subscribed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;}}">
 class Component extends DCLogic {
-  state = { profile: null, profileName: '', profileEmoji: '', subscribed: true, showPaywall: false };
+  state = { profile: null, profileName: '', profileEmoji: '', subscribed: false, showPaywall: false, catalog: null, announcement: '' };
 
   componentDidMount() {
-    this.setState({ subscribed: this.props.subscribed ?? true });
     if (!window.KMAuth) {
       window.location.href = 'Connexion.dc.html';
       return;
     }
-    window.KMAuth.getContext().then((context) => {
+    Promise.all([
+      window.KMAuth.getContext(),
+      window.KMAuth.listContent().catch(() => null),
+      window.KMAuth.getSettings().catch(() => [])
+    ]).then(([context, catalog, settings]) => {
       if (!context) {
         window.location.href = 'Connexion.dc.html';
         return;
       }
       const active = window.KMAuth.validateActiveProfile(context);
+      const staffAccess = ['admin', 'support', 'content_admin'].includes(context.profile.role);
       this.setState({
         profile: active.type === 'child' ? 'enfant' : 'maman',
         profileName: active.name || (active.type === 'child' ? 'Mon enfant' : 'Maman'),
         profileEmoji: active.avatar || (active.type === 'child' ? '🐤' : '🌸'),
+        subscribed: staffAccess || ['mensuel', 'annuel'].includes(context.profile.plan),
+        catalog,
+        announcement: settings.find((item) => item.key === 'announcement')?.value || '',
       });
     }).catch(() => {
       window.location.href = 'Connexion.dc.html';
@@ -351,7 +362,24 @@ class Component extends DCLogic {
       { title: 'Les animaux du Coran', sub: 'À la rencontre des créatures d\u2019Allah', cover: 'brand/assets/cover-animaux-coran.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/animaux-du-coran.html', grad: '', emoji: '' },
       { title: 'Vers Allah', sub: 'Le chemin de la foi', cover: 'brand/assets/cover-vers-allah.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/vers-allah.html', grad: '', emoji: '' },
     ];
-    const books = rawBooks.map((b) => ({
+    const managedBooks = Array.isArray(this.state.catalog)
+      ? this.state.catalog
+          .filter((item) => item.content_type === 'livre' && item.status === 'published')
+          .filter((item) => isMaman || item.audience !== 'maman')
+          .map((item) => ({
+            title: item.title,
+            sub: item.description,
+            cover: item.cover_url,
+            hasCover: Boolean(item.cover_url),
+            noCover: !item.cover_url,
+            available: true,
+            soon: false,
+            url: item.url,
+            grad: '',
+            emoji: item.cover_url ? '' : '📖',
+          }))
+      : rawBooks;
+    const books = managedBooks.map((b) => ({
       ...b,
       coverImg: b.hasCover && b.cover ? b.cover : false,
       canRead: b.available && subscribed,
@@ -384,6 +412,7 @@ class Component extends DCLogic {
       sub: isMaman ? "L'espace lecture de votre famille." : `Quel livre lit-on ce soir, ${this.state.profileName || 'petit lecteur'} ?`,
       profileName: this.state.profileName || (isMaman ? 'Maman' : 'Invité'),
       profileEmoji: this.state.profileEmoji || (isMaman ? '🌸' : '🐤'),
+      announcement: this.state.announcement,
       books,
       colorings,
       chooseEnfant: () => { window.location.href = 'Profils.dc.html'; },
@@ -391,7 +420,7 @@ class Component extends DCLogic {
       switchProfile: () => { window.location.href = 'Profils.dc.html'; },
       openPaywall: () => this.setState({ showPaywall: true }),
       closePaywall: () => this.setState({ showPaywall: false }),
-      subscribe: () => this.setState({ subscribed: true, showPaywall: false }),
+      subscribe: () => { window.location.href = 'Support.dc.html?category=abonnement'; },
     };
   }
 }

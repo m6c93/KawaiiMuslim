@@ -83,11 +83,11 @@
           <strong>${escapeHtml(card.name)}</strong>
           <small>${escapeHtml(card.label)}</small>
         </button>
-      `).join("") + (context.profile.role === "admin" ? `
+      `).join("") + (["admin", "support", "content_admin"].includes(context.profile.role) ? `
         <button class="mode-card" type="button" data-admin="true">
           <span class="profile-avatar">🛡️</span>
-          <strong>Administration</strong>
-          <small>Gérer Kawaii Muslim</small>
+          <strong>Espace équipe</strong>
+          <small>${context.profile.role === "admin" ? "Super-administration" : context.profile.role === "support" ? "Support client" : "Gestion des contenus"}</small>
         </button>
       ` : "");
     }).catch(error => {

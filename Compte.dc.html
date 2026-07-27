@@ -20,6 +20,7 @@
       </a>
       <div class="nav-links">
         <a class="nav-link" href="Profils.dc.html">⇄ <span>Changer de profil</span></a>
+        <a class="nav-link" href="Support.dc.html">❔ <span>Aide</span></a>
         <button class="ghost-button" id="logout" type="button">Déconnexion</button>
       </div>
     </nav>
@@ -111,7 +112,13 @@
       }
       document.getElementById("hello").textContent = `Assalamou alaykoum${context.profile.full_name ? `, ${context.profile.full_name}` : ""} 🌸`;
       document.getElementById("email").textContent = context.profile.email;
-      document.getElementById("roleBadge").textContent = context.profile.role === "admin" ? "🛡️ Administratrice" : "Compte parent";
+      const roleLabels = {
+        admin: "🛡️ Super-administratrice",
+        support: "💬 Équipe support",
+        content_admin: "📚 Équipe contenu",
+        parent: "Compte parent"
+      };
+      document.getElementById("roleBadge").textContent = roleLabels[context.profile.role] || "Compte parent";
       document.getElementById("parentName").value = context.profile.full_name || "";
       document.getElementById("parentAvatar").value = context.profile.avatar || "🌸";
       renderChildren();

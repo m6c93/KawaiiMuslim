@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#20285e">
+  <title>Centre d’aide — Kawaii Muslim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./responsive.css">
+  <link rel="stylesheet" href="./account.css">
+</head>
+<body>
+  <div class="account-shell">
+    <nav class="account-nav">
+      <a class="account-brand" href="Bibliotheque%20Kawaii%20Muslim.dc.html">
+        <img src="brand/assets/mascot-nour.png" alt="Mimi"><strong>Kawaii Muslim</strong>
+      </a>
+      <div class="nav-links"><a class="nav-link" href="Compte.dc.html">← <span>Mon compte</span></a></div>
+    </nav>
+    <main class="dashboard">
+      <header class="page-head">
+        <div><h1 class="page-title">Centre d’aide 🌸</h1><p>Décris simplement ton problème. L’équipe retrouvera uniquement les informations nécessaires à ta demande.</p></div>
+        <span class="badge">🔒 Échange privé</span>
+      </header>
+      <div class="dashboard-grid">
+        <section class="dash-card">
+          <h2>Nouvelle demande</h2>
+          <form id="ticketForm">
+            <label class="field-label" for="category">Catégorie</label>
+            <select class="field-select" id="category"><option value="compte">Mon compte</option><option value="abonnement">Mon abonnement</option><option value="contenu">Un contenu</option><option value="technique">Problème technique</option><option value="confidentialite">Confidentialité</option><option value="autre">Autre</option></select>
+            <label class="field-label" for="subject">Sujet</label>
+            <input class="field-input" id="subject" maxlength="160" required placeholder="En quelques mots…">
+            <label class="field-label" for="ticketMessage">Ton message</label>
+            <textarea class="field-input" id="ticketMessage" minlength="5" maxlength="3000" required style="min-height:140px;resize:vertical" placeholder="Explique-nous ce qui se passe…"></textarea>
+            <button class="primary-button" type="submit">Envoyer ma demande</button>
+          </form>
+          <p class="form-message" id="message" role="status"></p>
+        </section>
+        <section class="dash-card">
+          <h2>Ce que l’équipe peut voir</h2>
+          <p>Ton prénom, ton e-mail, ton abonnement et le message que tu envoies.</p>
+          <div class="profile-card"><div class="profile-main"><span class="profile-avatar">🌙</span><div class="profile-copy"><strong>Ton Planner reste privé</strong><small>Les émotions, priorités et réflexions ne sont jamais accessibles au support.</small></div></div></div>
+          <div class="profile-card"><div class="profile-main"><span class="profile-avatar">🔑</span><div class="profile-copy"><strong>Ton mot de passe reste secret</strong><small>Personne chez Kawaii Muslim ne peut le consulter.</small></div></div></div>
+        </section>
+        <section class="dash-card full">
+          <h2>Mes demandes</h2>
+          <div class="profile-list" id="tickets"><p class="loading">Chargement…</p></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./km-config.js"></script>
+  <script src="./km-auth.js"></script>
+  <script>
+    const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]);
+    const labels = { open: "Reçue", in_progress: "En cours", waiting_user: "En attente de ta réponse", resolved: "Résolue", closed: "Fermée" };
+    const message = document.getElementById("message");
+    const requestedCategory = new URLSearchParams(window.location.search).get("category");
+    if (["compte","abonnement","contenu","technique","confidentialite","autre"].includes(requestedCategory)) {
+      document.getElementById("category").value = requestedCategory;
+    }
+    const render = items => {
+      document.getElementById("tickets").innerHTML = items.map(ticket => `
+        <article class="profile-card">
+          <div class="profile-main"><span class="profile-avatar">${ticket.status === "resolved" || ticket.status === "closed" ? "✅" : "💌"}</span><div class="profile-copy"><strong>${escapeHtml(ticket.subject)}</strong><small>${escapeHtml(labels[ticket.status] || ticket.status)} · ${new Date(ticket.created_at).toLocaleDateString("fr-FR")}</small>${ticket.staff_note ? `<p>${escapeHtml(ticket.staff_note)}</p>` : ""}</div></div>
+        </article>`).join("") || '<p class="loading">Tu n’as encore envoyé aucune demande.</p>';
+    };
+    const load = async () => {
+      const context = await KMAuth.getContext();
+      if (!context) return window.location.href = "Connexion.dc.html";
+      render(await KMAuth.listTickets());
+    };
+    document.getElementById("ticketForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      try {
+        await KMAuth.createTicket({ subject: document.getElementById("subject").value, category: document.getElementById("category").value, message: document.getElementById("ticketMessage").value });
+        event.target.reset(); message.className = "form-message success"; message.textContent = "Ta demande a bien été envoyée.";
+        await load();
+      } catch (error) { message.className = "form-message"; message.textContent = KMAuth.friendlyError(error); }
+    });
+    load().catch(error => { message.textContent = KMAuth.friendlyError(error); });
+  </script>
+</body>
+</html>

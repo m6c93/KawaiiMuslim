@@ -1,7 +1,10 @@
 /* Kawaii Muslim — authentification Supabase sécurisée */
 window.KMAuth = (() => {
   const ACTIVE_PROFILE_KEY = "km-active-profile-v2";
+  const INACTIVITY_LIMIT = 30 * 60 * 1000;
   let clientInstance = null;
+  let inactivityTimer = null;
+  let inactivityStarted = false;
 
   const client = () => {
     if (clientInstance) return clientInstance;
@@ -33,6 +36,23 @@ window.KMAuth = (() => {
   const getSession = async () => {
     const data = requireSuccess(await client().auth.getSession());
     return data.session || null;
+  };
+
+  const startInactivityGuard = () => {
+    if (inactivityStarted) return;
+    inactivityStarted = true;
+    const reset = () => {
+      clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(async () => {
+        localStorage.removeItem(ACTIVE_PROFILE_KEY);
+        await client().auth.signOut().catch(() => {});
+        window.location.href = "Connexion.dc.html?expired=1";
+      }, INACTIVITY_LIMIT);
+    };
+    ["pointerdown", "keydown", "scroll", "touchstart"].forEach(eventName => {
+      window.addEventListener(eventName, reset, { passive: true });
+    });
+    reset();
   };
 
   const getProfile = async userId => {
@@ -100,6 +120,7 @@ window.KMAuth = (() => {
       throw new Error("Ce compte est actuellement désactivé. Contacte Kawaii Muslim.");
     }
     const children = await getChildren(session.user.id);
+    startInactivityGuard();
     return { session, user: session.user, profile, children };
   };
 
@@ -149,6 +170,7 @@ window.KMAuth = (() => {
     setActiveProfile,
     getPlannerDays,
     savePlannerDay,
+    startInactivityGuard,
 
     signup: async ({ name, email, password }) => {
       const data = requireSuccess(await client().auth.signUp({
@@ -165,6 +187,15 @@ window.KMAuth = (() => {
     login: async ({ email, password }) => {
       return requireSuccess(await client().auth.signInWithPassword({
         email: email.trim().toLowerCase(),
+        password
+      }));
+    },
+
+    reauthenticate: async password => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      return requireSuccess(await client().auth.signInWithPassword({
+        email: session.user.email,
         password
       }));
     },
@@ -214,13 +245,7 @@ window.KMAuth = (() => {
     },
 
     listFamilies: async () => {
-      const profiles = requireSuccess(await client().from("profiles")
-        .select("id,email,full_name,avatar,role,plan,is_active,created_at")
-        .order("created_at", { ascending: false }));
-      const children = requireSuccess(await client().from("child_profiles")
-        .select("id,parent_id,name,avatar,age_group,created_at")
-        .order("created_at", { ascending: true }));
-      return { profiles: profiles || [], children: children || [] };
+      return requireSuccess(await client().rpc("staff_list_families")) || [];
     },
 
     setUserStatus: async (userId, enabled) => {
@@ -235,6 +260,98 @@ window.KMAuth = (() => {
         target_user: userId,
         new_role: role
       }));
+    },
+
+    setUserPlan: async (userId, plan) => {
+      return requireSuccess(await client().rpc("admin_set_user_plan", {
+        target_user: userId,
+        new_plan: plan
+      }));
+    },
+
+    listContent: async () => {
+      return requireSuccess(await client().from("content_items")
+        .select("*")
+        .order("sort_order", { ascending: true })) || [];
+    },
+
+    saveContent: async item => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      const payload = {
+        slug: item.slug.trim().toLowerCase(),
+        title: item.title.trim(),
+        description: item.description.trim(),
+        content_type: item.content_type,
+        audience: item.audience,
+        status: item.status,
+        url: item.url.trim(),
+        cover_url: item.cover_url.trim(),
+        sort_order: Number(item.sort_order) || 0,
+        created_by: session.user.id
+      };
+      if (item.id) {
+        delete payload.created_by;
+        return requireSuccess(await client().from("content_items")
+          .update(payload).eq("id", item.id).select().single());
+      }
+      return requireSuccess(await client().from("content_items")
+        .insert(payload).select().single());
+    },
+
+    archiveContent: async (id, restore = false) => {
+      return requireSuccess(await client().from("content_items")
+        .update({ status: restore ? "draft" : "archived" })
+        .eq("id", id).select().single());
+    },
+
+    listTickets: async () => {
+      return requireSuccess(await client().from("support_tickets")
+        .select("id,requester_id,subject,category,message,status,priority,staff_note,assigned_to,created_at,updated_at")
+        .order("created_at", { ascending: false })) || [];
+    },
+
+    createTicket: async ({ subject, category, message }) => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      return requireSuccess(await client().from("support_tickets").insert({
+        requester_id: session.user.id,
+        subject: subject.trim(),
+        category,
+        message: message.trim()
+      }).select().single());
+    },
+
+    updateTicket: async ({ id, status, priority, note }) => {
+      return requireSuccess(await client().rpc("staff_update_ticket", {
+        target_ticket: id,
+        new_status: status,
+        new_priority: priority,
+        new_note: note || ""
+      }));
+    },
+
+    listAuditLogs: async () => {
+      return requireSuccess(await client().from("admin_audit_logs")
+        .select("id,actor_id,action,target_type,target_id,details,created_at")
+        .order("created_at", { ascending: false })
+        .limit(200)) || [];
+    },
+
+    getSettings: async () => {
+      return requireSuccess(await client().from("site_settings")
+        .select("*").order("key", { ascending: true })) || [];
+    },
+
+    saveSetting: async ({ key, value, description }) => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      return requireSuccess(await client().from("site_settings").upsert({
+        key,
+        value,
+        description,
+        updated_by: session.user.id
+      }, { onConflict: "key" }).select().single());
     }
   };
 })();

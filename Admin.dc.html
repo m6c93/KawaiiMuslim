@@ -3,138 +3,468 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#20285e">
-  <title>Administration — Kawaii Muslim</title>
+  <meta name="theme-color" content="#171b45">
+  <title>Administration professionnelle — Kawaii Muslim</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./responsive.css">
   <link rel="stylesheet" href="./account.css">
+  <link rel="stylesheet" href="./admin.css">
 </head>
-<body>
-  <div class="account-shell">
-    <nav class="account-nav">
-      <a class="account-brand" href="Bibliotheque%20Kawaii%20Muslim.dc.html">
+<body class="admin-body">
+  <div class="admin-shell">
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="Bibliotheque%20Kawaii%20Muslim.dc.html">
         <img src="brand/assets/mascot-nour.png" alt="Mimi">
-        <strong>Kawaii Muslim</strong>
+        <span><strong>Kawaii Muslim</strong><small>Administration</small></span>
       </a>
-      <div class="nav-links">
-        <a class="nav-link" href="Profils.dc.html">⇄ <span>Changer de profil</span></a>
-        <a class="nav-link" href="Compte.dc.html">⚙️ <span>Mon compte</span></a>
+      <nav class="admin-menu" aria-label="Rubriques administratives">
+        <button class="admin-tab active" data-view="overview">✨ Vue générale</button>
+        <button class="admin-tab" data-view="families" data-permission="families">👨‍👩‍👧 Familles</button>
+        <button class="admin-tab" data-view="content" data-permission="content">📚 Contenus</button>
+        <button class="admin-tab" data-view="subscriptions" data-permission="families">💳 Abonnements</button>
+        <button class="admin-tab" data-view="support" data-permission="support">💬 Support</button>
+        <button class="admin-tab" data-view="security">🛡️ Sécurité</button>
+        <button class="admin-tab" data-view="logs">🧾 Journal d’activité</button>
+        <button class="admin-tab" data-view="settings" data-permission="content">⚙️ Paramètres</button>
+      </nav>
+      <div class="admin-side-footer">
+        <a href="Profils.dc.html">⇄ Changer de profil</a>
+        <a href="Compte.dc.html">🌸 Mon compte familial</a>
+        <a href="Support.dc.html">❔ Centre d’aide</a>
       </div>
-    </nav>
+    </aside>
 
-    <main class="dashboard">
-      <header class="page-head">
+    <main class="admin-main">
+      <header class="admin-topbar">
         <div>
-          <h1 class="page-title">Tableau de bord administratrice</h1>
-          <p>Vue générale des familles et de leurs accès.</p>
+          <h1 id="viewTitle">Vue générale</h1>
+          <p id="viewSubtitle">Pilote ton univers sans accéder à la vie privée des familles.</p>
         </div>
-        <span class="badge">🛡️ Accès protégé</span>
+        <div class="admin-identity">
+          <span>🛡️</span>
+          <div><strong id="adminName">Administration</strong><small id="adminRole">Accès protégé</small></div>
+        </div>
       </header>
+      <p class="admin-message" id="message" role="status" aria-live="polite"></p>
 
-      <div class="dashboard-grid" id="adminContent">
-        <section class="dash-card admin-hero full">
-          <h2>Vue d’ensemble</h2>
-          <div class="stats">
-            <div class="stat"><strong id="familyCount">—</strong><span>comptes parents</span></div>
-            <div class="stat"><strong id="childCount">—</strong><span>profils enfants</span></div>
-            <div class="stat"><strong id="activeCount">—</strong><span>familles actives</span></div>
-          </div>
-        </section>
-        <section class="dash-card full">
-          <h2>Familles inscrites</h2>
-          <div class="family-list" id="families"><p class="loading">Chargement sécurisé…</p></div>
-          <p class="form-message" id="message"></p>
-        </section>
-      </div>
+      <section class="admin-view active" id="view-overview">
+        <div class="admin-stats">
+          <div class="admin-stat"><strong id="statFamilies">—</strong><span>familles</span></div>
+          <div class="admin-stat"><strong id="statChildren">—</strong><span>profils enfants</span></div>
+          <div class="admin-stat"><strong id="statPublished">—</strong><span>contenus publiés</span></div>
+          <div class="admin-stat"><strong id="statTickets">—</strong><span>demandes ouvertes</span></div>
+        </div>
+        <div class="admin-grid">
+          <article class="admin-card full">
+            <div class="admin-notice private"><strong>🔒 Confidentialité renforcée</strong><br>Les émotions, priorités et réflexions du Planner Cocon sont invisibles pour toute l’équipe, y compris le super-administrateur.</div>
+          </article>
+          <article class="admin-card">
+            <h3>Activité récente</h3>
+            <div id="recentLogs" class="admin-list"><p class="admin-empty">Chargement…</p></div>
+          </article>
+          <article class="admin-card">
+            <h3>À traiter</h3>
+            <div id="attentionList" class="admin-list"><p class="admin-empty">Aucune urgence pour le moment.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="admin-view" id="view-families">
+        <div class="admin-section-head">
+          <div><h2>Familles inscrites</h2><p>Les informations privées du Planner ne sont jamais chargées ici.</p></div>
+          <button class="admin-button secondary" id="exportFamilies">Exporter en CSV</button>
+        </div>
+        <div class="admin-toolbar">
+          <input class="admin-input" id="familySearch" type="search" placeholder="Rechercher un prénom ou un e-mail…">
+          <select class="admin-select" id="familyStatusFilter"><option value="">Tous les statuts</option><option value="active">Actifs</option><option value="inactive">Désactivés</option></select>
+        </div>
+        <div class="admin-list" id="familiesList"></div>
+      </section>
+
+      <section class="admin-view" id="view-content">
+        <div class="admin-section-head"><div><h2>Catalogue de contenus</h2><p>Prépare, publie, archive et restaure sans supprimer définitivement.</p></div></div>
+        <div class="admin-grid">
+          <article class="admin-card third">
+            <h3 id="contentFormTitle">Ajouter un contenu</h3>
+            <form class="admin-form" id="contentForm">
+              <input type="hidden" id="contentId">
+              <label class="wide">Titre<input class="admin-input" id="contentTitle" maxlength="160" required></label>
+              <label>Identifiant<input class="admin-input" id="contentSlug" maxlength="120" placeholder="mon-contenu" required></label>
+              <label>Type<select class="admin-select" id="contentType"><option value="livre">Livre</option><option value="coloriage">Coloriage</option><option value="quiz">Quiz</option><option value="audio">Audio</option><option value="planner">Planner</option><option value="activite">Activité</option></select></label>
+              <label>Public<select class="admin-select" id="contentAudience"><option value="famille">Famille</option><option value="maman">Maman</option><option value="enfant">Enfant</option></select></label>
+              <label>Statut<select class="admin-select" id="contentStatus"><option value="draft">Brouillon</option><option value="published">Publié</option><option value="archived">Archivé</option></select></label>
+              <label class="wide">Description<textarea class="admin-textarea" id="contentDescription" maxlength="600"></textarea></label>
+              <label class="wide">Lien<input class="admin-input" id="contentUrl" placeholder="books/mon-livre.html"></label>
+              <label class="wide">Image de couverture<input class="admin-input" id="contentCover" placeholder="brand/assets/cover.png"></label>
+              <label>Ordre<input class="admin-input" id="contentOrder" type="number" value="0"></label>
+              <div class="admin-actions wide"><button class="admin-button" type="submit">Enregistrer</button><button class="admin-button secondary" id="cancelContentEdit" type="button">Nouveau</button></div>
+            </form>
+          </article>
+          <article class="admin-card" style="grid-column:span 8">
+            <div class="admin-toolbar"><input class="admin-input" id="contentSearch" type="search" placeholder="Rechercher dans le catalogue…"><select class="admin-select" id="contentStatusFilter"><option value="">Tous</option><option value="published">Publiés</option><option value="draft">Brouillons</option><option value="archived">Archivés</option></select></div>
+            <div class="admin-list" id="contentList"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="admin-view" id="view-subscriptions">
+        <div class="admin-section-head"><div><h2>Abonnements</h2><p>Attribue les accès. Les coordonnées bancaires restent chez le prestataire de paiement.</p></div></div>
+        <div class="admin-stats">
+          <div class="admin-stat"><strong id="freeCount">—</strong><span>gratuits</span></div>
+          <div class="admin-stat"><strong id="monthlyCount">—</strong><span>mensuels</span></div>
+          <div class="admin-stat"><strong id="yearlyCount">—</strong><span>annuels</span></div>
+          <div class="admin-stat"><strong>0</strong><span>donnée bancaire stockée</span></div>
+        </div>
+        <div class="admin-list" id="subscriptionsList"></div>
+      </section>
+
+      <section class="admin-view" id="view-support">
+        <div class="admin-section-head"><div><h2>Support client</h2><p>Classe les demandes, note le suivi et ferme les dossiers résolus.</p></div></div>
+        <div class="admin-toolbar"><select class="admin-select" id="ticketFilter"><option value="">Toutes les demandes</option><option value="open">Nouvelles</option><option value="in_progress">En cours</option><option value="waiting_user">En attente de la famille</option><option value="resolved">Résolues</option><option value="closed">Fermées</option></select></div>
+        <div class="admin-list" id="ticketsList"></div>
+      </section>
+
+      <section class="admin-view" id="view-security">
+        <div class="admin-section-head"><div><h2>Sécurité et confidentialité</h2><p>Protections actives sur le compte administrateur.</p></div></div>
+        <div class="admin-grid">
+          <article class="admin-card">
+            <h3>Protections actives</h3>
+            <div class="admin-security-list">
+              <div class="admin-security-item"><span>⏱️</span><div><strong>Déconnexion après 30 minutes d’inactivité</strong><small>Réduit les risques sur un appareil laissé ouvert.</small></div></div>
+              <div class="admin-security-item"><span>🔑</span><div><strong>Mot de passe redemandé</strong><small>Obligatoire avant une désactivation ou un changement de rôle.</small></div></div>
+              <div class="admin-security-item"><span>🧾</span><div><strong>Actions enregistrées</strong><small>Les changements sensibles sont datés dans le journal.</small></div></div>
+              <div class="admin-security-item"><span>🗑️</span><div><strong>Suppression définitive désactivée</strong><small>Les comptes et contenus sont désactivés ou archivés et restent restaurables.</small></div></div>
+              <div class="admin-security-item"><span>🌙</span><div><strong>Planner strictement privé</strong><small>Aucun rôle d’équipe ne peut lire les écrits des familles.</small></div></div>
+            </div>
+          </article>
+          <article class="admin-card">
+            <h3>Bonnes pratiques</h3>
+            <p class="admin-notice">Utilise un mot de passe unique, verrouille ton appareil et ne partage jamais ton compte super-administrateur. Crée plutôt un rôle Support ou Contenu pour chaque collaboratrice.</p>
+            <button class="admin-button secondary" id="sendReset" type="button">M’envoyer un lien pour changer mon mot de passe</button>
+            <button class="admin-button danger" id="logoutAll" type="button" style="margin-top:9px">Fermer ma session actuelle</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="admin-view" id="view-logs">
+        <div class="admin-section-head"><div><h2>Journal d’activité</h2><p>Historique en lecture seule des actions administratives.</p></div><button class="admin-button secondary" id="exportLogs">Exporter le journal</button></div>
+        <div class="admin-card full"><div id="logsList"></div></div>
+      </section>
+
+      <section class="admin-view" id="view-settings">
+        <div class="admin-section-head"><div><h2>Paramètres de l’univers</h2><p>Informations générales visibles par les membres.</p></div></div>
+        <div class="admin-grid">
+          <article class="admin-card">
+            <h3>Contact du support</h3>
+            <form id="supportEmailForm">
+              <input class="admin-input" id="supportEmail" type="email" required>
+              <button class="admin-button" type="submit" style="margin-top:9px">Enregistrer</button>
+            </form>
+          </article>
+          <article class="admin-card">
+            <h3>Message important</h3>
+            <form id="announcementForm">
+              <textarea class="admin-textarea" id="announcement" maxlength="500" placeholder="Laisse vide pour ne rien afficher."></textarea>
+              <button class="admin-button" type="submit" style="margin-top:9px">Enregistrer</button>
+            </form>
+          </article>
+        </div>
+      </section>
     </main>
+  </div>
+
+  <div class="admin-modal" id="reauthModal" role="dialog" aria-modal="true" aria-labelledby="reauthTitle">
+    <form class="admin-modal-card" id="reauthForm">
+      <h2 id="reauthTitle">Confirmer cette action</h2>
+      <p id="reauthText">Pour protéger les familles, saisis ton mot de passe administrateur.</p>
+      <input class="admin-input" id="reauthPassword" type="password" autocomplete="current-password" placeholder="Ton mot de passe" required style="width:100%">
+      <p class="admin-message" id="reauthMessage"></p>
+      <div class="admin-modal-actions"><button class="admin-button secondary" id="reauthCancel" type="button">Annuler</button><button class="admin-button danger" type="submit">Confirmer</button></div>
+    </form>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
   <script src="./km-auth.js"></script>
   <script>
-    const families = document.getElementById("families");
-    const message = document.getElementById("message");
-    let currentProfile = null;
-    let familyData = null;
-
-    const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
+    const $ = selector => document.querySelector(selector);
+    const $$ = selector => [...document.querySelectorAll(selector)];
+    const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, character => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
     })[character]);
+    const roleLabels = { admin: "Super-administrateur", support: "Support client", content_admin: "Gestionnaire de contenu", parent: "Parent" };
+    const planLabels = { gratuit: "Gratuit", mensuel: "Mensuel", annuel: "Annuel" };
+    const statusLabels = { open: "Nouvelle", in_progress: "En cours", waiting_user: "Attente famille", resolved: "Résolue", closed: "Fermée" };
+    const actionLabels = {
+      deactivate_account: "Compte désactivé", reactivate_account: "Compte réactivé",
+      change_plan: "Abonnement modifié", change_role: "Rôle modifié",
+      update_ticket: "Demande support mise à jour",
+      insert_content_items: "Contenu ajouté", update_content_items: "Contenu modifié", delete_content_items: "Contenu supprimé"
+    };
+    const state = { context: null, families: [], content: [], tickets: [], logs: [], settings: [] };
+    let pendingCriticalAction = null;
 
-    const render = () => {
-      const { profiles, children } = familyData;
-      document.getElementById("familyCount").textContent = profiles.filter(item => item.role === "parent").length;
-      document.getElementById("childCount").textContent = children.length;
-      document.getElementById("activeCount").textContent = profiles.filter(item => item.is_active).length;
+    const permissions = () => ({
+      families: ["admin", "support"].includes(state.context.profile.role),
+      support: ["admin", "support"].includes(state.context.profile.role),
+      content: ["admin", "content_admin"].includes(state.context.profile.role),
+      admin: state.context.profile.role === "admin"
+    });
+    const showMessage = (text, success = false) => {
+      $("#message").textContent = text;
+      $("#message").className = `admin-message${success ? " success" : ""}`;
+      if (text) window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+    const formatDate = value => new Date(value).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
 
-      families.innerHTML = profiles.map(profile => {
-        const childItems = children.filter(child => child.parent_id === profile.id);
-        return `
-          <article class="profile-card">
-            <div class="profile-main">
-              <span class="profile-avatar">${escapeHtml(profile.role === "admin" ? "🛡️" : profile.avatar)}</span>
-              <div class="profile-copy">
-                <strong>${escapeHtml(profile.full_name || "Sans prénom")}</strong>
-                <small>${escapeHtml(profile.email)} · ${childItems.length} enfant${childItems.length > 1 ? "s" : ""} · ${profile.role}</small>
-              </div>
-            </div>
-            <div class="card-actions">
-              <button class="small-button" type="button" data-preview="${profile.id}">Voir parent</button>
-              ${profile.id !== currentProfile.id ? `
-                <button class="small-button ${profile.is_active ? "danger" : ""}" type="button"
-                  data-status="${profile.id}" data-enabled="${profile.is_active ? "false" : "true"}">
-                  ${profile.is_active ? "Désactiver" : "Réactiver"}
-                </button>
-              ` : ""}
-            </div>
-          </article>
-        `;
-      }).join("") || '<p class="loading">Aucune famille pour le moment.</p>';
+    const switchView = name => {
+      $$(".admin-tab").forEach(button => button.classList.toggle("active", button.dataset.view === name));
+      $$(".admin-view").forEach(view => view.classList.toggle("active", view.id === `view-${name}`));
+      const button = $(`.admin-tab[data-view="${name}"]`);
+      $("#viewTitle").textContent = button?.textContent.replace(/^[^\s]+\s/, "") || "Administration";
+      $("#viewSubtitle").textContent = name === "overview"
+        ? "Pilote ton univers sans accéder à la vie privée des familles."
+        : "Chaque action sensible est protégée et enregistrée.";
+      history.replaceState(null, "", `#${name}`);
     };
 
-    const load = async () => {
-      const context = await KMAuth.getContext();
-      if (!context) {
-        window.location.href = "Connexion.dc.html";
-        return;
-      }
-      if (context.profile.role !== "admin") {
-        window.location.href = "Profils.dc.html";
-        return;
-      }
-      currentProfile = context.profile;
-      familyData = await KMAuth.listFamilies();
-      render();
+    const renderFamilies = () => {
+      const query = $("#familySearch").value.trim().toLowerCase();
+      const filter = $("#familyStatusFilter").value;
+      const items = state.families.filter(item => {
+        const matchesSearch = !query || `${item.full_name} ${item.email}`.toLowerCase().includes(query);
+        const matchesStatus = !filter || (filter === "active" ? item.is_active : !item.is_active);
+        return matchesSearch && matchesStatus;
+      });
+      $("#familiesList").innerHTML = items.map(item => `
+        <article class="admin-row">
+          <div class="admin-row-main"><strong>${escapeHtml(item.full_name || "Sans prénom")}</strong><small>${escapeHtml(item.email)} · ${item.children_count} profil${Number(item.children_count) > 1 ? "s" : ""} enfant</small></div>
+          <span class="admin-pill ${item.is_active ? "active" : "inactive"}">${item.is_active ? "Actif" : "Désactivé"}</span>
+          <span>${escapeHtml(roleLabels[item.role] || item.role)}</span>
+          <div class="admin-actions">
+            <button class="admin-button secondary" data-family-plan="${item.id}">Abonnement</button>
+            ${permissions().admin ? `<button class="admin-button secondary" data-family-role="${item.id}">Rôle</button>` : ""}
+            ${item.id !== state.context.profile.id ? `<button class="admin-button ${item.is_active ? "danger" : "mint"}" data-family-status="${item.id}" data-enabled="${!item.is_active}">${item.is_active ? "Désactiver" : "Réactiver"}</button>` : ""}
+          </div>
+        </article>`).join("") || '<p class="admin-empty">Aucune famille ne correspond à la recherche.</p>';
     };
 
-    families.addEventListener("click", async event => {
-      const statusButton = event.target.closest("[data-status]");
-      const previewButton = event.target.closest("[data-preview]");
-      if (previewButton) {
-        const profile = familyData.profiles.find(item => item.id === previewButton.dataset.preview);
-        KMAuth.setActiveProfile({ type: "parent", name: profile.full_name, avatar: profile.avatar });
-        window.location.href = "Bibliotheque%20Kawaii%20Muslim.dc.html?preview=parent";
-        return;
+    const renderSubscriptions = () => {
+      const counts = { gratuit: 0, mensuel: 0, annuel: 0 };
+      state.families.forEach(item => counts[item.plan] = (counts[item.plan] || 0) + 1);
+      $("#freeCount").textContent = counts.gratuit;
+      $("#monthlyCount").textContent = counts.mensuel;
+      $("#yearlyCount").textContent = counts.annuel;
+      $("#subscriptionsList").innerHTML = state.families.filter(item => item.role === "parent").map(item => `
+        <article class="admin-row">
+          <div class="admin-row-main"><strong>${escapeHtml(item.full_name || "Sans prénom")}</strong><small>${escapeHtml(item.email)}</small></div>
+          <span class="admin-pill">${escapeHtml(planLabels[item.plan] || item.plan)}</span>
+          <span>${item.is_active ? "Compte actif" : "Compte désactivé"}</span>
+          <button class="admin-button secondary" data-family-plan="${item.id}">Modifier</button>
+        </article>`).join("") || '<p class="admin-empty">Aucun abonnement.</p>';
+    };
+
+    const renderContent = () => {
+      const query = $("#contentSearch").value.trim().toLowerCase();
+      const filter = $("#contentStatusFilter").value;
+      const items = state.content.filter(item => (!query || `${item.title} ${item.description}`.toLowerCase().includes(query)) && (!filter || item.status === filter));
+      $("#contentList").innerHTML = items.map(item => `
+        <article class="admin-row">
+          <div class="admin-row-main"><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.content_type)} · ${escapeHtml(item.audience)} · ${escapeHtml(item.url || "sans lien")}</small></div>
+          <span class="admin-pill ${item.status}">${item.status === "published" ? "Publié" : item.status === "draft" ? "Brouillon" : "Archivé"}</span>
+          <span>Ordre ${item.sort_order}</span>
+          <div class="admin-actions"><button class="admin-button secondary" data-content-edit="${item.id}">Modifier</button><button class="admin-button ${item.status === "archived" ? "mint" : "danger"}" data-content-archive="${item.id}" data-restore="${item.status === "archived"}">${item.status === "archived" ? "Restaurer" : "Archiver"}</button></div>
+        </article>`).join("") || '<p class="admin-empty">Aucun contenu.</p>';
+    };
+
+    const renderTickets = () => {
+      const filter = $("#ticketFilter").value;
+      const items = state.tickets.filter(ticket => !filter || ticket.status === filter);
+      $("#ticketsList").innerHTML = items.map(ticket => {
+        const requester = state.families.find(item => item.id === ticket.requester_id);
+        return `<article class="admin-ticket">
+          <div class="admin-ticket-head"><div><strong>${escapeHtml(ticket.subject)}</strong><small> · ${escapeHtml(ticket.category)} · ${escapeHtml(requester?.email || "Compte")}</small></div><span class="admin-pill ${ticket.priority === "urgent" ? "urgent" : ""}">${escapeHtml(ticket.priority)}</span></div>
+          <p>${escapeHtml(ticket.message)}</p>
+          <div class="admin-ticket-controls">
+            <label>Statut<select class="admin-select" data-ticket-status="${ticket.id}">${Object.entries(statusLabels).map(([value,label]) => `<option value="${value}" ${ticket.status === value ? "selected" : ""}>${label}</option>`).join("")}</select></label>
+            <label>Priorité<select class="admin-select" data-ticket-priority="${ticket.id}">${["low","normal","high","urgent"].map(value => `<option value="${value}" ${ticket.priority === value ? "selected" : ""}>${value}</option>`).join("")}</select></label>
+            <label>Note interne<input class="admin-input" data-ticket-note="${ticket.id}" value="${escapeHtml(ticket.staff_note)}" maxlength="3000"></label>
+            <button class="admin-button" data-ticket-save="${ticket.id}">Enregistrer</button>
+          </div>
+        </article>`;
+      }).join("") || '<p class="admin-empty">Aucune demande dans cette catégorie.</p>';
+    };
+
+    const renderLogs = () => {
+      const html = state.logs.map(log => `<div class="admin-log"><time>${formatDate(log.created_at)}</time><strong>${escapeHtml(actionLabels[log.action] || log.action)}</strong><span>${escapeHtml(log.target_type)} ${escapeHtml(log.target_id || "")}</span></div>`).join("") || '<p class="admin-empty">Aucune action enregistrée.</p>';
+      $("#logsList").innerHTML = html;
+      $("#recentLogs").innerHTML = state.logs.slice(0, 5).map(log => `<div class="admin-log"><time>${formatDate(log.created_at)}</time><strong>${escapeHtml(actionLabels[log.action] || log.action)}</strong><span>${escapeHtml(log.target_type)}</span></div>`).join("") || '<p class="admin-empty">Aucune action récente.</p>';
+    };
+
+    const renderOverview = () => {
+      const familyParents = state.families.filter(item => item.role === "parent");
+      $("#statFamilies").textContent = permissions().families ? familyParents.length : "—";
+      $("#statChildren").textContent = permissions().families ? state.families.reduce((sum, item) => sum + Number(item.children_count || 0), 0) : "—";
+      $("#statPublished").textContent = permissions().content ? state.content.filter(item => item.status === "published").length : "—";
+      $("#statTickets").textContent = permissions().support ? state.tickets.filter(item => ["open","in_progress"].includes(item.status)).length : "—";
+      const urgent = state.tickets.filter(item => item.priority === "urgent" && !["resolved","closed"].includes(item.status));
+      const inactive = state.families.filter(item => !item.is_active);
+      $("#attentionList").innerHTML = [
+        urgent.length ? `<div class="admin-notice">${urgent.length} demande${urgent.length > 1 ? "s" : ""} urgente${urgent.length > 1 ? "s" : ""}</div>` : "",
+        inactive.length ? `<div class="admin-notice">${inactive.length} compte${inactive.length > 1 ? "s" : ""} désactivé${inactive.length > 1 ? "s" : ""}</div>` : ""
+      ].filter(Boolean).join("") || '<p class="admin-empty">Aucune urgence pour le moment.</p>';
+    };
+
+    const resetContentForm = () => {
+      $("#contentForm").reset(); $("#contentId").value = ""; $("#contentOrder").value = "0";
+      $("#contentFormTitle").textContent = "Ajouter un contenu";
+    };
+
+    const requestPassword = action => {
+      pendingCriticalAction = action;
+      $("#reauthPassword").value = ""; $("#reauthMessage").textContent = "";
+      $("#reauthModal").classList.add("open");
+      setTimeout(() => $("#reauthPassword").focus(), 50);
+    };
+
+    const downloadCsv = (filename, rows) => {
+      const csv = rows.map(row => row.map(value => `"${String(value ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" }));
+      link.download = filename; link.click(); URL.revokeObjectURL(link.href);
+    };
+
+    const refreshData = async () => {
+      const access = permissions();
+      const tasks = [
+        access.families ? KMAuth.listFamilies().then(value => state.families = value) : Promise.resolve(),
+        access.content ? KMAuth.listContent().then(value => state.content = value) : Promise.resolve(),
+        access.support ? KMAuth.listTickets().then(value => state.tickets = value) : Promise.resolve(),
+        KMAuth.listAuditLogs().then(value => state.logs = value),
+        access.content ? KMAuth.getSettings().then(value => state.settings = value) : Promise.resolve()
+      ];
+      await Promise.all(tasks);
+      if (access.families) { renderFamilies(); renderSubscriptions(); }
+      if (access.content) renderContent();
+      if (access.support) renderTickets();
+      renderLogs(); renderOverview();
+      const supportSetting = state.settings.find(item => item.key === "support_email");
+      const announcementSetting = state.settings.find(item => item.key === "announcement");
+      if (supportSetting) $("#supportEmail").value = supportSetting.value;
+      if (announcementSetting) $("#announcement").value = announcementSetting.value;
+    };
+
+    const initialize = async () => {
+      state.context = await KMAuth.getContext();
+      if (!state.context) return window.location.href = "Connexion.dc.html";
+      if (!["admin","support","content_admin"].includes(state.context.profile.role)) return window.location.href = "Profils.dc.html";
+      $("#adminName").textContent = state.context.profile.full_name || "Administration";
+      $("#adminRole").textContent = roleLabels[state.context.profile.role];
+      const access = permissions();
+      $$("[data-permission]").forEach(button => button.hidden = !access[button.dataset.permission]);
+      await refreshData();
+      const initial = location.hash.slice(1);
+      const initialButton = initial && $(`.admin-tab[data-view="${initial}"]:not([hidden])`);
+      switchView(initialButton ? initial : "overview");
+    };
+
+    $$(".admin-tab").forEach(button => button.addEventListener("click", () => switchView(button.dataset.view)));
+    ["familySearch","familyStatusFilter"].forEach(id => $(`#${id}`).addEventListener("input", renderFamilies));
+    ["contentSearch","contentStatusFilter"].forEach(id => $(`#${id}`).addEventListener("input", renderContent));
+    $("#ticketFilter").addEventListener("change", renderTickets);
+
+    const handleFamilyAction = event => {
+      const planButton = event.target.closest("[data-family-plan]");
+      const roleButton = event.target.closest("[data-family-role]");
+      const statusButton = event.target.closest("[data-family-status]");
+      if (planButton) {
+        const item = state.families.find(row => row.id === planButton.dataset.familyPlan);
+        const plan = prompt("Choisis : gratuit, mensuel ou annuel", item.plan);
+        if (!["gratuit","mensuel","annuel"].includes(plan)) return;
+        KMAuth.setUserPlan(item.id, plan).then(refreshData).then(() => showMessage("Abonnement mis à jour.", true)).catch(error => showMessage(KMAuth.friendlyError(error)));
       }
-      if (!statusButton) return;
-      statusButton.disabled = true;
+      if (roleButton) {
+        const item = state.families.find(row => row.id === roleButton.dataset.familyRole);
+        const role = prompt("Choisis : parent, support, content_admin ou admin", item.role);
+        if (!["parent","support","content_admin","admin"].includes(role) || role === item.role) return;
+        requestPassword(() => KMAuth.setUserRole(item.id, role));
+      }
+      if (statusButton) {
+        requestPassword(() => KMAuth.setUserStatus(statusButton.dataset.familyStatus, statusButton.dataset.enabled === "true"));
+      }
+    };
+    $("#familiesList").addEventListener("click", handleFamilyAction);
+    $("#subscriptionsList").addEventListener("click", handleFamilyAction);
+
+    $("#contentForm").addEventListener("submit", async event => {
+      event.preventDefault();
       try {
-        await KMAuth.setUserStatus(statusButton.dataset.status, statusButton.dataset.enabled === "true");
-        familyData = await KMAuth.listFamilies();
-        render();
-      } catch (error) {
-        message.textContent = KMAuth.friendlyError(error);
-        statusButton.disabled = false;
+        await KMAuth.saveContent({
+          id: $("#contentId").value, title: $("#contentTitle").value, slug: $("#contentSlug").value,
+          content_type: $("#contentType").value, audience: $("#contentAudience").value,
+          status: $("#contentStatus").value, description: $("#contentDescription").value,
+          url: $("#contentUrl").value, cover_url: $("#contentCover").value, sort_order: $("#contentOrder").value
+        });
+        resetContentForm(); await refreshData(); showMessage("Contenu enregistré.", true);
+      } catch (error) { showMessage(KMAuth.friendlyError(error)); }
+    });
+    $("#cancelContentEdit").addEventListener("click", resetContentForm);
+    $("#contentList").addEventListener("click", async event => {
+      const edit = event.target.closest("[data-content-edit]");
+      const archive = event.target.closest("[data-content-archive]");
+      if (edit) {
+        const item = state.content.find(row => row.id === edit.dataset.contentEdit);
+        $("#contentId").value = item.id; $("#contentTitle").value = item.title; $("#contentSlug").value = item.slug;
+        $("#contentType").value = item.content_type; $("#contentAudience").value = item.audience; $("#contentStatus").value = item.status;
+        $("#contentDescription").value = item.description; $("#contentUrl").value = item.url; $("#contentCover").value = item.cover_url;
+        $("#contentOrder").value = item.sort_order; $("#contentFormTitle").textContent = "Modifier le contenu";
+      }
+      if (archive) {
+        await KMAuth.archiveContent(archive.dataset.contentArchive, archive.dataset.restore === "true");
+        await refreshData(); showMessage(archive.dataset.restore === "true" ? "Contenu restauré." : "Contenu archivé.", true);
       }
     });
 
-    load().catch(error => {
-      families.innerHTML = "";
-      message.textContent = KMAuth.friendlyError(error);
+    $("#ticketsList").addEventListener("click", async event => {
+      const button = event.target.closest("[data-ticket-save]"); if (!button) return;
+      const id = button.dataset.ticketSave;
+      try {
+        await KMAuth.updateTicket({ id, status: $(`[data-ticket-status="${id}"]`).value, priority: $(`[data-ticket-priority="${id}"]`).value, note: $(`[data-ticket-note="${id}"]`).value });
+        await refreshData(); showMessage("Demande support mise à jour.", true);
+      } catch (error) { showMessage(KMAuth.friendlyError(error)); }
     });
+
+    $("#reauthCancel").addEventListener("click", () => { pendingCriticalAction = null; $("#reauthModal").classList.remove("open"); });
+    $("#reauthForm").addEventListener("submit", async event => {
+      event.preventDefault(); $("#reauthMessage").textContent = "";
+      try {
+        await KMAuth.reauthenticate($("#reauthPassword").value);
+        const action = pendingCriticalAction; pendingCriticalAction = null; $("#reauthModal").classList.remove("open");
+        await action(); await refreshData(); showMessage("Action sensible confirmée et enregistrée.", true);
+      } catch (error) { $("#reauthMessage").textContent = KMAuth.friendlyError(error); }
+    });
+
+    $("#exportFamilies").addEventListener("click", () => downloadCsv("kawaii-muslim-familles.csv", [
+      ["Prénom","E-mail","Rôle","Abonnement","Actif","Profils enfants","Création"],
+      ...state.families.map(item => [item.full_name,item.email,item.role,item.plan,item.is_active,item.children_count,item.created_at])
+    ]));
+    $("#exportLogs").addEventListener("click", () => downloadCsv("kawaii-muslim-journal.csv", [
+      ["Date","Action","Type","Cible"],
+      ...state.logs.map(item => [item.created_at,item.action,item.target_type,item.target_id])
+    ]));
+
+    $("#supportEmailForm").addEventListener("submit", async event => {
+      event.preventDefault(); await KMAuth.saveSetting({ key: "support_email", value: $("#supportEmail").value.trim(), description: "Adresse de contact affichée aux familles" }); await refreshData(); showMessage("Adresse du support enregistrée.", true);
+    });
+    $("#announcementForm").addEventListener("submit", async event => {
+      event.preventDefault(); await KMAuth.saveSetting({ key: "announcement", value: $("#announcement").value.trim(), description: "Message important affichable dans l’univers Kawaii Muslim" }); await refreshData(); showMessage("Message enregistré.", true);
+    });
+    $("#sendReset").addEventListener("click", async () => { await KMAuth.resetPassword(state.context.profile.email); showMessage("Le lien sécurisé a été envoyé par e-mail.", true); });
+    $("#logoutAll").addEventListener("click", async () => { await KMAuth.logout(); window.location.href = "Connexion.dc.html"; });
+
+    initialize().catch(error => showMessage(KMAuth.friendlyError(error)));
   </script>
 </body>
 </html>
