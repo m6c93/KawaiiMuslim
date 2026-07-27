@@ -544,6 +544,51 @@ create policy "content_covers_staff_delete"
     and public.can_manage_content()
   );
 
+-- Livres PDF envoyés depuis l’administration.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'content-books',
+  'content-books',
+  true,
+  52428800,
+  array['application/pdf']
+)
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "content_books_staff_insert" on storage.objects;
+create policy "content_books_staff_insert"
+  on storage.objects for insert
+  to authenticated
+  with check (
+    bucket_id = 'content-books'
+    and public.can_manage_content()
+  );
+
+drop policy if exists "content_books_staff_update" on storage.objects;
+create policy "content_books_staff_update"
+  on storage.objects for update
+  to authenticated
+  using (
+    bucket_id = 'content-books'
+    and public.can_manage_content()
+  )
+  with check (
+    bucket_id = 'content-books'
+    and public.can_manage_content()
+  );
+
+drop policy if exists "content_books_staff_delete" on storage.objects;
+create policy "content_books_staff_delete"
+  on storage.objects for delete
+  to authenticated
+  using (
+    bucket_id = 'content-books'
+    and public.can_manage_content()
+  );
+
 revoke all on function public.write_admin_log(text, text, text, jsonb) from public, anon, authenticated;
 revoke all on function public.audit_managed_change() from public, anon, authenticated;
 revoke all on function public.audit_setting_change() from public, anon, authenticated;
