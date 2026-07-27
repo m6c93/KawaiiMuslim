@@ -350,6 +350,28 @@ window.KMAuth = (() => {
       return publicUrl.data.publicUrl;
     },
 
+    deleteBook: async url => {
+      if (!url) return;
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      let source = url;
+      try {
+        const readerUrl = new URL(url, window.location.href);
+        if (readerUrl.pathname.endsWith("/Livre.dc.html") || readerUrl.pathname.endsWith("Livre.dc.html")) {
+          source = readerUrl.searchParams.get("src") || "";
+        }
+        const objectUrl = new URL(source);
+        const marker = "/storage/v1/object/public/content-books/";
+        const markerIndex = objectUrl.pathname.indexOf(marker);
+        if (objectUrl.hostname !== "pasgxojzybmvbjhuokkk.supabase.co" || markerIndex < 0) return;
+        const path = decodeURIComponent(objectUrl.pathname.slice(markerIndex + marker.length));
+        if (!path) return;
+        requireSuccess(await client().storage.from("content-books").remove([path]));
+      } catch (error) {
+        if (error?.message === "Connexion requise.") throw error;
+      }
+    },
+
     listTickets: async () => {
       return requireSuccess(await client().from("support_tickets")
         .select("id,requester_id,subject,category,message,status,priority,staff_note,assigned_to,created_at,updated_at")

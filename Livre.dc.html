@@ -9,81 +9,516 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root { color-scheme: light; --night:#211e56; --ink:#34325f; --pink:#ef9fc3; --paper:#f7f4fb; }
+    :root {
+      color-scheme: light;
+      --night: #211e56;
+      --night-soft: #393273;
+      --ink: #34325f;
+      --pink: #ef9fc3;
+      --pink-deep: #d976a7;
+      --paper: #fbf9fd;
+      --gold: #f2cb78;
+    }
     * { box-sizing: border-box; }
     html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--night); }
-    body { font-family: "Nunito", sans-serif; }
-    .reader { height: 100dvh; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+    body { font-family: "Nunito", sans-serif; overscroll-behavior: none; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    .reader {
+      height: 100dvh;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      color: #fff;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(239,159,195,.18), transparent 24%),
+        radial-gradient(circle at 88% 72%, rgba(111,200,181,.13), transparent 24%),
+        linear-gradient(145deg, #17143e, #2e2865 58%, #211e56);
+    }
+    .reader::before {
+      content: "✦  ·  ✧  ·  ✦";
+      position: fixed;
+      z-index: 0;
+      top: 20%;
+      right: 3%;
+      color: rgba(255,255,255,.13);
+      font-size: clamp(20px, 4vw, 42px);
+      letter-spacing: 14px;
+      transform: rotate(18deg);
+      pointer-events: none;
+    }
     .reader-bar {
-      position: relative; z-index: 2; display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
-      align-items: center; gap: 12px; min-height: 68px;
+      position: relative;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 68px;
       padding: calc(10px + env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 10px max(14px, env(safe-area-inset-left));
-      color: #fff; background: linear-gradient(135deg, #211e56, #3d3679);
-      box-shadow: 0 8px 28px rgba(17,15,51,.25);
+      background: rgba(25,22,63,.86);
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      box-shadow: 0 8px 28px rgba(8,6,32,.22);
+      backdrop-filter: blur(14px);
     }
-    .reader-home, .reader-download {
-      min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-      padding: 9px 14px; border: 1px solid rgba(255,255,255,.2); border-radius: 14px;
-      color: #fff; background: rgba(255,255,255,.11); text-decoration: none; font-weight: 900;
+    .reader-home, .reader-action, .nav-button {
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 9px 14px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 14px;
+      color: #fff;
+      background: rgba(255,255,255,.1);
+      text-decoration: none;
+      font: 900 13px "Nunito", sans-serif;
+      cursor: pointer;
     }
-    .reader-download { background: linear-gradient(135deg, #ef9fc3, #db79aa); border-color: transparent; }
+    .reader-home:hover, .reader-action:hover, .nav-button:hover:not(:disabled) { background: rgba(255,255,255,.18); }
     .reader-title { min-width: 0; text-align: center; }
-    .reader-title strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 800 clamp(16px,3vw,22px)/1.1 "Baloo 2", cursive; }
-    .reader-title small { color: #d6d3ed; }
-    .reader-frame { width: 100%; height: 100%; border: 0; background: var(--paper); }
-    .reader-error { display: none; place-items: center; padding: 24px; text-align: center; color: var(--ink); background: var(--paper); }
-    .reader-error.show { display: grid; }
-    .reader-error h1 { font: 800 28px "Baloo 2", cursive; }
-    @media (max-width: 620px) {
-      .reader-bar { grid-template-columns: auto minmax(0, 1fr); }
-      .reader-download { grid-column: 1 / -1; min-height: 38px; padding: 7px 12px; }
-      .reader-home span:last-child { display: none; }
-      .reader-title { text-align: left; }
+    .reader-title strong {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font: 800 clamp(16px, 3vw, 22px)/1.1 "Baloo 2", cursive;
     }
-    @media (max-height: 500px) and (orientation: landscape) {
-      .reader-bar { min-height: 52px; padding-top: max(6px, env(safe-area-inset-top)); padding-bottom: 6px; }
-      .reader-title small { display: none; }
-      .reader-home, .reader-download { min-height: 36px; padding: 6px 11px; }
-      .reader-download { grid-column: auto; }
+    .reader-title small { color: #d6d3ed; }
+    .reader-actions { display: flex; gap: 7px; }
+    .reader-stage {
+      position: relative;
+      z-index: 1;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      padding: clamp(12px, 2.5vw, 28px) clamp(58px, 8vw, 105px);
+      perspective: 1800px;
+      overflow: hidden;
+      touch-action: pan-y;
+    }
+    .book-shadow {
+      position: absolute;
+      left: 20%;
+      right: 20%;
+      bottom: 2%;
+      height: 6%;
+      border-radius: 50%;
+      background: rgba(0,0,0,.45);
+      filter: blur(18px);
+      opacity: .8;
+    }
+    .page-card {
+      position: relative;
+      max-width: 100%;
+      max-height: 100%;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 7px 13px 13px 7px;
+      background: var(--paper);
+      box-shadow:
+        -8px 0 0 rgba(245,238,248,.72),
+        -11px 0 0 rgba(227,216,236,.5),
+        0 26px 65px rgba(5,4,24,.48);
+      transform-style: preserve-3d;
+      transform-origin: left center;
+      transition: transform .22s cubic-bezier(.55,.02,.42,1), opacity .18s ease;
+      will-change: transform, opacity;
+    }
+    .page-card::after {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 18px;
+      background: linear-gradient(90deg, rgba(43,30,71,.2), rgba(255,255,255,.28), transparent);
+      pointer-events: none;
+    }
+    .page-card.turn-out-next { transform: rotateY(-88deg) scale(.985); opacity: .45; }
+    .page-card.turn-out-prev { transform-origin: right center; transform: rotateY(88deg) scale(.985); opacity: .45; }
+    #pageCanvas {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      background: #fff;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .page-loading {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background: rgba(251,249,253,.94);
+      text-align: center;
+    }
+    .page-loading[hidden] { display: none; }
+    .loader-star {
+      display: inline-grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      margin-bottom: 10px;
+      border-radius: 50%;
+      color: #fff;
+      background: linear-gradient(135deg, var(--pink), var(--pink-deep));
+      box-shadow: 0 10px 26px rgba(217,118,167,.34);
+      font-size: 26px;
+      animation: starPulse 1.15s ease-in-out infinite;
+    }
+    @keyframes starPulse { 50% { transform: scale(1.08) rotate(8deg); } }
+    .page-loading strong { display: block; font: 800 19px "Baloo 2", cursive; }
+    .page-loading small { color: #716d91; }
+    .side-nav {
+      position: absolute;
+      z-index: 6;
+      top: 50%;
+      width: 48px;
+      height: 58px;
+      padding: 0;
+      border-radius: 18px;
+      transform: translateY(-50%);
+      font-size: 27px;
+      box-shadow: 0 12px 30px rgba(7,5,29,.28);
+    }
+    .side-nav.prev { left: max(10px, env(safe-area-inset-left)); }
+    .side-nav.next { right: max(10px, env(safe-area-inset-right)); }
+    .nav-button:disabled { opacity: .28; cursor: default; }
+    .reader-controls {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      min-height: 65px;
+      padding: 9px max(14px, env(safe-area-inset-right)) calc(9px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+      background: rgba(25,22,63,.9);
+      border-top: 1px solid rgba(255,255,255,.1);
+      backdrop-filter: blur(14px);
+    }
+    .reader-controls .nav-button { min-width: 110px; background: rgba(255,255,255,.1); }
+    .reader-controls .next-control {
+      background: linear-gradient(135deg, var(--pink), var(--pink-deep));
+      border-color: transparent;
+    }
+    .page-count {
+      min-width: 98px;
+      text-align: center;
+      color: #d9d7ea;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+    .reader-error {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      place-items: center;
+      padding: 24px;
+      text-align: center;
+      color: var(--ink);
+      background: var(--paper);
+    }
+    .reader-error.show { display: grid; }
+    .reader-error h1 { margin: 0 0 7px; font: 800 28px "Baloo 2", cursive; }
+    .reader-error p { color: #706c8d; }
+    .reader-error a { color: #fff; background: var(--pink-deep); }
+    :fullscreen .reader { height: 100vh; }
+    @media (max-width: 680px) {
+      .reader-bar { grid-template-columns: auto minmax(0, 1fr) auto; min-height: 60px; gap: 8px; }
+      .reader-home, .reader-action { min-width: 40px; min-height: 40px; padding: 8px 10px; }
+      .reader-home span:last-child, .reader-action span:last-child, .reader-title small { display: none; }
+      .reader-stage { padding: 12px 49px; }
+      .side-nav { width: 40px; height: 51px; border-radius: 15px; font-size: 23px; }
+      .reader-controls { min-height: 58px; gap: 8px; }
+      .reader-controls .nav-button { min-width: 82px; padding: 8px 10px; }
+      .page-count { min-width: 78px; font-size: 13px; }
+    }
+    @media (max-height: 520px) and (orientation: landscape) {
+      .reader { grid-template-rows: auto minmax(0, 1fr); }
+      .reader-bar {
+        min-height: 48px;
+        padding-top: max(5px, env(safe-area-inset-top));
+        padding-bottom: 5px;
+      }
+      .reader-home, .reader-action { min-height: 36px; padding: 5px 10px; }
+      .reader-stage { padding-top: 7px; padding-bottom: 7px; }
+      .reader-controls {
+        position: absolute;
+        left: 50%;
+        bottom: max(6px, env(safe-area-inset-bottom));
+        min-height: 0;
+        padding: 5px;
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 17px;
+        transform: translateX(-50%);
+        box-shadow: 0 8px 24px rgba(0,0,0,.3);
+      }
+      .reader-controls .nav-button { min-width: 48px; min-height: 35px; }
+      .reader-controls .nav-label { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
   </style>
 </head>
 <body>
-  <main class="reader">
+  <main class="reader" id="reader">
     <header class="reader-bar">
-      <a class="reader-home" href="Bibliotheque%20Kawaii%20Muslim.dc.html" aria-label="Retour à la bibliothèque"><span aria-hidden="true">⌂</span><span>Bibliothèque</span></a>
-      <div class="reader-title"><strong id="bookTitle">Mon livre</strong><small>Kawaii Muslim</small></div>
-      <a class="reader-download" id="downloadBook" href="#" target="_blank" rel="noopener">Ouvrir le PDF</a>
+      <a class="reader-home" href="Bibliotheque%20Kawaii%20Muslim.dc.html" aria-label="Retour à la bibliothèque">
+        <span aria-hidden="true">⌂</span><span>Bibliothèque</span>
+      </a>
+      <div class="reader-title"><strong id="bookTitle">Mon livre</strong><small>Livre digital Kawaii Muslim</small></div>
+      <div class="reader-actions">
+        <button class="reader-action" id="fullscreenButton" type="button" aria-label="Afficher en plein écran"><span aria-hidden="true">⛶</span><span>Plein écran</span></button>
+        <a class="reader-action" id="downloadBook" href="#" target="_blank" rel="noopener" aria-label="Ouvrir le PDF original"><span aria-hidden="true">⇩</span><span>PDF</span></a>
+      </div>
     </header>
-    <iframe class="reader-frame" id="bookFrame" title="Livre au format PDF"></iframe>
-    <section class="reader-error" id="readerError">
-      <div><h1>Ce livre n’est pas disponible</h1><p>Retourne dans la bibliothèque et réessaie.</p></div>
+
+    <section class="reader-stage" id="readerStage" aria-live="polite">
+      <div class="book-shadow" aria-hidden="true"></div>
+      <button class="nav-button side-nav prev" id="sidePrevious" type="button" aria-label="Page précédente">‹</button>
+      <article class="page-card" id="pageCard">
+        <canvas id="pageCanvas" aria-label="Page du livre"></canvas>
+        <div class="page-loading" id="pageLoading">
+          <div><span class="loader-star" aria-hidden="true">✦</span><strong>Préparation du livre…</strong><small id="loadingDetail">Ouverture du PDF</small></div>
+        </div>
+      </article>
+      <button class="nav-button side-nav next" id="sideNext" type="button" aria-label="Page suivante">›</button>
+      <section class="reader-error" id="readerError">
+        <div>
+          <h1>Impossible d’ouvrir ce livre</h1>
+          <p id="readerErrorText">Retourne dans la bibliothèque et réessaie.</p>
+          <a class="reader-home" href="Bibliotheque%20Kawaii%20Muslim.dc.html">Retour à la bibliothèque</a>
+        </div>
+      </section>
     </section>
+
+    <nav class="reader-controls" aria-label="Navigation dans le livre">
+      <button class="nav-button" id="previousButton" type="button"><span aria-hidden="true">←</span><span class="nav-label">Précédente</span></button>
+      <span class="page-count" id="pageCount">Page — / —</span>
+      <button class="nav-button next-control" id="nextButton" type="button"><span class="nav-label">Suivante</span><span aria-hidden="true">→</span></button>
+    </nav>
   </main>
-  <script>
-    (() => {
-      const params = new URLSearchParams(location.search);
-      const source = params.get("src") || "";
-      const title = (params.get("title") || "Mon livre").slice(0, 160);
-      const allowedHost = "pasgxojzybmvbjhuokkk.supabase.co";
-      let sourceUrl;
+
+  <script type="module">
+    const PDFJS_VERSION = "5.7.284";
+    const PDFJS_BASE = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/`;
+    const params = new URLSearchParams(location.search);
+    const source = params.get("src") || "";
+    const title = (params.get("title") || "Mon livre").slice(0, 160);
+    const allowedHost = "pasgxojzybmvbjhuokkk.supabase.co";
+    const elements = {
+      reader: document.getElementById("reader"),
+      stage: document.getElementById("readerStage"),
+      card: document.getElementById("pageCard"),
+      canvas: document.getElementById("pageCanvas"),
+      loading: document.getElementById("pageLoading"),
+      loadingDetail: document.getElementById("loadingDetail"),
+      pageCount: document.getElementById("pageCount"),
+      previous: document.getElementById("previousButton"),
+      next: document.getElementById("nextButton"),
+      sidePrevious: document.getElementById("sidePrevious"),
+      sideNext: document.getElementById("sideNext"),
+      fullscreen: document.getElementById("fullscreenButton"),
+      download: document.getElementById("downloadBook"),
+      error: document.getElementById("readerError"),
+      errorText: document.getElementById("readerErrorText")
+    };
+    let pdfDocument = null;
+    let currentPage = 1;
+    let isTurning = false;
+    let pendingPage = null;
+    let renderTask = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let resizeTimer = null;
+
+    const wait = (duration) => new Promise(resolve => setTimeout(resolve, duration));
+    const setLoading = (visible, detail = "") => {
+      elements.loading.hidden = !visible;
+      if (detail) elements.loadingDetail.textContent = detail;
+    };
+    const validateSource = () => {
+      const url = new URL(source);
+      const productionSource = url.protocol === "https:"
+        && url.hostname === allowedHost
+        && url.pathname.startsWith("/storage/v1/object/public/content-books/")
+        && url.pathname.toLowerCase().endsWith(".pdf");
+      const localPreview = ["localhost", "127.0.0.1"].includes(location.hostname)
+        && url.origin === location.origin
+        && url.pathname.toLowerCase().endsWith(".pdf");
+      if (!productionSource && !localPreview) throw new Error("L’adresse du livre n’est pas autorisée.");
+      return url;
+    };
+    const showError = (message) => {
+      setLoading(false);
+      elements.errorText.textContent = message || "Retourne dans la bibliothèque et réessaie.";
+      elements.error.classList.add("show");
+    };
+    const updateControls = () => {
+      const total = pdfDocument?.numPages || 0;
+      elements.pageCount.textContent = total ? `Page ${currentPage} / ${total}` : "Page — / —";
+      [elements.previous, elements.sidePrevious].forEach(button => button.disabled = !total || currentPage <= 1);
+      [elements.next, elements.sideNext].forEach(button => button.disabled = !total || currentPage >= total);
+      elements.canvas.setAttribute("aria-label", total ? `Page ${currentPage} sur ${total}` : "Page du livre");
+    };
+    const getAvailableSize = () => {
+      const bounds = elements.stage.getBoundingClientRect();
+      const horizontalPadding = innerWidth <= 680 ? 106 : Math.min(230, innerWidth * .18);
+      return {
+        width: Math.max(180, bounds.width - horizontalPadding),
+        height: Math.max(180, bounds.height - 24)
+      };
+    };
+    const renderPage = async pageNumber => {
+      if (!pdfDocument) return;
+      if (renderTask) {
+        try { renderTask.cancel(); } catch (error) {}
+        renderTask = null;
+      }
+      const page = await pdfDocument.getPage(pageNumber);
+      const baseViewport = page.getViewport({ scale: 1 });
+      const available = getAvailableSize();
+      const cssScale = Math.min(available.width / baseViewport.width, available.height / baseViewport.height);
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2.25);
+      const renderViewport = page.getViewport({ scale: cssScale * pixelRatio });
+      const cssWidth = Math.floor(baseViewport.width * cssScale);
+      const cssHeight = Math.floor(baseViewport.height * cssScale);
+      elements.canvas.width = Math.max(1, Math.floor(renderViewport.width));
+      elements.canvas.height = Math.max(1, Math.floor(renderViewport.height));
+      elements.canvas.style.width = `${cssWidth}px`;
+      elements.canvas.style.height = `${cssHeight}px`;
+      elements.card.style.width = `${cssWidth}px`;
+      elements.card.style.height = `${cssHeight}px`;
+      const context = elements.canvas.getContext("2d", { alpha: false });
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, elements.canvas.width, elements.canvas.height);
+      renderTask = page.render({ canvasContext: context, viewport: renderViewport });
+      await renderTask.promise;
+      renderTask = null;
+      currentPage = pageNumber;
+      updateControls();
+      const adjacent = pageNumber < pdfDocument.numPages ? pageNumber + 1 : pageNumber - 1;
+      if (adjacent >= 1) pdfDocument.getPage(adjacent).catch(() => {});
+    };
+    const turnTo = async targetPage => {
+      if (!pdfDocument) return;
+      const target = Math.max(1, Math.min(pdfDocument.numPages, targetPage));
+      if (target === currentPage) return;
+      if (isTurning) {
+        pendingPage = target;
+        return;
+      }
+      isTurning = true;
+      const direction = target > currentPage ? 1 : -1;
+      const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!reducedMotion) {
+        elements.card.classList.add(direction > 0 ? "turn-out-next" : "turn-out-prev");
+        await wait(190);
+      }
       try {
-        sourceUrl = new URL(source);
-        const valid = sourceUrl.protocol === "https:"
-          && sourceUrl.hostname === allowedHost
-          && sourceUrl.pathname.startsWith("/storage/v1/object/public/content-books/")
-          && sourceUrl.pathname.toLowerCase().endsWith(".pdf");
-        if (!valid) throw new Error("Adresse non autorisée");
+        await renderPage(target);
+        if (!reducedMotion) {
+          elements.card.classList.remove("turn-out-next", "turn-out-prev");
+          elements.card.style.transition = "none";
+          elements.card.style.transformOrigin = direction > 0 ? "right center" : "left center";
+          elements.card.style.transform = direction > 0 ? "rotateY(86deg)" : "rotateY(-86deg)";
+          elements.card.style.opacity = ".5";
+          elements.card.getBoundingClientRect();
+          elements.card.style.transition = "";
+          requestAnimationFrame(() => {
+            elements.card.style.transform = "";
+            elements.card.style.opacity = "";
+          });
+          await wait(240);
+          elements.card.style.transformOrigin = "";
+        }
+      } catch (error) {
+        showError("Cette page n’a pas pu être affichée.");
+      } finally {
+        elements.card.classList.remove("turn-out-next", "turn-out-prev");
+        isTurning = false;
+        if (pendingPage && pendingPage !== currentPage) {
+          const queued = pendingPage;
+          pendingPage = null;
+          turnTo(queued);
+        }
+      }
+    };
+    const next = () => turnTo(currentPage + 1);
+    const previous = () => turnTo(currentPage - 1);
+
+    [elements.next, elements.sideNext].forEach(button => button.addEventListener("click", next));
+    [elements.previous, elements.sidePrevious].forEach(button => button.addEventListener("click", previous));
+    document.addEventListener("keydown", event => {
+      if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); next(); }
+      if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); previous(); }
+      if (event.key === "Home") turnTo(1);
+      if (event.key === "End" && pdfDocument) turnTo(pdfDocument.numPages);
+    });
+    elements.stage.addEventListener("touchstart", event => {
+      const touch = event.changedTouches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    }, { passive: true });
+    elements.stage.addEventListener("touchend", event => {
+      const touch = event.changedTouches[0];
+      const deltaX = touch.clientX - touchStartX;
+      const deltaY = touch.clientY - touchStartY;
+      if (Math.abs(deltaX) > 55 && Math.abs(deltaX) > Math.abs(deltaY) * 1.35) {
+        deltaX < 0 ? next() : previous();
+      }
+    }, { passive: true });
+    elements.fullscreen.addEventListener("click", async () => {
+      try {
+        if (!document.fullscreenElement) await elements.reader.requestFullscreen();
+        else await document.exitFullscreen();
+      } catch (error) {}
+    });
+    document.addEventListener("fullscreenchange", () => {
+      elements.fullscreen.querySelector("span:last-child").textContent = document.fullscreenElement ? "Quitter" : "Plein écran";
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => renderPage(currentPage).catch(() => {}), 180);
+    });
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => renderPage(currentPage).catch(() => {}), 180);
+    });
+
+    const initialize = async () => {
+      try {
+        const sourceUrl = validateSource();
         document.title = `${title} — Kawaii Muslim`;
         document.getElementById("bookTitle").textContent = title;
-        document.getElementById("bookFrame").src = `${sourceUrl.href}#view=FitH`;
-        document.getElementById("downloadBook").href = sourceUrl.href;
+        elements.download.href = sourceUrl.href;
+        updateControls();
+        const pdfjsLib = await import(`${PDFJS_BASE}build/pdf.min.mjs`);
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `${PDFJS_BASE}build/pdf.worker.min.mjs`;
+        const loadingTask = pdfjsLib.getDocument({
+          url: sourceUrl.href,
+          cMapUrl: `${PDFJS_BASE}cmaps/`,
+          cMapPacked: true,
+          standardFontDataUrl: `${PDFJS_BASE}standard_fonts/`,
+          wasmUrl: `${PDFJS_BASE}wasm/`
+        });
+        loadingTask.onProgress = progress => {
+          if (!progress.total) return;
+          const percent = Math.min(100, Math.round(progress.loaded / progress.total * 100));
+          setLoading(true, `Chargement · ${percent} %`);
+        };
+        pdfDocument = await loadingTask.promise;
+        setLoading(true, `${pdfDocument.numPages} page${pdfDocument.numPages > 1 ? "s" : ""} · création du livre`);
+        await renderPage(1);
+        setLoading(false);
       } catch (error) {
-        document.getElementById("bookFrame").remove();
-        document.getElementById("downloadBook").hidden = true;
-        document.getElementById("readerError").classList.add("show");
+        console.error(error);
+        showError("Le livre digital n’a pas pu être préparé. Tu peux réessayer dans quelques instants.");
       }
-    })();
+    };
+    initialize();
   </script>
 </body>
 </html>
