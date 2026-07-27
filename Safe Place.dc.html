@@ -639,7 +639,7 @@
       background: #fff0f7;
     }
 
-    .calendar-card { margin-bottom: 24px; }
+    .calendar-card { margin-top: 24px; }
     .calendar-layout {
       display: grid;
       grid-template-columns: minmax(0, 1.35fr) minmax(250px, .65fr);
@@ -874,33 +874,6 @@
     </div>
 
     <main>
-      <section class="card calendar-card" aria-labelledby="calendarTitle">
-        <div class="section-head">
-          <div>
-            <span class="section-index">Mon calendrier cocon</span>
-            <h2 id="calendarTitle">Retrouver mes journées</h2>
-            <p class="section-note">Choisis une date passée pour relire ou modifier ton planner. Le petit point vert indique une journée commencée.</p>
-          </div>
-          <span class="gentle-tag">Ton histoire, à ton rythme</span>
-        </div>
-        <div class="calendar-layout">
-          <div class="calendar-shell">
-            <div class="calendar-nav">
-              <button class="month-button" id="previousMonth" type="button" aria-label="Mois précédent">←</button>
-              <strong id="calendarMonth"></strong>
-              <button class="month-button" id="nextMonth" type="button" aria-label="Mois suivant">→</button>
-            </div>
-            <div class="calendar-grid" id="calendarGrid" aria-label="Calendrier du planner"></div>
-          </div>
-          <div class="day-summary">
-            <small>Journée sélectionnée</small>
-            <h3 id="selectedDayTitle"></h3>
-            <p id="selectedDaySummary"></p>
-            <button class="today-button" id="todayButton" type="button">Revenir à aujourd’hui</button>
-          </div>
-        </div>
-      </section>
-
       <div class="grid">
         <div class="stack">
           <section class="card" aria-labelledby="moodTitle">
@@ -1018,6 +991,33 @@
           </section>
         </aside>
       </div>
+
+      <section class="card calendar-card" aria-labelledby="calendarTitle">
+        <div class="section-head">
+          <div>
+            <span class="section-index">Mon calendrier cocon</span>
+            <h2 id="calendarTitle">Retrouver mes journées</h2>
+            <p class="section-note">Choisis une date passée pour relire ou modifier ton planner. Le petit point vert indique une journée commencée.</p>
+          </div>
+          <span class="gentle-tag">Ton histoire, à ton rythme</span>
+        </div>
+        <div class="calendar-layout">
+          <div class="calendar-shell">
+            <div class="calendar-nav">
+              <button class="month-button" id="previousMonth" type="button" aria-label="Mois précédent">←</button>
+              <strong id="calendarMonth"></strong>
+              <button class="month-button" id="nextMonth" type="button" aria-label="Mois suivant">→</button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid" aria-label="Calendrier du planner"></div>
+          </div>
+          <div class="day-summary">
+            <small>Journée sélectionnée</small>
+            <h3 id="selectedDayTitle"></h3>
+            <p id="selectedDaySummary"></p>
+            <button class="today-button" id="todayButton" type="button">Revenir à aujourd’hui</button>
+          </div>
+        </div>
+      </section>
 
       <section class="card reflection-card" aria-labelledby="reflectionTitle">
         <div class="section-head">
