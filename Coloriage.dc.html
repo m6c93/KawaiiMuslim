@@ -39,6 +39,9 @@
     .size { cursor:pointer; width:24px; height:24px; display:grid; place-items:center; border:0; border-radius:50%; background:rgba(255,255,255,.09); }
     .size::after { content:""; width:var(--dot); height:var(--dot); border-radius:50%; background:#fff; }
     .size.active { outline:2px solid var(--gold); }
+    .pressure { width:72px; display:grid; gap:5px; text-align:center; }
+    .pressure input { width:72px; margin:0; cursor:pointer; accent-color:var(--pink); }
+    .pressure strong { color:#fff; font-size:9px; line-height:1.1; }
     .stage { min-width:0; min-height:0; overflow:auto; display:grid; place-items:start center; padding:clamp(12px,3vw,30px); touch-action:pan-x pan-y; }
     .paper { position:relative; width:min(820px,100%); overflow:hidden; border-radius:13px; background:#fff; box-shadow:0 26px 70px rgba(5,4,24,.5); touch-action:none; }
     .paper canvas { display:block; width:100%; height:auto; }
@@ -112,6 +115,11 @@
           <button class="size active" style="--dot:10px" data-size="14" aria-label="Feutre moyen"></button>
           <button class="size" style="--dot:15px" data-size="24" aria-label="Gros feutre"></button>
         </div>
+        <span class="tool-label">Pression</span>
+        <label class="pressure" for="pressureRange">
+          <input id="pressureRange" type="range" min="20" max="100" step="5" value="55" aria-label="Pression du feutre">
+          <strong id="pressureLabel">Normale</strong>
+        </label>
         <button class="tool" id="eraserButton" type="button">🧽<br>Gomme</button>
         <button class="tool" id="clearButton" type="button">✨<br>Recommencer</button>
         <button class="tool finish" id="finishButton" type="button">⭐<br>Terminé</button>
@@ -174,6 +182,7 @@
     let currentStroke = null;
     let color = "#ef6f9f";
     let size = 14;
+    let pressure = .55;
     let erasing = false;
     let saveTimer = null;
     let saving = false;
@@ -223,6 +232,7 @@
       drawCtx.lineJoin = "round";
       drawCtx.lineWidth = stroke.size;
       drawCtx.globalCompositeOperation = stroke.eraser ? "destination-out" : "source-over";
+      drawCtx.globalAlpha = stroke.eraser ? 1 : (Number.isFinite(stroke.pressure) ? stroke.pressure : 1);
       drawCtx.strokeStyle = stroke.color;
       drawCtx.beginPath();
       const [first,...rest] = stroke.points;
@@ -319,7 +329,7 @@
     drawCanvas.addEventListener("pointerdown", event => {
       event.preventDefault();
       drawCanvas.setPointerCapture(event.pointerId);
-      currentStroke = {color,size,eraser:erasing,points:[pointFromEvent(event)]};
+      currentStroke = {color,size,pressure,eraser:erasing,points:[pointFromEvent(event)]};
       redoStack = [];
       drawStroke(currentStroke);
     });
@@ -351,6 +361,11 @@
       if (!button) return;
       size = Number(button.dataset.size);
       document.querySelectorAll("[data-size]").forEach(item => item.classList.toggle("active",item===button));
+    });
+    document.getElementById("pressureRange").addEventListener("input",event => {
+      pressure = Number(event.target.value) / 100;
+      document.getElementById("pressureLabel").textContent =
+        pressure <= .35 ? "Toute douce" : pressure <= .7 ? "Normale" : "Bien marquée";
     });
     document.getElementById("eraserButton").addEventListener("click",event => {
       erasing = !erasing; event.currentTarget.classList.toggle("active",erasing);
