@@ -132,6 +132,10 @@
       <h1>Que veux-tu faire ?</h1>
       <p>Choisis simplement ton activité.</p>
       <select class="child-select" id="childSelect" aria-label="Choisir l’enfant"></select>
+      <div id="quickChild" hidden>
+        <p style="margin:0 0 8px;color:#fff;font-weight:900;">Quel est le prénom du petit artiste ?</p>
+        <input class="child-select" id="quickChildName" type="text" maxlength="40" autocomplete="off" placeholder="Son prénom">
+      </div>
       <div class="choice-buttons">
         <button class="choice-button" id="startColoring" type="button"><span>🖍️</span><strong>Colorier</strong><small>Avec mes feutres numériques</small></button>
         <button class="choice-button" id="quickPrint" type="button"><span>🖨️</span><strong>Imprimer</strong><small>Pour colorier sur papier</small></button>
@@ -289,7 +293,19 @@
     };
     const startEditor = async () => {
       childId = childSelect.value;
-      if (!childId) return document.getElementById("choiceMessage").textContent = "Ajoute d’abord un profil enfant.";
+      if (!childId) {
+        const childName = document.getElementById("quickChildName").value.trim();
+        if (!childName) {
+          document.getElementById("choiceMessage").textContent = "Écris d’abord le prénom du petit artiste.";
+          document.getElementById("quickChildName").focus();
+          return;
+        }
+        const child = await KMAuth.addChild({ name:childName, avatar:"🐤", ageGroup:"6-8" });
+        childId = child.id;
+        childSelect.innerHTML = `<option value="${child.id}">${child.avatar} ${child.name}</option>`;
+        childSelect.value = child.id;
+        KMAuth.setActiveProfile({type:"child",id:child.id,name:child.name,avatar:child.avatar});
+      }
       if (format === "pdf") {
         document.getElementById("choiceMessage").textContent = "Ce fichier PDF est prêt à imprimer. Choisis un coloriage en image pour utiliser les feutres numériques.";
         return;
@@ -378,8 +394,8 @@
       if (active.type === "child" && context.children.some(child => child.id === active.id)) childSelect.value = active.id;
       if (!context.children.length) {
         childSelect.hidden = true;
-        document.getElementById("choiceMessage").innerHTML = 'Ajoute un profil enfant dans <a href="Compte.dc.html" style="color:#fff">Mon compte</a>.';
-        document.getElementById("startColoring").disabled = true;
+        document.getElementById("quickChild").hidden = false;
+        document.getElementById("choiceMessage").textContent = "Une seule fois : indique son prénom pour créer sa galerie privée.";
       }
       if (requestedDraft && childSelect.value) await startEditor();
     } catch (error) {
