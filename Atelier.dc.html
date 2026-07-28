@@ -52,6 +52,7 @@
     .art-copy { padding:14px; }
     .art-copy strong { display:block; overflow:hidden; font:800 16px "Baloo 2",cursive; text-overflow:ellipsis; white-space:nowrap; }
     .art-copy small { color:var(--muted); font-size:10px; }
+    .memory-phrase { min-height:30px; margin:6px 0 0; display:-webkit-box; overflow:hidden; color:#777994; font-size:10px; font-style:italic; line-height:1.45; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
     .art-buttons { display:grid; grid-template-columns:1fr auto; gap:7px; margin-top:12px; }
     .art-button { cursor:pointer; min-height:36px; display:grid; place-items:center; padding:7px 10px; color:#fff; border:0; border-radius:15px; background:linear-gradient(145deg,var(--mint),#388f79); font-size:10px; font-weight:900; text-decoration:none; }
     .art-button.secondary { color:#8d5575; background:#fdebf4; }
@@ -199,14 +200,17 @@
       gallery.innerHTML = shown.map(item => {
         const resumeUrl = `Coloriage.dc.html?src=${encodeURIComponent(item.source_url)}&title=${encodeURIComponent(item.title)}&draft=${item.id}`;
         const isDraft = item.status === "in_progress";
+        const memory = item.drawing_data?.memory || {};
+        const displayTitle = memory.title || item.title;
         return `<article class="art-card">
           <div class="art-preview">
             ${item.image_url ? `<img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.title)}">` : `<span style="font-size:50px">🎨</span>`}
             <span class="art-badge ${isDraft ? "draft" : ""}">${isDraft ? "À terminer" : item.kind === "paper" ? "Sur papier" : "Terminé"}</span>
           </div>
           <div class="art-copy">
-            <strong>${escapeHtml(item.title)}</strong>
+            <strong>${escapeHtml(displayTitle)}</strong>
             <small>${dateLabel(item.updated_at)}</small>
+            ${memory.phrase ? `<p class="memory-phrase">“${escapeHtml(memory.phrase)}”</p>` : ""}
             <div class="art-buttons">
               ${isDraft ? `<a class="art-button" href="${resumeUrl}">Continuer</a>` : `<a class="art-button" href="${escapeHtml(item.image_url)}" target="_blank" rel="noopener">Voir</a>`}
               <button class="art-button secondary" data-delete="${item.id}" type="button" aria-label="Supprimer">🗑️</button>
