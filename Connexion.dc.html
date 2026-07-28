@@ -72,6 +72,19 @@
     const destination = requestedPage?.startsWith("/") && !requestedPage.startsWith("//")
       ? requestedPage
       : "Profils.dc.html";
+    const staffRoles = ["admin", "support", "content_admin"];
+
+    const continueAfterAuthentication = async () => {
+      const context = await KMAuth.getContext();
+      if (context && staffRoles.includes(context.profile.role)) {
+        const adminDestination = destination.includes("Admin.dc.html")
+          ? destination
+          : "/Admin.dc.html";
+        window.location.href = `MFA.dc.html?next=${encodeURIComponent(adminDestination)}`;
+        return;
+      }
+      window.location.href = destination;
+    };
 
     document.getElementById("togglePassword").addEventListener("click", () => {
       password.type = password.type === "password" ? "text" : "password";
@@ -105,7 +118,7 @@
           email: document.getElementById("email").value,
           password: password.value
         });
-        window.location.href = destination;
+        await continueAfterAuthentication();
       } catch (error) {
         message.textContent = KMAuth.friendlyError(error);
         submitButton.disabled = false;
@@ -114,7 +127,7 @@
     });
 
     KMAuth.getSession().then(session => {
-      if (session) window.location.href = destination;
+      if (session) return continueAfterAuthentication();
     }).catch(() => {});
   </script>
 </body>

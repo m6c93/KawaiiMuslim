@@ -99,7 +99,10 @@
               <small>${escapeHtml(child.age_group)} ans · progression personnelle</small>
             </div>
           </div>
-          <button class="small-button danger" type="button" data-remove="${child.id}">Retirer</button>
+          <div class="card-actions">
+            <a class="small-button" href="Atelier.dc.html?child=${child.id}">🎨 Sa galerie</a>
+            <button class="small-button danger" type="button" data-remove="${child.id}">Retirer</button>
+          </div>
         </article>
       `).join("") || '<p class="loading">Aucun profil enfant. Tu peux en ajouter un juste au-dessus.</p>';
     };

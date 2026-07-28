@@ -11,8 +11,22 @@
   <link rel="stylesheet" href="./responsive.css">
   <link rel="stylesheet" href="./account.css">
   <link rel="stylesheet" href="./admin.css">
+  <style>
+    .admin-auth-pending .admin-shell { visibility: hidden; }
+    .admin-auth-loader {
+      position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center;
+      padding: 24px; color: #5f6280; background: #f8f7fb; font-weight: 900; text-align: center;
+    }
+    .admin-auth-loader::before {
+      content: ""; width: 44px; height: 44px; margin: 0 auto 14px; display: block;
+      border: 4px solid #e6e4ec; border-top-color: #4fc0a1; border-radius: 50%;
+      animation: admin-auth-spin .8s linear infinite;
+    }
+    @keyframes admin-auth-spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
-<body class="admin-body">
+<body class="admin-body admin-auth-pending">
+  <div class="admin-auth-loader" id="adminAuthLoader">Vérification de ton accès sécurisé…</div>
   <div class="admin-shell">
     <aside class="admin-sidebar">
       <a class="admin-brand" href="Bibliotheque%20Kawaii%20Muslim.dc.html">
@@ -433,8 +447,13 @@
 
     const initialize = async () => {
       state.context = await KMAuth.getContext();
-      if (!state.context) return window.location.href = "Connexion.dc.html";
+      if (!state.context) return window.location.href = "Connexion.dc.html?next=%2FAdmin.dc.html";
       if (!["admin","support","content_admin"].includes(state.context.profile.role)) return window.location.href = "Profils.dc.html";
+      const mfaStatus = await KMAuth.getMFAStatus();
+      if (mfaStatus.currentLevel !== "aal2") {
+        const adminDestination = `/Admin.dc.html${location.hash || ""}`;
+        return window.location.replace(`MFA.dc.html?next=${encodeURIComponent(adminDestination)}`);
+      }
       $("#adminName").textContent = state.context.profile.full_name || "Administration";
       $("#adminRole").textContent = roleLabels[state.context.profile.role];
       const access = permissions();
@@ -443,6 +462,8 @@
       const initial = location.hash.slice(1);
       const initialButton = initial && $(`.admin-tab[data-view="${initial}"]:not([hidden])`);
       switchView(initialButton ? initial : "overview");
+      document.body.classList.remove("admin-auth-pending");
+      $("#adminAuthLoader").remove();
     };
 
     $$(".admin-tab").forEach(button => button.addEventListener("click", () => switchView(button.dataset.view)));
@@ -665,7 +686,11 @@
     $("#sendReset").addEventListener("click", async () => { await KMAuth.resetPassword(state.context.profile.email); showMessage("Le lien sécurisé a été envoyé par e-mail.", true); });
     $("#logoutAll").addEventListener("click", async () => { await KMAuth.logout(); window.location.href = "Connexion.dc.html"; });
 
-    initialize().catch(error => showMessage(KMAuth.friendlyError(error)));
+    initialize().catch(error => {
+      const loader = $("#adminAuthLoader");
+      if (loader) loader.textContent = KMAuth.friendlyError(error);
+      showMessage(KMAuth.friendlyError(error));
+    });
   </script>
 </body>
 </html>

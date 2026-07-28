@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#20285e">
+  <title>Double identification — Kawaii Muslim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./responsive.css">
+  <link rel="stylesheet" href="./account.css">
+  <style>
+    .mfa-layout { min-height: calc(100vh - 84px); }
+    .mfa-story-badge {
+      width: 72px; height: 72px; display: grid; place-items: center;
+      margin-bottom: 22px; border: 1px solid rgba(255,255,255,.18);
+      border-radius: 24px; background: rgba(255,255,255,.1); font-size: 34px;
+    }
+    .mfa-steps { display: grid; gap: 12px; margin: 24px 0 0; padding: 0; list-style: none; }
+    .mfa-steps li { display: flex; align-items: center; gap: 12px; color: #f0f1fb; font-size: 13px; font-weight: 800; }
+    .mfa-steps span {
+      flex: 0 0 30px; width: 30px; height: 30px; display: grid; place-items: center;
+      border-radius: 50%; background: rgba(255,255,255,.12); color: #fae7a9;
+    }
+    .mfa-loader { display: grid; place-items: center; min-height: 260px; color: #777894; font-weight: 900; text-align: center; }
+    .mfa-loader::before {
+      content: ""; width: 42px; height: 42px; margin-bottom: 15px;
+      border: 4px solid #e9e7f0; border-top-color: #4fc0a1; border-radius: 50%;
+      animation: mfa-spin .8s linear infinite;
+    }
+    @keyframes mfa-spin { to { transform: rotate(360deg); } }
+    .mfa-qr-card {
+      display: grid; grid-template-columns: 152px 1fr; gap: 18px; align-items: center;
+      margin: 2px 0 22px; padding: 16px; border: 1px solid #ebe7f0;
+      border-radius: 20px; background: #fffbf4;
+    }
+    .mfa-qr-card img { width: 152px; height: 152px; padding: 7px; border-radius: 14px; background: #fff; }
+    .mfa-qr-card strong { display: block; margin-bottom: 5px; font-family: "Baloo 2", cursive; font-size: 18px; }
+    .mfa-qr-card p { margin: 0; color: #777894; font-size: 12px; line-height: 1.5; }
+    .mfa-secret {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      margin-top: 10px; padding: 8px 10px; border-radius: 10px; background: #fff;
+    }
+    .mfa-secret code { min-width: 0; overflow: hidden; color: #292b52; font-size: 10px; text-overflow: ellipsis; }
+    .mfa-secret button { cursor: pointer; padding: 6px 9px; color: #2e7d6b; border-radius: 10px; background: #e9f7f1; font-size: 10px; font-weight: 900; }
+    .mfa-code { text-align: center; font-size: 24px; font-weight: 900; letter-spacing: .35em; }
+    .mfa-actions { display: grid; gap: 10px; }
+    .mfa-exit { cursor: pointer; padding: 10px; color: #777894; background: transparent; font-size: 11px; font-weight: 900; }
+    .mfa-note { margin: 15px 0 0; color: #a6a3b4; font-size: 10px; line-height: 1.5; text-align: center; }
+    @media (max-width: 560px) {
+      .mfa-story { min-height: 245px; }
+      .mfa-story-badge { width: 58px; height: 58px; margin-bottom: 14px; border-radius: 19px; font-size: 28px; }
+      .mfa-steps { display: none; }
+      .mfa-qr-card { grid-template-columns: 1fr; text-align: center; }
+      .mfa-qr-card img { margin: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="account-shell">
+    <nav class="account-nav">
+      <a class="account-brand" href="Bibliotheque%20Kawaii%20Muslim.dc.html">
+        <img src="brand/assets/mascot-nour.png" alt="Mimi">
+        <strong>Kawaii Muslim</strong>
+      </a>
+      <span class="badge">Accès administrateur</span>
+    </nav>
+
+    <main class="auth-layout mfa-layout">
+      <section class="auth-story mfa-story">
+        <div class="mfa-story-badge" aria-hidden="true">🛡️</div>
+        <span class="story-kicker">Protection renforcée</span>
+        <h1>Ton espace admin reste bien gardé</h1>
+        <p>Après ton mot de passe, un code temporaire confirme que c’est bien toi. Même si ton mot de passe est découvert, l’administration reste protégée.</p>
+        <ol class="mfa-steps">
+          <li><span>1</span> Ouvre ton application Authenticator</li>
+          <li><span>2</span> Saisis le code à 6 chiffres</li>
+          <li><span>3</span> Entre dans l’administration</li>
+        </ol>
+      </section>
+
+      <section class="auth-panel">
+        <div class="auth-form">
+          <div class="mfa-loader" id="loader">Vérification de la sécurité…</div>
+
+          <form id="mfaForm" hidden novalidate>
+            <h2 id="mfaTitle">Double identification</h2>
+            <p class="form-subtitle" id="mfaSubtitle"></p>
+
+            <div class="mfa-qr-card" id="enrollmentCard" hidden>
+              <img id="qrCode" alt="QR code à scanner dans l’application Authenticator">
+              <div>
+                <strong>Scanne ce QR code</strong>
+                <p>Dans Google Authenticator, Microsoft Authenticator, Authy ou ton gestionnaire de mots de passe.</p>
+                <div class="mfa-secret">
+                  <code id="secretCode"></code>
+                  <button id="copySecret" type="button">Copier</button>
+                </div>
+              </div>
+            </div>
+
+            <label class="field-label" for="mfaCode">Code de sécurité</label>
+            <input class="field-input mfa-code" id="mfaCode" type="text" inputmode="numeric"
+              pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="000000" required>
+
+            <div class="mfa-actions">
+              <button class="primary-button" id="verifyButton" type="submit">Vérifier et continuer</button>
+              <button class="mfa-exit" id="exitButton" type="button">Quitter le mode administrateur</button>
+            </div>
+            <p class="form-message" id="message" role="status" aria-live="polite"></p>
+            <p class="mfa-note">Le code change toutes les 30 secondes et n’est jamais envoyé à Kawaii Muslim.</p>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./km-config.js"></script>
+  <script src="./km-auth.js"></script>
+  <script>
+    const staffRoles = ["admin", "support", "content_admin"];
+    const requestedPage = new URLSearchParams(window.location.search).get("next");
+    const destination = requestedPage?.startsWith("/") && !requestedPage.startsWith("//")
+      ? requestedPage
+      : "/Admin.dc.html";
+    const loader = document.getElementById("loader");
+    const form = document.getElementById("mfaForm");
+    const title = document.getElementById("mfaTitle");
+    const subtitle = document.getElementById("mfaSubtitle");
+    const enrollmentCard = document.getElementById("enrollmentCard");
+    const qrCode = document.getElementById("qrCode");
+    const secretCode = document.getElementById("secretCode");
+    const codeInput = document.getElementById("mfaCode");
+    const verifyButton = document.getElementById("verifyButton");
+    const message = document.getElementById("message");
+    let factorId = "";
+    let enrollmentMode = false;
+
+    const showForm = () => {
+      loader.hidden = true;
+      form.hidden = false;
+      setTimeout(() => codeInput.focus(), 50);
+    };
+
+    const initialize = async () => {
+      const context = await KMAuth.getContext();
+      if (!context) {
+        window.location.replace(`Connexion.dc.html?next=${encodeURIComponent(destination)}`);
+        return;
+      }
+      if (!staffRoles.includes(context.profile.role)) {
+        window.location.replace("Profils.dc.html");
+        return;
+      }
+
+      const status = await KMAuth.getMFAStatus();
+      if (status.currentLevel === "aal2") {
+        window.location.replace(destination);
+        return;
+      }
+
+      if (status.factors.length) {
+        factorId = status.factors[0].id;
+        title.textContent = "Entre ton code de sécurité";
+        subtitle.textContent = "Ouvre ton application Authenticator et saisis le code affiché pour Kawaii Muslim.";
+        showForm();
+        return;
+      }
+
+      enrollmentMode = true;
+      await KMAuth.clearUnverifiedMFAFactors(status.unverifiedFactors);
+      const enrollment = await KMAuth.enrollMFA();
+      factorId = enrollment.factorId;
+      qrCode.src = enrollment.qrCode;
+      secretCode.textContent = enrollment.secret;
+      enrollmentCard.hidden = false;
+      title.textContent = "Active ta double identification";
+      subtitle.textContent = "Cette première étape n’est nécessaire qu’une fois. Scanne le QR code, puis entre le code à 6 chiffres.";
+      verifyButton.textContent = "Activer et continuer";
+      showForm();
+    };
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      message.textContent = "";
+      verifyButton.disabled = true;
+      verifyButton.textContent = "Vérification…";
+      try {
+        await KMAuth.verifyMFACode({ factorId, code: codeInput.value });
+        message.className = "form-message success";
+        message.textContent = enrollmentMode
+          ? "Double identification activée. Ouverture de l’administration…"
+          : "Identité confirmée. Ouverture de l’administration…";
+        window.location.replace(destination);
+      } catch (error) {
+        message.className = "form-message";
+        message.textContent = KMAuth.friendlyError(error);
+        codeInput.select();
+        verifyButton.disabled = false;
+        verifyButton.textContent = enrollmentMode ? "Activer et continuer" : "Vérifier et continuer";
+      }
+    });
+
+    document.getElementById("copySecret").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(secretCode.textContent);
+        document.getElementById("copySecret").textContent = "Copié";
+      } catch {
+        message.textContent = "Maintiens ton doigt sur la clé pour la copier.";
+      }
+    });
+
+    document.getElementById("exitButton").addEventListener("click", async () => {
+      await KMAuth.logout().catch(() => {});
+      window.location.replace("Connexion.dc.html");
+    });
+
+    initialize().catch(error => {
+      loader.hidden = true;
+      form.hidden = false;
+      title.textContent = "Vérification impossible";
+      subtitle.textContent = "La protection n’a pas pu être préparée.";
+      codeInput.hidden = true;
+      document.querySelector('label[for="mfaCode"]').hidden = true;
+      verifyButton.hidden = true;
+      message.textContent = KMAuth.friendlyError(error);
+    });
+  </script>
+</body>
+</html>

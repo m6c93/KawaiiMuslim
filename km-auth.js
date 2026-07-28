@@ -111,6 +111,27 @@ window.KMAuth = (() => {
     }).select().single());
   };
 
+  const withArtworkUrls = async rows => {
+    return Promise.all((rows || []).map(async artwork => {
+      if (!artwork.image_path) return { ...artwork, image_url: artwork.source_url || "" };
+      const signed = requireSuccess(await client().storage
+        .from("child-artworks")
+        .createSignedUrl(artwork.image_path, 60 * 60));
+      return { ...artwork, image_url: signed?.signedUrl || "" };
+    }));
+  };
+
+  const validateArtworkChild = async childId => {
+    const session = await getSession();
+    if (!session) throw new Error("Connexion requise.");
+    const child = requireSuccess(await client().from("child_profiles")
+      .select("id,name,avatar")
+      .eq("id", childId)
+      .eq("parent_id", session.user.id)
+      .single());
+    return { session, child };
+  };
+
   const getContext = async () => {
     const session = await getSession();
     if (!session) return null;
@@ -122,6 +143,55 @@ window.KMAuth = (() => {
     const children = await getChildren(session.user.id);
     startInactivityGuard();
     return { session, user: session.user, profile, children };
+  };
+
+  const getMFAStatus = async () => {
+    const session = await getSession();
+    if (!session) throw new Error("Connexion requise.");
+    const levels = requireSuccess(await client().auth.mfa.getAuthenticatorAssuranceLevel());
+    const factors = requireSuccess(await client().auth.mfa.listFactors());
+    const allTotpFactors = factors?.totp || [];
+    const totpFactors = allTotpFactors.filter(factor => factor.status === "verified");
+    return {
+      currentLevel: levels?.currentLevel || "aal1",
+      nextLevel: levels?.nextLevel || "aal1",
+      factors: totpFactors,
+      unverifiedFactors: allTotpFactors.filter(factor => factor.status !== "verified")
+    };
+  };
+
+  const clearUnverifiedMFAFactors = async factors => {
+    for (const factor of factors || []) {
+      requireSuccess(await client().auth.mfa.unenroll({ factorId: factor.id }));
+    }
+  };
+
+  const enrollMFA = async () => {
+    const session = await getSession();
+    if (!session) throw new Error("Connexion requise.");
+    const data = requireSuccess(await client().auth.mfa.enroll({
+      factorType: "totp",
+      friendlyName: "Kawaii Muslim Admin"
+    }));
+    return {
+      factorId: data.id,
+      qrCode: data.totp?.qr_code || "",
+      secret: data.totp?.secret || "",
+      uri: data.totp?.uri || ""
+    };
+  };
+
+  const verifyMFACode = async ({ factorId, code }) => {
+    const cleanCode = String(code || "").replace(/\s/g, "");
+    if (!/^\d{6}$/.test(cleanCode)) {
+      throw new Error("Entre le code à 6 chiffres de ton application.");
+    }
+    const challenge = requireSuccess(await client().auth.mfa.challenge({ factorId }));
+    return requireSuccess(await client().auth.mfa.verify({
+      factorId,
+      challengeId: challenge.id,
+      code: cleanCode
+    }));
   };
 
   const setActiveProfile = selection => {
@@ -165,12 +235,131 @@ window.KMAuth = (() => {
     friendlyError,
     getSession,
     getContext,
+    getMFAStatus,
+    enrollMFA,
+    verifyMFACode,
+    clearUnverifiedMFAFactors,
     getActiveProfile,
     validateActiveProfile,
     setActiveProfile,
     getPlannerDays,
     savePlannerDay,
     startInactivityGuard,
+
+    listArtworks: async childId => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      let query = client().from("child_artworks")
+        .select("*")
+        .eq("owner_id", session.user.id)
+        .order("updated_at", { ascending: false });
+      if (childId) query = query.eq("child_profile_id", childId);
+      return withArtworkUrls(requireSuccess(await query) || []);
+    },
+
+    findArtworkDraft: async ({ childId, sourceUrl }) => {
+      await validateArtworkChild(childId);
+      const result = await client().from("child_artworks")
+        .select("*")
+        .eq("child_profile_id", childId)
+        .eq("source_url", sourceUrl)
+        .eq("status", "in_progress")
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return requireSuccess(result);
+    },
+
+    saveArtworkDraft: async ({ id, childId, title, sourceUrl, drawingData }) => {
+      const { session } = await validateArtworkChild(childId);
+      const payload = {
+        owner_id: session.user.id,
+        child_profile_id: childId,
+        title: String(title || "Mon coloriage").trim().slice(0, 160),
+        source_url: sourceUrl,
+        kind: "digital",
+        status: "in_progress",
+        drawing_data: drawingData || { strokes: [] }
+      };
+      if (id) {
+        delete payload.owner_id;
+        delete payload.child_profile_id;
+        return requireSuccess(await client().from("child_artworks")
+          .update(payload)
+          .eq("id", id)
+          .eq("owner_id", session.user.id)
+          .select()
+          .single());
+      }
+      return requireSuccess(await client().from("child_artworks")
+        .insert(payload)
+        .select()
+        .single());
+    },
+
+    completeArtwork: async ({ id, childId, imageBlob, drawingData }) => {
+      const { session } = await validateArtworkChild(childId);
+      if (!id || !imageBlob) throw new Error("Le coloriage n’est pas encore prêt.");
+      if (imageBlob.size > 10 * 1024 * 1024) throw new Error("Le coloriage est trop lourd pour être enregistré.");
+      const path = `${session.user.id}/${childId}/${id}-${Date.now()}.png`;
+      requireSuccess(await client().storage.from("child-artworks").upload(path, imageBlob, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: "image/png"
+      }));
+      return requireSuccess(await client().from("child_artworks")
+        .update({
+          status: "completed",
+          image_path: path,
+          drawing_data: drawingData || { strokes: [] },
+          completed_at: new Date().toISOString()
+        })
+        .eq("id", id)
+        .eq("owner_id", session.user.id)
+        .select()
+        .single());
+    },
+
+    uploadPaperArtwork: async ({ childId, title, file }) => {
+      const { session } = await validateArtworkChild(childId);
+      if (!file || !String(file.type).startsWith("image/")) {
+        throw new Error("Choisis ou photographie une image du coloriage.");
+      }
+      if (file.size > 10 * 1024 * 1024) throw new Error("La photo doit peser moins de 10 Mo.");
+      const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+      const artworkId = crypto.randomUUID();
+      const path = `${session.user.id}/${childId}/${artworkId}-${Date.now()}.${extension}`;
+      requireSuccess(await client().storage.from("child-artworks").upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type
+      }));
+      return requireSuccess(await client().from("child_artworks").insert({
+        id: artworkId,
+        owner_id: session.user.id,
+        child_profile_id: childId,
+        title: String(title || "Mon coloriage papier").trim().slice(0, 160),
+        kind: "paper",
+        status: "completed",
+        image_path: path,
+        completed_at: new Date().toISOString()
+      }).select().single());
+    },
+
+    deleteArtwork: async id => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      const artwork = requireSuccess(await client().from("child_artworks")
+        .select("id,image_path")
+        .eq("id", id)
+        .eq("owner_id", session.user.id)
+        .single());
+      if (artwork.image_path) {
+        requireSuccess(await client().storage.from("child-artworks").remove([artwork.image_path]));
+      }
+      return requireSuccess(await client().from("child_artworks")
+        .delete().eq("id", id).eq("owner_id", session.user.id));
+    },
 
     signup: async ({ name, email, password }) => {
       const data = requireSuccess(await client().auth.signUp({
