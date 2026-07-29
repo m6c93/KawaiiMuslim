@@ -917,7 +917,7 @@
                 <p class="reminder-action" id="reminderAction"></p>
               </div>
             </div>
-            <p class="source-note">Les références indiquent la sourate et le verset du rappel. Les traductions françaises expriment le sens rapproché.</p>
+            <p class="source-note">Le rappel s’adapte à l’émotion choisie et change automatiquement toutes les deux heures. Les 36 variantes de chaque thème sont montrées avant qu’une ancienne ne revienne.</p>
           </section>
 
           <section class="card" aria-labelledby="plannerTitle">
@@ -1080,43 +1080,129 @@
       let selectedDateKey = todayKey;
       let calendarCursor = new Date(today.getFullYear(), today.getMonth(), 1, 12);
 
+      const REMINDER_INTERVAL_MS = 2 * 60 * 60 * 1000;
+      const REMINDER_HISTORY_KEY = "km-reminder-history-v2";
       const moods = {
-        fatiguee: {
-          icon: "🌙",
-          text: "« À côté de la difficulté est, certes, une facilité. À côté de la difficulté est, certes, une facilité. »",
-          reference: "Coran — Sourate Ash-Sharh, 94:5-6",
-          action: "Petite action : pose une main sur ton cœur, respire trois fois et accorde-toi dix minutes sans culpabilité."
-        },
-        debordee: {
-          icon: "🤍",
-          text: "« Allah n’impose à aucune âme une charge supérieure à sa capacité. »",
-          reference: "Coran — Sourate Al-Baqara, 2:286",
-          action: "Petite action : choisis une seule priorité maintenant, puis répète doucement trois fois : Al-hamdoulillah."
-        },
-        triste: {
-          icon: "🌦️",
-          text: "« Ne t’afflige pas, car Allah est avec nous. »",
-          reference: "Coran — Sourate At-Tawbah, 9:40",
-          action: "Petite action : confie à Allah ce qui pèse dans ton cœur, même avec quelques mots seulement."
-        },
-        reconnaissante: {
-          icon: "✨",
-          text: "« Si vous êtes reconnaissants, très certainement J’augmenterai Mes bienfaits pour vous. »",
-          reference: "Coran — Sourate Ibrahim, 14:7",
-          action: "Petite action : nomme trois petites choses qui ont apporté de la douceur à ta journée."
-        },
-        apaisee: {
-          icon: "🕊️",
-          text: "« C’est par l’évocation d’Allah que les cœurs se tranquillisent. »",
-          reference: "Coran — Sourate Ar-Ra’d, 13:28",
-          action: "Petite action : garde ce calme un instant et fais un dhikr lentement, sans te presser."
-        },
-        motivee: {
-          icon: "🌱",
-          text: "« L’homme n’obtient que le fruit de ses efforts. »",
-          reference: "Coran — Sourate An-Najm, 53:39",
-          action: "Petite action : commence par ce qui compte le plus et dis Bismillah avant ton premier pas."
-        }
+              "fatiguee": {
+                      "icon": "🌙",
+                      "label": "Fatiguée",
+                      "texts": [
+                              "Tu n’as pas besoin de tout porter aujourd’hui. Ralentir est aussi une façon de prendre soin de toi.",
+                              "Ta valeur ne se mesure pas au nombre de tâches terminées. Même fatiguée, tu restes digne de douceur.",
+                              "Écouter les limites de ton corps n’est pas abandonner : c’est avancer avec sagesse.",
+                              "Un petit pas sincère suffit aujourd’hui. Tu peux laisser le reste attendre.",
+                              "Allah connaît l’effort discret que tu fournis, même lorsque ton énergie est basse.",
+                              "Parle-toi comme à une sœur épuisée : avec patience, respect et tendresse."
+                      ],
+                      "actions": [
+                              "Bois un verre d’eau puis assieds-toi cinq minutes sans écran.",
+                              "Retire une tâche non urgente de ta liste.",
+                              "Relâche tes épaules et respire lentement trois fois.",
+                              "Commence seulement par deux minutes de la tâche la plus légère.",
+                              "Prépare une pause calme de dix minutes et protège-la.",
+                              "Décide maintenant de l’heure à laquelle tu arrêteras les tâches."
+                      ]
+              },
+              "debordee": {
+                      "icon": "🤍",
+                      "label": "Débordée",
+                      "texts": [
+                              "Tu n’as pas à résoudre toute ta journée d’un seul coup. Reviens à la prochaine chose importante.",
+                              "Tout ce qui paraît urgent ne l’est pas forcément. Ton calme mérite une place dans ton organisation.",
+                              "Un pas clair vaut mieux que dix pensées pressées.",
+                              "Tu peux faire moins, mais le faire avec présence. Allah connaît tes limites et ta sincérité.",
+                              "Tu n’es pas perdue : tu as simplement besoin d’un point de départ plus petit.",
+                              "Choisir la paix avant la perfection est aussi une décision courageuse."
+                      ],
+                      "actions": [
+                              "Écris une seule priorité et cache le reste de la liste.",
+                              "Classe tes tâches en trois mots : maintenant, plus tard, à laisser.",
+                              "Termine une action de moins de cinq minutes avant d’en ouvrir une autre.",
+                              "Dis Bismillah puis concentre-toi sur une seule tâche.",
+                              "Reporte consciemment une tâche non essentielle.",
+                              "Coupe une notification et garde un seul espace de travail ouvert."
+                      ]
+              },
+              "triste": {
+                      "icon": "🌦️",
+                      "label": "Triste",
+                      "texts": [
+                              "Tu n’as pas besoin de cacher ta tristesse pour être forte. Accueillir ton émotion peut déjà soulager ton cœur.",
+                              "Allah entend aussi les invocations murmurées avec une voix fragile.",
+                              "Tes larmes ne diminuent pas ta foi. Elles disent parfois ce que les mots ne portent pas encore.",
+                              "Ce que tu ressens maintenant n’est pas toute ton histoire. Cette vague aura aussi une fin.",
+                              "Chercher une présence bienveillante est un geste courageux, pas une faiblesse.",
+                              "Un jour plus lourd n’efface pas tous les pas que tu as déjà accomplis."
+                      ],
+                      "actions": [
+                              "Nomme ton émotion en une phrase, sans la juger.",
+                              "Confie à Allah une seule chose qui te fait mal.",
+                              "Accorde-toi quelques minutes dans un endroit où tu te sens en sécurité.",
+                              "Cite cinq choses que tu vois pour revenir au présent.",
+                              "Écris à une personne sûre : « J’aurais besoin de parler un peu. »",
+                              "Choisis une chose douce qui demande très peu d’énergie."
+                      ]
+              },
+              "reconnaissante": {
+                      "icon": "✨",
+                      "label": "Reconnaissante",
+                      "texts": [
+                              "La gratitude donne de la profondeur aux choses simples.",
+                              "Dire Al-hamdoulillah avec présence transforme un instant ordinaire.",
+                              "La joie grandit lorsqu’elle est partagée. Ton merci peut devenir la douceur de quelqu’un.",
+                              "Certains bienfaits sont discrets : un souffle calme, une présence, une protection invisible.",
+                              "La reconnaissance n’efface pas les difficultés ; elle révèle aussi ce qui te soutient.",
+                              "Un cœur reconnaissant sait célébrer sans attendre que tout soit parfait."
+                      ],
+                      "actions": [
+                              "Note trois détails précis qui ont embelli ta journée.",
+                              "Choisis un bienfait et remercie Allah lentement pour lui.",
+                              "Envoie un message de remerciement sincère.",
+                              "Complète : « Même aujourd’hui, je suis reconnaissante pour… »",
+                              "Écris un souvenir doux en moins de vingt mots.",
+                              "Transforme ta gratitude en un petit geste utile."
+                      ]
+              },
+              "apaisee": {
+                      "icon": "🕊️",
+                      "label": "Apaisée",
+                      "texts": [
+                              "Protège ce calme sans chercher à remplir immédiatement l’espace.",
+                              "Ton apaisement peut devenir un lieu depuis lequel agir avec plus de justesse.",
+                              "Quand le cœur se pose, le dhikr peut approfondir cette tranquillité.",
+                              "Reçois cette accalmie comme un bienfait, sans avoir à la mériter.",
+                              "Le calme n’est pas du temps vide : il permet au cœur d’entendre plus clairement.",
+                              "Cette paix peut coexister avec des choses encore inachevées."
+                      ],
+                      "actions": [
+                              "Reste deux minutes sans écran et observe ta respiration.",
+                              "Choisis lentement ta prochaine action.",
+                              "Répète un dhikr que tu aimes avec attention.",
+                              "Dis Al-hamdoulillah et nomme ce qui nourrit ta paix.",
+                              "Écris la pensée claire qui apparaît quand tu ralentis.",
+                              "Choisis un mot-guide : douceur, patience ou présence."
+                      ]
+              },
+              "motivee": {
+                      "icon": "🌱",
+                      "label": "Motivée",
+                      "texts": [
+                              "Ton élan est précieux. Donne-lui une direction claire au lieu de le disperser.",
+                              "Commence avec Bismillah sans attendre que tout soit parfaitement préparé.",
+                              "La motivation devient solide lorsqu’elle s’appuie sur une intention sincère.",
+                              "Garde un rythme que tu pourras respecter avec douceur.",
+                              "Un projet avance grâce aux petits gestes répétés, pas seulement aux grands élans.",
+                              "Une seule tâche terminée crée plus d’élan que cinq tâches ouvertes."
+                      ],
+                      "actions": [
+                              "Choisis un objectif et écris sa première étape concrète.",
+                              "Lance un minuteur de dix minutes et commence maintenant.",
+                              "Complète : « Je veux faire cela pour… »",
+                              "Définis ton heure d’arrêt avant de commencer.",
+                              "Crée une action de moins de cinq minutes à refaire demain.",
+                              "Termine une chose avant d’en ouvrir une nouvelle."
+                      ]
+              }
       };
 
       const challenges = [
@@ -1250,20 +1336,37 @@
         $("#fullDate").textContent = selectedDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
       };
 
-      const displayMood = mood => {
-        $$(".mood").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.mood === mood)));
-        const content = moods[mood];
-        if (content) {
-          $("#reminderIcon").textContent = content.icon;
-          $("#reminderText").textContent = content.text;
-          $("#reminderSource").textContent = content.reference;
-          $("#reminderAction").textContent = content.action;
-          $("#reminder").classList.add("show");
-        } else {
-          $("#reminder").classList.remove("show");
+      const readReminderHistory = () => { try { return JSON.parse(localStorage.getItem(REMINDER_HISTORY_KEY) || "{}"); } catch { return {}; } };
+      const reminderFor = mood => {
+        const theme = moods[mood]; if (!theme) return null;
+        const total = theme.texts.length * theme.actions.length;
+        const slot = Math.floor(Date.now() / REMINDER_INTERVAL_MS);
+        const history = readReminderHistory();
+        const state = history[mood] || { slot: null, pair: null, used: [] };
+        if (state.slot === slot && Number.isInteger(state.pair)) {
+          const textIndex = state.pair % theme.texts.length;
+          return { icon: theme.icon, text: theme.texts[textIndex], reference: "Rappel doux · " + theme.label, action: "Petite action : " + theme.actions[Math.floor(state.pair / theme.texts.length)] };
         }
+        let used = Array.isArray(state.used) ? state.used.filter(pair => Number.isInteger(pair) && pair < total) : [];
+        if (used.length >= total) used = Number.isInteger(state.pair) ? [state.pair] : [];
+        const offset = [...mood].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+        let pair = Math.abs(slot * 7 + offset) % total;
+        for (let step = 0; step < total; step += 1) { const candidate = (pair + step) % total; if (!used.includes(candidate) && candidate !== state.pair) { pair = candidate; break; } }
+        history[mood] = { slot, pair, used: [...used, pair].slice(-total) };
+        localStorage.setItem(REMINDER_HISTORY_KEY, JSON.stringify(history));
+        const textIndex = pair % theme.texts.length;
+        return { icon: theme.icon, text: theme.texts[textIndex], reference: "Rappel doux · " + theme.label, action: "Petite action : " + theme.actions[Math.floor(pair / theme.texts.length)] };
       };
-
+      const displayMood = mood => {
+        $(".mood").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.mood === mood)));
+        const content = reminderFor(mood);
+        if (content) { $("#reminderIcon").textContent=content.icon; $("#reminderText").textContent=content.text; $("#reminderSource").textContent=content.reference; $("#reminderAction").textContent=content.action; $("#reminder").classList.add("show"); }
+        else $("#reminder").classList.remove("show");
+      };
+      const scheduleReminderRefresh = () => {
+        const now=Date.now(), next=(Math.floor(now/REMINDER_INTERVAL_MS)+1)*REMINDER_INTERVAL_MS;
+        setTimeout(() => { if (day.mood) displayMood(day.mood); scheduleReminderRefresh(); }, Math.max(1000,next-now+1000));
+      };
       const setMood = mood => {
         day.mood = mood;
         displayMood(mood);
@@ -1527,6 +1630,7 @@
       };
 
       await initialize();
+      scheduleReminderRefresh();
     })();
   </script>
 </body>
