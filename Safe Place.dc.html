@@ -1494,7 +1494,7 @@
         window.scrollTo({ top: 0, behavior: "smooth" });
       };
 
-      $$$(".mood").forEach(button => button.addEventListener("click", () => setMood(button.dataset.mood)));
+      $$(".mood").forEach(button => button.addEventListener("click", () => setMood(button.dataset.mood)));
 
       $$(".priority-text").forEach(input => input.addEventListener("input", () => {
         const index = Number(input.dataset.index);
