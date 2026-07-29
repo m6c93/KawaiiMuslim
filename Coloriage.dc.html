@@ -163,6 +163,11 @@
           <input id="pressureRange" type="range" min="20" max="100" step="5" value="55" aria-label="Pression du feutre">
           <strong id="pressureLabel">Normale</strong>
         </label>
+        <span class="tool-label">Stylet</span>
+        <label class="pressure" for="stylusSensitivity">
+          <input id="stylusSensitivity" type="range" min="75" max="200" step="5" value="155" aria-label="Sensibilité du stylet">
+          <strong id="stylusSensitivityLabel">Sensible 155%</strong>
+        </label>
         <span class="tool-label">Stickers</span>
         <div class="stickers" id="stickers">
           <button class="sticker active" data-sticker="⭐" type="button">⭐</button>
@@ -268,6 +273,8 @@
     let color = "#ef6f9f";
     let size = 14;
     let pressure = .55;
+    let stylusSensitivity = 1.55;
+    let stylusNotified = false;
     let activeTool = "marker";
     let activeSticker = "⭐";
     let safeMode = true;
@@ -344,16 +351,42 @@
       ctx.save();
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
-      ctx.lineWidth = style.width;
       ctx.globalCompositeOperation = stroke.eraser ? "destination-out" : "source-over";
-      ctx.globalAlpha = stroke.eraser ? 1 : style.alpha;
       ctx.strokeStyle = stroke.color;
-      ctx.beginPath();
       const [first,...rest] = stroke.points;
-      ctx.moveTo(first[0],first[1]);
-      if (!rest.length) ctx.lineTo(first[0]+.1,first[1]+.1);
-      rest.forEach(point => ctx.lineTo(point[0],point[1]));
-      ctx.stroke();
+      if (!stroke.dynamic) {
+        ctx.lineWidth = style.width;
+        ctx.globalAlpha = stroke.eraser ? 1 : style.alpha;
+        ctx.beginPath();
+        ctx.moveTo(first[0],first[1]);
+        if (!rest.length) ctx.lineTo(first[0]+.1,first[1]+.1);
+        rest.forEach(point => ctx.lineTo(point[0],point[1]));
+        ctx.stroke();
+      } else {
+        const sensitivity = Number.isFinite(stroke.sensitivity) ? stroke.sensitivity : 1.55;
+        const pressureFactor = value => Math.max(.3,Math.min(1.8,1+(value-.5)*1.35*sensitivity));
+        if (!rest.length) {
+          const penPressure = Number.isFinite(first[2]) ? first[2] : .5;
+          ctx.lineWidth = style.width*pressureFactor(penPressure);
+          ctx.globalAlpha = stroke.eraser ? 1 : Math.min(1,style.alpha*(.65+penPressure*.7));
+          ctx.beginPath();
+          ctx.moveTo(first[0],first[1]);
+          ctx.lineTo(first[0]+.1,first[1]+.1);
+          ctx.stroke();
+        } else {
+          let previous = first;
+          rest.forEach(point => {
+            const penPressure = ((Number.isFinite(previous[2]) ? previous[2] : .5)+(Number.isFinite(point[2]) ? point[2] : .5))/2;
+            ctx.lineWidth = style.width*pressureFactor(penPressure);
+            ctx.globalAlpha = stroke.eraser ? 1 : Math.min(1,style.alpha*(.65+penPressure*.7));
+            ctx.beginPath();
+            ctx.moveTo(previous[0],previous[1]);
+            ctx.lineTo(point[0],point[1]);
+            ctx.stroke();
+            previous = point;
+          });
+        }
+      }
       ctx.restore();
     };
     const applyBucket = action => {
@@ -463,7 +496,12 @@
     };
     const pointFromEvent = event => {
       const rect = drawCanvas.getBoundingClientRect();
-      return [(event.clientX-rect.left)*drawCanvas.width/rect.width,(event.clientY-rect.top)*drawCanvas.height/rect.height];
+      const penPressure = event.pointerType === "pen" && event.pressure > 0 ? event.pressure : .5;
+      return [
+        (event.clientX-rect.left)*drawCanvas.width/rect.width,
+        (event.clientY-rect.top)*drawCanvas.height/rect.height,
+        penPressure
+      ];
     };
     const scheduleSave = () => {
       saveStatus.textContent = "Sauvegarde…";
@@ -596,8 +634,13 @@
       }
       currentStroke = {
         type:"stroke",tool:erasing ? "eraser" : activeTool,color,size,pressure,
-        safe:safeMode,eraser:erasing,points:[point]
+        safe:safeMode,eraser:erasing,dynamic:event.pointerType==="pen",
+        sensitivity:stylusSensitivity,points:[point]
       };
+      if (currentStroke.dynamic && !stylusNotified) {
+        stylusNotified = true;
+        toast("Stylet détecté : pression dynamique activée ✨");
+      }
       drawStroke(currentStroke);
     });
     drawCanvas.addEventListener("pointermove", event => {
@@ -617,7 +660,10 @@
       }
       if (!currentStroke) return;
       event.preventDefault();
-      currentStroke.points.push(pointFromEvent(event));
+      const samples = currentStroke.dynamic && typeof event.getCoalescedEvents === "function"
+        ? event.getCoalescedEvents()
+        : [event];
+      (samples.length ? samples : [event]).forEach(sample => currentStroke.points.push(pointFromEvent(sample)));
       redraw();
       drawStroke(currentStroke);
       protectContours(currentStroke.safe);
@@ -698,6 +744,13 @@
       pressure = Number(event.target.value) / 100;
       document.getElementById("pressureLabel").textContent =
         pressure <= .35 ? "Toute douce" : pressure <= .7 ? "Normale" : "Bien marquée";
+    });
+    document.getElementById("stylusSensitivity").addEventListener("input",event => {
+      stylusSensitivity = Number(event.target.value) / 100;
+      document.getElementById("stylusSensitivityLabel").textContent =
+        stylusSensitivity < 1.15 ? `Douce ${event.target.value}%`
+        : stylusSensitivity < 1.65 ? `Sensible ${event.target.value}%`
+        : `Très sensible ${event.target.value}%`;
     });
     document.getElementById("safeModeButton").addEventListener("click",event => {
       safeMode = !safeMode;
