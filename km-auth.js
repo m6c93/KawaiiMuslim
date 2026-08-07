@@ -20,11 +20,19 @@ window.KMAuth = (() => {
 
   const friendlyError = error => {
     const message = String(error?.message || error || "");
-    if (/invalid login/i.test(message)) return "E-mail ou mot de passe incorrect.";
-    if (/already registered|already been registered/i.test(message)) return "Un compte existe déjà avec cet e-mail.";
-    if (/password/i.test(message) && /6 characters/i.test(message)) return "Le mot de passe doit contenir au moins 8 caractères.";
-    if (/email rate limit/i.test(message)) return "Trop d’e-mails ont été envoyés. Réessaie dans quelques minutes.";
-    if (/network|fetch/i.test(message)) return "Connexion impossible. Vérifie internet puis réessaie.";
+    const status = Number(error?.status || error?.statusCode || 0);
+
+    if (/invalid login|invalid credentials/i.test(message)) return "E-mail ou mot de passe incorrect.";
+    if (/email not confirmed/i.test(message)) return "Confirme d’abord ton adresse e-mail grâce au message reçu.";
+    if (/already registered|already been registered|user already exists/i.test(message)) return "Un compte existe déjà avec cet e-mail.";
+    if (/weak password|password.*(?:6|8) characters|password should be at least/i.test(message)) return "Choisis un mot de passe d’au moins 8 caractères.";
+    if (/email rate limit|over_email_send_rate_limit/i.test(message)) return "Trop d’e-mails ont été envoyés. Attends quelques minutes avant de réessayer.";
+    if (/rate limit|too many requests/i.test(message) || status === 429) return "Trop de tentatives ont été effectuées. Attends quelques minutes avant de réessayer.";
+    if (/expired|invalid.*(?:token|otp)|otp.*invalid/i.test(message)) return "Ce lien ou ce code a expiré. Demande-en un nouveau.";
+    if (/signup.*disabled|signups not allowed/i.test(message)) return "Les inscriptions sont momentanément fermées.";
+    if (/network|fetch|timeout|timed out|load failed|connection refused|service unavailable/i.test(message) || status >= 500) {
+      return "Le service de connexion est momentanément indisponible. Réessaie dans quelques minutes.";
+    }
     return message || "Une erreur est survenue. Réessaie doucement.";
   };
 
