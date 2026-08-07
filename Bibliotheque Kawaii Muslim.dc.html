@@ -412,17 +412,13 @@
               </div>
               <p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:38px; color:#fff; margin:0;">{{ familyPrice }}€<span style="font-size:14px; color:#C9CBE6; font-weight:600;">/mois</span></p>
             </div>
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:18px; background:rgba(255,255,255,.08); border-radius:18px; padding:14px 16px;">
-              <div>
-                <strong style="display:block; font-size:14px; color:#fff;">Combien d’enfants ?</strong>
-                <span style="font-size:12px; color:#C9CBE6;">+0,99€/mois par enfant après le premier</span>
-              </div>
-              <div style="display:flex; align-items:center; gap:12px;">
-                <button onClick="{{ removeRequestedChild }}" type="button" aria-label="Retirer un enfant" style="cursor:pointer; width:36px; height:36px; border:0; border-radius:50%; background:rgba(255,255,255,.12); color:#fff; font-size:20px;">−</button>
-                <strong style="min-width:24px; text-align:center; font-family:'Baloo 2',cursive; font-size:22px; color:#fff;">{{ requestedChildren }}</strong>
-                <button onClick="{{ addRequestedChild }}" type="button" aria-label="Ajouter un enfant" style="cursor:pointer; width:36px; height:36px; border:0; border-radius:50%; background:#F0B53F; color:#3a2b06; font-size:20px;">+</button>
-              </div>
+            <p style="font-family:'Baloo 2',cursive; font-weight:700; font-size:15px; color:#fff; margin:0 0 12px; text-align:center;">Choisis le nombre d’enfants</p>
+            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">
+              <button onClick="{{ chooseOneChild }}" type="button" style="cursor:pointer; border:1px solid rgba(255,255,255,.2); border-radius:16px; background:rgba(255,255,255,.08); color:#fff; padding:14px 8px;"><strong style="display:block; font-size:15px;">1 enfant</strong><span style="font-size:13px; color:#C9CBE6;">4,99€/mois</span></button>
+              <button onClick="{{ chooseTwoChildren }}" type="button" style="cursor:pointer; border:2px solid #F0B53F; border-radius:16px; background:rgba(240,181,63,.16); color:#fff; padding:14px 8px;"><strong style="display:block; font-size:15px;">2 enfants</strong><span style="font-size:13px; color:#FAE08C;">5,98€/mois</span></button>
+              <button onClick="{{ chooseThreeChildren }}" type="button" style="cursor:pointer; border:1px solid rgba(255,255,255,.2); border-radius:16px; background:rgba(255,255,255,.08); color:#fff; padding:14px 8px;"><strong style="display:block; font-size:15px;">3 enfants</strong><span style="font-size:13px; color:#C9CBE6;">6,97€/mois</span></button>
             </div>
+            <p style="font-size:13px; color:#C9CBE6; margin:14px 0 0; text-align:center;">Votre choix : <strong style="color:#fff;">{{ requestedChildren }} enfant(s) · {{ familyPrice }}€/mois</strong></p>
           </div>
 
           <div style="display:flex; flex-wrap:wrap; gap:10px 22px; justify-content:center; margin-bottom:28px;">
@@ -468,7 +464,7 @@ class Component extends DCLogic {
         subscribed: staffAccess || ['mensuel', 'annuel'].includes(context.profile.plan),
         catalog,
         announcement: settings.find((item) => item.key === 'announcement')?.value || '',
-        requestedChildren: Math.max(1, context.children.length || 1),
+        requestedChildren: Math.min(3, Math.max(1, context.children.length || 1)),
       });
     }).catch(() => {
       window.location.href = 'Connexion.dc.html';
@@ -571,8 +567,9 @@ class Component extends DCLogic {
       switchProfile: () => { window.location.href = 'Profils.dc.html'; },
       openPaywall: () => this.setState({ showPaywall: true }),
       closePaywall: () => this.setState({ showPaywall: false }),
-      removeRequestedChild: () => this.setState({ requestedChildren: Math.max(1, requestedChildren - 1) }),
-      addRequestedChild: () => this.setState({ requestedChildren: Math.min(10, requestedChildren + 1) }),
+      chooseOneChild: () => this.setState({ requestedChildren: 1 }),
+      chooseTwoChildren: () => this.setState({ requestedChildren: 2 }),
+      chooseThreeChildren: () => this.setState({ requestedChildren: 3 }),
       subscribe: () => { window.location.href = `Support.dc.html?category=abonnement&children=${requestedChildren}`; },
     };
   }
