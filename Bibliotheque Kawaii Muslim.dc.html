@@ -404,23 +404,30 @@
             <p style="font-size:14.5px; color:#C9CBE6; margin:0;">Lecture illimitée, nouveaux livres chaque mois, pour toute la famille.</p>
           </div>
 
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
-            <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16); border-radius:22px; padding:26px 24px; text-align:center;">
-              <p style="font-family:'Baloo 2',cursive; font-weight:700; font-size:15px; color:#C9CBE6; margin:0 0 6px;">Mensuel</p>
-              <p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:34px; color:#fff; margin:0;">6,99€<span style="font-size:14px; color:#9fa2c8; font-weight:600;">/mois</span></p>
-              <p style="font-size:12px; color:#9fa2c8; margin:8px 0 0;">Sans engagement</p>
+          <div style="background:linear-gradient(160deg, rgba(240,181,63,.18), rgba(226,127,174,.14)); border:1px solid rgba(240,181,63,.58); border-radius:24px; padding:24px; margin-bottom:24px;">
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:18px; flex-wrap:wrap; margin-bottom:20px;">
+              <div>
+                <p style="font-family:'Baloo 2',cursive; font-weight:700; font-size:16px; color:#FAE08C; margin:0 0 5px;">Abonnement famille</p>
+                <p style="font-size:13px; color:#C9CBE6; margin:0;">1 parent + 1 enfant inclus</p>
+              </div>
+              <p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:38px; color:#fff; margin:0;">{{ familyPrice }}€<span style="font-size:14px; color:#C9CBE6; font-weight:600;">/mois</span></p>
             </div>
-            <div style="background:linear-gradient(160deg, rgba(240,181,63,.2), rgba(226,127,174,.16)); border:2px solid #F0B53F; border-radius:22px; padding:26px 24px; text-align:center; position:relative;">
-              <span style="position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:#F0B53F; color:#3a2b06; font-weight:700; font-size:10.5px; letter-spacing:.5px; padding:4px 14px; border-radius:12px; text-transform:uppercase; white-space:nowrap;">2 mois offerts</span>
-              <p style="font-family:'Baloo 2',cursive; font-weight:700; font-size:15px; color:#FAE08C; margin:0 0 6px;">Annuel</p>
-              <p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:34px; color:#fff; margin:0;">59€<span style="font-size:14px; color:#C9CBE6; font-weight:600;">/an</span></p>
-              <p style="font-size:12px; color:#C9CBE6; margin:8px 0 0;">Soit 4,92€/mois</p>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:18px; background:rgba(255,255,255,.08); border-radius:18px; padding:14px 16px;">
+              <div>
+                <strong style="display:block; font-size:14px; color:#fff;">Combien d’enfants ?</strong>
+                <span style="font-size:12px; color:#C9CBE6;">+0,99€/mois par enfant après le premier</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <button onClick="{{ removeRequestedChild }}" type="button" aria-label="Retirer un enfant" style="cursor:pointer; width:36px; height:36px; border:0; border-radius:50%; background:rgba(255,255,255,.12); color:#fff; font-size:20px;">−</button>
+                <strong style="min-width:24px; text-align:center; font-family:'Baloo 2',cursive; font-size:22px; color:#fff;">{{ requestedChildren }}</strong>
+                <button onClick="{{ addRequestedChild }}" type="button" aria-label="Ajouter un enfant" style="cursor:pointer; width:36px; height:36px; border:0; border-radius:50%; background:#F0B53F; color:#3a2b06; font-size:20px;">+</button>
+              </div>
             </div>
           </div>
 
           <div style="display:flex; flex-wrap:wrap; gap:10px 22px; justify-content:center; margin-bottom:28px;">
             <span style="font-size:13px; color:#C9CBE6;">✅ Tous les livres</span>
-            <span style="font-size:13px; color:#C9CBE6;">✅ 2 profils (enfant + parent)</span>
+            <span style="font-size:13px; color:#C9CBE6;">✅ 1 parent + 1 enfant inclus</span>
             <span style="font-size:13px; color:#C9CBE6;">✅ Lecture audio</span>
             <span style="font-size:13px; color:#C9CBE6;">✅ Nouveautés chaque mois</span>
           </div>
@@ -436,7 +443,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1312,&quot;height&quot;:872},&quot;defaultProfile&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;demander&quot;,&quot;enfant&quot;,&quot;maman&quot;],&quot;default&quot;:&quot;demander&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;},&quot;parentSpace&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;},&quot;subscribed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;}}">
 class Component extends DCLogic {
-  state = { profile: null, profileName: '', profileEmoji: '', subscribed: false, showPaywall: false, catalog: null, announcement: '' };
+  state = { profile: null, profileName: '', profileEmoji: '', subscribed: false, showPaywall: false, catalog: null, announcement: '', requestedChildren: 1 };
 
   componentDidMount() {
     if (!window.KMAuth) {
@@ -461,6 +468,7 @@ class Component extends DCLogic {
         subscribed: staffAccess || ['mensuel', 'annuel'].includes(context.profile.plan),
         catalog,
         announcement: settings.find((item) => item.key === 'announcement')?.value || '',
+        requestedChildren: Math.max(1, context.children.length || 1),
       });
     }).catch(() => {
       window.location.href = 'Connexion.dc.html';
@@ -471,6 +479,8 @@ class Component extends DCLogic {
     const profile = this.state.profile;
     const subscribed = this.state.subscribed;
     const isMaman = profile === 'maman';
+    const requestedChildren = Math.max(1, this.state.requestedChildren || 1);
+    const familyPrice = (4.99 + Math.max(0, requestedChildren - 1) * 0.99).toFixed(2).replace('.', ',');
     const rawBooks = [
       { title: 'Tawakkul', sub: 'La confiance en Allah', cover: 'brand/assets/scene-tawakkul.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/tawakkul.html', grad: '', emoji: '' },
       { title: 'Bubble Tea Time Hijabi', sub: 'Un goûter entre copines', cover: 'brand/assets/coloring-bubble-tea.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/bubble-tea-time-hijabi.html', grad: '', emoji: '' },
@@ -546,6 +556,8 @@ class Component extends DCLogic {
       subscribed,
       notSubscribed: !subscribed,
       showPaywall: this.state.showPaywall,
+      requestedChildren,
+      familyPrice,
       parentSpace: (this.props.parentSpace ?? true) && isMaman,
       greeting: isMaman ? 'Assalamou alaykoum \uD83C\uDF38' : 'Assalamou alaykoum, petit lecteur ! \uD83C\uDF19',
       sub: isMaman ? "L'espace lecture de votre famille." : `Quel livre lit-on ce soir, ${this.state.profileName || 'petit lecteur'} ?`,
@@ -559,7 +571,9 @@ class Component extends DCLogic {
       switchProfile: () => { window.location.href = 'Profils.dc.html'; },
       openPaywall: () => this.setState({ showPaywall: true }),
       closePaywall: () => this.setState({ showPaywall: false }),
-      subscribe: () => { window.location.href = 'Support.dc.html?category=abonnement'; },
+      removeRequestedChild: () => this.setState({ requestedChildren: Math.max(1, requestedChildren - 1) }),
+      addRequestedChild: () => this.setState({ requestedChildren: Math.min(10, requestedChildren + 1) }),
+      subscribe: () => { window.location.href = `Support.dc.html?category=abonnement&children=${requestedChildren}`; },
     };
   }
 }
