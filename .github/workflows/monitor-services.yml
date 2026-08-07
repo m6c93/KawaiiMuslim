@@ -36,4 +36,5 @@ jobs:
         run: |
           curl --fail --silent --show-error \
             --retry 2 --retry-all-errors --max-time 20 \
+            --header "apikey: sb_publishable_JfiHxlqfI8pXr4Emho4vOw_QBePfSHm" \
             "https://pasgxojzybmvbjhuokkk.supabase.co/auth/v1/health"
