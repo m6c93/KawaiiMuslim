@@ -55,7 +55,7 @@
             <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:38px; color:#232A52; margin:14px 0 2px;" id="familyPrice">4,99€/mois</p>
             <p style="color:#6a6480; margin:0;" id="familyBreakdown">1 parent + 1 enfant inclus</p>
           </div>
-          <p style="color:#6a6480; line-height:1.6; margin:0 0 18px;">Chaque enfant supplémentaire ajoute seulement <strong style="color:#E27FAE;">0,99€/mois</strong>. Tu peux en ajouter maintenant ou plus tard.</p>
+          <p style="color:#6a6480; line-height:1.6; margin:0 0 18px;">Choisis une offre pour <strong style="color:#E27FAE;">1, 2 ou 3 enfants</strong>. Tu peux passer à l’offre supérieure plus tard.</p>
           <a class="primary-button pink" id="subscriptionAction" href="Support.dc.html?category=abonnement&children=1" style="display:block; text-align:center; text-decoration:none;">Choisir mon abonnement</a>
         </section>
 
@@ -76,7 +76,7 @@
               <option>🐤</option><option>👧</option><option>👦</option><option>🧒</option><option>⭐</option><option>🌱</option>
             </select>
             <button class="primary-button pink" type="submit">Ajouter ce profil</button>
-            <p style="font-size:13px; color:#7a7490; line-height:1.5; margin:12px 0 0;">Le premier enfant est inclus. Chaque profil supplémentaire ajoute 0,99€/mois à l’abonnement.</p>
+            <p style="font-size:13px; color:#7a7490; line-height:1.5; margin:12px 0 0;">Le premier enfant est inclus. Tu peux ajouter jusqu’à 3 profils enfants au total.</p>
           </form>
         </section>
 
@@ -136,7 +136,7 @@
       document.getElementById("roleBadge").textContent = roleLabels[context.profile.role] || "Compte parent";
       document.getElementById("parentName").value = context.profile.full_name || "";
       document.getElementById("parentAvatar").value = context.profile.avatar || "🌸";
-      const billedChildren = Math.max(1, context.children.length);
+      const billedChildren = Math.min(3, Math.max(1, context.children.length));
       const extraChildren = Math.max(0, billedChildren - 1);
       const familyTotal = (4.99 + extraChildren * 0.99).toFixed(2).replace(".", ",");
       const subscribed = ["mensuel", "annuel"].includes(context.profile.plan);
@@ -147,6 +147,10 @@
       document.getElementById("subscriptionStatus").textContent = subscribed ? "✓ Abonnement actif" : "7 jours gratuits";
       document.getElementById("subscriptionAction").textContent = subscribed ? "Gérer mon abonnement" : "Choisir mon abonnement";
       document.getElementById("subscriptionAction").href = `Support.dc.html?category=abonnement&children=${billedChildren}`;
+      const childSubmitButton = document.querySelector("#childForm button[type='submit']");
+      const childLimitReached = context.children.length >= 3;
+      childSubmitButton.disabled = childLimitReached;
+      childSubmitButton.textContent = childLimitReached ? "3 profils enfants maximum" : "Ajouter ce profil";
       renderChildren();
     };
 
@@ -168,6 +172,11 @@
 
     document.getElementById("childForm").addEventListener("submit", async event => {
       event.preventDefault();
+      if (context.children.length >= 3) {
+        message.className = "form-message";
+        message.textContent = "Ton offre peut contenir au maximum 3 profils enfants.";
+        return;
+      }
       try {
         await KMAuth.addChild({
           name: document.getElementById("childName").value,
