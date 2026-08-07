@@ -157,8 +157,8 @@
         <div class="admin-section-head"><div><h2>Abonnements</h2><p>Attribue les accès. Les coordonnées bancaires restent chez le prestataire de paiement.</p></div></div>
         <div class="admin-stats">
           <div class="admin-stat"><strong id="freeCount">—</strong><span>gratuits</span></div>
-          <div class="admin-stat"><strong id="monthlyCount">—</strong><span>mensuels</span></div>
-          <div class="admin-stat"><strong id="yearlyCount">—</strong><span>annuels</span></div>
+          <div class="admin-stat"><strong id="monthlyCount">—</strong><span>abonnements famille</span></div>
+          <div class="admin-stat"><strong id="yearlyCount">—</strong><span>anciens annuels</span></div>
           <div class="admin-stat"><strong>0</strong><span>donnée bancaire stockée</span></div>
         </div>
         <div class="admin-list" id="subscriptionsList"></div>
@@ -239,7 +239,7 @@
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
     })[character]);
     const roleLabels = { admin: "Super-administrateur", support: "Support client", content_admin: "Gestionnaire de contenu", parent: "Parent" };
-    const planLabels = { gratuit: "Gratuit", mensuel: "Mensuel", annuel: "Annuel" };
+    const planLabels = { gratuit: "Gratuit", mensuel: "Famille", annuel: "Ancien annuel" };
     const statusLabels = { open: "Nouvelle", in_progress: "En cours", waiting_user: "Attente famille", resolved: "Résolue", closed: "Fermée" };
     const actionLabels = {
       deactivate_account: "Compte désactivé", reactivate_account: "Compte réactivé",
@@ -309,13 +309,17 @@
       $("#freeCount").textContent = counts.gratuit;
       $("#monthlyCount").textContent = counts.mensuel;
       $("#yearlyCount").textContent = counts.annuel;
-      $("#subscriptionsList").innerHTML = state.families.filter(item => item.role === "parent").map(item => `
+      $("#subscriptionsList").innerHTML = state.families.filter(item => item.role === "parent").map(item => {
+        const billedChildren = Math.max(1, Number(item.children_count) || 0);
+        const familyPrice = (4.99 + Math.max(0, billedChildren - 1) * 0.99).toFixed(2).replace(".", ",");
+        return `
         <article class="admin-row">
-          <div class="admin-row-main"><strong>${escapeHtml(item.full_name || "Sans prénom")}</strong><small>${escapeHtml(item.email)}</small></div>
+          <div class="admin-row-main"><strong>${escapeHtml(item.full_name || "Sans prénom")}</strong><small>${escapeHtml(item.email)} · ${billedChildren} enfant${billedChildren > 1 ? "s" : ""} · ${familyPrice}€/mois</small></div>
           <span class="admin-pill">${escapeHtml(planLabels[item.plan] || item.plan)}</span>
           <span>${item.is_active ? "Compte actif" : "Compte désactivé"}</span>
           <button class="admin-button secondary" data-family-plan="${item.id}">Modifier</button>
-        </article>`).join("") || '<p class="admin-empty">Aucun abonnement.</p>';
+        </article>`;
+      }).join("") || '<p class="admin-empty">Aucun abonnement.</p>';
     };
 
     const renderContent = () => {
@@ -546,8 +550,12 @@
       const statusButton = event.target.closest("[data-family-status]");
       if (planButton) {
         const item = state.families.find(row => row.id === planButton.dataset.familyPlan);
-        const plan = prompt("Choisis : gratuit, mensuel ou annuel", item.plan);
-        if (!["gratuit","mensuel","annuel"].includes(plan)) return;
+        const currentChoice = item.plan === "mensuel" ? "famille" : item.plan === "annuel" ? "ancien annuel" : "gratuit";
+        const choice = prompt("Choisis : gratuit ou famille", currentChoice);
+        if (!choice) return;
+        const normalizedChoice = choice.trim().toLowerCase();
+        const plan = normalizedChoice === "famille" ? "mensuel" : normalizedChoice === "gratuit" ? "gratuit" : null;
+        if (!plan) return;
         KMAuth.setUserPlan(item.id, plan).then(refreshData).then(() => showMessage("Abonnement mis à jour.", true)).catch(error => showMessage(KMAuth.friendlyError(error)));
       }
       if (roleButton) {
