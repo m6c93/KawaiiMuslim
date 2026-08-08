@@ -1,326 +1,45 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="./responsive.css">
-  <meta name="theme-color" content="#171b3f">
-  <title>Kawaii Muslim</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#171b45">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Kawaii Muslim World — Bientôt disponible</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --night: #151a3e;
-      --night-soft: #222c66;
-      --pink: #e27fae;
-      --gold: #f0b53f;
-      --sky: #8fd2e4;
-    }
-
-    * { box-sizing: border-box; }
-    html, body { width: 100%; min-height: 100%; }
-    body {
-      margin: 0;
-      overflow: hidden;
-      color: #fff;
-      font-family: "Nunito", system-ui, sans-serif;
-      background:
-        radial-gradient(75% 70% at 50% 32%, #35439b 0%, var(--night-soft) 43%, var(--night) 100%);
-    }
-
-    button { font: inherit; }
-
-    .intro {
-      position: relative;
-      isolation: isolate;
-      min-height: 100svh;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      opacity: 1;
-      transition: opacity .42s ease, transform .42s ease;
-    }
-    .intro.leaving { opacity: 0; transform: scale(1.025); }
-
-    .stars, .stars::before, .stars::after {
-      position: absolute;
-      inset: 0;
-      content: "";
-      pointer-events: none;
-      background-repeat: no-repeat;
-    }
-    .stars {
-      opacity: .8;
-      background-image:
-        radial-gradient(1.7px 1.7px at 8% 18%, #fff, transparent),
-        radial-gradient(1.2px 1.2px at 15% 72%, #fff, transparent),
-        radial-gradient(1.5px 1.5px at 29% 11%, #ffe6a0, transparent),
-        radial-gradient(1.2px 1.2px at 42% 78%, #fff, transparent),
-        radial-gradient(1.6px 1.6px at 57% 15%, #fff, transparent),
-        radial-gradient(1.3px 1.3px at 69% 66%, #ffe6a0, transparent),
-        radial-gradient(1.7px 1.7px at 86% 24%, #fff, transparent),
-        radial-gradient(1.2px 1.2px at 95% 76%, #fff, transparent);
-      animation: twinkle 3.4s ease-in-out infinite;
-    }
-    .stars::before {
-      opacity: .55;
-      background-image:
-        radial-gradient(2.5px 2.5px at 21% 38%, rgba(240,174,202,.9), transparent),
-        radial-gradient(2px 2px at 35% 88%, rgba(143,210,228,.9), transparent),
-        radial-gradient(2.5px 2.5px at 74% 36%, rgba(240,181,63,.9), transparent),
-        radial-gradient(2px 2px at 91% 57%, rgba(240,174,202,.9), transparent);
-      animation: drift 5s ease-in-out infinite;
-    }
-    .stars::after {
-      left: 50%;
-      top: 50%;
-      width: min(84vw, 900px);
-      height: min(62vw, 620px);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      background: radial-gradient(circle, rgba(226,127,174,.12), rgba(143,210,228,.06) 42%, transparent 68%);
-      filter: blur(12px);
-    }
-
-    .moon {
-      position: absolute;
-      top: clamp(26px, 6vw, 58px);
-      right: clamp(28px, 7vw, 92px);
-      width: clamp(44px, 6vw, 70px);
-      aspect-ratio: 1;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #fff9dc, #f7dc84 67%, #dfa943);
-      box-shadow: 0 0 48px rgba(250, 224, 140, .36);
-      opacity: 0;
-      animation: appear .7s .25s ease forwards;
-    }
-    .moon::after {
-      content: "";
-      position: absolute;
-      width: 82%;
-      height: 82%;
-      top: -8%;
-      right: -15%;
-      border-radius: 50%;
-      background: #1c2354;
-    }
-
-    .content {
-      position: relative;
-      z-index: 2;
-      width: min(100%, 1100px);
-      display: grid;
-      justify-items: center;
-      padding: 48px 18px 34px;
-      text-align: center;
-    }
-
-    .video-wrap {
-      position: relative;
-      width: min(92vw, 900px);
-      aspect-ratio: 16 / 9;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      border-radius: 42px;
-      opacity: 0;
-      animation: appear .36s .08s ease forwards;
-      -webkit-mask-image: radial-gradient(ellipse 76% 72% at center, #000 48%, transparent 84%);
-      mask-image: radial-gradient(ellipse 76% 72% at center, #000 48%, transparent 84%);
-    }
-    .video-wrap::after {
-      content: "";
-      position: absolute;
-      inset: 13% 14%;
-      z-index: -1;
-      border-radius: 50%;
-      background: rgba(240,174,202,.15);
-      filter: blur(38px);
-    }
-    video {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: contain;
-      object-position: center center;
-      background: transparent;
-      mix-blend-mode: screen;
-    }
-    video.is-transparent { mix-blend-mode: normal; }
-    .intro-animation {
-      display: none;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      object-position: center;
-      background: transparent;
-    }
-
-    .fallback-logo {
-      position: absolute;
-      inset: 0;
-      display: none;
-      place-items: center;
-      font-family: "Baloo 2", cursive;
-      font-size: clamp(42px, 10vw, 94px);
-      font-weight: 800;
-      color: #fff;
-      text-shadow: 0 4px 24px rgba(0,0,0,.3);
-    }
-    .video-failed video { display: none; }
-    .video-failed .fallback-logo { display: grid; }
-
-    .tagline {
-      max-width: 680px;
-      margin: clamp(-26px, -3vw, -10px) 0 0;
-      font-family: "Baloo 2", cursive;
-      font-size: clamp(18px, 3.2vw, 29px);
-      font-weight: 700;
-      line-height: 1.25;
-      letter-spacing: .2px;
-      opacity: 0;
-      transform: translateY(12px);
-      animation: tagline .62s 4.6s ease forwards;
-    }
-    .tagline strong { color: #fae08c; font-weight: 800; }
-    .subline {
-      margin: 8px 0 0;
-      color: #cfd2ec;
-      font-size: clamp(10px, 1.6vw, 13px);
-      font-weight: 800;
-      letter-spacing: 1.7px;
-      text-transform: uppercase;
-      opacity: 0;
-      animation: appear .55s 4.9s ease forwards;
-    }
-
-    .loader {
-      position: absolute;
-      left: 50%;
-      bottom: max(20px, env(safe-area-inset-bottom));
-      width: min(240px, 54vw);
-      height: 3px;
-      overflow: hidden;
-      border-radius: 3px;
-      background: rgba(255,255,255,.12);
-      transform: translateX(-50%);
-    }
-    .loader::after {
-      content: "";
-      display: block;
-      width: 100%;
-      height: 100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, var(--pink), var(--gold), var(--sky));
-      transform: translateX(-100%);
-      animation: load 10s linear forwards;
-    }
-
-    @keyframes twinkle { 0%,100% { opacity: .58; } 50% { opacity: 1; } }
-    @keyframes drift { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-    @keyframes appear { to { opacity: 1; } }
-    @keyframes tagline { to { opacity: 1; transform: translateY(0); } }
-    @keyframes load { to { transform: translateX(0); } }
-
-    @media (max-width: 1400px), (hover: none), (pointer: coarse) {
-      .intro-animation {
-        display: block;
-      }
-      #introVideo {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        opacity: 0;
-        pointer-events: none;
-        mix-blend-mode: normal;
-      }
-      .video-wrap {
-        width: min(96vw, 760px);
-        margin-inline: auto;
-        background: transparent;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .content {
-        width: 100%;
-        padding: clamp(44px, 8svh, 62px) 0 30px;
-      }
-      .video-wrap {
-        width: min(96vw, 560px);
-        max-width: 100%;
-        margin-inline: auto;
-        border-radius: 22px;
-        transform: translateX(0);
-      }
-      .tagline { width: min(92vw, 520px); margin-top: -3vw; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation: none !important; transition: none !important; }
-      .video-wrap, .tagline, .subline, .moon { opacity: 1; transform: none; }
-    }
+    *{box-sizing:border-box}html,body{min-height:100%;margin:0}
+    body{font-family:Nunito,sans-serif;color:#fff;background:
+      radial-gradient(circle at 18% 18%,rgba(240,174,202,.28),transparent 30%),
+      radial-gradient(circle at 82% 24%,rgba(240,181,63,.18),transparent 26%),
+      linear-gradient(155deg,#111735,#242b63 55%,#43356d);overflow-x:hidden}
+    .stars{position:fixed;inset:0;pointer-events:none;opacity:.7;background-image:
+      radial-gradient(circle,#fff 1px,transparent 1.5px),
+      radial-gradient(circle,#f8d77a 1px,transparent 1.5px);background-size:74px 74px,113px 113px;background-position:12px 18px,40px 52px}
+    main{position:relative;z-index:1;min-height:100vh;display:grid;place-items:center;padding:32px}
+    .card{width:min(680px,100%);text-align:center;padding:52px 38px;border:1px solid rgba(255,255,255,.16);border-radius:34px;background:rgba(16,21,52,.74);box-shadow:0 30px 80px rgba(5,8,30,.45);backdrop-filter:blur(14px)}
+    .moon{font-size:58px;filter:drop-shadow(0 10px 20px rgba(240,181,63,.25))}
+    .eyebrow{margin:20px 0 8px;color:#f7d987;font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-size:13px}
+    h1{font-family:"Baloo 2",sans-serif;font-size:clamp(38px,7vw,62px);line-height:1;margin:0 0 20px}
+    p{max-width:520px;margin:0 auto;color:#dfe1f3;font-size:18px;line-height:1.7}
+    .pill{display:inline-flex;align-items:center;gap:8px;margin-top:28px;padding:12px 20px;border-radius:999px;background:rgba(240,174,202,.16);color:#ffdbea;font-weight:800}
+    .team{display:inline-block;margin-top:34px;color:#aeb2d4;font-size:12px;text-decoration:none}.team:hover{color:#fff}
+    @media(max-width:520px){main{padding:18px}.card{padding:42px 22px;border-radius:26px}p{font-size:16px}}
   </style>
 </head>
-<body class="km-responsive km-intro">
-  <main class="intro" id="intro">
-    <div class="stars" aria-hidden="true"></div>
-    <div class="moon" aria-hidden="true"></div>
-
-    <div class="content">
-      <div class="video-wrap" id="videoWrap">
-        <img class="intro-animation" src="brand/assets/kawaii-muslim-intro-tablet.webp" alt="Animation du logo Kawaii Muslim">
-        <video id="introVideo" autoplay muted playsinline preload="auto" aria-label="Animation du logo Kawaii Muslim">
-          <source src="brand/assets/kawaii-muslim-intro.webm" type="video/webm">
-          <source src="brand/assets/kawaii-muslim-intro.mp4" type="video/mp4">
-        </video>
-        <div class="fallback-logo" aria-hidden="true">Kawaii Muslim</div>
-      </div>
-      <p class="tagline">Grandir, apprendre et se rapprocher <strong>doucement d’Allah</strong>.</p>
-      <p class="subline">Bienvenue dans notre univers</p>
-    </div>
-
-    <div class="loader" aria-hidden="true"></div>
+<body>
+  <div class="stars"></div>
+  <main>
+    <section class="card">
+      <div class="moon">🌙</div>
+      <div class="eyebrow">Kawaii Muslim World</div>
+      <h1>Notre univers se prépare…</h1>
+      <p>Aya et Mimi mettent les dernières étoiles en place pour offrir aux familles un espace doux, sécurisé et rempli de belles découvertes islamiques.</p>
+      <div class="pill">✨ Ouverture prochainement</div><br>
+      <a class="team" href="Connexion.dc.html">Accès réservé à l’équipe</a>
+    </section>
   </main>
-
-  <script>
-    (() => {
-      const destination = "./Bibliotheque%20Kawaii%20Muslim.dc.html";
-      const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const intro = document.getElementById("intro");
-      const video = document.getElementById("introVideo");
-      const videoWrap = document.getElementById("videoWrap");
-      const tabletMode = matchMedia("(max-width: 1400px), (hover: none), (pointer: coarse)").matches;
-      let leaving = false;
-      let safetyTimer;
-
-      const enterSite = () => {
-        if (leaving) return;
-        leaving = true;
-        intro.classList.add("leaving");
-        setTimeout(() => location.replace(destination), reducedMotion ? 0 : 390);
-      };
-
-      video.addEventListener("loadedmetadata", () => {
-        video.classList.toggle("is-transparent", video.currentSrc.endsWith(".webm"));
-      });
-      video.addEventListener("ended", enterSite);
-      video.addEventListener("playing", () => {
-        clearTimeout(safetyTimer);
-        safetyTimer = setTimeout(enterSite, 11000);
-      });
-      video.addEventListener("error", () => {
-        if (!tabletMode) videoWrap.classList.add("video-failed");
-        setTimeout(enterSite, 2100);
-      });
-
-      video.muted = false;
-      video.play().catch(() => {
-        video.muted = true;
-        video.play();
-      });
-    })();
-  </script>
 </body>
 </html>
