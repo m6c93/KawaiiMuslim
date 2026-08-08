@@ -219,6 +219,24 @@
     </main>
   </div>
 
+  <div class="admin-modal" id="planModal" role="dialog" aria-modal="true" aria-labelledby="planModalTitle">
+    <form class="admin-modal-card" id="planForm">
+      <h2 id="planModalTitle">Modifier l’abonnement</h2>
+      <p id="planModalText">Choisis l’accès de cette famille.</p>
+      <label for="planChoice">Formule</label>
+      <select class="admin-input" id="planChoice" style="width:100%">
+        <option value="gratuit">Compte gratuit</option>
+        <option value="mensuel">Abonnement famille</option>
+        <option value="annuel" disabled>Ancien abonnement annuel</option>
+      </select>
+      <p class="admin-message" id="planMessage"></p>
+      <div class="admin-modal-actions">
+        <button class="admin-button secondary" id="planCancel" type="button">Annuler</button>
+        <button class="admin-button" id="planSave" type="submit">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+
   <div class="admin-modal" id="reauthModal" role="dialog" aria-modal="true" aria-labelledby="reauthTitle">
     <form class="admin-modal-card" id="reauthForm">
       <h2 id="reauthTitle">Confirmer cette action</h2>
@@ -249,6 +267,7 @@
     };
     const state = { context: null, families: [], content: [], tickets: [], logs: [], settings: [] };
     let pendingCriticalAction = null;
+    let selectedPlanFamily = null;
     let selectedCoverFile = null;
     let coverObjectUrl = null;
     let selectedBookFile = null;
@@ -312,9 +331,10 @@
       $("#subscriptionsList").innerHTML = state.families.filter(item => item.role === "parent").map(item => {
         const billedChildren = Math.max(1, Number(item.children_count) || 0);
         const familyPrice = (4.99 + Math.max(0, billedChildren - 1) * 0.99).toFixed(2).replace(".", ",");
+        const billingLabel = item.plan === "mensuel" ? `${familyPrice}€/mois` : "Aucun abonnement actif";
         return `
         <article class="admin-row">
-          <div class="admin-row-main"><strong>${escapeHtml(item.full_name || "Sans prénom")}</strong><small>${escapeHtml(item.email)} · ${billedChildren} enfant${billedChildren > 1 ? "s" : ""} · ${familyPrice}€/mois</small></div>
+          <div class="admin-row-main"><strong>${escapeHtml(item.full_name || "Sans prénom")}</strong><small>${escapeHtml(item.email)} · ${billedChildren} enfant${billedChildren > 1 ? "s" : ""} · ${billingLabel}</small></div>
           <span class="admin-pill">${escapeHtml(planLabels[item.plan] || item.plan)}</span>
           <span>${item.is_active ? "Compte actif" : "Compte désactivé"}</span>
           <button class="admin-button secondary" data-family-plan="${item.id}">Modifier</button>
@@ -550,13 +570,14 @@
       const statusButton = event.target.closest("[data-family-status]");
       if (planButton) {
         const item = state.families.find(row => row.id === planButton.dataset.familyPlan);
-        const currentChoice = item.plan === "mensuel" ? "famille" : item.plan === "annuel" ? "ancien annuel" : "gratuit";
-        const choice = prompt("Choisis : gratuit ou famille", currentChoice);
-        if (!choice) return;
-        const normalizedChoice = choice.trim().toLowerCase();
-        const plan = normalizedChoice === "famille" ? "mensuel" : normalizedChoice === "gratuit" ? "gratuit" : null;
-        if (!plan) return;
-        KMAuth.setUserPlan(item.id, plan).then(refreshData).then(() => showMessage("Abonnement mis à jour.", true)).catch(error => showMessage(KMAuth.friendlyError(error)));
+        if (!item) return;
+        selectedPlanFamily = item;
+        $("#planModalText").textContent = `${item.full_name || "Cette famille"} · ${item.email}`;
+        $("#planChoice").value = ["gratuit", "mensuel", "annuel"].includes(item.plan) ? item.plan : "gratuit";
+        $("#planMessage").textContent = "";
+        $("#planModal").classList.add("open");
+        setTimeout(() => $("#planChoice").focus(), 50);
+        return;
       }
       if (roleButton) {
         const item = state.families.find(row => row.id === roleButton.dataset.familyRole);
@@ -656,6 +677,38 @@
         await KMAuth.updateTicket({ id, status: $(`[data-ticket-status="${id}"]`).value, priority: $(`[data-ticket-priority="${id}"]`).value, note: $(`[data-ticket-note="${id}"]`).value });
         await refreshData(); showMessage("Demande support mise à jour.", true);
       } catch (error) { showMessage(KMAuth.friendlyError(error)); }
+    });
+
+    $("#planCancel").addEventListener("click", () => {
+      selectedPlanFamily = null;
+      $("#planModal").classList.remove("open");
+    });
+    $("#planForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!selectedPlanFamily) return;
+      const family = selectedPlanFamily;
+      const plan = $("#planChoice").value;
+      const saveButton = $("#planSave");
+      $("#planMessage").textContent = "";
+      if (plan === family.plan) {
+        selectedPlanFamily = null;
+        $("#planModal").classList.remove("open");
+        return;
+      }
+      try {
+        saveButton.disabled = true;
+        saveButton.textContent = "Enregistrement…";
+        await KMAuth.setUserPlan(family.id, plan);
+        selectedPlanFamily = null;
+        $("#planModal").classList.remove("open");
+        await refreshData();
+        showMessage("Abonnement mis à jour.", true);
+      } catch (error) {
+        $("#planMessage").textContent = KMAuth.friendlyError(error);
+      } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = "Enregistrer";
+      }
     });
 
     $("#reauthCancel").addEventListener("click", () => { pendingCriticalAction = null; $("#reauthModal").classList.remove("open"); });
