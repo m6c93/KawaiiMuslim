@@ -677,6 +677,31 @@ window.KMAuth = (() => {
       }));
     },
 
+    getStarShop: async childId => {
+      if (!childId) throw new Error("Choisis d’abord un profil enfant.");
+      return requireSuccess(await client().rpc("get_child_star_shop", {
+        target_child: childId
+      }));
+    },
+
+    awardChildStars: async ({ childId, eventType, sourceKey, description }) => {
+      if (!childId) return { awarded: 0, balance: 0 };
+      return requireSuccess(await client().rpc("award_child_stars", {
+        target_child: childId,
+        event_type: eventType,
+        source_key: String(sourceKey || "").slice(0, 200),
+        event_description: String(description || "").slice(0, 180)
+      }));
+    },
+
+    redeemStarItem: async ({ childId, itemId }) => {
+      if (!childId) throw new Error("Choisis d’abord un profil enfant.");
+      return requireSuccess(await client().rpc("redeem_star_shop_item", {
+        target_child: childId,
+        target_item: itemId
+      }));
+    },
+
     getSettings: async () => {
       return requireSuccess(await client().from("site_settings")
         .select("*").order("key", { ascending: true })) || [];
