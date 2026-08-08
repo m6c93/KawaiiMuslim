@@ -239,7 +239,7 @@
     <i class="confetti" style="left:68%;--c:#f3bd4a;--d:2.8s;--delay:-.2s"></i>
     <i class="confetti" style="left:83%;--c:#e789b6;--d:3s;--delay:-1.2s"></i>
     <i class="confetti" style="left:94%;--c:#4fc0a1;--d:2.4s;--delay:-.9s"></i>
-    <div class="celebration-card"><span>⭐</span><h2>Macha Allah !</h2><p>Quelle jolie création !</p></div>
+    <div class="celebration-card"><span>⭐</span><h2>Macha Allah !</h2><p id="celebrationMessage">Quelle jolie création !</p></div>
   </section>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -819,6 +819,15 @@
           id:draftId,childId,imageBlob:blob,
           drawingData:{version:2,width:drawCanvas.width,height:drawCanvas.height,strokes,memory}
         });
+        const starReward = await KMAuth.awardChildStars({
+          childId,
+          eventType:"activity_complete",
+          sourceKey:`coloring:${draftId}`,
+          description:`Coloriage terminé : ${memory.title}`
+        }).catch(() => ({ awarded:0 }));
+        document.getElementById("celebrationMessage").textContent = starReward.awarded
+          ? `Coloriage terminé : +${starReward.awarded} étoile ⭐`
+          : "Ta création est maintenant dans ta galerie.";
         document.getElementById("finishModal").hidden = true;
         document.getElementById("celebration").hidden = false;
         setTimeout(() => {
