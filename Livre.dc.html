@@ -316,6 +316,10 @@
     </nav>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./km-config.js"></script>
+  <script src="./km-auth.js"></script>
+  <div id="starToast" hidden style="position:fixed;z-index:30;left:50%;bottom:82px;transform:translateX(-50%);padding:13px 18px;border-radius:18px;background:#fff;color:#4d4775;font-weight:900;box-shadow:0 16px 40px rgba(13,12,42,.35);">Livre terminé : +2 étoiles ⭐</div>
   <script type="module">
     const PDFJS_VERSION = "5.7.284";
     const PDFJS_BASE = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/`;
@@ -348,6 +352,8 @@
     let touchStartX = 0;
     let touchStartY = 0;
     let resizeTimer = null;
+    let readingChildId = null;
+    let bookRewardChecked = false;
 
     const wait = (duration) => new Promise(resolve => setTimeout(resolve, duration));
     const setLoading = (visible, detail = "") => {
@@ -414,6 +420,25 @@
       renderTask = null;
       currentPage = pageNumber;
       updateControls();
+      if (readingChildId && pageNumber === pdfDocument.numPages && !bookRewardChecked) {
+        bookRewardChecked = true;
+        const sourceName = (() => {
+          try { return new URL(source).pathname.split("/").pop() || title; }
+          catch { return title; }
+        })();
+        window.KMAuth.awardChildStars({
+          childId: readingChildId,
+          eventType: "book_complete",
+          sourceKey: `book:${sourceName}`,
+          description: `Livre terminé : ${title}`
+        }).then(reward => {
+          if (!reward?.awarded) return;
+          const toast = document.getElementById("starToast");
+          toast.textContent = `Livre terminé : +${reward.awarded} étoiles ⭐`;
+          toast.hidden = false;
+          setTimeout(() => { toast.hidden = true; }, 2800);
+        }).catch(() => {});
+      }
       const adjacent = pageNumber < pdfDocument.numPages ? pageNumber + 1 : pageNumber - 1;
       if (adjacent >= 1) pdfDocument.getPage(adjacent).catch(() => {});
     };
@@ -503,6 +528,13 @@
 
     const initialize = async () => {
       try {
+        const context = await window.KMAuth.getContext();
+        if (!context) {
+          window.location.replace(`Connexion.dc.html?next=${encodeURIComponent(location.pathname + location.search)}`);
+          return;
+        }
+        const active = window.KMAuth.validateActiveProfile(context);
+        readingChildId = active.type === "child" ? active.id : null;
         const sourceUrl = validateSource();
         document.title = `${title} — Kawaii Muslim`;
         document.getElementById("bookTitle").textContent = title;
