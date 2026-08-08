@@ -1,3 +1,12 @@
+/* Mode préouverture Kawaii Muslim — accès réservé à l’équipe */
+(() => {
+  const page = decodeURIComponent(window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+  const teamPages = new Set(["index.html", "connexion.dc.html", "mfa.dc.html", "admin.dc.html"]);
+  const teamPreview = localStorage.getItem("km-site-preview") === "staff";
+  if (!teamPages.has(page) && !teamPreview) {
+    window.location.replace("/");
+  }
+})();
 // GENERATED from dc-runtime/src/*.ts — do not edit. Rebuild with `cd dc-runtime && bun run build`.
 "use strict";
 (() => {
