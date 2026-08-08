@@ -287,7 +287,7 @@
         <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:30px;">
           <div style="background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:20px 24px;"><p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:26px; color:#F0B53F; margin:0;">3 livres</p><p style="font-size:12.5px; color:#C9CBE6; margin:6px 0 0;">lus cette semaine par Aya</p></div>
           <div style="background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:20px 24px;"><p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:26px; color:#F0AECA; margin:0;">42 min</p><p style="font-size:12.5px; color:#C9CBE6; margin:6px 0 0;">de lecture partagée</p></div>
-          <div style="background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:20px 24px;"><p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:26px; color:#8FD2E4; margin:0;">⭐ 12</p><p style="font-size:12.5px; color:#C9CBE6; margin:6px 0 0;">étoiles gagnées</p></div>
+          <a href="Boutique.dc.html" style="display:block;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:20px 24px;text-decoration:none;color:inherit;transition:transform .2s,border-color .2s;"><p style="font-family:'Baloo 2',cursive;font-weight:800;font-size:26px;color:#8FD2E4;margin:0;">⭐ {{ starBalance }}</p><p style="font-size:12.5px;color:#C9CBE6;margin:6px 0 0;">étoiles de {{ starChildName }} · Voir la boutique</p></a>
         </div>
       </sc-if>
 
@@ -297,7 +297,7 @@
         <a class="km-filter-chip" href="Safe%20Place.dc.html" style="text-decoration:none; cursor:pointer; background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Safe Place</a>
         <span class="km-filter-chip" style="background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Prières</span>
         <span class="km-filter-chip" style="background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Ramadan</span>
-        <span class="km-filter-chip" style="background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Histoires</span>
+        <a class="km-filter-chip" href="Boutique.dc.html" style="text-decoration:none;cursor:pointer;background:linear-gradient(150deg,#F0B53F,#D8932A);color:#fff;font-weight:800;font-size:13px;padding:9px 20px;border-radius:22px;white-space:nowrap;box-shadow:0 7px 18px rgba(216,147,42,.28);">⭐ Boutique</a>
       </div>
 
       <!-- SHELF -->
@@ -439,7 +439,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1312,&quot;height&quot;:872},&quot;defaultProfile&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;demander&quot;,&quot;enfant&quot;,&quot;maman&quot;],&quot;default&quot;:&quot;demander&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;},&quot;parentSpace&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;},&quot;subscribed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;}}">
 class Component extends DCLogic {
-  state = { profile: null, profileName: '', profileEmoji: '', subscribed: false, showPaywall: false, catalog: null, announcement: '', requestedChildren: 1 };
+  state = { profile: null, profileName: '', profileEmoji: '', subscribed: false, showPaywall: false, catalog: null, announcement: '', requestedChildren: 1, starBalance: 0, starChildName: 'Mon enfant' };
 
   componentDidMount() {
     if (!window.KMAuth) {
@@ -450,13 +450,17 @@ class Component extends DCLogic {
       window.KMAuth.getContext(),
       window.KMAuth.listContent().catch(() => null),
       window.KMAuth.getSettings().catch(() => [])
-    ]).then(([context, catalog, settings]) => {
+    ]).then(async ([context, catalog, settings]) => {
       if (!context) {
         window.location.href = 'Connexion.dc.html';
         return;
       }
       const active = window.KMAuth.validateActiveProfile(context);
       const staffAccess = ['admin', 'support', 'content_admin'].includes(context.profile.role);
+      const starChild = active.type === 'child' ? active : context.children[0] || null;
+      const starShop = starChild
+        ? await window.KMAuth.getStarShop(starChild.id).catch(() => ({ balance: 0 }))
+        : { balance: 0 };
       this.setState({
         profile: active.type === 'child' ? 'enfant' : 'maman',
         profileName: active.name || (active.type === 'child' ? 'Mon enfant' : 'Maman'),
@@ -465,6 +469,8 @@ class Component extends DCLogic {
         catalog,
         announcement: settings.find((item) => item.key === 'announcement')?.value || '',
         requestedChildren: Math.min(3, Math.max(1, context.children.length || 1)),
+        starBalance: Number(starShop?.balance) || 0,
+        starChildName: starChild?.name || 'Mon enfant',
       });
     }).catch(() => {
       window.location.href = 'Connexion.dc.html';
@@ -560,6 +566,8 @@ class Component extends DCLogic {
       profileName: this.state.profileName || (isMaman ? 'Maman' : 'Invité'),
       profileEmoji: this.state.profileEmoji || (isMaman ? '🌸' : '🐤'),
       announcement: this.state.announcement,
+      starBalance: this.state.starBalance,
+      starChildName: this.state.starChildName,
       books,
       colorings,
       chooseEnfant: () => { window.location.href = 'Profils.dc.html'; },
