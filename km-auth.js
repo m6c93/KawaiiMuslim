@@ -1,3 +1,12 @@
+/* Mode préouverture Kawaii Muslim — accès réservé à l’équipe */
+(() => {
+  const page = decodeURIComponent(window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+  const teamPages = new Set(["index.html", "connexion.dc.html", "mfa.dc.html", "admin.dc.html"]);
+  const teamPreview = localStorage.getItem("km-site-preview") === "staff";
+  if (!teamPages.has(page) && !teamPreview) {
+    window.location.replace("/");
+  }
+})();
 /* Kawaii Muslim — authentification Supabase sécurisée */
 window.KMAuth = (() => {
   const ACTIVE_PROFILE_KEY = "km-active-profile-v2";
@@ -144,6 +153,9 @@ window.KMAuth = (() => {
     const session = await getSession();
     if (!session) return null;
     const profile = await getProfile(session.user.id);
+    if (["admin", "support", "content_admin"].includes(profile.role)) {
+      localStorage.setItem("km-site-preview", "staff");
+    }
     if (!profile.is_active) {
       await client().auth.signOut();
       throw new Error("Ce compte est actuellement désactivé. Contacte Kawaii Muslim.");
