@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#211e56">
+  <title>Boutique des étoiles — Kawaii Muslim World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./responsive.css">
+  <style>
+    :root{--night:#211e56;--night2:#373071;--paper:#fffafd;--ink:#35325f;--muted:#756f91;--pink:#ed9bc0;--gold:#f3cb76;--mint:#75c7b5;--line:#ece5f3}
+    *{box-sizing:border-box}html{min-height:100%;background:#f7f1fb}body{margin:0;min-height:100%;font-family:"Nunito",sans-serif;color:var(--ink);background:linear-gradient(180deg,var(--night) 0 370px,#f7f1fb 370px)}
+    button,a,select{font:inherit}.sky{position:relative;overflow:hidden;padding:calc(18px + env(safe-area-inset-top)) 18px 118px;color:white;background:radial-gradient(circle at 15% 5%,rgba(237,155,192,.28),transparent 28%),radial-gradient(circle at 85% 70%,rgba(117,199,181,.17),transparent 25%)}
+    .sky:after{content:"✦  ·  ✧  ·  ✦  ·  ✧";position:absolute;left:7%;right:7%;top:78px;color:rgba(255,255,255,.25);font-size:22px;letter-spacing:16px;white-space:nowrap;pointer-events:none}
+    .top,.hero,.content{max-width:1120px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;z-index:1}.back{color:white;text-decoration:none;font-weight:800;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.1)}
+    .wallet{display:flex;align-items:center;gap:9px;background:white;color:var(--night);border-radius:18px;padding:9px 14px;box-shadow:0 8px 24px rgba(10,8,40,.18)}.wallet strong{font-family:"Baloo 2";font-size:24px;line-height:1}.wallet small{display:block;color:var(--muted);font-size:11px}
+    .hero{position:relative;z-index:1;text-align:center;padding-top:42px}.hero h1{font:800 clamp(34px,6vw,58px)/1 "Baloo 2";margin:0}.hero p{max-width:660px;margin:14px auto 0;color:#eeeafb;font-size:17px;line-height:1.55}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:650px;margin:24px auto 0}.step{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:13px 8px}.step span{display:block;font-size:25px}.step b{font-size:13px}
+    .content{margin-top:-78px;position:relative;z-index:2;padding:0 18px 64px}.panel{background:var(--paper);border-radius:28px;padding:22px;box-shadow:0 18px 50px rgba(49,38,86,.14)}
+    .controls{display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap}.profile label{display:block;font-size:12px;color:var(--muted);font-weight:800;margin:0 0 6px 4px}.profile select{min-width:210px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:11px 38px 11px 13px;color:var(--ink);font-weight:800}
+    .actions{display:flex;gap:8px}.soft-btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:14px;padding:11px 14px;font-weight:800;cursor:pointer}.soft-btn:hover{border-color:#cfc3df}
+    .how{margin:20px 0;background:#fff6dd;border:1px solid #f4dda3;border-radius:18px;padding:13px 16px;color:#625237;font-size:14px}.how strong{color:#493c24}
+    .filters{display:flex;gap:8px;overflow:auto;padding:2px 0 14px;scrollbar-width:none}.filter{white-space:nowrap;border:0;border-radius:999px;background:#f0eaf6;color:#655d7f;padding:9px 14px;font-weight:800;cursor:pointer}.filter.active{background:var(--night);color:white}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.card{min-width:0;border:1px solid var(--line);border-radius:22px;background:#fff;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 7px 18px rgba(58,45,92,.06)}.visual{height:128px;display:grid;place-items:center;font-size:52px;background:linear-gradient(145deg,var(--accent),#fff)}.visual img{width:100%;height:100%;object-fit:cover}.card-body{padding:15px;display:flex;flex:1;flex-direction:column}.tag{text-transform:uppercase;letter-spacing:.06em;font-size:10px;color:var(--muted);font-weight:900}.card h2{font:800 20px/1.1 "Baloo 2";margin:5px 0}.card p{font-size:13px;line-height:1.45;color:var(--muted);margin:0 0 14px}.price{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px}.price strong{color:#886b21;font-size:15px}.get{border:0;border-radius:12px;padding:9px 11px;background:var(--night);color:#fff;font-size:12px;font-weight:900;cursor:pointer}.get:disabled{background:#eee9f2;color:#8b849a;cursor:default}.get.owned{background:#e4f5ef;color:#287a68}.empty{grid-column:1/-1;text-align:center;padding:48px 16px;color:var(--muted)}
+    .notice{display:none;margin:14px 0 0;border-radius:14px;padding:11px 14px;font-weight:800}.notice.show{display:block}.notice.ok{background:#e5f7f0;color:#287a68}.notice.error{background:#fde8ee;color:#a14062}
+    dialog{border:0;border-radius:24px;padding:0;max-width:min(92vw,480px);width:100%;box-shadow:0 24px 80px rgba(21,15,54,.35);color:var(--ink)}dialog::backdrop{background:rgba(18,13,48,.62);backdrop-filter:blur(3px)}.modal{padding:24px}.modal h2{font:800 27px/1.1 "Baloo 2";margin:0 0 10px}.modal p{color:var(--muted);line-height:1.5}.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}.primary{border:0;border-radius:13px;background:var(--night);color:#fff;padding:11px 15px;font-weight:900;cursor:pointer}.history{max-height:52vh;overflow:auto;margin-top:14px}.history-row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.history-row b.plus{color:#2d8b76}.history-row b.minus{color:#b14e72}.history-row small{display:block;color:var(--muted);margin-top:3px}
+    @media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){body{background:linear-gradient(180deg,var(--night) 0 430px,#f7f1fb 430px)}.sky{padding-left:14px;padding-right:14px;padding-bottom:106px}.top{align-items:flex-start}.back{font-size:0}.back:before{content:"←";font-size:21px}.wallet{padding:8px 11px}.hero{padding-top:34px}.hero p{font-size:15px}.steps{gap:6px}.step{padding:11px 4px}.step b{font-size:11px}.content{padding:0 10px 45px;margin-top:-70px}.panel{border-radius:22px;padding:15px}.controls{display:block}.profile select{width:100%}.actions{margin-top:10px}.soft-btn{flex:1;padding:10px 7px;font-size:12px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.visual{height:102px}.card-body{padding:11px}.card h2{font-size:17px}.card p{font-size:12px}.price{align-items:stretch;flex-direction:column}.get{width:100%}}
+  </style>
+</head>
+<body>
+  <header class="sky">
+    <div class="top">
+      <a class="back" href="Bibliotheque%20Kawaii%20Muslim.dc.html">← Bibliothèque</a>
+      <div class="wallet" aria-live="polite"><span>⭐</span><div><strong id="balance">—</strong><small>mes étoiles</small></div></div>
+    </div>
+    <div class="hero">
+      <h1>La Boutique des étoiles</h1>
+      <p>Termine des livres et des activités pour gagner des étoiles. Utilise-les ensuite pour choisir ce qui te plaît.</p>
+      <div class="steps" aria-label="Comment fonctionne la boutique">
+        <div class="step"><span>📚</span><b>1. J’apprends</b></div>
+        <div class="step"><span>⭐</span><b>2. Je gagne</b></div>
+        <div class="step"><span>🎁</span><b>3. Je choisis</b></div>
+      </div>
+    </div>
+  </header>
+  <main class="content">
+    <section class="panel">
+      <div class="controls">
+        <div class="profile"><label for="childSelect">Boutique de</label><select id="childSelect" aria-label="Choisir un profil enfant"></select></div>
+        <div class="actions"><button class="soft-btn" id="howBtn">Comment gagner ?</button><button class="soft-btn" id="historyBtn">Mon historique</button></div>
+      </div>
+      <div class="how"><strong>Les étoiles récompensent les vrais efforts.</strong> Un livre terminé donne 2 ⭐ et un coloriage terminé donne 1 ⭐, une seule fois par contenu et jusqu’à 5 ⭐ par jour.</div>
+      <div id="notice" class="notice" role="status"></div>
+      <div class="filters" id="filters" aria-label="Catégories">
+        <button class="filter active" data-filter="all">Tout</button>
+        <button class="filter" data-filter="stickers">Stickers</button>
+        <button class="filter" data-filter="colorings">Coloriages</button>
+        <button class="filter" data-filter="activities">Activités</button>
+        <button class="filter" data-filter="decorations">Décorations</button>
+        <button class="filter" data-filter="owned">Mes récompenses</button>
+      </div>
+      <div class="grid" id="grid"><div class="empty">La boutique se prépare…</div></div>
+    </section>
+  </main>
+  <dialog id="confirmDialog"><div class="modal"><h2 id="confirmTitle">Choisir cette récompense ?</h2><p id="confirmText"></p><div class="modal-actions"><button class="soft-btn" data-close="confirmDialog">Pas maintenant</button><button class="primary" id="confirmBuy">Oui, je la choisis</button></div></div></dialog>
+  <dialog id="howDialog"><div class="modal"><h2>Comment gagner des étoiles ?</h2><p>Lis un livre jusqu’à la dernière page ou termine un coloriage dans l’atelier. Les étoiles sont ajoutées automatiquement au profil enfant actif.</p><p>Chaque contenu ne récompense qu’une seule fois. Le maximum est de 5 étoiles par jour pour garder chaque étoile précieuse.</p><div class="modal-actions"><button class="primary" data-close="howDialog">J’ai compris</button></div></div></dialog>
+  <dialog id="historyDialog"><div class="modal"><h2>Mon historique</h2><p>Tout ce que tu as gagné et choisi.</p><div class="history" id="history"></div><div class="modal-actions"><button class="primary" data-close="historyDialog">Fermer</button></div></div></dialog>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./km-config.js"></script>
+  <script src="./km-auth.js"></script>
+  <script>
+  (function(){
+    var state={context:null,childId:null,data:{balance:0,items:[],transactions:[]},filter:"all",pending:null};
+    var labels={stickers:"Sticker",colorings:"Coloriage",activities:"Activité",decorations:"Décoration"};
+    var esc=function(value){return String(value==null?"":value).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+    var notice=function(message,type){var el=document.getElementById("notice");el.textContent=message;el.className="notice show "+(type||"ok");setTimeout(function(){el.className="notice"},4200)};
+    var dateLabel=function(value){try{return new Intl.DateTimeFormat("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}).format(new Date(value))}catch(e){return ""}};
+    function render(){
+      document.getElementById("balance").textContent=state.data.balance||0;
+      var items=(state.data.items||[]).filter(function(item){
+        if(state.filter==="owned")return item.owned;
+        return state.filter==="all"||item.category===state.filter;
+      });
+      var grid=document.getElementById("grid");
+      if(!items.length){grid.innerHTML='<div class="empty">'+(state.filter==="owned"?"Aucune récompense choisie pour le moment.":"Aucune récompense dans cette catégorie.")+'</div>';return}
+      grid.innerHTML=items.map(function(item){
+        var missing=Math.max(0,item.cost-(state.data.balance||0));
+        var visual=item.asset_url?'<img src="'+esc(item.asset_url)+'" alt="">':esc(item.emoji||"🎁");
+        var action;
+        if(item.owned&&item.asset_url&&item.category==="colorings"){
+          var href="Coloriage.dc.html?src="+encodeURIComponent(item.asset_url)+"&title="+encodeURIComponent(item.title)+"&format=image";
+          action='<a class="get owned" href="'+href+'">Ouvrir</a>';
+        }else if(item.owned){
+          action='<button class="get owned" disabled>✓ Obtenu</button>';
+        }else if(missing){
+          action='<button class="get" disabled>Il manque '+missing+' ⭐</button>';
+        }else{
+          action='<button class="get" data-buy="'+esc(item.id)+'">Obtenir</button>';
+        }
+        return '<article class="card" style="--accent:'+esc(item.accent||"#8d7bd6")+'"><div class="visual">'+visual+'</div><div class="card-body"><span class="tag">'+esc(labels[item.category]||item.category)+'</span><h2>'+esc(item.title)+'</h2><p>'+esc(item.description)+'</p><div class="price"><strong>⭐ '+item.cost+'</strong>'+action+'</div></div></article>';
+      }).join("");
+      grid.querySelectorAll("[data-buy]").forEach(function(btn){btn.addEventListener("click",function(){openConfirm(btn.dataset.buy)})});
+    }
+    function renderHistory(){
+      var box=document.getElementById("history"),rows=state.data.transactions||[];
+      box.innerHTML=rows.length?rows.map(function(row){
+        var plus=row.amount>0;
+        return '<div class="history-row"><div><strong>'+esc(row.description||"Étoiles")+'</strong><small>'+esc(dateLabel(row.created_at))+'</small></div><b class="'+(plus?"plus":"minus")+'">'+(plus?"+":"")+row.amount+' ⭐</b></div>';
+      }).join(""):'<div class="empty">Aucun mouvement pour le moment.</div>';
+    }
+    function openConfirm(id){
+      state.pending=(state.data.items||[]).find(function(item){return item.id===id});
+      if(!state.pending)return;
+      document.getElementById("confirmTitle").textContent=state.pending.title;
+      document.getElementById("confirmText").textContent="Cette récompense coûte "+state.pending.cost+" étoiles. Ton nouveau solde sera de "+(state.data.balance-state.pending.cost)+" étoiles.";
+      document.getElementById("confirmDialog").showModal();
+    }
+    async function loadShop(){
+      document.getElementById("grid").innerHTML='<div class="empty">La boutique se prépare…</div>';
+      try{state.data=await KMAuth.getStarShop(state.childId);render();renderHistory()}
+      catch(error){document.getElementById("grid").innerHTML='<div class="empty">Impossible de charger la boutique.</div>';notice(KMAuth.friendlyError(error),"error")}
+    }
+    async function start(){
+      try{
+        state.context=await KMAuth.getContext();
+        if(!state.context){location.href="Connexion.dc.html";return}
+        var active=KMAuth.validateActiveProfile(state.context);
+        var children=state.context.children||[];
+        if(!children.length){document.getElementById("grid").innerHTML='<div class="empty"><h2>Ajoute d’abord un profil enfant</h2><p>Les étoiles appartiennent à chaque enfant.</p><a class="primary" href="Profils.dc.html">Créer un profil</a></div>';document.getElementById("balance").textContent="0";return}
+        var selected=active.type==="child"?children.find(function(c){return c.id===active.id}):children[0];
+        if(!selected)selected=children[0];
+        state.childId=selected.id;
+        var select=document.getElementById("childSelect");
+        select.innerHTML=children.map(function(c){return '<option value="'+esc(c.id)+'">'+esc((c.avatar||"⭐")+" "+c.name)+'</option>'}).join("");
+        select.value=state.childId;
+        select.addEventListener("change",function(){state.childId=this.value;loadShop()});
+        await loadShop();
+      }catch(error){notice(KMAuth.friendlyError(error),"error")}
+    }
+    document.getElementById("filters").addEventListener("click",function(e){var btn=e.target.closest("[data-filter]");if(!btn)return;document.querySelectorAll(".filter").forEach(function(x){x.classList.remove("active")});btn.classList.add("active");state.filter=btn.dataset.filter;render()});
+    document.getElementById("howBtn").addEventListener("click",function(){document.getElementById("howDialog").showModal()});
+    document.getElementById("historyBtn").addEventListener("click",function(){renderHistory();document.getElementById("historyDialog").showModal()});
+    document.querySelectorAll("[data-close]").forEach(function(btn){btn.addEventListener("click",function(){document.getElementById(btn.dataset.close).close()})});
+    document.getElementById("confirmBuy").addEventListener("click",async function(){
+      if(!state.pending)return;
+      var btn=this;btn.disabled=true;btn.textContent="Patiente…";
+      try{
+        var result=await KMAuth.redeemStarItem({childId:state.childId,itemId:state.pending.id});
+        document.getElementById("confirmDialog").close();notice("Bravo ! "+state.pending.title+" est maintenant dans tes récompenses.","ok");state.pending=null;await loadShop();
+      }catch(error){notice(KMAuth.friendlyError(error),"error")}
+      finally{btn.disabled=false;btn.textContent="Oui, je la choisis"}
+    });
+    start();
+  })();
+  </script>
+</body>
+</html>
