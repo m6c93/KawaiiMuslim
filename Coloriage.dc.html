@@ -632,6 +632,11 @@ body.book-coloring-mode .title small{color:#daf3eb}
       editorApp.hidden = false;
       await loadBase();
       await loadDraft();
+      if (bookColoring && choice.isConnected) {
+        choice.remove();
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }
     };
 
     const setZoom = value => {
