@@ -319,7 +319,12 @@
               </sc-if>
               <sc-if value="{{ book.canRead }}" hint-placeholder-val="{{ true }}">
                 <a class="km-book-link" href="{{ book.url }}" aria-label="Lire {{ book.title }}" style="position:absolute; inset:0; display:block;"></a>
-                <span class="km-read-label" style="position:absolute; bottom:10px; left:10px; background:rgba(226,127,174,.92); color:#fff; font-weight:700; font-size:10.5px; letter-spacing:.5px; padding:5px 11px; border-radius:14px; text-transform:uppercase;">▶ Lire</span>
+                <sc-if value="{{ book.isColoringBook }}" hint-placeholder-val="{{ false }}">
+                  <span class="km-read-label" style="position:absolute; bottom:10px; left:10px; background:linear-gradient(135deg,#7d72df,#ef6f9f); color:#fff; font-weight:800; font-size:10.5px; letter-spacing:.35px; padding:6px 11px; border-radius:14px; text-transform:uppercase; box-shadow:0 6px 16px rgba(32,25,82,.3);">🎨 Lire & colorier</span>
+                </sc-if>
+                <sc-if value="{{ book.isRegularBook }}" hint-placeholder-val="{{ true }}">
+                  <span class="km-read-label" style="position:absolute; bottom:10px; left:10px; background:rgba(226,127,174,.92); color:#fff; font-weight:700; font-size:10.5px; letter-spacing:.5px; padding:5px 11px; border-radius:14px; text-transform:uppercase;">▶ Lire</span>
+                </sc-if>
               </sc-if>
               <sc-if value="{{ book.locked }}" hint-placeholder-val="{{ false }}">
                 <div onClick="{{ openPaywall }}" style="position:absolute; inset:0; cursor:pointer; background:rgba(20,26,60,.5); display:flex; align-items:center; justify-content:center;">
@@ -510,12 +515,31 @@ class Component extends DCLogic {
             emoji: item.cover_url ? '' : '📖',
           }))
       : rawBooks;
-    const books = managedBooks.map((b) => ({
-      ...b,
-      coverImg: b.hasCover && b.cover ? b.cover : false,
-      canRead: b.available && subscribed,
-      locked: b.available && !subscribed,
-    }));
+    const normalizeColoringBookTitle = value => String(value || '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    const coloringBookSlugs = {
+      'bubble tea time hijabi': 'bubble-tea-time-hijabi',
+      'aya et l armure de lumiere': 'aya-armure-de-lumiere',
+      'exploration de l espace': 'exploration-espace',
+      'les aliments dans le coran': 'aliments-dans-le-coran',
+      'les animaux du coran': 'animaux-du-coran'
+    };
+    const books = managedBooks.map((b) => {
+      const coloringSlug = coloringBookSlugs[normalizeColoringBookTitle(b.title)] || '';
+      const isColoringBook = Boolean(coloringSlug);
+      return {
+        ...b,
+        url: isColoringBook
+          ? `LivreColoriage.dc.html?book=${encodeURIComponent(coloringSlug)}&title=${encodeURIComponent(b.title)}`
+          : b.url,
+        coverImg: b.hasCover && b.cover ? b.cover : false,
+        canRead: b.available && subscribed,
+        locked: b.available && !subscribed,
+        isColoringBook,
+        isRegularBook: !isColoringBook,
+      };
+    });
 
     const rawColorings = [
       { title: 'La lune de Ramadan', emoji: '🌙' },
