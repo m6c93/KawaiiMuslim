@@ -119,7 +119,7 @@
 <body>
   <main class="app" id="editorApp" hidden>
     <header class="topbar">
-      <a class="action" href="Atelier.dc.html"><span>⌂</span><span class="home-label">Atelier</span></a>
+      <a class="action" id="backAction" href="Atelier.dc.html"><span>←</span><span class="home-label" id="backLabel">Atelier</span></a>
       <div class="title"><strong id="coloringTitle">Mon coloriage</strong><small id="saveStatus">Prêt à colorier</small></div>
       <div class="top-actions">
         <button class="action" id="undoButton" type="button">↶ Annuler</button>
@@ -251,6 +251,11 @@
     const title = (params.get("title") || "Mon coloriage").slice(0,160);
     const requestedFormat = params.get("format") || "";
     const requestedDraft = params.get("draft") || "";
+    const requestedChild = params.get("child") || "";
+    const bookColoring = params.get("bookColoring") === "1";
+    const requestedBook = (params.get("book") || "").slice(0,80);
+    const requestedPage = (params.get("page") || "").slice(0,12);
+    const requestedReturn = params.get("return") || "";
     const allowedHost = "pasgxojzybmvbjhuokkk.supabase.co";
     const baseCanvas = document.getElementById("baseCanvas");
     const drawCanvas = document.getElementById("drawCanvas");
@@ -264,6 +269,9 @@
     const stage = document.querySelector(".stage");
     let context = null;
     let sourceUrl = null;
+    let imageSource = "";
+    let artworkSourceKey = "";
+    let bookReturnUrl = "";
     let format = "image";
     let childId = "";
     let draftId = requestedDraft;
@@ -301,11 +309,33 @@
       toast.timer = setTimeout(() => element.hidden = true,2200);
     };
     const validateSource = () => {
-      sourceUrl = new URL(source);
-      const valid = sourceUrl.protocol === "https:" && sourceUrl.hostname === allowedHost
-        && sourceUrl.pathname.startsWith("/storage/v1/object/public/content-colorings/");
-      if (!valid) throw new Error("Ce coloriage n’est pas disponible.");
-      format = requestedFormat === "pdf" || sourceUrl.pathname.toLowerCase().endsWith(".pdf") ? "pdf" : "image";
+      if (bookColoring) {
+        let saved = null;
+        try { saved = JSON.parse(sessionStorage.getItem("km-book-coloring-page") || "null"); } catch (error) {}
+        const validSaved = saved
+          && saved.slug === requestedBook
+          && String(saved.pageNumber) === String(requestedPage)
+          && String(saved.imageSrc || "").startsWith("data:image/")
+          && String(saved.sourceKey || "") === `book-coloring:${requestedBook}:page:${requestedPage}`;
+        if (!validSaved) throw new Error("Rouvre cette page depuis le livre pour continuer ton coloriage.");
+        imageSource = saved.imageSrc;
+        artworkSourceKey = saved.sourceKey;
+        format = "image";
+        const returnCandidate = new URL(requestedReturn || saved.returnUrl || "Bibliotheque%20Kawaii%20Muslim.dc.html", location.href);
+        bookReturnUrl = returnCandidate.origin === location.origin && /\/LivreColoriage\.dc\.html$/i.test(returnCandidate.pathname)
+          ? returnCandidate.pathname.split("/").pop() + returnCandidate.search
+          : "Bibliotheque%20Kawaii%20Muslim.dc.html";
+        document.getElementById("backAction").href = bookReturnUrl;
+        document.getElementById("backLabel").textContent = "Livre";
+      } else {
+        sourceUrl = new URL(source);
+        const valid = sourceUrl.protocol === "https:" && sourceUrl.hostname === allowedHost
+          && sourceUrl.pathname.startsWith("/storage/v1/object/public/content-colorings/");
+        if (!valid) throw new Error("Ce coloriage n’est pas disponible.");
+        format = requestedFormat === "pdf" || sourceUrl.pathname.toLowerCase().endsWith(".pdf") ? "pdf" : "image";
+        imageSource = sourceUrl.href;
+        artworkSourceKey = sourceUrl.href;
+      }
       document.title = `${title} — Kawaii Muslim`;
       document.getElementById("coloringTitle").textContent = title;
     };
@@ -317,7 +347,7 @@
         const image = new Image();
         image.crossOrigin = "anonymous";
         await new Promise((resolve,reject) => {
-          image.onload = resolve; image.onerror = reject; image.src = sourceUrl.href;
+          image.onload = resolve; image.onerror = reject; image.src = imageSource;
         });
         const scale = Math.min(1,1400 / image.naturalWidth);
         baseCanvas.width = drawCanvas.width = Math.round(image.naturalWidth * scale);
@@ -515,7 +545,7 @@
       savePromise = (async () => {
         try {
           const saved = await KMAuth.saveArtworkDraft({
-            id:draftId,childId,title,sourceUrl:sourceUrl.href,
+            id:draftId,childId,title,sourceUrl:artworkSourceKey,
             drawingData:{version:2,width:drawCanvas.width,height:drawCanvas.height,strokes}
           });
           draftId = saved.id;
@@ -531,7 +561,7 @@
       return savePromise;
     };
     const loadDraft = async () => {
-      const draft = await KMAuth.findArtworkDraft({childId,sourceUrl:sourceUrl.href});
+      const draft = await KMAuth.findArtworkDraft({childId,sourceUrl:artworkSourceKey});
       if (!draft) return;
       draftId = draft.id;
       strokes = Array.isArray(draft.drawing_data?.strokes) ? draft.drawing_data.strokes : [];
@@ -822,7 +852,7 @@
         const starReward = await KMAuth.awardChildStars({
           childId,
           eventType:"activity_complete",
-          sourceKey:`coloring:${draftId}`,
+          sourceKey:bookColoring ? artworkSourceKey : `coloring:${draftId}`,
           description:`Coloriage terminé : ${memory.title}`
         }).catch(() => ({ awarded:0 }));
         document.getElementById("celebrationMessage").textContent = starReward.awarded
@@ -831,7 +861,9 @@
         document.getElementById("finishModal").hidden = true;
         document.getElementById("celebration").hidden = false;
         setTimeout(() => {
-          window.location.href = `Atelier.dc.html?child=${encodeURIComponent(childId)}&celebrated=1`;
+          window.location.href = bookColoring
+            ? bookReturnUrl
+            : `Atelier.dc.html?child=${encodeURIComponent(childId)}&celebrated=1`;
         },2200);
       } catch (error) {
         toast(KMAuth.friendlyError(error));
@@ -847,13 +879,14 @@
       if (!context) window.location.replace(`Connexion.dc.html?next=${encodeURIComponent(location.pathname+location.search)}`);
       const active = KMAuth.getActiveProfile();
       childSelect.innerHTML = context.children.map(child => `<option value="${child.id}">${child.avatar} ${child.name}</option>`).join("");
-      if (active.type === "child" && context.children.some(child => child.id === active.id)) childSelect.value = active.id;
+      if (requestedChild && context.children.some(child => child.id === requestedChild)) childSelect.value = requestedChild;
+      else if (active.type === "child" && context.children.some(child => child.id === active.id)) childSelect.value = active.id;
       if (!context.children.length) {
         childSelect.hidden = true;
         document.getElementById("quickChild").hidden = false;
         document.getElementById("choiceMessage").textContent = "Une seule fois : indique son prénom pour créer sa galerie privée.";
       }
-      if (requestedDraft && childSelect.value) await startEditor();
+      if ((requestedDraft || bookColoring) && childSelect.value) await startEditor();
     } catch (error) {
       editorApp.hidden = true;
       choice.hidden = false;
