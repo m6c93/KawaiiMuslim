@@ -899,17 +899,20 @@ body.book-coloring-mode .title small{color:#daf3eb}
     try {
       validateSource();
       context = await KMAuth.getContext();
-      if (!context) window.location.replace(`Connexion.dc.html?next=${encodeURIComponent(location.pathname+location.search)}`);
-      const active = KMAuth.getActiveProfile();
-      childSelect.innerHTML = context.children.map(child => `<option value="${child.id}">${child.avatar} ${child.name}</option>`).join("");
-      if (requestedChild && context.children.some(child => child.id === requestedChild)) childSelect.value = requestedChild;
-      else if (active.type === "child" && context.children.some(child => child.id === active.id)) childSelect.value = active.id;
-      if (!context.children.length) {
-        childSelect.hidden = true;
-        document.getElementById("quickChild").hidden = false;
-        document.getElementById("choiceMessage").textContent = "Une seule fois : indique son prénom pour créer sa galerie privée.";
+      if (!context) {
+        window.location.replace(`Connexion.dc.html?next=${encodeURIComponent(location.pathname+location.search)}`);
+      } else {
+        const active = KMAuth.getActiveProfile();
+        childSelect.innerHTML = context.children.map(child => `<option value="${child.id}">${child.avatar} ${child.name}</option>`).join("");
+        if (requestedChild && context.children.some(child => child.id === requestedChild)) childSelect.value = requestedChild;
+        else if (active.type === "child" && context.children.some(child => child.id === active.id)) childSelect.value = active.id;
+        if (!context.children.length) {
+          childSelect.hidden = true;
+          document.getElementById("quickChild").hidden = false;
+          document.getElementById("choiceMessage").textContent = "Une seule fois : indique son prénom pour créer sa galerie privée.";
+        }
+        if ((requestedDraft || bookColoring) && childSelect.value) await startEditor();
       }
-      if ((requestedDraft || bookColoring) && childSelect.value) await startEditor();
     } catch (error) {
       editorApp.hidden = true;
       choice.hidden = false;
