@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<script>
+/* Mode préouverture Kawaii Muslim — accès réservé à l’équipe */
+(() => {
+  const page = decodeURIComponent(window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+  const teamPages = new Set(["index.html", "connexion.dc.html", "mfa.dc.html", "admin.dc.html"]);
+  const teamPreview = localStorage.getItem("km-site-preview") === "staff";
+  if (!teamPages.has(page) && !teamPreview) window.location.replace("/");
+})();
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#211e56">
+<title>Livre à colorier — Kawaii Muslim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--night:#211e56;--ink:#39355f;--pink:#ed8fba;--violet:#7569d4;--paper:#fffafd;--line:#e9e2f0}
+*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}body{font-family:"Nunito",sans-serif;background:#f5eff9;color:var(--ink);display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+button,a,select{font:inherit}.topbar{min-height:66px;padding:calc(9px + env(safe-area-inset-top)) 14px 9px;background:var(--night);color:#fff;display:flex;align-items:center;gap:12px;box-shadow:0 5px 20px rgba(21,17,58,.24);z-index:5}
+.back{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;text-decoration:none;color:#fff;background:rgba(255,255,255,.11);font-size:21px;font-weight:900}.heading{min-width:0;flex:1}.heading strong{font:800 20px/1.05 "Baloo 2";display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.heading small{color:#cbc6e6;font-weight:800}.badge{white-space:nowrap;border-radius:999px;padding:8px 11px;background:linear-gradient(135deg,var(--violet),var(--pink));font-size:12px;font-weight:900}
+.reader-shell{position:relative;min-height:0;background:#272255}.reader-shell iframe{display:block;width:100%;height:100%;border:0;background:#272255}.reader-loading{position:absolute;inset:0;display:grid;place-items:center;background:#272255;color:#fff;font-weight:900;z-index:2}.reader-loading[hidden]{display:none}
+.colorbar{position:relative;z-index:6;background:var(--paper);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -8px 28px rgba(35,25,71,.13)}
+.colorbar-inner{max-width:1080px;margin:auto;display:grid;grid-template-columns:minmax(170px,230px) minmax(0,1fr);align-items:center;gap:12px}.profile label{display:block;font-size:11px;color:#7d7591;font-weight:900;margin:0 0 4px 3px}.profile select{width:100%;border:1px solid var(--line);background:#fff;border-radius:13px;padding:9px 12px;color:var(--ink);font-weight:900}
+.action-side{min-width:0}.hint{font-size:12px;color:#756d88;font-weight:800;margin:0 0 6px}.page-actions{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}.color-page{border:0;border-radius:14px;background:linear-gradient(135deg,var(--violet),var(--pink));color:#fff;padding:11px 16px;font-weight:900;white-space:nowrap;cursor:pointer;box-shadow:0 7px 17px rgba(117,105,212,.22)}.color-page.resume{background:linear-gradient(135deg,#389f8c,#67c6b3)}.color-page.done{background:linear-gradient(135deg,#4e8b7d,#78bba9)}.empty-action{padding:10px 0;color:#6d6581;font-weight:900}.child-empty{color:#a14668}.child-empty a{color:#6f5dc5}
+@media(max-width:650px){.topbar{min-height:58px;padding-left:9px;padding-right:9px}.back{width:38px;height:38px}.heading strong{font-size:17px}.badge{font-size:10px;padding:7px 8px}.colorbar{padding:8px 9px calc(8px + env(safe-area-inset-bottom))}.colorbar-inner{grid-template-columns:1fr;gap:7px}.profile{display:flex;align-items:center;gap:8px}.profile label{white-space:nowrap;margin:0}.profile select{padding:7px 10px}.hint{display:none}.color-page{padding:10px 13px;font-size:13px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="back" href="Bibliotheque%20Kawaii%20Muslim.dc.html" aria-label="Retour à la bibliothèque">←</a>
+  <div class="heading"><strong id="bookTitle">Livre à colorier</strong><small>Lis et colorie directement les pages</small></div>
+  <span class="badge">🎨 Livre à colorier</span>
+</header>
+<main class="reader-shell">
+  <div class="reader-loading" id="readerLoading">Ouverture du livre…</div>
+  <iframe id="bookFrame" title="Livre numérique à colorier" allow="fullscreen"></iframe>
+</main>
+<footer class="colorbar">
+  <div class="colorbar-inner">
+    <div class="profile"><label for="childSelect">Coloriages de</label><select id="childSelect" aria-label="Choisir l’enfant"></select></div>
+    <div class="action-side">
+      <p class="hint">Choisis une page. Ses couleurs seront sauvegardées automatiquement.</p>
+      <div class="page-actions" id="pageActions" aria-live="polite"><span class="empty-action">Ouvre le livre pour choisir une page.</span></div>
+    </div>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./km-config.js"></script>
+<script src="./km-auth.js"></script>
+<script>
+(async()=>{
+  const params=new URLSearchParams(location.search);
+  const slug=params.get("book")||"";
+  const title=(params.get("title")||"Livre à colorier").slice(0,160);
+  const restorePosition=String(params.get("position")||"");
+  const allowed={
+    "bubble-tea-time-hijabi":"bubble-tea-time-hijabi.html",
+    "aya-armure-de-lumiere":"aya-armure-de-lumiere.html",
+    "exploration-espace":"exploration-espace.html",
+    "aliments-dans-le-coran":"aliments-dans-le-coran.html",
+    "animaux-du-coran":"animaux-du-coran.html"
+  };
+  const frame=document.getElementById("bookFrame");
+  const loading=document.getElementById("readerLoading");
+  const childSelect=document.getElementById("childSelect");
+  const actions=document.getElementById("pageActions");
+  let context=null,artworks=[],refreshTimer=null;
+
+  const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+  const sourceKey=pageNumber=>`book-coloring:${slug}:page:${pageNumber}`;
+  const selectedChild=()=>childSelect.value||"";
+  const currentPosition=()=>{
+    try{return frame.contentDocument.querySelector('input[type="range"]')?.value||"0"}catch(error){return"0"}
+  };
+  const visiblePages=()=>{
+    try{
+      const doc=frame.contentDocument,view=frame.contentWindow;
+      return [...doc.querySelectorAll("main figure img")]
+        .filter(img=>{
+          const rect=img.getBoundingClientRect(),style=view.getComputedStyle(img);
+          return rect.width>20&&rect.height>20&&style.display!=="none"&&style.visibility!=="hidden"&&img.src.startsWith("data:image/")&&img.src.length>12000&&/^Page\s+\d+/i.test(img.alt||"");
+        })
+        .map((img,index)=>({
+          imageSrc:img.src,
+          pageNumber:(img.alt.match(/\d+/)||[String(index+1)])[0],
+          side:img.closest("figure")?.classList.contains("left-paper")?"gauche":"droite"
+        }));
+    }catch(error){return[]}
+  };
+  const matchingArtwork=pageNumber=>artworks.find(item=>item.source_url===sourceKey(pageNumber));
+  const renderActions=()=>{
+    if(!selectedChild()){
+      actions.innerHTML='<span class="empty-action child-empty">Ajoute d’abord un <a href="Profils.dc.html">profil enfant</a>.</span>';
+      return;
+    }
+    const pages=visiblePages();
+    if(!pages.length){
+      actions.innerHTML='<span class="empty-action">Ouvre le livre pour choisir une page.</span>';
+      return;
+    }
+    actions.innerHTML=pages.map(page=>{
+      const artwork=matchingArtwork(page.pageNumber);
+      const inProgress=artwork?.status==="in_progress";
+      const completed=artwork?.status==="completed";
+      const label=inProgress?`✏️ Continuer la page ${page.pageNumber}`:completed?`✓ Recolorier la page ${page.pageNumber}`:`🎨 Colorier la page ${page.pageNumber}`;
+      const style=inProgress?"resume":completed?"done":"";
+      return `<button class="color-page ${style}" type="button" data-page="${escapeHtml(page.pageNumber)}">${escapeHtml(label)}</button>`;
+    }).join("");
+  };
+  const loadArtworks=async()=>{
+    const childId=selectedChild();
+    artworks=childId?await KMAuth.listArtworks(childId).catch(()=>[]):[];
+    renderActions();
+  };
+  const scheduleRefresh=()=>{
+    clearTimeout(refreshTimer);
+    refreshTimer=setTimeout(renderActions,120);
+  };
+  const startColoring=pageNumber=>{
+    const page=visiblePages().find(item=>String(item.pageNumber)===String(pageNumber));
+    if(!page||!selectedChild())return;
+    const artwork=matchingArtwork(page.pageNumber);
+    const position=currentPosition();
+    const returnUrl=`LivreColoriage.dc.html?book=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}&position=${encodeURIComponent(position)}`;
+    const payload={slug,pageNumber:String(page.pageNumber),imageSrc:page.imageSrc,sourceKey:sourceKey(page.pageNumber),returnUrl,title};
+    try{sessionStorage.setItem("km-book-coloring-page",JSON.stringify(payload))}
+    catch(error){actions.innerHTML='<span class="empty-action child-empty">Cette page est trop lourde. Réessaie après avoir fermé les autres onglets.</span>';return}
+    const editorTitle=`${title} · Page ${page.pageNumber}`;
+    const query=new URLSearchParams({bookColoring:"1",book:slug,page:String(page.pageNumber),child:selectedChild(),title:editorTitle,return:returnUrl});
+    if(artwork?.status==="in_progress")query.set("draft",artwork.id);
+    location.href=`Coloriage.dc.html?${query.toString()}`;
+  };
+
+  document.getElementById("bookTitle").textContent=title;
+  if(!allowed[slug]){loading.textContent="Ce livre à colorier n’est pas disponible.";return}
+  actions.addEventListener("click",event=>{
+    const button=event.target.closest("[data-page]");
+    if(button)startColoring(button.dataset.page);
+  });
+  childSelect.addEventListener("change",loadArtworks);
+
+  try{
+    context=await KMAuth.getContext();
+    if(!context){location.replace("Connexion.dc.html?next="+encodeURIComponent(location.pathname+location.search));return}
+    const active=KMAuth.validateActiveProfile(context);
+    childSelect.innerHTML=(context.children||[]).map(child=>`<option value="${escapeHtml(child.id)}">${escapeHtml((child.avatar||"⭐")+" "+child.name)}</option>`).join("");
+    if(active.type==="child"&&context.children.some(child=>child.id===active.id))childSelect.value=active.id;
+    if(!context.children.length)childSelect.hidden=true;
+    await loadArtworks();
+  }catch(error){
+    actions.innerHTML=`<span class="empty-action child-empty">${escapeHtml(KMAuth.friendlyError(error))}</span>`;
+  }
+
+  frame.addEventListener("load",()=>{
+    loading.hidden=true;
+    try{
+      const doc=frame.contentDocument;
+      const observer=new MutationObserver(scheduleRefresh);
+      observer.observe(doc.body,{subtree:true,childList:true,attributes:true,attributeFilter:["src","style","class","value"]});
+      if(restorePosition){
+        setTimeout(()=>{
+          const range=doc.querySelector('input[type="range"]');
+          if(range){
+            range.value=restorePosition;
+            range.dispatchEvent(new Event("input",{bubbles:true}));
+            range.dispatchEvent(new Event("change",{bubbles:true}));
+          }
+          scheduleRefresh();
+        },350);
+      }
+      doc.addEventListener("click",scheduleRefresh,true);
+      doc.addEventListener("keyup",scheduleRefresh,true);
+      scheduleRefresh();
+    }catch(error){
+      actions.innerHTML='<span class="empty-action child-empty">Impossible de préparer cette page.</span>';
+    }
+  });
+  frame.src="books/"+allowed[slug];
+})();
+</script>
+</body>
+</html>
