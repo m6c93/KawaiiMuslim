@@ -178,9 +178,15 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
     const active=KMAuth.validateActiveProfile(context);
     childSelect.innerHTML=(context.children||[]).map(child=>`<option value="${escapeHtml(child.id)}">${escapeHtml((child.avatar||"⭐")+" "+child.name)}</option>`).join("");
     const activeChild=active.type==="child"&&context.children.some(child=>child.id===active.id);
+    const onlyChild=context.children.length===1?context.children[0]:null;
     if(activeChild){
       activeChildId=active.id;
       childSelect.value=active.id;
+      profileChooser.hidden=true;
+      colorbarInner.classList.add("single-profile");
+    }else if(onlyChild){
+      activeChildId=onlyChild.id;
+      childSelect.value=onlyChild.id;
       profileChooser.hidden=true;
       colorbarInner.classList.add("single-profile");
     }else if(resumeChild&&context.children.some(child=>child.id===resumeChild))childSelect.value=resumeChild;
