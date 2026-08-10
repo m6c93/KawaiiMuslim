@@ -346,6 +346,9 @@ body.book-coloring-mode .title small{color:#daf3eb}
         resumeUrl.searchParams.set("book",savedBookMatch[1]);
         resumeUrl.searchParams.set("title",savedBookTitles[savedBookMatch[1]]);
         resumeUrl.searchParams.set("position",String(Math.max(0,Math.ceil(pageNumber/2))));
+        resumeUrl.searchParams.set("resumePage",String(pageNumber));
+        if (requestedDraft) resumeUrl.searchParams.set("resumeDraft",requestedDraft);
+        if (requestedChild) resumeUrl.searchParams.set("child",requestedChild);
         location.replace(resumeUrl.pathname.split("/").pop()+resumeUrl.search);
         throw new Error("book_redirect");
       }
