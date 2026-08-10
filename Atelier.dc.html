@@ -47,8 +47,13 @@
     .art-card { overflow:hidden; border:1px solid #ebe8f0; border-radius:23px; background:#fff; box-shadow:0 12px 32px rgba(37,43,103,.08); }
     .art-preview { position:relative; aspect-ratio:4/5; overflow:hidden; display:grid; place-items:center; background:linear-gradient(145deg,#fffaf4,#f3f1f7); }
     .art-preview img { width:100%; height:100%; object-fit:contain; display:block; }
+    .book-placeholder { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:28px 18px; color:#5c5f86; text-align:center; background:radial-gradient(circle at 50% 32%,rgba(240,181,63,.24),transparent 36%),linear-gradient(145deg,#fff9ed,#f4edff); }
+    .book-placeholder .book-icon { font-size:52px; filter:drop-shadow(0 7px 10px rgba(37,43,103,.12)); }
+    .book-placeholder .book-kicker { color:#a56d91; font-size:10px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+    .book-placeholder .book-page { font:800 18px "Baloo 2",cursive; line-height:1.15; }
     .art-badge { position:absolute; top:10px; left:10px; padding:6px 9px; color:#fff; border-radius:14px; background:rgba(79,192,161,.94); font-size:9px; font-weight:900; text-transform:uppercase; }
     .art-badge.draft { background:rgba(231,137,182,.94); }
+    .book-tag { position:absolute; top:10px; right:10px; padding:6px 9px; color:#5b4775; border:1px solid rgba(255,255,255,.9); border-radius:14px; background:rgba(255,255,255,.92); box-shadow:0 4px 14px rgba(37,43,103,.1); font-size:9px; font-weight:900; text-transform:uppercase; }
     .art-copy { padding:14px; }
     .art-copy strong { display:block; overflow:hidden; font:800 16px "Baloo 2",cursive; text-overflow:ellipsis; white-space:nowrap; }
     .art-copy small { color:var(--muted); font-size:10px; }
@@ -117,6 +122,7 @@
         </header>
         <div class="filters" id="filters">
           <button class="chip active" data-filter="all" type="button">Tout</button>
+          <button class="chip" data-filter="books" type="button">📚 Livres</button>
           <button class="chip" data-filter="in_progress" type="button">À terminer</button>
           <button class="chip" data-filter="completed" type="button">Terminés</button>
           <button class="chip" data-filter="paper" type="button">Sur papier</button>
@@ -193,26 +199,37 @@
 
     const renderGallery = () => {
       const shown = artworks.filter(item => {
+        const isBook = String(item.source_url || "").startsWith("book-coloring:");
         if (activeFilter === "all") return true;
+        if (activeFilter === "books") return isBook;
         if (activeFilter === "paper") return item.kind === "paper";
         return item.status === activeFilter;
       });
       gallery.innerHTML = shown.map(item => {
         const resumeUrl = `Coloriage.dc.html?src=${encodeURIComponent(item.source_url)}&title=${encodeURIComponent(item.title)}&draft=${item.id}`;
         const isDraft = item.status === "in_progress";
+        const isBook = String(item.source_url || "").startsWith("book-coloring:");
+        const hasUsableImage = /^(https?:|data:|blob:)/i.test(String(item.image_url || ""));
+        const pageNumber = String(item.source_url || "").match(/:page:(\d+)$/)?.[1] || "";
         const memory = item.drawing_data?.memory || {};
         const displayTitle = memory.title || item.title;
+        const preview = hasUsableImage
+          ? `<img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.title)}">`
+          : isBook
+            ? `<div class="book-placeholder"><span class="book-icon">📖</span><span class="book-kicker">Coloriage du livre</span><span class="book-page">${pageNumber ? `Page ${pageNumber}` : escapeHtml(displayTitle)}</span></div>`
+            : `<span style="font-size:50px">🎨</span>`;
         return `<article class="art-card">
           <div class="art-preview">
-            ${item.image_url ? `<img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.title)}">` : `<span style="font-size:50px">🎨</span>`}
+            ${preview}
             <span class="art-badge ${isDraft ? "draft" : ""}">${isDraft ? "À terminer" : item.kind === "paper" ? "Sur papier" : "Terminé"}</span>
+            ${isBook ? `<span class="book-tag">📚 Livre</span>` : ""}
           </div>
           <div class="art-copy">
             <strong>${escapeHtml(displayTitle)}</strong>
             <small>${dateLabel(item.updated_at)}</small>
             ${memory.phrase ? `<p class="memory-phrase">“${escapeHtml(memory.phrase)}”</p>` : ""}
             <div class="art-buttons">
-              ${isDraft ? `<a class="art-button" href="${resumeUrl}">Continuer</a>` : `<a class="art-button" href="${escapeHtml(item.image_url)}" target="_blank" rel="noopener">Voir</a>`}
+              ${isDraft ? `<a class="art-button" href="${resumeUrl}">${isBook ? "Reprendre le livre" : "Continuer"}</a>` : `<a class="art-button" href="${escapeHtml(item.image_url)}" target="_blank" rel="noopener">Voir</a>`}
               <button class="art-button secondary" data-delete="${item.id}" type="button" aria-label="Supprimer">🗑️</button>
             </div>
           </div>
