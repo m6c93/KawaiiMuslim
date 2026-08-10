@@ -52,7 +52,7 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   <div class="reader-loading" id="readerLoading">Ouverture du livre…</div>
   <iframe id="bookFrame" title="Livre numérique à colorier" allow="fullscreen"></iframe>
 </main>
-<footer class="colorbar">
+<footer class="colorbar" id="colorbar" hidden>
   <div class="colorbar-inner" id="colorbarInner">
     <div class="profile" id="profileChooser"><label for="childSelect">Coloriages de</label><select id="childSelect" aria-label="Choisir l’enfant"></select></div>
     <div class="action-side">
@@ -83,6 +83,7 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   };
   const frame=document.getElementById("bookFrame");
   const loading=document.getElementById("readerLoading");
+  const colorbar=document.getElementById("colorbar");
   const childSelect=document.getElementById("childSelect");
   const profileChooser=document.getElementById("profileChooser");
   const colorbarInner=document.getElementById("colorbarInner");
@@ -113,14 +114,17 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   const matchingArtwork=pageNumber=>artworks.find(item=>item.source_url===sourceKey(pageNumber));
   const renderActions=()=>{
     if(!selectedChild()){
+      colorbar.hidden=false;
       actions.innerHTML='<span class="empty-action child-empty">Ajoute d’abord un <a href="Profils.dc.html">profil enfant</a>.</span>';
       return;
     }
     const pages=visiblePages();
     if(!pages.length){
+      colorbar.hidden=true;
       actions.innerHTML='<span class="empty-action">Ouvre le livre pour choisir une page.</span>';
       return;
     }
+    colorbar.hidden=false;
     actions.innerHTML=pages.map(page=>{
       const artwork=matchingArtwork(page.pageNumber);
       const inProgress=artwork?.status==="in_progress";
@@ -198,6 +202,7 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
     await loadArtworks();
   }catch(error){
     document.documentElement.classList.remove("direct-resume");
+    colorbar.hidden=false;
     actions.innerHTML=`<span class="empty-action child-empty">${escapeHtml(KMAuth.friendlyError(error))}</span>`;
   }
 
@@ -223,12 +228,14 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
       scheduleRefresh();
     }catch(error){
       document.documentElement.classList.remove("direct-resume");
+      colorbar.hidden=false;
       actions.innerHTML='<span class="empty-action child-empty">Impossible de préparer cette page.</span>';
     }
   });
   if(resumePage)setTimeout(()=>{
     if(!resumeStarted){
       document.documentElement.classList.remove("direct-resume");
+      colorbar.hidden=false;
       actions.innerHTML='<span class="empty-action child-empty">Choisis la page pour reprendre ton coloriage.</span>';
     }
   },6500);
