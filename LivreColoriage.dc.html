@@ -27,7 +27,7 @@ button,a,select{font:inherit}.topbar{min-height:66px;padding:calc(9px + env(safe
 .back{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;text-decoration:none;color:#fff;background:rgba(255,255,255,.11);font-size:21px;font-weight:900}.heading{min-width:0;flex:1}.heading strong{font:800 20px/1.05 "Baloo 2";display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.heading small{color:#cbc6e6;font-weight:800}.badge{white-space:nowrap;border-radius:999px;padding:8px 11px;background:linear-gradient(135deg,var(--violet),var(--pink));font-size:12px;font-weight:900}
 .reader-shell{position:relative;min-height:0;background:#272255}.reader-shell iframe{display:block;width:100%;height:100%;border:0;background:#272255}.reader-loading{position:absolute;inset:0;display:grid;place-items:center;background:#272255;color:#fff;font-weight:900;z-index:2}.reader-loading[hidden]{display:none}
 .colorbar{position:relative;z-index:6;background:var(--paper);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -8px 28px rgba(35,25,71,.13)}
-.colorbar-inner{max-width:1080px;margin:auto;display:grid;grid-template-columns:minmax(170px,230px) minmax(0,1fr);align-items:center;gap:12px}.profile label{display:block;font-size:11px;color:#7d7591;font-weight:900;margin:0 0 4px 3px}.profile select{width:100%;border:1px solid var(--line);background:#fff;border-radius:13px;padding:9px 12px;color:var(--ink);font-weight:900}
+.colorbar-inner{max-width:1080px;margin:auto;display:grid;grid-template-columns:minmax(170px,230px) minmax(0,1fr);align-items:center;gap:12px}.colorbar-inner.single-profile{grid-template-columns:1fr}.profile label{display:block;font-size:11px;color:#7d7591;font-weight:900;margin:0 0 4px 3px}.profile select{width:100%;border:1px solid var(--line);background:#fff;border-radius:13px;padding:9px 12px;color:var(--ink);font-weight:900}
 .action-side{min-width:0}.hint{font-size:12px;color:#756d88;font-weight:800;margin:0 0 6px}.page-actions{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}.color-page{border:0;border-radius:14px;background:linear-gradient(135deg,var(--violet),var(--pink));color:#fff;padding:11px 16px;font-weight:900;white-space:nowrap;cursor:pointer;box-shadow:0 7px 17px rgba(117,105,212,.22)}.color-page.resume{background:linear-gradient(135deg,#389f8c,#67c6b3)}.color-page.done{background:linear-gradient(135deg,#4e8b7d,#78bba9)}.empty-action{padding:10px 0;color:#6d6581;font-weight:900}.child-empty{color:#a14668}.child-empty a{color:#6f5dc5}
 @media(max-width:650px){.topbar{min-height:58px;padding-left:9px;padding-right:9px}.back{width:38px;height:38px}.heading strong{font-size:17px}.badge{font-size:10px;padding:7px 8px}.colorbar{padding:8px 9px calc(8px + env(safe-area-inset-bottom))}.colorbar-inner{grid-template-columns:1fr;gap:7px}.profile{display:flex;align-items:center;gap:8px}.profile label{white-space:nowrap;margin:0}.profile select{padding:7px 10px}.hint{display:none}.color-page{padding:10px 13px;font-size:13px}}
 .direct-resume-screen{display:none}
@@ -53,8 +53,8 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   <iframe id="bookFrame" title="Livre numérique à colorier" allow="fullscreen"></iframe>
 </main>
 <footer class="colorbar">
-  <div class="colorbar-inner">
-    <div class="profile"><label for="childSelect">Coloriages de</label><select id="childSelect" aria-label="Choisir l’enfant"></select></div>
+  <div class="colorbar-inner" id="colorbarInner">
+    <div class="profile" id="profileChooser"><label for="childSelect">Coloriages de</label><select id="childSelect" aria-label="Choisir l’enfant"></select></div>
     <div class="action-side">
       <p class="hint">Choisis une page. Ses couleurs seront sauvegardées automatiquement.</p>
       <div class="page-actions" id="pageActions" aria-live="polite"><span class="empty-action">Ouvre le livre pour choisir une page.</span></div>
@@ -84,12 +84,14 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   const frame=document.getElementById("bookFrame");
   const loading=document.getElementById("readerLoading");
   const childSelect=document.getElementById("childSelect");
+  const profileChooser=document.getElementById("profileChooser");
+  const colorbarInner=document.getElementById("colorbarInner");
   const actions=document.getElementById("pageActions");
-  let context=null,artworks=[],refreshTimer=null,resumeStarted=false;
+  let context=null,activeChildId="",artworks=[],refreshTimer=null,resumeStarted=false;
 
   const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const sourceKey=pageNumber=>`book-coloring:${slug}:page:${pageNumber}`;
-  const selectedChild=()=>childSelect.value||"";
+  const selectedChild=()=>activeChildId||childSelect.value||"";
   const currentPosition=()=>{
     try{return frame.contentDocument.querySelector('input[type="range"]')?.value||"0"}catch(error){return"0"}
   };
@@ -175,9 +177,18 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
     if(!context){location.replace("Connexion.dc.html?next="+encodeURIComponent(location.pathname+location.search));return}
     const active=KMAuth.validateActiveProfile(context);
     childSelect.innerHTML=(context.children||[]).map(child=>`<option value="${escapeHtml(child.id)}">${escapeHtml((child.avatar||"⭐")+" "+child.name)}</option>`).join("");
-    if(resumeChild&&context.children.some(child=>child.id===resumeChild))childSelect.value=resumeChild;
-    else if(active.type==="child"&&context.children.some(child=>child.id===active.id))childSelect.value=active.id;
-    if(!context.children.length){document.documentElement.classList.remove("direct-resume");childSelect.hidden=true}
+    const activeChild=active.type==="child"&&context.children.some(child=>child.id===active.id);
+    if(activeChild){
+      activeChildId=active.id;
+      childSelect.value=active.id;
+      profileChooser.hidden=true;
+      colorbarInner.classList.add("single-profile");
+    }else if(resumeChild&&context.children.some(child=>child.id===resumeChild))childSelect.value=resumeChild;
+    if(!context.children.length){
+      document.documentElement.classList.remove("direct-resume");
+      profileChooser.hidden=true;
+      colorbarInner.classList.add("single-profile");
+    }
     await loadArtworks();
   }catch(error){
     document.documentElement.classList.remove("direct-resume");
