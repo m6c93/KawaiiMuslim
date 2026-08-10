@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#211e56">
   <title>Coloriage — Kawaii Muslim</title>
+  <script>
+    (() => {
+      const startupParams = new URLSearchParams(location.search);
+      if (startupParams.get("bookColoring") === "1" || startupParams.has("draft")) {
+        document.documentElement.classList.add("direct-coloring");
+      }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -16,6 +24,7 @@
     button,select { font:inherit; }
     button,a { -webkit-tap-highlight-color:transparent; }
     [hidden] { display:none!important; }
+    html.direct-coloring .choice { display:none!important; }
     .app { min-height:100dvh; display:grid; grid-template-rows:auto minmax(0,1fr); background:
       radial-gradient(circle at 10% 16%,rgba(231,137,182,.16),transparent 25%),
       radial-gradient(circle at 88% 75%,rgba(79,192,161,.14),transparent 25%),
@@ -924,6 +933,7 @@ body.book-coloring-mode .title small{color:#daf3eb}
         if (requestedChild && context.children.some(child => child.id === requestedChild)) childSelect.value = requestedChild;
         else if (active.type === "child" && context.children.some(child => child.id === active.id)) childSelect.value = active.id;
         if (!context.children.length) {
+          document.documentElement.classList.remove("direct-coloring");
           childSelect.hidden = true;
           document.getElementById("quickChild").hidden = false;
           document.getElementById("choiceMessage").textContent = "Une seule fois : indique son prénom pour créer sa galerie privée.";
@@ -932,6 +942,7 @@ body.book-coloring-mode .title small{color:#daf3eb}
       }
     } catch (error) {
       if (error?.message !== "book_redirect") {
+        document.documentElement.classList.remove("direct-coloring");
         editorApp.hidden = true;
         choice.hidden = false;
         document.getElementById("choiceMessage").textContent = KMAuth.friendlyError(error);
