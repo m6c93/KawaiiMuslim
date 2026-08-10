@@ -322,6 +322,23 @@ body.book-coloring-mode .title small{color:#daf3eb}
       toast.timer = setTimeout(() => element.hidden = true,2200);
     };
     const validateSource = () => {
+      const savedBookMatch = !bookColoring ? source.match(/^book-coloring:([a-z0-9-]+):page:(\d+)$/) : null;
+      const savedBookTitles = {
+        "bubble-tea-time-hijabi":"Bubble Tea Time Hijabi",
+        "aya-armure-de-lumiere":"Aya et l’Armure de Lumière",
+        "exploration-espace":"Exploration de l’espace",
+        "aliments-dans-le-coran":"Les aliments dans le Coran",
+        "animaux-du-coran":"Les animaux dans le Coran"
+      };
+      if (savedBookMatch && savedBookTitles[savedBookMatch[1]]) {
+        const pageNumber = Number(savedBookMatch[2]);
+        const resumeUrl = new URL("LivreColoriage.dc.html",location.href);
+        resumeUrl.searchParams.set("book",savedBookMatch[1]);
+        resumeUrl.searchParams.set("title",savedBookTitles[savedBookMatch[1]]);
+        resumeUrl.searchParams.set("position",String(Math.max(0,Math.ceil(pageNumber/2))));
+        location.replace(resumeUrl.pathname.split("/").pop()+resumeUrl.search);
+        throw new Error("book_redirect");
+      }
       if (bookColoring) {
         let saved = null;
         try { saved = JSON.parse(sessionStorage.getItem("km-book-coloring-page") || "null"); } catch (error) {}
@@ -914,11 +931,13 @@ body.book-coloring-mode .title small{color:#daf3eb}
         if ((requestedDraft || bookColoring) && childSelect.value) await startEditor();
       }
     } catch (error) {
-      editorApp.hidden = true;
-      choice.hidden = false;
-      document.getElementById("choiceMessage").textContent = KMAuth.friendlyError(error);
-      document.getElementById("startColoring").disabled = true;
-      document.getElementById("quickPrint").disabled = true;
+      if (error?.message !== "book_redirect") {
+        editorApp.hidden = true;
+        choice.hidden = false;
+        document.getElementById("choiceMessage").textContent = KMAuth.friendlyError(error);
+        document.getElementById("startColoring").disabled = true;
+        document.getElementById("quickPrint").disabled = true;
+      }
     }
   </script>
 </body>
