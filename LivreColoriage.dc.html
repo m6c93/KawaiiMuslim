@@ -9,6 +9,9 @@
   const teamPreview = localStorage.getItem("km-site-preview") === "staff";
   if (!teamPages.has(page) && !teamPreview) window.location.replace("/");
 })();
+if (new URLSearchParams(location.search).has("resumePage")) {
+  document.documentElement.classList.add("direct-resume");
+}
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -27,9 +30,19 @@ button,a,select{font:inherit}.topbar{min-height:66px;padding:calc(9px + env(safe
 .colorbar-inner{max-width:1080px;margin:auto;display:grid;grid-template-columns:minmax(170px,230px) minmax(0,1fr);align-items:center;gap:12px}.profile label{display:block;font-size:11px;color:#7d7591;font-weight:900;margin:0 0 4px 3px}.profile select{width:100%;border:1px solid var(--line);background:#fff;border-radius:13px;padding:9px 12px;color:var(--ink);font-weight:900}
 .action-side{min-width:0}.hint{font-size:12px;color:#756d88;font-weight:800;margin:0 0 6px}.page-actions{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}.color-page{border:0;border-radius:14px;background:linear-gradient(135deg,var(--violet),var(--pink));color:#fff;padding:11px 16px;font-weight:900;white-space:nowrap;cursor:pointer;box-shadow:0 7px 17px rgba(117,105,212,.22)}.color-page.resume{background:linear-gradient(135deg,#389f8c,#67c6b3)}.color-page.done{background:linear-gradient(135deg,#4e8b7d,#78bba9)}.empty-action{padding:10px 0;color:#6d6581;font-weight:900}.child-empty{color:#a14668}.child-empty a{color:#6f5dc5}
 @media(max-width:650px){.topbar{min-height:58px;padding-left:9px;padding-right:9px}.back{width:38px;height:38px}.heading strong{font-size:17px}.badge{font-size:10px;padding:7px 8px}.colorbar{padding:8px 9px calc(8px + env(safe-area-inset-bottom))}.colorbar-inner{grid-template-columns:1fr;gap:7px}.profile{display:flex;align-items:center;gap:8px}.profile label{white-space:nowrap;margin:0}.profile select{padding:7px 10px}.hint{display:none}.color-page{padding:10px 13px;font-size:13px}}
+.direct-resume-screen{display:none}
+html.direct-resume body{background:#17143e}
+html.direct-resume body>.topbar,
+html.direct-resume body>.reader-shell,
+html.direct-resume body>.colorbar{visibility:hidden}
+html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;color:#fff;background:radial-gradient(circle at 50% 30%,#373285,#17143e 72%);text-align:center}
+.direct-resume-screen span{display:block;margin-bottom:12px;font-size:54px}
+.direct-resume-screen strong{font:800 24px "Baloo 2",cursive}
+.direct-resume-screen small{display:block;margin-top:6px;color:#ddd9f4;font-weight:700}
 </style>
 </head>
 <body>
+<div class="direct-resume-screen" aria-live="polite"><div><span>🖍️</span><strong>Ton coloriage revient…</strong><small>Nous retrouvons tes couleurs.</small></div></div>
 <header class="topbar">
   <a class="back" href="Bibliotheque%20Kawaii%20Muslim.dc.html" aria-label="Retour à la bibliothèque">←</a>
   <div class="heading"><strong id="bookTitle">Livre à colorier</strong><small>Lis et colorie directement les pages</small></div>
@@ -57,6 +70,9 @@ button,a,select{font:inherit}.topbar{min-height:66px;padding:calc(9px + env(safe
   const slug=params.get("book")||"";
   const title=(params.get("title")||"Livre à colorier").slice(0,160);
   const restorePosition=String(params.get("position")||"");
+  const resumePage=String(params.get("resumePage")||"");
+  const resumeDraft=String(params.get("resumeDraft")||"");
+  const resumeChild=String(params.get("child")||"");
   const allowed={
     "bubble-tea-time-hijabi":"bubble-tea-time-hijabi.html",
     "aya-armure-de-lumiere":"aya-armure-de-lumiere.html",
@@ -69,7 +85,7 @@ button,a,select{font:inherit}.topbar{min-height:66px;padding:calc(9px + env(safe
   const loading=document.getElementById("readerLoading");
   const childSelect=document.getElementById("childSelect");
   const actions=document.getElementById("pageActions");
-  let context=null,artworks=[],refreshTimer=null;
+  let context=null,artworks=[],refreshTimer=null,resumeStarted=false;
 
   const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const sourceKey=pageNumber=>`book-coloring:${slug}:page:${pageNumber}`;
@@ -111,6 +127,7 @@ button,a,select{font:inherit}.topbar{min-height:66px;padding:calc(9px + env(safe
       const style=inProgress?"resume":completed?"done":"";
       return `<button class="color-page ${style}" type="button" data-page="${escapeHtml(page.pageNumber)}">${escapeHtml(label)}</button>`;
     }).join("");
+    tryDirectResume();
   };
   const loadArtworks=async()=>{
     const childId=selectedChild();
@@ -121,7 +138,7 @@ button,a,select{font:inherit}.topbar{min-height:66px;padding:calc(9px + env(safe
     clearTimeout(refreshTimer);
     refreshTimer=setTimeout(renderActions,120);
   };
-  const startColoring=pageNumber=>{
+  const startColoring=(pageNumber,forcedDraft="")=>{
     const page=visiblePages().find(item=>String(item.pageNumber)===String(pageNumber));
     if(!page||!selectedChild())return;
     const artwork=matchingArtwork(page.pageNumber);
@@ -132,12 +149,21 @@ button,a,select{font:inherit}.topbar{min-height:66px;padding:calc(9px + env(safe
     catch(error){actions.innerHTML='<span class="empty-action child-empty">Cette page est trop lourde. Réessaie après avoir fermé les autres onglets.</span>';return}
     const editorTitle=`${title} · Page ${page.pageNumber}`;
     const query=new URLSearchParams({bookColoring:"1",book:slug,page:String(page.pageNumber),child:selectedChild(),title:editorTitle,return:returnUrl});
-    if(artwork?.status==="in_progress")query.set("draft",artwork.id);
+    if(forcedDraft)query.set("draft",forcedDraft);
+    else if(artwork?.status==="in_progress")query.set("draft",artwork.id);
     location.href=`Coloriage.dc.html?${query.toString()}`;
+  };
+  const tryDirectResume=()=>{
+    if(!resumePage||resumeStarted||!selectedChild())return false;
+    const page=visiblePages().find(item=>String(item.pageNumber)===resumePage);
+    if(!page)return false;
+    resumeStarted=true;
+    startColoring(resumePage,resumeDraft);
+    return true;
   };
 
   document.getElementById("bookTitle").textContent=title;
-  if(!allowed[slug]){loading.textContent="Ce livre à colorier n’est pas disponible.";return}
+  if(!allowed[slug]){document.documentElement.classList.remove("direct-resume");loading.textContent="Ce livre à colorier n’est pas disponible.";return}
   actions.addEventListener("click",event=>{
     const button=event.target.closest("[data-page]");
     if(button)startColoring(button.dataset.page);
@@ -149,10 +175,12 @@ button,a,select{font:inherit}.topbar{min-height:66px;padding:calc(9px + env(safe
     if(!context){location.replace("Connexion.dc.html?next="+encodeURIComponent(location.pathname+location.search));return}
     const active=KMAuth.validateActiveProfile(context);
     childSelect.innerHTML=(context.children||[]).map(child=>`<option value="${escapeHtml(child.id)}">${escapeHtml((child.avatar||"⭐")+" "+child.name)}</option>`).join("");
-    if(active.type==="child"&&context.children.some(child=>child.id===active.id))childSelect.value=active.id;
-    if(!context.children.length)childSelect.hidden=true;
+    if(resumeChild&&context.children.some(child=>child.id===resumeChild))childSelect.value=resumeChild;
+    else if(active.type==="child"&&context.children.some(child=>child.id===active.id))childSelect.value=active.id;
+    if(!context.children.length){document.documentElement.classList.remove("direct-resume");childSelect.hidden=true}
     await loadArtworks();
   }catch(error){
+    document.documentElement.classList.remove("direct-resume");
     actions.innerHTML=`<span class="empty-action child-empty">${escapeHtml(KMAuth.friendlyError(error))}</span>`;
   }
 
@@ -177,9 +205,16 @@ button,a,select{font:inherit}.topbar{min-height:66px;padding:calc(9px + env(safe
       doc.addEventListener("keyup",scheduleRefresh,true);
       scheduleRefresh();
     }catch(error){
+      document.documentElement.classList.remove("direct-resume");
       actions.innerHTML='<span class="empty-action child-empty">Impossible de préparer cette page.</span>';
     }
   });
+  if(resumePage)setTimeout(()=>{
+    if(!resumeStarted){
+      document.documentElement.classList.remove("direct-resume");
+      actions.innerHTML='<span class="empty-action child-empty">Choisis la page pour reprendre ton coloriage.</span>';
+    }
+  },6500);
   frame.src="books/"+allowed[slug];
 })();
 </script>
