@@ -22,14 +22,15 @@ if (new URLSearchParams(location.search).has("resumePage")) {
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--night:#211e56;--ink:#39355f;--pink:#ed8fba;--violet:#7569d4;--paper:#fffafd;--line:#e9e2f0}
-*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}body{font-family:"Nunito",sans-serif;background:#f5eff9;color:var(--ink);display:flex;flex-direction:column;min-height:100%;min-height:100dvh} [hidden]{display:none!important}
+*{box-sizing:border-box}html,body{width:100%;max-width:100%;height:100%;margin:0;overflow:hidden}body{font-family:"Nunito",sans-serif;background:#272255;color:var(--ink);display:flex;flex-direction:column;min-height:100%;min-height:100dvh} [hidden]{display:none!important}
 button,a,select{font:inherit}.topbar{flex:0 0 auto;min-height:66px;padding:calc(9px + env(safe-area-inset-top)) 14px 9px;background:var(--night);color:#fff;display:flex;align-items:center;gap:12px;box-shadow:0 5px 20px rgba(21,17,58,.24);z-index:5}
 .back{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;text-decoration:none;color:#fff;background:rgba(255,255,255,.11);font-size:21px;font-weight:900}.heading{min-width:0;flex:1}.heading strong{font:800 20px/1.05 "Baloo 2";display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.heading small{color:#cbc6e6;font-weight:800}.badge{white-space:nowrap;border-radius:999px;padding:8px 11px;background:linear-gradient(135deg,var(--violet),var(--pink));font-size:12px;font-weight:900}
 .reader-shell{position:relative;min-height:0;flex:1 1 auto;background:#272255}.reader-shell iframe{display:block;width:100%;height:100%;border:0;background:#272255}.reader-loading{position:absolute;inset:0;display:grid;place-items:center;background:#272255;color:#fff;font-weight:900;z-index:2}.reader-loading[hidden]{display:none}
+body.book-ready>.topbar{display:none}.reader-shell,.reader-shell iframe{min-width:0;max-width:100vw}
 .colorbar{position:relative;z-index:6;flex:0 0 auto;isolation:isolate;contain:layout paint;background:var(--paper);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -8px 28px rgba(35,25,71,.13)}
 .colorbar-inner{max-width:1080px;margin:auto;display:grid;grid-template-columns:minmax(170px,230px) minmax(0,1fr);align-items:center;gap:12px}.colorbar-inner.single-profile{grid-template-columns:1fr}.profile label{display:block;font-size:11px;color:#7d7591;font-weight:900;margin:0 0 4px 3px}.profile select{width:100%;border:1px solid var(--line);background:#fff;border-radius:13px;padding:9px 12px;color:var(--ink);font-weight:900}
 .action-side{min-width:0}.hint{font-size:12px;color:#756d88;font-weight:800;margin:0 0 6px}.page-actions{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}.color-page{border:0;border-radius:14px;background:linear-gradient(135deg,var(--violet),var(--pink));color:#fff;padding:11px 16px;font-weight:900;white-space:nowrap;cursor:pointer;box-shadow:0 7px 17px rgba(117,105,212,.22)}.color-page.resume{background:linear-gradient(135deg,#389f8c,#67c6b3)}.color-page.done{background:linear-gradient(135deg,#4e8b7d,#78bba9)}.empty-action{padding:10px 0;color:#6d6581;font-weight:900}.child-empty{color:#a14668}.child-empty a{color:#6f5dc5}
-@media(max-width:650px){.topbar{min-height:58px;padding-left:9px;padding-right:9px}.back{width:38px;height:38px}.heading strong{font-size:17px}.badge{font-size:10px;padding:7px 8px}.colorbar{padding:8px 9px calc(8px + env(safe-area-inset-bottom))}.colorbar-inner{grid-template-columns:1fr;gap:7px}.profile{display:flex;align-items:center;gap:8px}.profile label{white-space:nowrap;margin:0}.profile select{padding:7px 10px}.hint{display:none}.color-page{padding:10px 13px;font-size:13px}}
+@media(max-width:650px){.topbar{min-height:58px;padding-left:9px;padding-right:9px}.back{width:38px;height:38px}.heading strong{font-size:17px}.badge{font-size:10px;padding:7px 8px}.colorbar{padding:8px 9px calc(8px + env(safe-area-inset-bottom))}.colorbar-inner{grid-template-columns:1fr;gap:7px}.profile{display:flex;align-items:center;gap:8px}.profile label{white-space:nowrap;margin:0}.profile select{padding:7px 10px}.hint{font-size:11px;margin-bottom:5px}.page-actions{overflow:visible;flex-wrap:wrap}.color-page{width:100%;min-height:44px;padding:10px 13px;font-size:13px}}
 .direct-resume-screen{display:none}
 html.direct-resume body{background:#17143e}
 html.direct-resume body>.topbar,
@@ -208,7 +209,11 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
 
   frame.addEventListener("load",()=>{
     loading.hidden=true;
+    document.body.classList.add("book-ready");
     try{
+      const responsiveStyle=frame.contentDocument.createElement("style");
+      responsiveStyle.textContent="html,body{width:100%;max-width:100%;overflow-x:hidden} @media(max-width:650px){header{min-width:0} main{min-width:0} figure{max-width:100%}}";
+      frame.contentDocument.head.appendChild(responsiveStyle);
       const doc=frame.contentDocument;
       const observer=new MutationObserver(scheduleRefresh);
       observer.observe(doc.body,{subtree:true,childList:true,attributes:true,attributeFilter:["src","style","class","value"]});

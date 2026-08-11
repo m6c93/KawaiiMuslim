@@ -55,8 +55,9 @@
             <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:38px; color:#232A52; margin:14px 0 2px;" id="familyPrice">4,99€/mois</p>
             <p style="color:#6a6480; margin:0;" id="familyBreakdown">1 parent + 1 enfant inclus</p>
           </div>
-          <p style="color:#6a6480; line-height:1.6; margin:0 0 18px;">Choisis une offre pour <strong style="color:#E27FAE;">1, 2 ou 3 enfants</strong>. Tu peux passer à l’offre supérieure plus tard.</p>
-          <a class="primary-button pink" id="subscriptionAction" href="Support.dc.html?category=abonnement&children=1" style="display:block; text-align:center; text-decoration:none;">Choisir mon abonnement</a>
+          <p style="color:#5f5975; line-height:1.6; margin:0 0 8px;">Choisis une offre pour <strong style="color:#b95383;">1, 2 ou 3 enfants</strong>. Tu peux passer à l’offre supérieure plus tard.</p>
+          <p style="color:#7a748d;font-size:12px;line-height:1.5;margin:0 0 18px;">Le paiement en ligne arrive bientôt. Pour l’instant, l’équipe répond personnellement à ta demande.</p>
+          <a class="primary-button pink" id="subscriptionAction" href="Support.dc.html?category=abonnement&children=1" style="display:block; text-align:center; text-decoration:none;">Contacter l’équipe pour m’abonner</a>
         </section>
 
         <section class="dash-card">
@@ -145,7 +146,7 @@
         ? `1 enfant inclus + ${extraChildren} enfant${extraChildren > 1 ? "s" : ""} supplémentaire${extraChildren > 1 ? "s" : ""}`
         : "1 parent + 1 enfant inclus";
       document.getElementById("subscriptionStatus").textContent = subscribed ? "✓ Abonnement actif" : "7 jours gratuits";
-      document.getElementById("subscriptionAction").textContent = subscribed ? "Gérer mon abonnement" : "Choisir mon abonnement";
+      document.getElementById("subscriptionAction").textContent = subscribed ? "Contacter l’équipe pour gérer mon abonnement" : "Contacter l’équipe pour m’abonner";
       document.getElementById("subscriptionAction").href = `Support.dc.html?category=abonnement&children=${billedChildren}`;
       const childSubmitButton = document.querySelector("#childForm button[type='submit']");
       const childLimitReached = context.children.length >= 3;

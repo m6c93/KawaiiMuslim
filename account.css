@@ -27,6 +27,7 @@ button, input, select { font: inherit; }
 button { border: 0; }
 a { color: inherit; text-decoration: none; }
 [hidden] { display: none !important; }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
 
 .account-shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
 .account-nav {
@@ -50,7 +51,7 @@ a { color: inherit; text-decoration: none; }
 .nav-links { display: flex; align-items: center; gap: 12px; }
 .nav-link, .ghost-button {
   cursor: pointer;
-  min-height: 40px;
+  min-height: 44px;
   padding: 9px 15px;
   color: #626482;
   font-size: 12px;
@@ -101,7 +102,7 @@ a { color: inherit; text-decoration: none; }
 .auth-panel { display: flex; align-items: center; justify-content: center; padding: clamp(28px, 5vw, 62px); }
 .auth-form { width: min(430px, 100%); }
 .auth-form h2, .page-title { margin: 0; font-family: "Baloo 2", cursive; font-size: clamp(29px, 4vw, 38px); line-height: 1.08; }
-.form-subtitle { margin: 7px 0 27px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.form-subtitle { margin: 7px 0 27px; color: #656780; font-size: 13px; line-height: 1.5; }
 .form-subtitle a { color: var(--mint-dark); font-weight: 900; }
 .field-label { display: block; margin: 0 0 7px; color: #5a5c7b; font-size: 12px; font-weight: 900; }
 .field-input, .field-select {
@@ -138,7 +139,7 @@ a { color: inherit; text-decoration: none; }
 .primary-button:disabled { cursor: wait; opacity: .65; }
 .form-message { min-height: 19px; margin: 13px 0 0; color: #b04f72; font-size: 12px; font-weight: 800; text-align: center; line-height: 1.5; }
 .form-message.success { color: var(--mint-dark); }
-.privacy-note { margin: 17px 0 0; color: #a6a3b4; font-size: 10px; line-height: 1.5; text-align: center; }
+.privacy-note { margin: 17px 0 0; color: #777487; font-size: 11px; line-height: 1.5; text-align: center; }
 
 .dashboard { padding: 42px 0 70px; }
 .page-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
@@ -192,6 +193,14 @@ a { color: inherit; text-decoration: none; }
 .mode-card .profile-avatar { margin: 0 auto 12px; width: 62px; height: 62px; font-size: 30px; border-radius: 20px; }
 .mode-card strong { display: block; font-family: "Baloo 2", cursive; font-size: 18px; }
 .mode-card small { color: var(--muted); }
+.team-zone { display:grid; grid-template-columns:minmax(0,1fr) minmax(260px,360px); gap:22px; align-items:center; margin-top:34px; padding:24px; border:1px solid #d9dced; border-radius:25px; background:linear-gradient(145deg,#f1f3fb,#fff); }
+.team-zone-copy h2 { margin:9px 0 4px; font-family:"Baloo 2",cursive; font-size:22px; }
+.team-zone-copy p { max-width:580px; margin:0; color:#666985; line-height:1.55; }
+.team-badge { color:#3f4a8a; background:#e9ecfb; }
+.team-grid { display:grid; }
+.team-card { min-height:145px; border-color:#d8dced; background:#f9faff; }
+.team-card:hover { border-color:#8d96c9; box-shadow:0 15px 30px rgba(51,65,154,.12); }
+.team-card .profile-avatar { background:#e9ecfb; }
 .admin-hero { color: #fff; background: linear-gradient(145deg,#33419a,#20285e); }
 .admin-hero h2 { color: #fff; }
 .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
@@ -207,6 +216,7 @@ a { color: inherit; text-decoration: none; }
   .mode-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .child-form { grid-template-columns: 1fr 1fr; }
   .child-form .primary-button { grid-column: 1 / -1; }
+  .team-zone { grid-template-columns:1fr; }
 }
 @media (max-width: 560px) {
   .account-shell { width: min(100% - 22px, 1180px); }

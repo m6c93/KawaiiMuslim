@@ -36,6 +36,14 @@
       <div class="mode-grid" id="profiles">
         <p class="loading">Chargement de ta famille…</p>
       </div>
+      <section class="team-zone" id="teamZone" hidden>
+        <div class="team-zone-copy">
+          <span class="badge team-badge">Accès professionnel</span>
+          <h2>Espace équipe</h2>
+          <p>Administration, support et contenus. Cet espace est séparé des profils de la famille.</p>
+        </div>
+        <div class="team-grid" id="teamProfile"></div>
+      </section>
       <p class="form-message" id="message"></p>
     </main>
   </div>
@@ -45,6 +53,8 @@
   <script src="./km-auth.js"></script>
   <script>
     const profiles = document.getElementById("profiles");
+    const teamZone = document.getElementById("teamZone");
+    const teamProfile = document.getElementById("teamProfile");
     const message = document.getElementById("message");
 
     const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
@@ -83,13 +93,16 @@
           <strong>${escapeHtml(card.name)}</strong>
           <small>${escapeHtml(card.label)}</small>
         </button>
-      `).join("") + (["admin", "support", "content_admin"].includes(context.profile.role) ? `
-        <button class="mode-card" type="button" data-admin="true">
+      `).join("");
+      const hasTeamAccess = ["admin", "support", "content_admin"].includes(context.profile.role);
+      teamZone.hidden = !hasTeamAccess;
+      teamProfile.innerHTML = hasTeamAccess ? `
+        <button class="mode-card team-card" type="button" data-admin="true">
           <span class="profile-avatar">🛡️</span>
-          <strong>Espace équipe</strong>
+          <strong>Ouvrir l’administration</strong>
           <small>${context.profile.role === "admin" ? "Super-administration" : context.profile.role === "support" ? "Support client" : "Gestion des contenus"}</small>
         </button>
-      ` : "");
+      ` : "";
     }).catch(error => {
       message.textContent = KMAuth.friendlyError(error);
       profiles.innerHTML = "";
@@ -108,6 +121,10 @@
         name: card.dataset.name,
         avatar: card.dataset.avatar
       });
+    });
+
+    teamProfile.addEventListener("click", event => {
+      if (event.target.closest("[data-admin]")) window.location.href = "Admin.dc.html";
     });
 
     document.getElementById("logout").addEventListener("click", async () => {

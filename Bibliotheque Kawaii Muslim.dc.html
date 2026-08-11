@@ -206,25 +206,25 @@
     <div class="km-moon" style="position:absolute; top:34px; right:46px; width:60px; height:60px; border-radius:50%; pointer-events:none; background:radial-gradient(circle at 38% 35%, #FFF6D6, #FAE08C 60%, #EFC65C); box-shadow:0 0 55px 12px rgba(250,224,140,.34), inset -8px -6px 0 rgba(214,160,60,.18);"></div>
 
     <!-- ===== TOPBAR ===== -->
-    <div style="position:relative; z-index:3; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 30px;">
-      <div style="display:flex; align-items:center; gap:12px;">
+    <div class="km-library-topbar" style="position:relative; z-index:3; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 30px;">
+      <div class="km-brand-lockup" style="display:flex; align-items:center; gap:12px;">
         <div style="width:46px; height:46px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 0 0 2px rgba(255,255,255,.22);"><img src="brand/assets/mascot-nour.png" alt="Mimi" style="width:56px; height:auto; margin-top:4px;" /></div>
         <div style="line-height:1;">
           <p style="font-family:'Baloo 2',cursive; font-weight:700; font-size:18px; margin:0; letter-spacing:.5px; white-space:nowrap;">Kawaii Muslim</p>
           <p style="font-weight:700; font-size:10px; letter-spacing:2.5px; color:#CFD0E8; text-transform:uppercase; margin:3px 0 0;">Bibliothèque</p>
         </div>
       </div>
-      <div style="flex:0 1 380px; display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); border-radius:30px; padding:11px 20px;">
+      <label class="km-library-search" for="librarySearch" style="flex:0 1 380px; display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); border-radius:30px; padding:11px 20px;">
         <span style="opacity:.7; font-size:15px;">🔍</span>
-        <span style="font-size:14px; color:rgba(255,255,255,.55);">Cherche un livre, une histoire…</span>
-      </div>
+        <input id="librarySearch" type="search" autocomplete="off" placeholder="Cherche un livre, une histoire…" aria-label="Rechercher dans la bibliothèque" style="width:100%;border:0;outline:0;background:transparent;color:#fff;font-size:14px;" />
+      </label>
       <sc-if value="{{ subscribed }}" hint-placeholder-val="{{ false }}">
-        <span style="display:flex; align-items:center; gap:7px; background:linear-gradient(150deg,#F0B53F,#D8932A); color:#fff; font-weight:700; font-size:12.5px; padding:9px 18px; border-radius:24px; white-space:nowrap; box-shadow:0 6px 16px rgba(216,147,42,.34);">✨ Abonné Premium</span>
+        <span class="km-premium-badge" style="display:flex; align-items:center; gap:7px; background:linear-gradient(150deg,#F0B53F,#D8932A); color:#fff; font-weight:700; font-size:12.5px; padding:9px 18px; border-radius:24px; white-space:nowrap; box-shadow:0 6px 16px rgba(216,147,42,.34);">✨ Abonné Premium</span>
       </sc-if>
       <sc-if value="{{ notSubscribed }}" hint-placeholder-val="{{ true }}">
         <span onClick="{{ openPaywall }}" style="cursor:pointer; display:flex; align-items:center; gap:7px; background:linear-gradient(150deg,#F0AECA,#E27FAE); color:#fff; font-family:'Baloo 2',cursive; font-weight:700; font-size:13px; padding:9px 20px; border-radius:24px; white-space:nowrap; box-shadow:0 8px 18px rgba(226,127,174,.36);">🔓 S'abonner</span>
       </sc-if>
-      <div onClick="{{ switchProfile }}" style="display:flex; align-items:center; gap:11px; cursor:pointer; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:30px; padding:7px 9px 7px 16px;">
+      <div class="km-profile-switch" role="button" tabindex="0" aria-label="Changer de profil" onClick="{{ switchProfile }}" style="display:flex; align-items:center; gap:11px; cursor:pointer; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:30px; padding:7px 9px 7px 16px;">
         <div style="text-align:right; line-height:1.1;"><p style="font-size:13px; font-weight:700; margin:0;">{{ profileName }}</p><p style="font-size:10px; color:#CFD0E8; margin:1px 0 0;">changer</p></div>
         <div style="width:38px; height:38px; border-radius:50%; background:linear-gradient(150deg,#F0AECA,#E27FAE); display:flex; align-items:center; justify-content:center; font-size:18px;">{{ profileEmoji }}</div>
       </div>
@@ -295,8 +295,8 @@
       <div data-km-reveal style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
         <span class="km-filter-chip" style="background:#E27FAE; color:#fff; font-weight:700; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Tous les livres</span>
         <a class="km-filter-chip" href="Safe%20Place.dc.html" style="text-decoration:none; cursor:pointer; background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Safe Place</a>
-        <span class="km-filter-chip" style="background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Prières</span>
-        <span class="km-filter-chip" style="background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Ramadan</span>
+        <span class="km-filter-chip km-coming-chip" aria-label="Prières, bientôt disponible" style="background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Prières · bientôt</span>
+        <span class="km-filter-chip km-coming-chip" aria-label="Ramadan, bientôt disponible" style="background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Ramadan · bientôt</span>
         <a class="km-filter-chip" href="Boutique.dc.html" style="text-decoration:none;cursor:pointer;background:linear-gradient(150deg,#F0B53F,#D8932A);color:#fff;font-weight:800;font-size:13px;padding:9px 20px;border-radius:22px;white-space:nowrap;box-shadow:0 7px 18px rgba(216,147,42,.28);">⭐ Boutique</a>
       </div>
 
@@ -624,6 +624,19 @@ class Component extends DCLogic {
       if (cover) cover.classList.add('km-opening');
       else document.body.classList.add('km-page-leaving');
       window.setTimeout(() => { window.location.href = destination; }, cover ? 260 : 180);
+    });
+    document.addEventListener('input', (event) => {
+      if (event.target.id !== 'librarySearch') return;
+      const query = event.target.value.trim().toLocaleLowerCase('fr');
+      document.querySelectorAll('.km-book-item').forEach((item) => {
+        item.hidden = Boolean(query) && !item.textContent.toLocaleLowerCase('fr').includes(query);
+      });
+    });
+    document.addEventListener('keydown', (event) => {
+      const switcher = event.target.closest('.km-profile-switch');
+      if (!switcher || !['Enter',' '].includes(event.key)) return;
+      event.preventDefault();
+      window.location.href = 'Profils.dc.html';
     });
   })();
 </script>
