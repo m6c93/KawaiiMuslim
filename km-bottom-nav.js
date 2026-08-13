@@ -2,8 +2,9 @@
   "use strict";
 
   var transitionKey = "km-page-transition";
+  var shellChild = new URLSearchParams(window.location.search).get("kmShell") === "1";
   var incomingTransition = sessionStorage.getItem(transitionKey);
-  if (incomingTransition) {
+  if (incomingTransition && !shellChild) {
     document.documentElement.classList.add("km-page-entering");
     sessionStorage.removeItem(transitionKey);
   }
@@ -17,6 +18,10 @@
   ];
 
   function mount() {
+    if (shellChild) {
+      document.body.classList.add("km-shell-child");
+      return;
+    }
     var currentKey = document.body.getAttribute("data-km-section") || "today";
     var activeIndex = Math.max(0, items.findIndex(function (item) { return item.key === currentKey; }));
     var previousIndex = Number(sessionStorage.getItem("km-nav-index"));
@@ -54,13 +59,39 @@
       event.preventDefault();
       nav.classList.add("is-moving");
       nav.style.setProperty("--km-nav-index", nextIndex);
+      nav.querySelectorAll("a[data-km-nav-index]").forEach(function (itemLink) {
+        if (Number(itemLink.getAttribute("data-km-nav-index")) === nextIndex) itemLink.setAttribute("aria-current", "page");
+        else itemLink.removeAttribute("aria-current");
+      });
       sessionStorage.setItem("km-nav-index", String(nextIndex));
-      sessionStorage.setItem(transitionKey, "1");
-      document.documentElement.classList.add("km-page-leaving");
-      document.body.classList.add("km-nav-leaving");
       var href = link.href;
-      var delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 390;
-      window.setTimeout(function () { window.location.href = href; }, delay);
+      var target = new URL(href, window.location.href);
+      target.searchParams.set("kmShell", "1");
+      var oldFrame = document.querySelector(".km-page-frame.is-ready");
+      if (oldFrame) oldFrame.classList.add("is-old");
+      var frame = document.createElement("iframe");
+      frame.className = "km-page-frame";
+      frame.title = items[nextIndex].label;
+      frame.src = target.href;
+      frame.addEventListener("load", function () {
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            frame.classList.add("is-ready");
+            nav.classList.remove("is-moving");
+            window.setTimeout(function () {
+              if (oldFrame) oldFrame.remove();
+            }, 520);
+          });
+        });
+      }, { once: true });
+      document.body.appendChild(frame);
+      activeIndex = nextIndex;
+      var cleanTarget = new URL(href, window.location.href);
+      window.history.pushState({ kmSection: items[nextIndex].key }, "", cleanTarget.pathname + cleanTarget.search + cleanTarget.hash);
+    });
+
+    window.addEventListener("popstate", function () {
+      window.location.reload();
     });
   }
 
