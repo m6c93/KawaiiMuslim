@@ -40,6 +40,15 @@
     }).join("");
     document.body.appendChild(nav);
 
+    items.forEach(function (item, index) {
+      if (index === activeIndex) return;
+      var preload = document.createElement("link");
+      preload.rel = "prefetch";
+      preload.as = "document";
+      preload.href = item.href + (item.href.indexOf("?") === -1 ? "?" : "&") + "kmShell=1";
+      document.head.appendChild(preload);
+    });
+
     window.setTimeout(function () {
       document.documentElement.classList.remove("km-page-entering");
     }, 620);
