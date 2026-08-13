@@ -78,6 +78,14 @@ body.km-shell-child {
   padding-bottom: 20px !important;
 }
 
+/* Le profil actif est déjà connu dans la navigation principale. */
+body.km-shell-child .km-profile-gate {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 @keyframes km-veil-out {
   to { opacity: 0; }
 }
