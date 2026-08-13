@@ -19,6 +19,12 @@
     @media(hover:hover){.book,.primary,.row-action,.outline,.bottom-nav a{transition:transform .2s ease,filter .2s ease}.book:hover,.primary:hover,.row-action:hover,.outline:hover,.bottom-nav a:hover{transform:translateY(-3px);filter:brightness(1.06)}}
     @media(max-width:820px){.shell{padding:20px 20px 108px}.topbar{grid-template-columns:1fr auto}.topbar h1{grid-column:1/-1;grid-row:2}.hero{grid-template-columns:1fr}.hero-art{min-height:300px}.hero-copy{padding:30px}.books{grid-template-columns:repeat(2,1fr)}.resume-row{grid-template-columns:112px 1fr}.row-action{grid-column:2;justify-self:start;margin:0 18px 18px}.bottom-nav span:last-child{font-size:11px}}
     @media(max-width:560px){.shell{padding:14px 14px 104px}.brand img{width:42px;height:42px}.brand strong{font-size:18px}.brand small{display:none}.profile{padding:5px}.profile>span:last-child{display:none}.topbar h1{font-size:36px}.hero{border-radius:22px}.hero-art{min-height:225px}.hero-copy{padding:24px}.hero h2{font-size:38px}.section-head{align-items:stretch;flex-direction:column}.outline{width:100%}.library{padding:17px}.books{gap:10px}.book{border-radius:15px}.resume-row{grid-template-columns:88px 1fr;padding-right:0}.thumb{min-height:102px}.resume-copy{padding:14px}.resume-copy h3{font-size:20px}.row-action{grid-column:1/-1;width:calc(100% - 28px);min-width:0;margin:0 14px 14px}.calendar{min-height:100px}.calendar .icon{font-size:46px}.bottom-nav{bottom:8px;width:calc(100% - 14px);padding:7px 4px;border-radius:20px}.bottom-nav a{min-height:58px}.bottom-nav span:last-child{font-size:10px}.bottom-nav .icon{font-size:18px}}
+    /* Couvertures épurées : le livre seul, sans carte autour */
+    .books{gap:22px}
+    .book{min-width:0;display:flex;flex-direction:column;gap:10px;padding:0;overflow:visible;border:0;border-radius:0;background:transparent;box-shadow:none}
+    .book img{position:static;width:100%;aspect-ratio:1/1;display:block;object-fit:cover;border:2px solid #111;border-radius:18px;background:transparent;box-shadow:0 10px 22px #05071838}
+    .book:after{display:none}
+    .book strong{position:static;min-height:38px;display:grid;place-items:start center;padding:0 4px;color:#fff;text-align:center;font:800 clamp(14px,1.8vw,18px)/1.12 "Baloo 2";text-shadow:0 2px 8px #050718}
   </style>
 </head>
 <body data-km-section="today">
