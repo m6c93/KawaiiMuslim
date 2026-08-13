@@ -80,7 +80,7 @@
             nav.classList.remove("is-moving");
             window.setTimeout(function () {
               if (oldFrame) oldFrame.remove();
-            }, 520);
+            }, 280);
           });
         });
       }, { once: true });
