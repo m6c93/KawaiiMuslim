@@ -5,6 +5,57 @@
   --km-nav-bottom: max(10px, env(safe-area-inset-bottom));
 }
 
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: km-page-old .28s cubic-bezier(.4, 0, 1, 1) both;
+}
+
+::view-transition-new(root) {
+  animation: km-page-new .42s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes km-page-old {
+  to { opacity: 0; transform: scale(.992); filter: blur(2px); }
+}
+
+@keyframes km-page-new {
+  from { opacity: 0; transform: translateY(9px) scale(.995); filter: blur(3px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+html::after {
+  content: "";
+  position: fixed;
+  z-index: 999;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 16% 22%, rgba(255,255,255,.92) 0 1px, transparent 2px),
+    radial-gradient(circle at 33% 68%, rgba(255,231,167,.9) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 67% 28%, rgba(255,255,255,.88) 0 1px, transparent 2px),
+    radial-gradient(circle at 86% 73%, rgba(255,231,167,.88) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 50% 45%, rgba(113, 95, 184, .38), transparent 42%),
+    linear-gradient(145deg, #24275f, #171b48);
+  transition: opacity .28s ease;
+}
+
+html.km-page-leaving::after,
+html.km-page-entering::after {
+  opacity: 1;
+}
+
+html.km-page-entering::after {
+  animation: km-veil-out .44s .06s cubic-bezier(.22, 1, .36, 1) forwards;
+}
+
+@keyframes km-veil-out {
+  to { opacity: 0; }
+}
+
 body.km-has-app-nav {
   padding-bottom: calc(var(--km-nav-height) + var(--km-nav-bottom) + 24px) !important;
 }
@@ -97,8 +148,8 @@ body.km-has-app-nav {
 
 body.km-nav-leaving > :not(.km-app-nav) {
   transition: opacity .25s ease, transform .25s ease;
-  opacity: .88;
-  transform: translateY(3px);
+  opacity: .58;
+  transform: translateY(5px) scale(.997);
 }
 
 @media (hover: hover) {
@@ -142,7 +193,9 @@ body.km-nav-leaving > :not(.km-app-nav) {
   .km-nav-indicator,
   .km-app-nav a,
   .km-app-nav .material-symbols-rounded,
-  body.km-nav-leaving > :not(.km-app-nav) {
+  body.km-nav-leaving > :not(.km-app-nav),
+  html::after {
     transition: none !important;
+    animation: none !important;
   }
 }

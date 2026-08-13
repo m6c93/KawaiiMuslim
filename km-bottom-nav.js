@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  var transitionKey = "km-page-transition";
+  var incomingTransition = sessionStorage.getItem(transitionKey);
+  if (incomingTransition) {
+    document.documentElement.classList.add("km-page-entering");
+    sessionStorage.removeItem(transitionKey);
+  }
+
   var items = [
     { key: "today", label: "Aujourd’hui", icon: "home", href: "Aujourd%27hui.dc.html" },
     { key: "library", label: "Bibliothèque", icon: "menu_book", href: "Bibliotheque%20Kawaii%20Muslim.dc.html" },
@@ -28,6 +35,10 @@
     }).join("");
     document.body.appendChild(nav);
 
+    window.setTimeout(function () {
+      document.documentElement.classList.remove("km-page-entering");
+    }, 620);
+
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         nav.style.setProperty("--km-nav-index", activeIndex);
@@ -44,9 +55,11 @@
       nav.classList.add("is-moving");
       nav.style.setProperty("--km-nav-index", nextIndex);
       sessionStorage.setItem("km-nav-index", String(nextIndex));
+      sessionStorage.setItem(transitionKey, "1");
+      document.documentElement.classList.add("km-page-leaving");
       document.body.classList.add("km-nav-leaving");
       var href = link.href;
-      var delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 360;
+      var delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 390;
       window.setTimeout(function () { window.location.href = href; }, delay);
     });
   }

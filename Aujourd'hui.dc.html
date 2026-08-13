@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,600,1,0&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./km-bottom-nav.css">
+  <script src="./km-bottom-nav.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
   <script src="./km-auth.js"></script>
@@ -30,7 +31,6 @@
       <section class="resume-list"><article class="resume-row"><img class="thumb" src="https://www.kawaiimuslimworld.com/brand/assets/scene-tawakkul.png" alt=""><div class="resume-copy"><small>À reprendre</small><h3>Tawakkul · page 8 sur 20</h3><div class="progress"><span></span></div></div><a class="row-action" href="books/tawakkul.html">Continuer <span class="material-symbols-rounded icon">arrow_forward</span></a></article><article class="resume-row"><img class="thumb" src="https://www.kawaiimuslimworld.com/brand/assets/coloring-armure-lumiere.png" alt=""><div class="resume-copy"><small>Ton coloriage</small><h3>Aya et l’Armure de Lumière</h3></div><a class="row-action" href="LivreColoriage.dc.html?book=aya-armure-de-lumiere&title=Aya%20et%20l%27Armure%20de%20Lumi%C3%A8re">Reprendre <span class="material-symbols-rounded icon">arrow_forward</span></a></article><article class="resume-row"><div class="calendar"><span class="material-symbols-rounded icon">calendar_month</span></div><div class="resume-copy"><small>Vendredi</small><h3>Notre moment avec maman</h3></div><a class="row-action gold" href="Safe%20Place.dc.html">Découvrir <span class="material-symbols-rounded icon">arrow_forward</span></a></article></section>
     </main>
   </div>
-  <script src="./km-bottom-nav.js"></script>
   <script>
     (async()=>{try{if(!window.KMAuth)return location.replace("Connexion.dc.html");const context=await KMAuth.getContext();if(!context)return location.replace("Connexion.dc.html");const active=KMAuth.validateActiveProfile(context);document.getElementById("profileName").textContent=active.name||(active.type==="child"?"Mon enfant":"Maman");document.getElementById("avatar").textContent=active.avatar||(active.type==="child"?"🐤":"🌸");const child=active.type==="child"?active:context.children[0];if(child){const shop=await KMAuth.getStarShop(child.id).catch(()=>({balance:0}));const balance=Number(shop&&shop.balance)||0;document.getElementById("stars").textContent=balance+" étoile"+(balance>1?"s":"")}else document.getElementById("stars").textContent="0 étoile";document.getElementById("loading").classList.add("hidden")}catch(error){location.replace("Connexion.dc.html")}})();
   </script>
