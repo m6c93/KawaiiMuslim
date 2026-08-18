@@ -106,10 +106,9 @@
   .km-book-cover img {
     width:100% !important;
     height:100% !important;
-    object-fit:cover !important;
+    object-fit:contain !important;
     object-position:center;
   }
-  .km-book-cover img.km-wide-cover { object-position:right center; }
   .km-read-label { animation:kmSoftPulse 4.8s ease-in-out infinite; transform-origin:left center; }
   .km-book-cover.km-opening { animation:kmBookOpen .28s ease forwards !important; }
   .km-page-leaving { opacity:.78; transform:translateY(5px); transition:opacity .2s ease, transform .2s ease; }
@@ -320,7 +319,7 @@
           <div class="km-book-item" data-km-reveal style="position:relative;">
             <div class="km-book-cover" style="position:relative; border-radius:16px; overflow:hidden; background:#fff; box-shadow:0 16px 34px rgba(0,0,0,.4);">
               <sc-if value="{{ book.coverImg }}" hint-placeholder-val="{{ false }}">
-                <img src="{{ book.coverImg }}" alt="{{ book.title }}" onLoad="{{ fitBookCover }}" style="display:block;" />
+                <img src="{{ book.coverImg }}" alt="{{ book.title }}" style="display:block;" />
               </sc-if>
               <sc-if value="{{ book.noCover }}" hint-placeholder-val="{{ true }}">
                 <div style="width:100%; height:100%; background:{{ book.grad }}; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
@@ -609,11 +608,6 @@ class Component extends DCLogic {
       starChildName: this.state.starChildName,
       books,
       colorings,
-      fitBookCover: (event) => {
-        const image = event?.currentTarget || event?.target;
-        if (!image) return;
-        image.classList.toggle('km-wide-cover', image.naturalWidth > image.naturalHeight * 1.15);
-      },
       chooseEnfant: () => { window.location.href = 'Profils.dc.html'; },
       chooseMaman: () => { window.location.href = 'Profils.dc.html'; },
       switchProfile: () => { window.location.href = 'Profils.dc.html'; },
