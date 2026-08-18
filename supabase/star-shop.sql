@@ -141,6 +141,8 @@ declare
   current_owner uuid := auth.uid();
   base_points integer;
   earned_today integer;
+  prayer_count integer;
+  prayer_day text;
   points integer;
   inserted_id uuid;
   new_balance integer;
@@ -158,6 +160,7 @@ begin
     when 'invocation_learned' then 3
     when 'invocation_review' then 1
     when 'weekly_discovery' then 2
+    when 'prayer_complete' then 2
     else 0
   end;
 
@@ -176,13 +179,26 @@ begin
     return jsonb_build_object('awarded', 0, 'balance', coalesce(new_balance, 0), 'reason', 'already_awarded');
   end if;
 
-  select coalesce(sum(amount), 0) into earned_today
-  from public.star_transactions
-  where child_profile_id = target_child
-    and amount > 0
-    and created_at >= date_trunc('day', now());
-
-  points := greatest(0, least(base_points, 5 - earned_today));
+  if event_type = 'prayer_complete' then
+    if source_key !~ '^prayer:[0-9]{4}-[0-9]{2}-[0-9]{2}:(Fajr|Dhuhr|Asr|Maghrib|Isha)$' then
+      raise exception 'Récompense de prière invalide';
+    end if;
+    prayer_day := split_part(source_key, ':', 2);
+    select count(*) into prayer_count
+    from public.star_transactions
+    where child_profile_id = target_child
+      and star_transactions.event_type = 'prayer_complete'
+      and star_transactions.source_key like 'prayer:' || prayer_day || ':%';
+    points := case when prayer_count < 5 then 2 else 0 end;
+  else
+    select coalesce(sum(amount), 0) into earned_today
+    from public.star_transactions
+    where child_profile_id = target_child
+      and amount > 0
+      and star_transactions.event_type <> 'prayer_complete'
+      and created_at >= date_trunc('day', now());
+    points := greatest(0, least(base_points, 5 - earned_today));
+  end if;
 
   insert into public.child_star_wallets(child_profile_id, owner_id)
   values (target_child, current_owner)
