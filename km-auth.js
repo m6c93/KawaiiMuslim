@@ -3,7 +3,9 @@
   const page = decodeURIComponent(window.location.pathname.split("/").pop() || "index.html").toLowerCase();
   const teamPages = new Set(["index.html", "connexion.dc.html", "mfa.dc.html", "admin.dc.html"]);
   const teamPreview = localStorage.getItem("km-site-preview") === "staff";
-  if (!teamPages.has(page) && !teamPreview) {
+  const localDesignPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
+    && new URLSearchParams(window.location.search).get("preview") === "1";
+  if (!teamPages.has(page) && !teamPreview && !localDesignPreview) {
     window.location.replace("/");
   }
 })();

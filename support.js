@@ -3,7 +3,8 @@
   const page = decodeURIComponent(window.location.pathname.split("/").pop() || "index.html").toLowerCase();
   const teamPages = new Set(["index.html", "connexion.dc.html", "mfa.dc.html", "admin.dc.html"]);
   const teamPreview = localStorage.getItem("km-site-preview") === "staff";
-  if (!teamPages.has(page) && !teamPreview) {
+  const localPreview = location.hostname === "127.0.0.1" || location.hostname === "localhost";
+  if (!teamPages.has(page) && !teamPreview && !localPreview) {
     window.location.replace("/");
   }
 })();

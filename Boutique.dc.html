@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./responsive.css">
+  <link rel="stylesheet" href="./responsive.css?v=tablet-20260818">
   <style>
     :root{--night:#211e56;--night2:#373071;--paper:#fffafd;--ink:#35325f;--muted:#756f91;--pink:#ed9bc0;--gold:#f3cb76;--mint:#75c7b5;--line:#ece5f3}
     *{box-sizing:border-box}html{min-height:100%;background:#f7f1fb}body{margin:0;min-height:100%;font-family:"Nunito",sans-serif;color:var(--ink);background:linear-gradient(180deg,var(--night) 0 370px,#f7f1fb 370px)}
@@ -27,8 +27,8 @@
     dialog{border:0;border-radius:24px;padding:0;max-width:min(92vw,480px);width:100%;box-shadow:0 24px 80px rgba(21,15,54,.35);color:var(--ink)}dialog::backdrop{background:rgba(18,13,48,.62);backdrop-filter:blur(3px)}.modal{padding:24px}.modal h2{font:800 27px/1.1 "Baloo 2";margin:0 0 10px}.modal p{color:var(--muted);line-height:1.5}.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}.primary{border:0;border-radius:13px;background:var(--night);color:#fff;padding:11px 15px;font-weight:900;cursor:pointer}.history{max-height:52vh;overflow:auto;margin-top:14px}.history-row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.history-row b.plus{color:#2d8b76}.history-row b.minus{color:#b14e72}.history-row small{display:block;color:var(--muted);margin-top:3px}
     @media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){body{background:linear-gradient(180deg,var(--night) 0 430px,#f7f1fb 430px)}.sky{padding-left:14px;padding-right:14px;padding-bottom:106px}.top{align-items:flex-start}.back{font-size:0}.back:before{content:"←";font-size:21px}.wallet{padding:8px 11px}.hero{padding-top:34px}.hero p{font-size:15px}.steps{gap:6px}.step{padding:11px 4px}.step b{font-size:11px}.content{padding:0 10px 45px;margin-top:-70px}.panel{border-radius:22px;padding:15px}.controls{display:block}.profile select{width:100%}.actions{margin-top:10px}.soft-btn{flex:1;padding:10px 7px;font-size:12px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.visual{height:102px}.card-body{padding:11px}.card h2{font-size:17px}.card p{font-size:12px}.price{align-items:stretch;flex-direction:column}.get{width:100%}}
   </style>
-  <link rel="stylesheet" href="./km-bottom-nav.css?v=no-profile-flash-4">
-  <script src="./km-bottom-nav.js?v=no-profile-flash-4"></script>
+  <link rel="stylesheet" href="./km-bottom-nav.css?v=safe-place-label-1">
+  <script src="./km-bottom-nav.js?v=safe-place-label-1"></script>
 </head>
 <body data-km-section="shop">
   <header class="sky">
@@ -70,7 +70,7 @@
   <dialog id="historyDialog"><div class="modal"><h2>Mon historique</h2><p>Tout ce que tu as gagné et choisi.</p><div class="history" id="history"></div><div class="modal-actions"><button class="primary" data-close="historyDialog">Fermer</button></div></div></dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js"></script>
+  <script src="./km-auth.js?v=local-preview-1"></script>
   <script>
   (function(){
     var state={context:null,childId:null,data:{balance:0,items:[],transactions:[]},filter:"all",pending:null};

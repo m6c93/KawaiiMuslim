@@ -14,7 +14,7 @@
     background-color: #141a3c;
   }
 </style>
-<link rel="stylesheet" href="./responsive.css">
+<link rel="stylesheet" href="./responsive.css?v=tablet-20260818">
 <script src="./support.js"></script>
   <link rel="stylesheet" href="./km-bottom-nav.css?v=no-profile-flash-4">
   <script src="./km-bottom-nav.js?v=no-profile-flash-4"></script>
@@ -128,7 +128,7 @@
     .km-book-item:hover .km-book-cover img, .km-coloring-item:hover .km-coloring-card img { transform:scale(1.025); }
   }
 
-  @media (max-width: 820px) {
+  @media (max-width: 900px) {
     .km-reading-cover { animation-duration:7.5s; }
     .km-book-cover:active, .km-coloring-card:active { transform:scale(.975); }
     .km-motion-ready [data-km-reveal] { animation-duration:.5s; }
@@ -179,7 +179,7 @@
     }
     .km-coloring-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:15px; }
   }
-  @media (min-width: 821px) and (max-width: 1100px) {
+  @media (min-width: 901px) and (max-width: 1100px) {
     .km-coloring-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
   }
 </style>
@@ -449,6 +449,22 @@ class Component extends DCLogic {
   state = { profile: null, profileName: '', profileEmoji: '', subscribed: false, showPaywall: false, catalog: null, announcement: '', requestedChildren: 1, starBalance: 0, starChildName: 'Mon enfant' };
 
   componentDidMount() {
+    const localDesignPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
+      && new URLSearchParams(window.location.search).get('preview') === '1';
+    if (localDesignPreview) {
+      this.setState({
+        profile: 'enfant',
+        profileName: 'Toto',
+        profileEmoji: '🐤',
+        subscribed: true,
+        catalog: null,
+        announcement: '',
+        requestedChildren: 1,
+        starBalance: 12,
+        starChildName: 'Toto',
+      });
+      return;
+    }
     if (!window.KMAuth) {
       window.location.href = 'Connexion.dc.html';
       return;

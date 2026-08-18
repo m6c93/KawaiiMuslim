@@ -94,8 +94,8 @@
       .art-copy { padding:11px; }
     }
   </style>
-  <link rel="stylesheet" href="./km-bottom-nav.css?v=no-profile-flash-4">
-  <script src="./km-bottom-nav.js?v=no-profile-flash-4"></script>
+  <link rel="stylesheet" href="./km-bottom-nav.css?v=safe-place-label-1">
+  <script src="./km-bottom-nav.js?v=safe-place-label-1"></script>
 </head>
 <body data-km-section="workshop">
   <div class="shell">
@@ -160,8 +160,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js"></script>
+  <script src="./km-auth.js?v=local-preview-1"></script>
   <script>
+    const localDesignPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
+      && new URLSearchParams(window.location.search).get("preview") === "1";
     const gallery = document.getElementById("gallery");
     const childPicker = document.getElementById("childPicker");
     const pageMessage = document.getElementById("pageMessage");
@@ -180,7 +182,9 @@
     const dateLabel = value => new Intl.DateTimeFormat("fr-FR",{day:"numeric",month:"short",year:"numeric"}).format(new Date(value));
 
     const renderChildren = () => {
-      const active = KMAuth.getActiveProfile();
+      const active = localDesignPreview
+        ? { type: "child", id: "preview-child", name: "Toto", avatar: "🐤" }
+        : KMAuth.getActiveProfile();
       const isChild = active.type === "child" && context.children.some(child => child.id === active.id);
       if (isChild) {
         selectedChildId = active.id;
@@ -251,7 +255,30 @@
         return;
       }
       gallery.innerHTML = '<p class="loading">Ouverture de la galerie…</p>';
-      artworks = await KMAuth.listArtworks(selectedChildId);
+      artworks = localDesignPreview ? [
+        {
+          id: "preview-armure",
+          child_id: "preview-child",
+          title: "Aya et l’Armure de Lumière · Page 6",
+          image_url: new URL("brand/assets/coloring-armure-lumiere.png", location.href).href,
+          source_url: "book-coloring:aya-armure-de-lumiere:page:6",
+          status: "in_progress",
+          kind: "digital",
+          updated_at: new Date().toISOString(),
+          drawing_data: { memory: { title: "Aya et l’Armure de Lumière · Page 6" } }
+        },
+        {
+          id: "preview-bubble",
+          child_id: "preview-child",
+          title: "Bubble Tea Time Hijabi · Page 3",
+          image_url: new URL("brand/assets/coloring-bubble-tea.png", location.href).href,
+          source_url: "book-coloring:bubble-tea-time-hijabi:page:3",
+          status: "completed",
+          kind: "digital",
+          updated_at: new Date(Date.now() - 86400000).toISOString(),
+          drawing_data: { memory: { title: "Bubble Tea Time Hijabi · Page 3" } }
+        }
+      ] : await KMAuth.listArtworks(selectedChildId);
       renderGallery();
     };
 
@@ -337,7 +364,12 @@
     });
 
     (async () => {
-      context = await KMAuth.getContext();
+      context = localDesignPreview
+        ? {
+            profile: { role: "user", plan: "mensuel" },
+            children: [{ id: "preview-child", name: "Toto", avatar: "🐤" }]
+          }
+        : await KMAuth.getContext();
       if (!context) return window.location.replace("Connexion.dc.html?next=%2FAtelier.dc.html");
       renderChildren();
       await loadGallery();

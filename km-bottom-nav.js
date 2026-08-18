@@ -3,6 +3,8 @@
 
   var transitionKey = "km-page-transition";
   var shellChild = new URLSearchParams(window.location.search).get("kmShell") === "1";
+  var localPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
+    && new URLSearchParams(window.location.search).get("preview") === "1";
   var incomingTransition = sessionStorage.getItem(transitionKey);
   if (incomingTransition && !shellChild) {
     document.documentElement.classList.add("km-page-entering");
@@ -13,7 +15,7 @@
     { key: "today", label: "Aujourd’hui", icon: "home", href: "Aujourd%27hui.dc.html" },
     { key: "library", label: "Bibliothèque", icon: "menu_book", href: "Bibliotheque%20Kawaii%20Muslim.dc.html" },
     { key: "workshop", label: "Atelier", icon: "brush", href: "Atelier.dc.html" },
-    { key: "invocations", label: "Invocations", icon: "prayer_times", href: "Safe%20Place.dc.html" },
+    { key: "invocations", label: "Safe Place", icon: "prayer_times", href: "Safe%20Place.dc.html" },
     { key: "shop", label: "Boutique", icon: "shopping_bag", href: "Boutique.dc.html" }
   ];
 
@@ -40,12 +42,33 @@
     }).join("");
     document.body.appendChild(nav);
 
+    function isImmersiveReaderPath(pathname) {
+      var path = decodeURIComponent(pathname || "").toLowerCase();
+      return /\/books\/[^/]+\.html$/.test(path)
+        || /\/(livre|livrecoloriage)\.dc\.html$/.test(path);
+    }
+
+    function syncImmersiveReader(frame) {
+      var active = false;
+      try {
+        active = Boolean(frame && frame.contentWindow)
+          && isImmersiveReaderPath(frame.contentWindow.location.pathname);
+      } catch (error) {
+        active = false;
+      }
+      document.body.classList.toggle("km-immersive-reader", active);
+      nav.setAttribute("aria-hidden", active ? "true" : "false");
+    }
+
     items.forEach(function (item, index) {
       if (index === activeIndex) return;
       var preload = document.createElement("link");
       preload.rel = "prefetch";
       preload.as = "document";
-      preload.href = item.href + (item.href.indexOf("?") === -1 ? "?" : "&") + "kmShell=1";
+      var preloadTarget = new URL(item.href, window.location.href);
+      preloadTarget.searchParams.set("kmShell", "1");
+      if (localPreview) preloadTarget.searchParams.set("preview", "1");
+      preload.href = preloadTarget.href;
       document.head.appendChild(preload);
     });
 
@@ -76,6 +99,7 @@
       var href = link.href;
       var target = new URL(href, window.location.href);
       target.searchParams.set("kmShell", "1");
+      if (localPreview) target.searchParams.set("preview", "1");
       var oldFrame = document.querySelector(".km-page-frame.is-ready");
       if (oldFrame) oldFrame.classList.add("is-old");
       var frame = document.createElement("iframe");
@@ -83,6 +107,7 @@
       frame.title = items[nextIndex].label;
       frame.src = target.href;
       frame.addEventListener("load", function () {
+        syncImmersiveReader(frame);
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
             frame.classList.add("is-ready");
@@ -93,14 +118,25 @@
           });
         });
       }, { once: true });
+      frame.addEventListener("load", function () {
+        syncImmersiveReader(frame);
+      });
       document.body.appendChild(frame);
       activeIndex = nextIndex;
       var cleanTarget = new URL(href, window.location.href);
+      if (localPreview) cleanTarget.searchParams.set("preview", "1");
       window.history.pushState({ kmSection: items[nextIndex].key }, "", cleanTarget.pathname + cleanTarget.search + cleanTarget.hash);
     });
 
     window.addEventListener("popstate", function () {
       window.location.reload();
+    });
+
+    window.addEventListener("message", function (event) {
+      if (event.origin !== window.location.origin || !event.data || event.data.type !== "km-reader-mode") return;
+      var active = Boolean(event.data.active);
+      document.body.classList.toggle("km-immersive-reader", active);
+      nav.setAttribute("aria-hidden", active ? "true" : "false");
     });
   }
 

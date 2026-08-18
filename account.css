@@ -210,13 +210,26 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .loading { padding: 50px; color: var(--muted); text-align: center; font-weight: 800; }
 
 @media (max-width: 850px) {
+  .account-shell { width: min(1180px, calc(100% - 48px)); }
+  .account-nav { gap: 12px; }
+  .nav-link { flex: 0 0 auto; padding-inline: 12px; }
   .auth-layout { grid-template-columns: 1fr; }
-  .auth-story { min-height: 320px; }
+  .auth-story { min-height: 270px; padding: 30px 34px; }
+  .auth-story h1 { font-size: clamp(35px, 5.2vw, 40px); }
+  .auth-story p { line-height: 1.5; }
+  .story-points { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
+  .story-point { align-items: flex-start; }
+  .auth-panel { padding: 36px 34px 42px; }
   .dashboard-grid { grid-template-columns: 1fr; }
   .mode-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .child-form { grid-template-columns: 1fr 1fr; }
   .child-form .primary-button { grid-column: 1 / -1; }
   .team-zone { grid-template-columns:1fr; }
+}
+@media (min-width: 851px) and (max-width: 1100px) {
+  .auth-story { padding: 40px; }
+  .auth-story h1 { font-size: clamp(38px, 4.2vw, 46px); }
+  .auth-panel { padding: 38px; }
 }
 @media (max-width: 560px) {
   .account-shell { width: min(100% - 22px, 1180px); }
@@ -226,6 +239,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .nav-link, .ghost-button { padding-inline: 11px; }
   .auth-layout { border-radius: 25px; }
   .auth-story { min-height: 280px; padding: 30px 25px; }
+  .story-points { grid-template-columns: 1fr; gap: 8px; }
+  .story-point { align-items: center; }
   .auth-panel { padding: 32px 22px; }
   .page-head { display: block; }
   .page-head .badge { margin-top: 12px; }
