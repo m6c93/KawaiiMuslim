@@ -542,7 +542,7 @@ class Component extends DCLogic {
           ? `LivreColoriage.dc.html?book=${encodeURIComponent(coloringSlug)}&title=${encodeURIComponent(b.title)}`
           : b.url,
         coverImg: isMiraclesBook
-          ? 'brand/books/miracles-du-coran/page-01.jpg'
+          ? 'brand/books/miracles-du-coran/library-cover.png'
           : b.hasCover && b.cover ? b.cover : false,
         available: isMiraclesBook || b.available,
         soon: isMiraclesBook ? false : b.soon,
