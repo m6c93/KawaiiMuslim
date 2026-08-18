@@ -185,6 +185,104 @@ button:focus-visible {
 .today-stars small { margin-top: 1px; color: var(--today-pink-soft); font-size: 9px; font-weight: 800; }
 .today-stars-arrow { margin-left: auto; font-size: 18px; }
 
+.prayer-card {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  width: min(100%, 860px);
+  min-height: 92px;
+  margin: 4px auto 14px;
+  padding: 14px 18px;
+  overflow: hidden;
+  border: 1px solid rgba(232, 219, 255, .24);
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(45, 48, 106, .96), rgba(30, 36, 88, .94));
+  box-shadow: 0 16px 42px rgba(3, 5, 27, .24);
+}
+
+.prayer-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 19px;
+  color: #342b68;
+  background: linear-gradient(145deg, #ffe8a6, var(--today-gold));
+}
+
+.prayer-icon .material-symbols-rounded { font-size: 31px; }
+.prayer-copy { min-width: 0; }
+.prayer-copy > p { margin: 0 0 2px; color: var(--today-pink-soft); font-size: 10px; font-weight: 900; letter-spacing: .13em; }
+.prayer-copy h2 { margin: 0; font: 800 25px/1.05 "Baloo 2", sans-serif; }
+.prayer-copy small { display: block; margin-top: 4px; color: #aaa9c9; font-size: 9px; }
+
+.prayer-city {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 27px;
+  margin: 2px 0 0;
+  padding: 0;
+  border: 0;
+  color: #d8d5ef;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.prayer-city .material-symbols-rounded { color: var(--today-gold); font-size: 16px; }
+.prayer-edit { margin-left: 3px; color: var(--today-pink-soft); font-size: 10px; }
+.prayer-action { min-width: 148px; display: grid; justify-items: stretch; gap: 5px; text-align: center; }
+.prayer-countdown { min-height: 15px; color: #d6d3eb; font-size: 11px; font-weight: 800; }
+
+.prayer-done {
+  min-height: 44px;
+  padding: 9px 18px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(145deg, var(--today-pink), #d75098);
+  box-shadow: 0 9px 22px rgba(255, 106, 169, .23);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.prayer-done:disabled { opacity: .62; cursor: default; }
+.prayer-reward { min-height: 15px; color: #ffe18a; font-size: 11px; font-weight: 900; }
+.prayer-card.is-rewarded .prayer-reward { animation: prayer-reward-pop .52s cubic-bezier(.22, 1.4, .36, 1); }
+
+@keyframes prayer-reward-pop {
+  0% { opacity: 0; transform: scale(.72); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.prayer-city-form {
+  grid-column: 1 / -1;
+  padding-top: 11px;
+  border-top: 1px solid rgba(255,255,255,.12);
+}
+
+.prayer-city-form label { display: block; margin-bottom: 7px; font-weight: 900; }
+.prayer-city-form > div { display: flex; gap: 8px; }
+.prayer-city-form input {
+  min-width: 0;
+  flex: 1;
+  min-height: 44px;
+  padding: 9px 13px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 13px;
+  color: #292653;
+  background: #fff;
+  outline: none;
+}
+.prayer-city-form button { min-height: 44px; padding: 9px 15px; border: 0; border-radius: 13px; color: #2c2858; background: var(--today-gold); font-weight: 900; cursor: pointer; }
+.prayer-city-form .prayer-cancel { color: #e8e5f5; background: rgba(255,255,255,.1); }
+.prayer-city-form > p { min-height: 16px; margin: 6px 0 0; color: #ffd0e5; font-size: 11px; }
+
 .faith-journey {
   position: relative;
   display: grid;
@@ -521,6 +619,12 @@ button:focus-visible {
   .today-stars small, .today-stars-arrow { display: none; }
   .today-heading h1 { font-size: 46px; }
   .today-heading p { margin-top: 3px; }
+  .prayer-card { width: 100%; grid-template-columns: 50px minmax(0, 1fr) 190px; min-height: 82px; margin: 4px auto 10px; padding: 10px 16px; border-radius: 20px; }
+  .prayer-icon { width: 50px; height: 50px; border-radius: 16px; }
+  .prayer-copy h2 { font-size: 22px; }
+  .prayer-copy small { display: none; }
+  .prayer-action { width: 100%; min-width: 0; }
+  .prayer-countdown { white-space: nowrap; }
   .faith-path { top: 50%; width: 245px; height: auto; }
   .journey-step { gap: 40px; padding: 7px 16px; }
   .journey-step-one { min-height: 300px; }
@@ -563,8 +667,19 @@ button:focus-visible {
   .today-avatar { width: 40px; height: 40px; }
   .today-stars { position: absolute; top: 60px; right: 0; width: max-content; }
   .today-heading h1 { font-size: 42px; }
+  .prayer-card { width: 100%; grid-template-columns: auto minmax(0, 1fr); column-gap: 11px; row-gap: 7px; margin: 8px 0 6px; padding: 12px; }
+  .prayer-icon { width: 49px; height: 49px; border-radius: 16px; }
+  .prayer-copy h2 { font-size: 21px; }
+  .prayer-copy small { display: none; }
+  .prayer-city { min-height: 32px; margin-top: 0; }
+  .prayer-action { grid-column: 1 / -1; min-width: 0; grid-template-columns: 1fr; justify-items: start; align-items: center; text-align: left; }
+  .prayer-done { width: 100%; min-width: 0; }
+  .prayer-reward { max-width: 100%; overflow-wrap: anywhere; }
+  .prayer-city-form > div { flex-wrap: wrap; }
+  .prayer-city-form input { flex-basis: 100%; }
+  .prayer-city-form button { flex: 1; }
   .faith-path { display: none; }
-  .faith-journey { gap: 22px; margin-top: 26px; }
+  .faith-journey { gap: 22px; margin-top: 10px; }
   .journey-step,
   .journey-step-one,
   .journey-step-two,
@@ -595,7 +710,10 @@ button:focus-visible {
   .today-heading p { display: none; }
   .today-profile { min-height: 50px; }
   .today-stars { display: none; }
-  .journey-step { min-height: calc(100vh - 150px); }
+  .prayer-card { min-height: 72px; margin-bottom: 4px; padding-block: 7px; }
+  .prayer-icon { width: 48px; height: 48px; }
+  .prayer-copy small { display: none; }
+  .journey-step { min-height: calc(100vh - 224px); }
   .journey-step + .journey-step { margin-top: 18px; }
   .journey-copy h2 { font-size: clamp(38px, 5vw, 56px); }
   .today-library { margin-top: 20px; }
@@ -607,7 +725,8 @@ button:focus-visible {
   .today-heading h1 { font-size: 43px; }
   .today-account { display:none; }
   .today-stars-arrow { display: none; }
-  .journey-step { grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); gap:clamp(28px,4vw,48px); min-height:calc(100svh - 138px); padding-inline:8px; }
+  .faith-journey { margin-top: -24px; }
+  .journey-step { grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); gap:clamp(28px,4vw,48px); min-height:clamp(360px,calc(100svh - 310px),500px); padding-inline:8px; }
   .journey-step-two { grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); }
   .journey-copy h2 { font-size:clamp(38px,4.2vw,48px); overflow-wrap:anywhere; }
   .journey-kicker { font-size:clamp(17px,2vw,23px); }
