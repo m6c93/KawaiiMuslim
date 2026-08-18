@@ -529,16 +529,25 @@ class Component extends DCLogic {
       'les animaux du coran': 'animaux-du-coran'
     };
     const books = managedBooks.map((b) => {
-      const coloringSlug = coloringBookSlugs[normalizeColoringBookTitle(b.title)] || '';
+      const normalizedTitle = normalizeColoringBookTitle(b.title);
+      const coloringSlug = coloringBookSlugs[normalizedTitle] || '';
       const isColoringBook = Boolean(coloringSlug);
+      const isMiraclesBook = normalizedTitle.includes('miracles')
+        && normalizedTitle.includes('coran');
       return {
         ...b,
-        url: isColoringBook
+        url: isMiraclesBook
+          ? 'books/miracles-du-coran.html'
+          : isColoringBook
           ? `LivreColoriage.dc.html?book=${encodeURIComponent(coloringSlug)}&title=${encodeURIComponent(b.title)}`
           : b.url,
-        coverImg: b.hasCover && b.cover ? b.cover : false,
-        canRead: b.available && subscribed,
-        locked: b.available && !subscribed,
+        coverImg: isMiraclesBook
+          ? 'brand/books/miracles-du-coran/page-01.jpg'
+          : b.hasCover && b.cover ? b.cover : false,
+        available: isMiraclesBook || b.available,
+        soon: isMiraclesBook ? false : b.soon,
+        canRead: (isMiraclesBook || b.available) && subscribed,
+        locked: (isMiraclesBook || b.available) && !subscribed,
         isColoringBook,
         isRegularBook: !isColoringBook,
       };
