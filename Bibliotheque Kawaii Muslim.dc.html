@@ -16,8 +16,8 @@
 </style>
 <link rel="stylesheet" href="./responsive.css">
 <script src="./support.js"></script>
-  <link rel="stylesheet" href="./km-bottom-nav.css?v=no-profile-flash-4">
-  <script src="./km-bottom-nav.js?v=no-profile-flash-4"></script>
+  <link rel="stylesheet" href="./km-bottom-nav.css?v=safe-place-label-1">
+  <script src="./km-bottom-nav.js?v=safe-place-label-1"></script>
 </head>
 <body class="km-responsive km-library" data-km-section="library">
 <x-dc>
@@ -27,7 +27,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./km-config.js"></script>
-<script src="./km-auth.js"></script>
+<script src="./km-auth.js?v=local-preview-1"></script>
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; background: #0e1330; }
@@ -98,6 +98,18 @@
     transition:transform .7s ease;
   }
   .km-book-cover img, .km-coloring-card img { transition:transform .55s cubic-bezier(.2,.8,.2,1), filter .35s ease; }
+  .km-book-cover {
+    aspect-ratio:3/4 !important;
+    border:2px solid rgba(16,14,40,.9);
+    background:#fff;
+  }
+  .km-book-cover img {
+    width:100% !important;
+    height:100% !important;
+    object-fit:cover !important;
+    object-position:center;
+  }
+  .km-book-cover img.km-wide-cover { object-position:right center; }
   .km-read-label { animation:kmSoftPulse 4.8s ease-in-out infinite; transform-origin:left center; }
   .km-book-cover.km-opening { animation:kmBookOpen .28s ease forwards !important; }
   .km-page-leaving { opacity:.78; transform:translateY(5px); transition:opacity .2s ease, transform .2s ease; }
@@ -268,7 +280,7 @@
             <span style="font-size:12px; font-weight:700; color:#C9CBE6;">page 8 / 20</span>
           </div>
           <sc-if value="{{ subscribed }}" hint-placeholder-val="{{ false }}">
-            <a class="km-reading-button" href="books/tawakkul.html" style="align-self:flex-start; text-decoration:none; display:flex; align-items:center; gap:10px; background:linear-gradient(150deg,#F0AECA,#E27FAE); color:#fff; font-family:'Baloo 2',cursive; font-weight:700; font-size:16px; padding:13px 30px; border-radius:30px; box-shadow:0 12px 26px rgba(226,127,174,.4);">
+            <a class="km-reading-button" href="books/tawakkul.html" target="_top" style="align-self:flex-start; text-decoration:none; display:flex; align-items:center; gap:10px; background:linear-gradient(150deg,#F0AECA,#E27FAE); color:#fff; font-family:'Baloo 2',cursive; font-weight:700; font-size:16px; padding:13px 30px; border-radius:30px; box-shadow:0 12px 26px rgba(226,127,174,.4);">
               <span style="font-size:15px;">▶</span> Reprendre la lecture
             </a>
           </sc-if>
@@ -306,9 +318,9 @@
       <div class="km-book-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px;">
         <sc-for list="{{ books }}" as="book" hint-placeholder-count="8">
           <div class="km-book-item" data-km-reveal style="position:relative;">
-            <div class="km-book-cover" style="position:relative; border-radius:16px; overflow:hidden; aspect-ratio:1/1; background:#fff; box-shadow:0 16px 34px rgba(0,0,0,.4);">
+            <div class="km-book-cover" style="position:relative; border-radius:16px; overflow:hidden; background:#fff; box-shadow:0 16px 34px rgba(0,0,0,.4);">
               <sc-if value="{{ book.coverImg }}" hint-placeholder-val="{{ false }}">
-                <img src="{{ book.coverImg }}" alt="{{ book.title }}" style="width:100%; height:100%; object-fit:contain; display:block;" />
+                <img src="{{ book.coverImg }}" alt="{{ book.title }}" onLoad="{{ fitBookCover }}" style="display:block;" />
               </sc-if>
               <sc-if value="{{ book.noCover }}" hint-placeholder-val="{{ true }}">
                 <div style="width:100%; height:100%; background:{{ book.grad }}; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
@@ -320,7 +332,7 @@
                 <span style="position:absolute; top:10px; right:10px; background:rgba(20,10,26,.66); color:#FAE08C; font-weight:700; font-size:10.5px; letter-spacing:.5px; padding:5px 11px; border-radius:14px; text-transform:uppercase;">Bientôt</span>
               </sc-if>
               <sc-if value="{{ book.canRead }}" hint-placeholder-val="{{ true }}">
-                <a class="km-book-link" href="{{ book.url }}" aria-label="Lire {{ book.title }}" style="position:absolute; inset:0; display:block;"></a>
+                <a class="km-book-link" href="{{ book.url }}" target="_top" aria-label="Lire {{ book.title }}" style="position:absolute; inset:0; display:block;"></a>
                 <sc-if value="{{ book.isColoringBook }}" hint-placeholder-val="{{ false }}">
                   <span class="km-read-label" style="position:absolute; bottom:10px; left:10px; background:linear-gradient(135deg,#7d72df,#ef6f9f); color:#fff; font-weight:800; font-size:10.5px; letter-spacing:.35px; padding:6px 11px; border-radius:14px; text-transform:uppercase; box-shadow:0 6px 16px rgba(32,25,82,.3);">🎨 Lire & colorier</span>
                 </sc-if>
@@ -597,6 +609,11 @@ class Component extends DCLogic {
       starChildName: this.state.starChildName,
       books,
       colorings,
+      fitBookCover: (event) => {
+        const image = event?.currentTarget || event?.target;
+        if (!image) return;
+        image.classList.toggle('km-wide-cover', image.naturalWidth > image.naturalHeight * 1.15);
+      },
       chooseEnfant: () => { window.location.href = 'Profils.dc.html'; },
       chooseMaman: () => { window.location.href = 'Profils.dc.html'; },
       switchProfile: () => { window.location.href = 'Profils.dc.html'; },
@@ -621,11 +638,15 @@ class Component extends DCLogic {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target === '_blank') return;
       const destination = link.getAttribute('href');
       if (!destination || destination === '#') return;
+      const openAtTop = link.target === '_top';
       event.preventDefault();
       const cover = link.closest('.km-book-cover');
       if (cover) cover.classList.add('km-opening');
       else document.body.classList.add('km-page-leaving');
-      window.setTimeout(() => { window.location.href = destination; }, cover ? 260 : 180);
+      window.setTimeout(() => {
+        if (openAtTop && window.top) window.top.location.href = destination;
+        else window.location.href = destination;
+      }, cover ? 260 : 180);
     });
     document.addEventListener('input', (event) => {
       if (event.target.id !== 'librarySearch') return;

@@ -7,7 +7,8 @@
   const page = decodeURIComponent(window.location.pathname.split("/").pop() || "index.html").toLowerCase();
   const teamPages = new Set(["index.html", "connexion.dc.html", "mfa.dc.html", "admin.dc.html"]);
   const teamPreview = localStorage.getItem("km-site-preview") === "staff";
-  if (!teamPages.has(page) && !teamPreview) {
+  const localPreview = ["localhost", "127.0.0.1"].includes(location.hostname) && new URLSearchParams(location.search).get("preview") === "1";
+  if (!teamPages.has(page) && !teamPreview && !localPreview) {
     window.location.replace("/");
   }
 })();
@@ -120,35 +121,56 @@
       filter: blur(18px);
       opacity: .8;
     }
+    .book-spread {
+      position:relative;
+      z-index:2;
+      max-width:100%;
+      max-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:0;
+      filter:drop-shadow(0 28px 42px rgba(5,4,24,.45));
+      transform-style:preserve-3d;
+      transition:transform .24s cubic-bezier(.55,.02,.42,1), opacity .18s ease;
+      will-change:transform,opacity;
+    }
+    .book-spread.turn-out-next { transform:translateX(-1.5%) rotateY(-8deg) scale(.985); opacity:.35; }
+    .book-spread.turn-out-prev { transform:translateX(1.5%) rotateY(8deg) scale(.985); opacity:.35; }
     .page-card {
       position: relative;
-      max-width: 100%;
-      max-height: 100%;
       display: grid;
       place-items: center;
       overflow: hidden;
-      border-radius: 7px 13px 13px 7px;
+      flex:none;
       background: var(--paper);
-      box-shadow:
-        -8px 0 0 rgba(245,238,248,.72),
-        -11px 0 0 rgba(227,216,236,.5),
-        0 26px 65px rgba(5,4,24,.48);
-      transform-style: preserve-3d;
-      transform-origin: left center;
-      transition: transform .22s cubic-bezier(.55,.02,.42,1), opacity .18s ease;
-      will-change: transform, opacity;
+      box-shadow:0 0 0 1px rgba(45,35,71,.12);
     }
-    .page-card::after {
+    .page-card:first-child { border-radius:13px 3px 3px 13px; }
+    .page-card:last-of-type { border-radius:3px 13px 13px 3px; }
+    .page-card:first-child::after {
       content: "";
       position: absolute;
-      inset: 0 auto 0 0;
-      width: 18px;
-      background: linear-gradient(90deg, rgba(43,30,71,.2), rgba(255,255,255,.28), transparent);
+      inset:0 0 0 auto;
+      width:22px;
+      background:linear-gradient(270deg,rgba(43,30,71,.18),rgba(255,255,255,.18),transparent);
       pointer-events: none;
     }
-    .page-card.turn-out-next { transform: rotateY(-88deg) scale(.985); opacity: .45; }
-    .page-card.turn-out-prev { transform-origin: right center; transform: rotateY(88deg) scale(.985); opacity: .45; }
-    #pageCanvas {
+    .page-card:last-of-type::after {
+      content:"";
+      position:absolute;
+      inset:0 auto 0 0;
+      width:22px;
+      background:linear-gradient(90deg,rgba(43,30,71,.2),rgba(255,255,255,.18),transparent);
+      pointer-events:none;
+    }
+    .book-spread.single .page-card:first-child { border-radius:10px 15px 15px 10px; }
+    .book-spread.single .page-card:first-child::after {
+      inset:0 auto 0 0;
+      background:linear-gradient(90deg,rgba(43,30,71,.2),rgba(255,255,255,.2),transparent);
+    }
+    .page-card[hidden] { display:none; }
+    .page-card canvas {
       display: block;
       max-width: 100%;
       max-height: 100%;
@@ -159,14 +181,19 @@
     .page-loading {
       position: absolute;
       inset: 0;
-      z-index: 4;
+      z-index: 8;
       display: grid;
       place-items: center;
       color: var(--ink);
-      background: rgba(251,249,253,.94);
+      border-radius:14px;
+      background: rgba(251,249,253,.97);
       text-align: center;
     }
     .page-loading[hidden] { display: none; }
+    .book-spread:has(.page-loading:not([hidden])) {
+      width:min(72vw,400px);
+      height:min(70vh,520px);
+    }
     .loader-star {
       display: inline-grid;
       place-items: center;
@@ -248,6 +275,7 @@
       .reader-controls { min-height: 58px; gap: 8px; }
       .reader-controls .nav-button { min-width: 82px; padding: 8px 10px; }
       .page-count { min-width: 78px; font-size: 13px; }
+      .book-spread { filter:drop-shadow(0 20px 32px rgba(5,4,24,.42)); }
     }
     @media (max-height: 520px) and (orientation: landscape) {
       .reader { grid-template-rows: auto minmax(0, 1fr); }
@@ -293,12 +321,17 @@
     <section class="reader-stage" id="readerStage" aria-live="polite">
       <div class="book-shadow" aria-hidden="true"></div>
       <button class="nav-button side-nav prev" id="sidePrevious" type="button" aria-label="Page précédente">‹</button>
-      <article class="page-card" id="pageCard">
+      <div class="book-spread single" id="bookSpread">
+        <article class="page-card" id="pageCard">
         <canvas id="pageCanvas" aria-label="Page du livre"></canvas>
+        </article>
+        <article class="page-card" id="secondPageCard" hidden>
+          <canvas id="secondPageCanvas" aria-label="Deuxième page du livre"></canvas>
+        </article>
         <div class="page-loading" id="pageLoading">
           <div><span class="loader-star" aria-hidden="true">✦</span><strong>Préparation du livre…</strong><small id="loadingDetail">Ouverture du PDF</small></div>
         </div>
-      </article>
+      </div>
       <button class="nav-button side-nav next" id="sideNext" type="button" aria-label="Page suivante">›</button>
       <section class="reader-error" id="readerError">
         <div>
@@ -330,8 +363,11 @@
     const elements = {
       reader: document.getElementById("reader"),
       stage: document.getElementById("readerStage"),
+      spread: document.getElementById("bookSpread"),
       card: document.getElementById("pageCard"),
       canvas: document.getElementById("pageCanvas"),
+      secondCard: document.getElementById("secondPageCard"),
+      secondCanvas: document.getElementById("secondPageCanvas"),
       loading: document.getElementById("pageLoading"),
       loadingDetail: document.getElementById("loadingDetail"),
       pageCount: document.getElementById("pageCount"),
@@ -348,12 +384,13 @@
     let currentPage = 1;
     let isTurning = false;
     let pendingPage = null;
-    let renderTask = null;
+    let renderTasks = [];
     let touchStartX = 0;
     let touchStartY = 0;
     let resizeTimer = null;
     let readingChildId = null;
     let bookRewardChecked = false;
+    const progressKey = `km-book-progress:${encodeURIComponent(source || title)}`;
 
     const wait = (duration) => new Promise(resolve => setTimeout(resolve, duration));
     const setLoading = (visible, detail = "") => {
@@ -367,7 +404,8 @@
         && url.pathname.startsWith("/storage/v1/object/public/content-books/")
         && url.pathname.toLowerCase().endsWith(".pdf");
       const localPreview = ["localhost", "127.0.0.1"].includes(location.hostname)
-        && url.origin === location.origin
+        && params.get("preview") === "1"
+        && ["http:", "https:"].includes(url.protocol)
         && url.pathname.toLowerCase().endsWith(".pdf");
       if (!productionSource && !localPreview) throw new Error("L’adresse du livre n’est pas autorisée.");
       return url;
@@ -379,48 +417,63 @@
     };
     const updateControls = () => {
       const total = pdfDocument?.numPages || 0;
-      elements.pageCount.textContent = total ? `Page ${currentPage} / ${total}` : "Page — / —";
+      const lastVisible = isSpreadMode() && currentPage > 1 ? Math.min(total, currentPage + 1) : currentPage;
+      const shown = lastVisible > currentPage ? `Pages ${currentPage}–${lastVisible}` : `Page ${currentPage}`;
+      elements.pageCount.textContent = total ? `${shown} / ${total}` : "Page — / —";
       [elements.previous, elements.sidePrevious].forEach(button => button.disabled = !total || currentPage <= 1);
-      [elements.next, elements.sideNext].forEach(button => button.disabled = !total || currentPage >= total);
+      [elements.next, elements.sideNext].forEach(button => button.disabled = !total || lastVisible >= total);
       elements.canvas.setAttribute("aria-label", total ? `Page ${currentPage} sur ${total}` : "Page du livre");
+      elements.secondCanvas.setAttribute("aria-label", total ? `Page ${lastVisible} sur ${total}` : "Deuxième page du livre");
     };
-    const getAvailableSize = () => {
+    const isSpreadMode = () => innerWidth >= 720 && innerWidth / Math.max(innerHeight, 1) >= 1.12;
+    const getAvailableSize = (spreadMode) => {
       const bounds = elements.stage.getBoundingClientRect();
       const horizontalPadding = innerWidth <= 680 ? 106 : Math.min(230, innerWidth * .18);
       return {
-        width: Math.max(180, bounds.width - horizontalPadding),
+        width: Math.max(180, (bounds.width - horizontalPadding) / (spreadMode ? 2 : 1)),
         height: Math.max(180, bounds.height - 24)
       };
     };
-    const renderPage = async pageNumber => {
-      if (!pdfDocument) return;
-      if (renderTask) {
-        try { renderTask.cancel(); } catch (error) {}
-        renderTask = null;
-      }
+    const renderCanvas = async (pageNumber, canvas, card, available) => {
       const page = await pdfDocument.getPage(pageNumber);
       const baseViewport = page.getViewport({ scale: 1 });
-      const available = getAvailableSize();
       const cssScale = Math.min(available.width / baseViewport.width, available.height / baseViewport.height);
       const pixelRatio = Math.min(window.devicePixelRatio || 1, 2.25);
       const renderViewport = page.getViewport({ scale: cssScale * pixelRatio });
       const cssWidth = Math.floor(baseViewport.width * cssScale);
       const cssHeight = Math.floor(baseViewport.height * cssScale);
-      elements.canvas.width = Math.max(1, Math.floor(renderViewport.width));
-      elements.canvas.height = Math.max(1, Math.floor(renderViewport.height));
-      elements.canvas.style.width = `${cssWidth}px`;
-      elements.canvas.style.height = `${cssHeight}px`;
-      elements.card.style.width = `${cssWidth}px`;
-      elements.card.style.height = `${cssHeight}px`;
-      const context = elements.canvas.getContext("2d", { alpha: false });
+      canvas.width = Math.max(1, Math.floor(renderViewport.width));
+      canvas.height = Math.max(1, Math.floor(renderViewport.height));
+      canvas.style.width = `${cssWidth}px`;
+      canvas.style.height = `${cssHeight}px`;
+      card.style.width = `${cssWidth}px`;
+      card.style.height = `${cssHeight}px`;
+      const context = canvas.getContext("2d", { alpha: false });
       context.fillStyle = "#ffffff";
-      context.fillRect(0, 0, elements.canvas.width, elements.canvas.height);
-      renderTask = page.render({ canvasContext: context, viewport: renderViewport });
-      await renderTask.promise;
-      renderTask = null;
-      currentPage = pageNumber;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      const task = page.render({ canvasContext: context, viewport: renderViewport });
+      renderTasks.push(task);
+      await task.promise;
+    };
+    const renderPage = async pageNumber => {
+      if (!pdfDocument) return;
+      renderTasks.forEach(task => { try { task.cancel(); } catch (error) {} });
+      renderTasks = [];
+      const spreadMode = isSpreadMode() && pageNumber > 1;
+      const normalizedPage = spreadMode ? Math.max(2, pageNumber - (pageNumber % 2)) : pageNumber;
+      const secondPage = spreadMode && normalizedPage < pdfDocument.numPages ? normalizedPage + 1 : null;
+      const available = getAvailableSize(spreadMode);
+      elements.spread.classList.toggle("single", !spreadMode);
+      elements.secondCard.hidden = !secondPage;
+      await Promise.all([
+        renderCanvas(normalizedPage, elements.canvas, elements.card, available),
+        secondPage ? renderCanvas(secondPage, elements.secondCanvas, elements.secondCard, available) : Promise.resolve()
+      ]);
+      renderTasks = [];
+      currentPage = normalizedPage;
+      try { localStorage.setItem(progressKey, String(currentPage)); } catch (error) {}
       updateControls();
-      if (readingChildId && pageNumber === pdfDocument.numPages && !bookRewardChecked) {
+      if (readingChildId && (secondPage || normalizedPage) === pdfDocument.numPages && !bookRewardChecked) {
         bookRewardChecked = true;
         const sourceName = (() => {
           try { return new URL(source).pathname.split("/").pop() || title; }
@@ -439,7 +492,7 @@
           setTimeout(() => { toast.hidden = true; }, 2800);
         }).catch(() => {});
       }
-      const adjacent = pageNumber < pdfDocument.numPages ? pageNumber + 1 : pageNumber - 1;
+      const adjacent = Math.min(pdfDocument.numPages, (secondPage || normalizedPage) + 1);
       if (adjacent >= 1) pdfDocument.getPage(adjacent).catch(() => {});
     };
     const turnTo = async targetPage => {
@@ -454,30 +507,25 @@
       const direction = target > currentPage ? 1 : -1;
       const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (!reducedMotion) {
-        elements.card.classList.add(direction > 0 ? "turn-out-next" : "turn-out-prev");
-        await wait(190);
+        elements.spread.classList.add(direction > 0 ? "turn-out-next" : "turn-out-prev");
+        await wait(145);
       }
       try {
         await renderPage(target);
         if (!reducedMotion) {
-          elements.card.classList.remove("turn-out-next", "turn-out-prev");
-          elements.card.style.transition = "none";
-          elements.card.style.transformOrigin = direction > 0 ? "right center" : "left center";
-          elements.card.style.transform = direction > 0 ? "rotateY(86deg)" : "rotateY(-86deg)";
-          elements.card.style.opacity = ".5";
-          elements.card.getBoundingClientRect();
-          elements.card.style.transition = "";
-          requestAnimationFrame(() => {
-            elements.card.style.transform = "";
-            elements.card.style.opacity = "";
-          });
-          await wait(240);
-          elements.card.style.transformOrigin = "";
+          elements.spread.classList.remove("turn-out-next", "turn-out-prev");
+          elements.spread.animate(
+            direction > 0
+              ? [{ opacity:.45, transform:"translateX(1.5%) scale(.985)" }, { opacity:1, transform:"none" }]
+              : [{ opacity:.45, transform:"translateX(-1.5%) scale(.985)" }, { opacity:1, transform:"none" }],
+            { duration:220, easing:"cubic-bezier(.2,.8,.2,1)" }
+          );
+          await wait(220);
         }
       } catch (error) {
         showError("Cette page n’a pas pu être affichée.");
       } finally {
-        elements.card.classList.remove("turn-out-next", "turn-out-prev");
+        elements.spread.classList.remove("turn-out-next", "turn-out-prev");
         isTurning = false;
         if (pendingPage && pendingPage !== currentPage) {
           const queued = pendingPage;
@@ -486,8 +534,8 @@
         }
       }
     };
-    const next = () => turnTo(currentPage + 1);
-    const previous = () => turnTo(currentPage - 1);
+    const next = () => turnTo(currentPage + (isSpreadMode() && currentPage > 1 ? 2 : 1));
+    const previous = () => turnTo(currentPage - (isSpreadMode() && currentPage > 2 ? 2 : 1));
 
     [elements.next, elements.sideNext].forEach(button => button.addEventListener("click", next));
     [elements.previous, elements.sidePrevious].forEach(button => button.addEventListener("click", previous));
@@ -529,11 +577,12 @@
     const initialize = async () => {
       try {
         const context = await window.KMAuth.getContext();
-        if (!context) {
+        const localPreview = ["localhost", "127.0.0.1"].includes(location.hostname) && params.get("preview") === "1";
+        if (!context && !localPreview) {
           window.location.replace(`Connexion.dc.html?next=${encodeURIComponent(location.pathname + location.search)}`);
           return;
         }
-        const active = window.KMAuth.validateActiveProfile(context);
+        const active = context ? window.KMAuth.validateActiveProfile(context) : { type: "preview", id: null };
         readingChildId = active.type === "child" ? active.id : null;
         const sourceUrl = validateSource();
         document.title = `${title} — Kawaii Muslim`;
@@ -556,7 +605,9 @@
         };
         pdfDocument = await loadingTask.promise;
         setLoading(true, `${pdfDocument.numPages} page${pdfDocument.numPages > 1 ? "s" : ""} · création du livre`);
-        await renderPage(1);
+        let savedPage = 1;
+        try { savedPage = Number(localStorage.getItem(progressKey)) || 1; } catch (error) {}
+        await renderPage(Math.max(1, Math.min(pdfDocument.numPages, savedPage)));
         setLoading(false);
       } catch (error) {
         console.error(error);
