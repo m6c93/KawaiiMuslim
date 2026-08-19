@@ -42,31 +42,12 @@
     }).join("");
     document.body.appendChild(nav);
 
-    function isImmersiveReaderPath(pathname) {
-      var path = decodeURIComponent(pathname || "").toLowerCase();
-      return /\/books\/[^/]+\.html$/.test(path)
-        || /\/(livre|livrecoloriage)\.dc\.html$/.test(path);
-    }
-
-    function syncImmersiveReader(frame) {
-      var active = false;
-      try {
-        active = Boolean(frame && frame.contentWindow)
-          && isImmersiveReaderPath(frame.contentWindow.location.pathname);
-      } catch (error) {
-        active = false;
-      }
-      document.body.classList.toggle("km-immersive-reader", active);
-      nav.setAttribute("aria-hidden", active ? "true" : "false");
-    }
-
     items.forEach(function (item, index) {
       if (index === activeIndex) return;
       var preload = document.createElement("link");
       preload.rel = "prefetch";
       preload.as = "document";
       var preloadTarget = new URL(item.href, window.location.href);
-      preloadTarget.searchParams.set("kmShell", "1");
       if (localPreview) preloadTarget.searchParams.set("preview", "1");
       preload.href = preloadTarget.href;
       document.head.appendChild(preload);
@@ -83,12 +64,14 @@
       });
     });
 
+    var navigating = false;
     nav.addEventListener("click", function (event) {
       var link = event.target.closest("a[data-km-nav-index]");
       if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       var nextIndex = Number(link.getAttribute("data-km-nav-index"));
-      if (nextIndex === activeIndex) return;
+      if (nextIndex === activeIndex || navigating) return;
       event.preventDefault();
+      navigating = true;
       nav.classList.add("is-moving");
       nav.style.setProperty("--km-nav-index", nextIndex);
       nav.querySelectorAll("a[data-km-nav-index]").forEach(function (itemLink) {
@@ -96,40 +79,14 @@
         else itemLink.removeAttribute("aria-current");
       });
       sessionStorage.setItem("km-nav-index", String(nextIndex));
-      var href = link.href;
-      var target = new URL(href, window.location.href);
-      target.searchParams.set("kmShell", "1");
-      if (localPreview) target.searchParams.set("preview", "1");
-      var oldFrame = document.querySelector(".km-page-frame.is-ready");
-      if (oldFrame) oldFrame.classList.add("is-old");
-      var frame = document.createElement("iframe");
-      frame.className = "km-page-frame";
-      frame.title = items[nextIndex].label;
-      frame.src = target.href;
-      frame.addEventListener("load", function () {
-        syncImmersiveReader(frame);
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () {
-            frame.classList.add("is-ready");
-            nav.classList.remove("is-moving");
-            window.setTimeout(function () {
-              if (oldFrame) oldFrame.remove();
-            }, 280);
-          });
-        });
-      }, { once: true });
-      frame.addEventListener("load", function () {
-        syncImmersiveReader(frame);
-      });
-      document.body.appendChild(frame);
-      activeIndex = nextIndex;
-      var cleanTarget = new URL(href, window.location.href);
+      sessionStorage.setItem(transitionKey, "1");
+      document.documentElement.classList.add("km-page-leaving");
+      document.body.classList.add("km-nav-leaving");
+      var cleanTarget = new URL(link.href, window.location.href);
       if (localPreview) cleanTarget.searchParams.set("preview", "1");
-      window.history.pushState({ kmSection: items[nextIndex].key }, "", cleanTarget.pathname + cleanTarget.search + cleanTarget.hash);
-    });
-
-    window.addEventListener("popstate", function () {
-      window.location.reload();
+      window.setTimeout(function () {
+        window.location.assign(cleanTarget.href);
+      }, 110);
     });
 
     window.addEventListener("message", function (event) {

@@ -5,6 +5,11 @@
   --km-nav-bottom: max(10px, env(safe-area-inset-bottom));
 }
 
+html {
+  min-height: 100%;
+  background: #171b48;
+}
+
 @view-transition {
   navigation: auto;
 }
@@ -48,30 +53,12 @@ html.km-page-entering::after {
   opacity: 1;
 }
 
+html.km-page-leaving::after {
+  transition-duration: .12s;
+}
+
 html.km-page-entering::after {
   animation: km-veil-out .44s .06s cubic-bezier(.22, 1, .36, 1) forwards;
-}
-
-.km-page-frame {
-  position: fixed;
-  z-index: 990;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  background: #11163c;
-  opacity: 0;
-  transform: translateY(5px) scale(.998);
-  transition: opacity .14s ease, transform .18s cubic-bezier(.22, 1, .36, 1);
-}
-
-.km-page-frame.is-ready {
-  opacity: 1;
-  transform: none;
-}
-
-.km-page-frame.is-old {
-  pointer-events: none;
 }
 
 body.km-shell-child {
@@ -245,5 +232,4 @@ body.km-nav-leaving > :not(.km-app-nav) {
     transition: none !important;
     animation: none !important;
   }
-  .km-page-frame { transition: none !important; }
 }
