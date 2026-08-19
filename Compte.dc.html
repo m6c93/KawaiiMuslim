@@ -111,7 +111,7 @@
     const message = document.getElementById("message");
     const billingMessage = document.getElementById("billingMessage");
     const activeBillingStatuses = new Set(["active", "trialing", "past_due"]);
-    let childLimit = 1;
+    let childLimit = 0;
 
     const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
@@ -154,7 +154,7 @@
       document.getElementById("parentAvatar").value = context.profile.avatar || "🌸";
       context.subscription = await KMAuth.getSubscription();
       const subscribed = activeBillingStatuses.has(context.subscription?.status);
-      childLimit = subscribed ? context.subscription.child_limit : 1;
+      childLimit = subscribed ? Number(context.subscription.child_limit || 1) : context.children.length;
       const prices = { 1: "4,99", 2: "5,98", 3: "6,97" };
       document.getElementById("subscriptionStatus").textContent = subscribed
         ? (context.subscription.cancel_at_period_end ? "Actif · arrêt programmé" : "✓ Abonnement actif")
@@ -174,7 +174,11 @@
       const childSubmitButton = document.querySelector("#childForm button[type='submit']");
       const childLimitReached = context.children.length >= childLimit;
       childSubmitButton.disabled = childLimitReached;
-      childSubmitButton.textContent = childLimitReached ? `Limite de l’offre : ${childLimit} enfant${childLimit > 1 ? "s" : ""}` : "Ajouter ce profil";
+      childSubmitButton.textContent = !subscribed
+        ? "Choisis d’abord une offre"
+        : childLimitReached
+          ? `Limite de l’offre : ${childLimit} enfant${childLimit > 1 ? "s" : ""}`
+          : "Ajouter ce profil";
       renderChildren();
     };
 
@@ -235,6 +239,11 @@
 
     document.getElementById("childForm").addEventListener("submit", async event => {
       event.preventDefault();
+      if (!activeBillingStatuses.has(context.subscription?.status)) {
+        message.className = "form-message";
+        message.textContent = "Choisis et règle d’abord une offre famille pour créer un profil enfant.";
+        return;
+      }
       if (context.children.length >= childLimit) {
         message.className = "form-message";
         message.textContent = `Ton offre permet ${childLimit} profil${childLimit > 1 ? "s" : ""} enfant${childLimit > 1 ? "s" : ""}.`;

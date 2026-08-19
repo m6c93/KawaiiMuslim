@@ -70,19 +70,6 @@ Deno.serve(async (request) => {
       customerId = customer.id;
     }
 
-    const { error: selectionSaveError } = await admin.from("subscriptions").upsert({
-      user_id: user.id,
-      stripe_customer_id: customerId,
-      stripe_subscription_id: null,
-      status: "incomplete",
-      plan_code: planCode,
-      price_id: selectedPlan.priceId,
-      child_limit: selectedPlan.childLimit,
-      cancel_at_period_end: false,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
-    if (selectionSaveError) throw selectionSaveError;
-
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: customerId,

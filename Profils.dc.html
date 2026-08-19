@@ -94,7 +94,7 @@
     const activeBillingStatuses = new Set(["active", "trialing", "past_due"]);
     let context = null;
     let subscription = null;
-    let childLimit = 1;
+    let childLimit = 0;
 
     const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
@@ -119,12 +119,14 @@
       const active = activeBillingStatuses.has(subscription?.status);
       childLimit = active
         ? Number(subscription.child_limit || 1)
-        : Math.max(1, context.children.length);
+        : context.children.length;
       familyOffer.textContent = active
         ? `1 parent + ${childLimit} enfant${childLimit > 1 ? "s" : ""}`
         : subscription?.status === "incomplete"
           ? "Activation de l’abonnement…"
-          : `1 parent + ${childLimit} enfant${childLimit > 1 ? "s" : ""}`;
+          : context.children.length
+            ? `Compte parent + ${context.children.length} profil${context.children.length > 1 ? "s" : ""} existant${context.children.length > 1 ? "s" : ""}`
+            : "Compte parent · abonnement requis";
       return active;
     };
 
