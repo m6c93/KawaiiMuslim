@@ -633,7 +633,7 @@ button:focus-visible {
   .today-stars small, .today-stars-arrow { display: none; }
   .today-heading h1 { font-size: 46px; }
   .today-heading p { margin-top: 3px; }
-  .prayer-card { width: min(100%, 720px); grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; min-height: 72px; margin: 4px auto 10px; padding: 9px 13px; border-radius: 19px; }
+  .prayer-card { width: min(100%, 560px); grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; min-height: 72px; margin: 4px auto 10px; padding: 9px 13px; border-radius: 19px; }
   .prayer-icon { width: 44px; height: 44px; border-radius: 14px; }
   .prayer-icon .material-symbols-rounded { font-size: 26px; }
   .prayer-copy h2 { font-size: 20px; }
@@ -671,6 +671,43 @@ button:focus-visible {
   .today-book { gap: 5px; }
   .today-book img { border-radius: 14px; }
   .today-book strong { min-height: 28px; font-size: 13px; }
+}
+
+/* Les iPad en mode portrait utilisent souvent une largeur CSS de 1024 px. */
+@media (min-width: 901px) and (max-width: 1180px) {
+  .today-shell { width: calc(100% - 24px); padding: 14px 18px 108px; }
+  .today-header { min-height: 78px; margin-bottom: 2px; }
+  .prayer-card {
+    width: min(100%, 560px);
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    gap: 12px;
+    min-height: 72px;
+    margin: 4px auto 10px;
+    padding: 9px 13px;
+    border-radius: 19px;
+  }
+  .prayer-icon { width: 44px; height: 44px; border-radius: 14px; }
+  .prayer-icon .material-symbols-rounded { font-size: 26px; }
+  .prayer-copy h2 { font-size: 20px; }
+  .prayer-copy > p { font-size: 9px; }
+  .prayer-copy small { display: none; }
+  .prayer-city { min-height: 24px; font-size: 11px; }
+  .prayer-action { width: auto; min-width: 0; justify-items: end; gap: 3px; text-align: right; }
+  .prayer-countdown { min-height: 0; font-size: 10px; white-space: nowrap; }
+  .prayer-done { min-height: 36px; padding: 7px 14px; }
+  .prayer-reward { font-size: 9px; }
+  .faith-path { width: 250px; opacity: .7; }
+  .journey-step {
+    grid-template-columns: minmax(0, 1fr) minmax(310px, .88fr);
+    gap: 34px;
+    min-height: 390px;
+    padding: 8px 12px;
+  }
+  .journey-step-two { grid-template-columns: minmax(310px, .88fr) minmax(0, 1fr); }
+  .journey-copy h2 { font-size: clamp(36px, 4.2vw, 45px); overflow-wrap: anywhere; }
+  .journey-visual-hero img { max-height: 410px; }
+  .journey-book img { width: min(74%, 260px); }
+  .journey-coloring img { width: min(74%, 250px); }
 }
 
 @media (max-width: 680px) {
@@ -729,7 +766,7 @@ button:focus-visible {
   .today-heading p { display: none; }
   .today-profile { min-height: 50px; }
   .today-stars { display: none; }
-  .prayer-card { width: min(100%, 720px); min-height: 66px; margin-bottom: 4px; padding-block: 6px; }
+  .prayer-card { width: min(100%, 560px); min-height: 66px; margin-bottom: 4px; padding-block: 6px; }
   .prayer-icon { width: 42px; height: 42px; }
   .prayer-copy small { display: none; }
   .journey-step { min-height: calc(100vh - 224px); }
