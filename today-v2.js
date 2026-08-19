@@ -5,6 +5,7 @@
   var profileName = document.getElementById("todayProfileName");
   var avatar = document.getElementById("todayAvatar");
   var starBalance = document.getElementById("todayStarBalance");
+  var starUnit = document.getElementById("todayStarUnit");
   var dateLabel = document.getElementById("todayDate");
   var prayerCard = document.getElementById("prayerCard");
   var prayerEyebrow = document.getElementById("prayerEyebrow");
@@ -41,7 +42,8 @@
     currentBalance = count;
     if (profileName) profileName.textContent = safeName;
     if (avatar) avatar.textContent = avatarValue || safeName.charAt(0).toLowerCase();
-    if (starBalance) starBalance.textContent = count + " étoile" + (count > 1 ? "s" : "");
+    if (starBalance) starBalance.textContent = count;
+    if (starUnit) starUnit.textContent = " étoile" + (count > 1 ? "s" : "");
   }
 
   function prayerStorageKey() {

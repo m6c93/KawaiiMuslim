@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,600,1,0&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./km-bottom-nav.css?v=motion-3">
-  <link rel="stylesheet" href="./today-v2.css?v=prayer-tablet-1024-3">
+  <link rel="stylesheet" href="./today-v2.css?v=prayer-inline-stars-5">
   <script src="./km-bottom-nav.js?v=motion-3"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
@@ -41,11 +41,6 @@
           <span class="today-avatar" id="todayAvatar">t</span>
           <span><strong id="todayProfileName">toto</strong><small>Mon profil</small></span>
         </a>
-        <a class="today-stars" href="Boutique.dc.html" aria-label="Utiliser mes étoiles dans la Boutique">
-          <span class="material-symbols-rounded" aria-hidden="true">star</span>
-          <span><strong id="todayStarBalance">12 étoiles</strong><small>Utiliser dans la Boutique</small></span>
-          <span class="material-symbols-rounded today-stars-arrow" aria-hidden="true">arrow_forward</span>
-        </a>
       </div>
     </header>
 
@@ -63,6 +58,10 @@
           <small id="prayerNote">Les horaires restent indicatifs : vérifie-les avec ta mosquée.</small>
         </div>
         <div class="prayer-action">
+          <a class="prayer-stars" href="Boutique.dc.html" aria-label="Utiliser mes étoiles dans la Boutique">
+            <span class="material-symbols-rounded" aria-hidden="true">star</span>
+            <strong><span id="todayStarBalance">12</span><span class="prayer-star-unit" id="todayStarUnit"> étoiles</span></strong>
+          </a>
           <span class="prayer-countdown" id="prayerCountdown"></span>
           <button class="prayer-done" id="prayerDone" type="button" hidden>J’ai prié</button>
           <span class="prayer-reward" id="prayerReward" aria-live="polite"></span>
@@ -161,6 +160,6 @@
     </main>
   </div>
 
-  <script src="./today-v2.js?v=prayer-city-4"></script>
+  <script src="./today-v2.js?v=prayer-inline-stars-6"></script>
 </body>
 </html>
