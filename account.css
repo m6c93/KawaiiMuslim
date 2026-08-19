@@ -207,6 +207,33 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .mode-card .profile-avatar { margin: 0 auto 12px; width: 62px; height: 62px; font-size: 30px; border-radius: 20px; }
 .mode-card strong { display: block; font-family: "Baloo 2", cursive; font-size: 18px; }
 .mode-card small { color: var(--muted); }
+.empty-profile-card {
+  border: 2px dashed #d9cce7;
+  background: linear-gradient(145deg,#fffafd,#f7f3fb);
+}
+.empty-profile-card .profile-avatar {
+  color: #9a6ca5;
+  background: #f3e8f2;
+  font-size: 34px;
+}
+.empty-profile-card strong { color: #6c5277; }
+.profile-setup {
+  margin-top: 20px;
+  padding: 24px;
+  border: 1px solid #eaddea;
+  border-radius: 26px;
+  background: linear-gradient(145deg,#fff,#fff7fb);
+  box-shadow: 0 18px 45px rgba(84,55,101,.1);
+}
+.profile-setup[hidden] { display: none; }
+.profile-setup-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.profile-setup-head h2 { margin: 9px 0 3px; font: 800 24px "Baloo 2",cursive; }
+.profile-setup-head p { max-width: 700px; margin: 0; color: var(--muted); line-height: 1.5; }
+.profile-setup-form { display: grid; grid-template-columns: 1.2fr .8fr .7fr auto; gap: 10px; align-items: end; margin-top: 20px; }
+.profile-setup-form label { min-width: 0; }
+.profile-setup-form .field-input,
+.profile-setup-form .field-select { min-height: 48px; margin: 0; }
+.profile-setup-form .primary-button { min-height: 48px; white-space: nowrap; }
 .team-zone { display:grid; grid-template-columns:minmax(0,1fr) minmax(260px,360px); gap:22px; align-items:center; margin-top:34px; padding:24px; border:1px solid #d9dced; border-radius:25px; background:linear-gradient(145deg,#f1f3fb,#fff); }
 .team-zone-copy h2 { margin:9px 0 4px; font-family:"Baloo 2",cursive; font-size:22px; }
 .team-zone-copy p { max-width:580px; margin:0; color:#666985; line-height:1.55; }
@@ -236,6 +263,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .auth-panel { padding: 36px 34px 42px; }
   .dashboard-grid { grid-template-columns: 1fr; }
   .mode-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .profile-setup-form { grid-template-columns: 1fr 1fr; }
+  .profile-setup-form .primary-button { grid-column: 1 / -1; }
   .child-form { grid-template-columns: 1fr 1fr; }
   .child-form .primary-button { grid-column: 1 / -1; }
   .team-zone { grid-template-columns:1fr; }
@@ -263,6 +292,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .plan-option { display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:8px; padding:12px 14px; text-align:left; }
   .plan-option strong { margin:0; font-size:20px; }
   .mode-grid, .stats { grid-template-columns: 1fr; }
+  .profile-setup { padding: 20px 16px; }
+  .profile-setup-head { display: block; }
+  .profile-setup-head .ghost-button { margin-top: 14px; }
+  .profile-setup-form { grid-template-columns: 1fr; }
+  .profile-setup-form .primary-button { grid-column: auto; }
   .profile-card { align-items: flex-start; }
   .card-actions { flex-direction: column; }
   .child-form { grid-template-columns: 1fr; }

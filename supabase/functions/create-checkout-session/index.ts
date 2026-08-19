@@ -1,7 +1,22 @@
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
-import { PLANS, SITE_URL, type PlanCode } from "../_shared/billing.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "https://www.kawaiimuslimworld.com",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+const jsonResponse = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
+  status,
+  headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
+});
+const SITE_URL = "https://www.kawaiimuslimworld.com";
+const PLANS = {
+  family_1_child: { priceId: "price_1U69cTEwwuZdiQAHVCYyKOy8", childLimit: 1 },
+  family_2_children: { priceId: "price_1U69cUEwwuZdiQAHYwEdet4Y", childLimit: 2 },
+  family_3_children: { priceId: "price_1U69cVEwwuZdiQAH0nOykNZz", childLimit: 3 },
+} as const;
+type PlanCode = keyof typeof PLANS;
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
   apiVersion: "2025-06-30.basil",
@@ -53,16 +68,20 @@ Deno.serve(async (request) => {
         metadata: { supabase_user_id: user.id, app: "kawaii_muslim_world" },
       });
       customerId = customer.id;
-      const { error: customerSaveError } = await admin.from("subscriptions").upsert({
-        user_id: user.id,
-        stripe_customer_id: customerId,
-        status: "incomplete",
-        plan_code: planCode,
-        price_id: selectedPlan.priceId,
-        child_limit: selectedPlan.childLimit,
-      }, { onConflict: "user_id" });
-      if (customerSaveError) throw customerSaveError;
     }
+
+    const { error: selectionSaveError } = await admin.from("subscriptions").upsert({
+      user_id: user.id,
+      stripe_customer_id: customerId,
+      stripe_subscription_id: null,
+      status: "incomplete",
+      plan_code: planCode,
+      price_id: selectedPlan.priceId,
+      child_limit: selectedPlan.childLimit,
+      cancel_at_period_end: false,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id" });
+    if (selectionSaveError) throw selectionSaveError;
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -70,7 +89,7 @@ Deno.serve(async (request) => {
       client_reference_id: user.id,
       line_items: [{ price: selectedPlan.priceId, quantity: 1 }],
       locale: "fr",
-      success_url: `${SITE_URL}/Compte.dc.html?abonnement=confirme&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${SITE_URL}/Profils.dc.html?abonnement=confirme&setup=1&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE_URL}/Compte.dc.html?abonnement=annule`,
       metadata: { supabase_user_id: user.id, plan_code: planCode },
       subscription_data: {

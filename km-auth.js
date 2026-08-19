@@ -232,6 +232,10 @@ window.KMAuth = (() => {
     }
   };
 
+  const clearActiveProfile = () => {
+    localStorage.removeItem(ACTIVE_PROFILE_KEY);
+  };
+
   const validateActiveProfile = context => {
     const active = getActiveProfile();
     if (active.type !== "child") {
@@ -262,6 +266,7 @@ window.KMAuth = (() => {
     verifyMFACode,
     clearUnverifiedMFAFactors,
     getActiveProfile,
+    clearActiveProfile,
     validateActiveProfile,
     setActiveProfile,
     getPlannerDays,
@@ -396,10 +401,12 @@ window.KMAuth = (() => {
     },
 
     login: async ({ email, password }) => {
-      return requireSuccess(await client().auth.signInWithPassword({
+      const data = requireSuccess(await client().auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password
       }));
+      clearActiveProfile();
+      return data;
     },
 
     reauthenticate: async password => {

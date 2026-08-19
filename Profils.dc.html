@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./responsive.css?v=tablet-20260818">
-  <link rel="stylesheet" href="./account.css?v=tablet-20260818">
+  <link rel="stylesheet" href="./account.css?v=family-profiles-20260819">
 </head>
 <body>
   <div class="account-shell">
@@ -30,12 +30,44 @@
           <h1 class="page-title">Qui utilise Kawaii Muslim ?</h1>
           <p>Choisis ton espace. Chaque profil garde sa propre progression.</p>
         </div>
-        <span class="badge">Espace familial sécurisé</span>
+        <span class="badge" id="familyOffer">Chargement de l’offre…</span>
       </header>
 
       <div class="mode-grid" id="profiles">
         <p class="loading">Chargement de ta famille…</p>
       </div>
+      <section class="profile-setup" id="profileSetup" hidden>
+        <div class="profile-setup-head">
+          <div>
+            <span class="badge">Nouveau profil enfant</span>
+            <h2 id="setupTitle">Configurons son espace</h2>
+            <p>Quelques informations suffisent. Sa progression, ses coloriages et ses étoiles resteront personnels.</p>
+          </div>
+          <button class="ghost-button" id="closeSetup" type="button">Fermer</button>
+        </div>
+        <form class="profile-setup-form" id="quickChildForm">
+          <label>
+            <span class="field-label">Prénom de l’enfant</span>
+            <input class="field-input" id="quickChildName" maxlength="40" placeholder="Exemple : Aya" required>
+          </label>
+          <label>
+            <span class="field-label">Tranche d’âge</span>
+            <select class="field-select" id="quickChildAge">
+              <option value="3-5">3 à 5 ans</option>
+              <option value="6-8" selected>6 à 8 ans</option>
+              <option value="9-12">9 à 12 ans</option>
+              <option value="13+">13 ans et plus</option>
+            </select>
+          </label>
+          <label>
+            <span class="field-label">Son symbole</span>
+            <select class="field-select" id="quickChildAvatar">
+              <option>🐤</option><option>👧</option><option>👦</option><option>🧒</option><option>⭐</option><option>🌱</option>
+            </select>
+          </label>
+          <button class="primary-button pink" id="saveChildProfile" type="submit">Créer son profil</button>
+        </form>
+      </section>
       <section class="team-zone" id="teamZone" hidden>
         <div class="team-zone-copy">
           <span class="badge team-badge">Accès professionnel</span>
@@ -50,27 +82,53 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js"></script>
+  <script src="./km-auth.js?v=family-profiles-20260819"></script>
   <script>
     const profiles = document.getElementById("profiles");
     const teamZone = document.getElementById("teamZone");
     const teamProfile = document.getElementById("teamProfile");
     const message = document.getElementById("message");
+    const familyOffer = document.getElementById("familyOffer");
+    const profileSetup = document.getElementById("profileSetup");
+    const quickChildForm = document.getElementById("quickChildForm");
+    const activeBillingStatuses = new Set(["active", "trialing", "past_due"]);
+    let context = null;
+    let subscription = null;
+    let childLimit = 1;
 
     const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
     })[character]);
 
-    const choose = (selection, target = "Aujourd%27hui.dc.html") => {
+    const choose = selection => {
       KMAuth.setActiveProfile(selection);
+      const target = sessionStorage.getItem("km-after-profile") || "Aujourd%27hui.dc.html";
+      sessionStorage.removeItem("km-after-profile");
       window.location.href = target;
     };
 
-    KMAuth.getContext().then(context => {
-      if (!context) {
-        window.location.href = "Connexion.dc.html";
-        return;
+    const wait = delay => new Promise(resolve => setTimeout(resolve, delay));
+
+    const refreshSubscription = async waitForActivation => {
+      const attempts = waitForActivation ? 8 : 1;
+      for (let attempt = 0; attempt < attempts; attempt += 1) {
+        subscription = await KMAuth.getSubscription();
+        if (!subscription || activeBillingStatuses.has(subscription.status)) break;
+        if (attempt < attempts - 1) await wait(700);
       }
+      const active = activeBillingStatuses.has(subscription?.status);
+      childLimit = active
+        ? Number(subscription.child_limit || 1)
+        : Math.max(1, context.children.length);
+      familyOffer.textContent = active
+        ? `1 parent + ${childLimit} enfant${childLimit > 1 ? "s" : ""}`
+        : subscription?.status === "incomplete"
+          ? "Activation de l’abonnement…"
+          : `1 parent + ${childLimit} enfant${childLimit > 1 ? "s" : ""}`;
+      return active;
+    };
+
+    const renderProfiles = () => {
       const cards = [{
         type: "parent",
         id: null,
@@ -85,7 +143,8 @@
         label: `Profil enfant · ${child.age_group} ans`
       }))];
 
-      profiles.innerHTML = cards.map(card => `
+      const remainingSlots = Math.max(0, childLimit - context.children.length);
+      const profileCards = cards.map(card => `
         <button class="mode-card" type="button"
           data-type="${card.type}" data-id="${card.id || ""}"
           data-name="${escapeHtml(card.name)}" data-avatar="${escapeHtml(card.avatar)}">
@@ -94,6 +153,15 @@
           <small>${escapeHtml(card.label)}</small>
         </button>
       `).join("");
+      const emptyCards = Array.from({ length: remainingSlots }, (_, index) => `
+        <button class="mode-card empty-profile-card" type="button" data-create-child="${context.children.length + index + 1}">
+          <span class="profile-avatar">＋</span>
+          <strong>Créer le profil enfant ${context.children.length + index + 1}</strong>
+          <small>Emplacement inclus dans ton offre</small>
+        </button>
+      `).join("");
+      profiles.innerHTML = profileCards + emptyCards;
+
       const hasTeamAccess = ["admin", "support", "content_admin"].includes(context.profile.role);
       teamZone.hidden = !hasTeamAccess;
       teamProfile.innerHTML = hasTeamAccess ? `
@@ -103,7 +171,27 @@
           <small>${context.profile.role === "admin" ? "Super-administration" : context.profile.role === "support" ? "Support client" : "Gestion des contenus"}</small>
         </button>
       ` : "";
-    }).catch(error => {
+    };
+
+    const load = async () => {
+      context = await KMAuth.getContext();
+      if (!context) {
+        window.location.href = "Connexion.dc.html";
+        return;
+      }
+      KMAuth.clearActiveProfile();
+      const paymentReturn = new URLSearchParams(window.location.search).get("abonnement") === "confirme";
+      const active = await refreshSubscription(paymentReturn);
+      renderProfiles();
+      if (paymentReturn && active && context.children.length < childLimit) {
+        message.className = "form-message success";
+        message.textContent = `Paiement confirmé. Tu peux maintenant créer ${childLimit - context.children.length} profil${childLimit - context.children.length > 1 ? "s" : ""} enfant.`;
+      } else if (paymentReturn && !active) {
+        message.textContent = "Le paiement est confirmé. L’activation des profils se termine, actualise dans quelques secondes.";
+      }
+    };
+
+    load().catch(error => {
       message.textContent = KMAuth.friendlyError(error);
       profiles.innerHTML = "";
     });
@@ -111,6 +199,13 @@
     profiles.addEventListener("click", event => {
       const card = event.target.closest(".mode-card");
       if (!card) return;
+      if (card.dataset.createChild) {
+        document.getElementById("setupTitle").textContent = `Créer le profil enfant ${card.dataset.createChild}`;
+        profileSetup.hidden = false;
+        document.getElementById("quickChildName").focus();
+        profileSetup.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
       if (card.dataset.admin) {
         window.location.href = "Admin.dc.html";
         return;
@@ -121,6 +216,40 @@
         name: card.dataset.name,
         avatar: card.dataset.avatar
       });
+    });
+
+    document.getElementById("closeSetup").addEventListener("click", () => {
+      profileSetup.hidden = true;
+      quickChildForm.reset();
+      document.getElementById("quickChildAge").value = "6-8";
+    });
+
+    quickChildForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const saveButton = document.getElementById("saveChildProfile");
+      saveButton.disabled = true;
+      saveButton.textContent = "Création…";
+      message.textContent = "";
+      try {
+        await KMAuth.addChild({
+          name: document.getElementById("quickChildName").value,
+          ageGroup: document.getElementById("quickChildAge").value,
+          avatar: document.getElementById("quickChildAvatar").value
+        });
+        context = await KMAuth.getContext();
+        renderProfiles();
+        profileSetup.hidden = true;
+        quickChildForm.reset();
+        document.getElementById("quickChildAge").value = "6-8";
+        message.className = "form-message success";
+        message.textContent = "Le profil enfant est prêt. Il peut maintenant choisir son espace.";
+      } catch (error) {
+        message.className = "form-message";
+        message.textContent = KMAuth.friendlyError(error);
+      } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = "Créer son profil";
+      }
     });
 
     teamProfile.addEventListener("click", event => {
