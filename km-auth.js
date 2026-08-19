@@ -455,6 +455,36 @@ window.KMAuth = (() => {
       return requireSuccess(await client().from("child_profiles").delete().eq("id", id));
     },
 
+    getSubscription: async () => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      return requireSuccess(await client().from("subscriptions")
+        .select("plan_code,child_limit,status,cancel_at_period_end,current_period_end,price_id")
+        .eq("user_id", session.user.id)
+        .maybeSingle());
+    },
+
+    startCheckout: async planCode => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      const result = await client().functions.invoke("create-checkout-session", {
+        body: { planCode }
+      });
+      const data = requireSuccess(result);
+      if (!data?.url) throw new Error("Le paiement ne peut pas s’ouvrir pour le moment.");
+      window.location.assign(data.url);
+    },
+
+    openBillingPortal: async () => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      const data = requireSuccess(await client().functions.invoke("create-portal-session", {
+        body: {}
+      }));
+      if (!data?.url) throw new Error("L’espace de gestion ne peut pas s’ouvrir pour le moment.");
+      window.location.assign(data.url);
+    },
+
     listFamilies: async () => {
       return requireSuccess(await client().rpc("staff_list_families")) || [];
     },

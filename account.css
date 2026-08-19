@@ -149,6 +149,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .dash-card { padding: 27px; border: 1px solid var(--line); border-radius: 25px; background: rgba(255,255,255,.95); box-shadow: 0 13px 35px rgba(35,42,82,.07); }
 .dash-card.full { grid-column: 1 / -1; }
 .dash-card h2 { margin: 0 0 17px; font-family: "Baloo 2", cursive; font-size: 22px; }
+.subscription-summary { padding:20px; margin-bottom:16px; border-radius:22px; background:linear-gradient(150deg,#fdeff5,#f4f1ff); }
+.subscription-price { margin:12px 0 1px; color:#232a52; font-family:"Baloo 2",cursive; font-size:34px; font-weight:800; line-height:1; }
+.subscription-breakdown { margin:0; color:#6a6480; font-size:13px; font-weight:800; }
+.subscription-intro { margin:0 0 15px; color:#5f5975; font-size:13px; line-height:1.55; }
+.plan-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+.plan-option { cursor:pointer; min-width:0; padding:14px 8px; color:var(--ink); border:2px solid #ebe7f0; border-radius:18px; background:#fff; text-align:center; transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease; }
+.plan-option:hover,.plan-option.selected { transform:translateY(-2px); border-color:#e27fae; box-shadow:0 10px 22px rgba(226,127,174,.16); }
+.plan-option:disabled { cursor:wait; opacity:.7; }
+.plan-option span,.plan-option strong,.plan-option small { display:block; }
+.plan-children { color:#8a4870; font-size:11px; font-weight:900; }
+.plan-option strong { margin:5px 0 0; font-family:"Baloo 2",cursive; font-size:22px; line-height:1; }
+.plan-option small { color:var(--muted); font-size:9px; font-weight:800; }
+.subscription-card > .primary-button { margin-top:14px; }
+.billing-note { margin:12px 0 0; color:#7a748d; font-size:10px; font-weight:800; text-align:center; }
 .profile-list, .family-list { display: grid; gap: 11px; }
 .profile-card {
   display: flex;
@@ -245,6 +259,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .page-head { display: block; }
   .page-head .badge { margin-top: 12px; }
   .dash-card { padding: 20px 16px; border-radius: 21px; }
+  .plan-options { grid-template-columns:1fr; }
+  .plan-option { display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:8px; padding:12px 14px; text-align:left; }
+  .plan-option strong { margin:0; font-size:20px; }
   .mode-grid, .stats { grid-template-columns: 1fr; }
   .profile-card { align-items: flex-start; }
   .card-actions { flex-direction: column; }

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./responsive.css?v=tablet-20260818">
-  <link rel="stylesheet" href="./account.css?v=tablet-20260818">
+  <link rel="stylesheet" href="./account.css?v=billing-20260819">
 </head>
 <body>
   <div class="account-shell">
@@ -48,16 +48,28 @@
           </form>
         </section>
 
-        <section class="dash-card">
+        <section class="dash-card subscription-card">
           <h2>Mon abonnement famille</h2>
-          <div style="background:linear-gradient(150deg,#FDEFF5,#F4F1FF); border-radius:22px; padding:22px; margin-bottom:18px;">
+          <div class="subscription-summary">
             <span class="badge" id="subscriptionStatus">Tarif famille</span>
-            <p style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:38px; color:#232A52; margin:14px 0 2px;" id="familyPrice">4,99€/mois</p>
-            <p style="color:#6a6480; margin:0;" id="familyBreakdown">1 parent + 1 enfant inclus</p>
+            <p class="subscription-price" id="familyPrice">Dès 4,99€/mois</p>
+            <p class="subscription-breakdown" id="familyBreakdown">Choisis le nombre de profils enfants</p>
           </div>
-          <p style="color:#5f5975; line-height:1.6; margin:0 0 8px;">Choisis une offre pour <strong style="color:#b95383;">1, 2 ou 3 enfants</strong>. Tu peux passer à l’offre supérieure plus tard.</p>
-          <p style="color:#7a748d;font-size:12px;line-height:1.5;margin:0 0 18px;">Le paiement en ligne arrive bientôt. Pour l’instant, l’équipe répond personnellement à ta demande.</p>
-          <a class="primary-button pink" id="subscriptionAction" href="Support.dc.html?category=abonnement&children=1" style="display:block; text-align:center; text-decoration:none;">Contacter l’équipe pour m’abonner</a>
+          <p class="subscription-intro">Une seule formule familiale, adaptée au nombre d’enfants. Tu pourras changer d’offre ou arrêter depuis ton espace sécurisé.</p>
+          <div class="plan-options" id="planOptions" aria-label="Choisir une offre">
+            <button class="plan-option" type="button" data-plan="family_1_child" data-limit="1">
+              <span class="plan-children">1 enfant</span><strong>4,99€</strong><small>par mois</small>
+            </button>
+            <button class="plan-option" type="button" data-plan="family_2_children" data-limit="2">
+              <span class="plan-children">2 enfants</span><strong>5,98€</strong><small>par mois</small>
+            </button>
+            <button class="plan-option" type="button" data-plan="family_3_children" data-limit="3">
+              <span class="plan-children">3 enfants</span><strong>6,97€</strong><small>par mois</small>
+            </button>
+          </div>
+          <button class="primary-button pink" id="subscriptionAction" type="button" hidden>Gérer mon abonnement</button>
+          <p class="billing-note">Paiement sécurisé par Stripe · Annulation depuis ton compte</p>
+          <p class="form-message" id="billingMessage" role="status"></p>
         </section>
 
         <section class="dash-card">
@@ -92,11 +104,13 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js"></script>
+  <script src="./km-auth.js?v=billing-20260819"></script>
   <script>
     let context = null;
     const children = document.getElementById("children");
     const message = document.getElementById("message");
+    const billingMessage = document.getElementById("billingMessage");
+    const activeBillingStatuses = new Set(["active", "trialing", "past_due"]);
 
     const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
@@ -137,23 +151,70 @@
       document.getElementById("roleBadge").textContent = roleLabels[context.profile.role] || "Compte parent";
       document.getElementById("parentName").value = context.profile.full_name || "";
       document.getElementById("parentAvatar").value = context.profile.avatar || "🌸";
-      const billedChildren = Math.min(3, Math.max(1, context.children.length));
-      const extraChildren = Math.max(0, billedChildren - 1);
-      const familyTotal = (4.99 + extraChildren * 0.99).toFixed(2).replace(".", ",");
-      const subscribed = ["mensuel", "annuel"].includes(context.profile.plan);
-      document.getElementById("familyPrice").textContent = familyTotal + "€/mois";
-      document.getElementById("familyBreakdown").textContent = extraChildren
-        ? `1 enfant inclus + ${extraChildren} enfant${extraChildren > 1 ? "s" : ""} supplémentaire${extraChildren > 1 ? "s" : ""}`
-        : "1 parent + 1 enfant inclus";
-      document.getElementById("subscriptionStatus").textContent = subscribed ? "✓ Abonnement actif" : "7 jours gratuits";
-      document.getElementById("subscriptionAction").textContent = subscribed ? "Contacter l’équipe pour gérer mon abonnement" : "Contacter l’équipe pour m’abonner";
-      document.getElementById("subscriptionAction").href = `Support.dc.html?category=abonnement&children=${billedChildren}`;
+      context.subscription = await KMAuth.getSubscription();
+      const subscribed = activeBillingStatuses.has(context.subscription?.status);
+      const childLimit = subscribed ? context.subscription.child_limit : 1;
+      const prices = { 1: "4,99", 2: "5,98", 3: "6,97" };
+      document.getElementById("subscriptionStatus").textContent = subscribed
+        ? (context.subscription.cancel_at_period_end ? "Actif · arrêt programmé" : "✓ Abonnement actif")
+        : "Choisis ton offre";
+      document.getElementById("familyPrice").textContent = subscribed
+        ? `${prices[childLimit]}€/mois`
+        : "Dès 4,99€/mois";
+      document.getElementById("familyBreakdown").textContent = subscribed
+        ? `1 parent + ${childLimit} profil${childLimit > 1 ? "s" : ""} enfant${childLimit > 1 ? "s" : ""}`
+        : "1 parent et jusqu’à 3 enfants";
+      document.querySelectorAll(".plan-option").forEach(option => {
+        option.hidden = subscribed;
+        option.classList.toggle("selected", Number(option.dataset.limit) === childLimit);
+      });
+      const subscriptionAction = document.getElementById("subscriptionAction");
+      subscriptionAction.hidden = !subscribed;
       const childSubmitButton = document.querySelector("#childForm button[type='submit']");
-      const childLimitReached = context.children.length >= 3;
+      const childLimitReached = context.children.length >= childLimit;
       childSubmitButton.disabled = childLimitReached;
-      childSubmitButton.textContent = childLimitReached ? "3 profils enfants maximum" : "Ajouter ce profil";
+      childSubmitButton.textContent = childLimitReached ? `Limite de l’offre : ${childLimit} enfant${childLimit > 1 ? "s" : ""}` : "Ajouter ce profil";
       renderChildren();
     };
+
+    document.getElementById("planOptions").addEventListener("click", async event => {
+      const option = event.target.closest("[data-plan]");
+      if (!option) return;
+      const buttons = [...document.querySelectorAll(".plan-option")];
+      buttons.forEach(button => button.disabled = true);
+      option.classList.add("selected");
+      billingMessage.className = "form-message success";
+      billingMessage.textContent = "Ouverture du paiement sécurisé…";
+      try {
+        await KMAuth.startCheckout(option.dataset.plan);
+      } catch (error) {
+        buttons.forEach(button => button.disabled = false);
+        option.classList.remove("selected");
+        billingMessage.className = "form-message";
+        billingMessage.textContent = KMAuth.friendlyError(error);
+      }
+    });
+
+    document.getElementById("subscriptionAction").addEventListener("click", async event => {
+      event.currentTarget.disabled = true;
+      billingMessage.className = "form-message success";
+      billingMessage.textContent = "Ouverture de ton espace sécurisé…";
+      try {
+        await KMAuth.openBillingPortal();
+      } catch (error) {
+        event.currentTarget.disabled = false;
+        billingMessage.className = "form-message";
+        billingMessage.textContent = KMAuth.friendlyError(error);
+      }
+    });
+
+    const billingResult = new URLSearchParams(window.location.search).get("abonnement");
+    if (billingResult === "confirme") {
+      billingMessage.className = "form-message success";
+      billingMessage.textContent = "Merci ! Ton paiement est confirmé. L’activation se termine automatiquement.";
+    } else if (billingResult === "annule") {
+      billingMessage.textContent = "Aucun paiement n’a été effectué. Tu peux choisir une offre quand tu veux.";
+    }
 
     document.getElementById("parentForm").addEventListener("submit", async event => {
       event.preventDefault();
