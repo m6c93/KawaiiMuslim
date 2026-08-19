@@ -75,7 +75,7 @@
     const activeProfile=(()=>{try{return JSON.parse(localStorage.getItem("km-active-profile-v2"))||{}}catch{return{}}})();
     const progressKey=`km-reading:miracles-du-coran:${activeProfile.id||"parent"}`;
     const queryPage=Number(new URLSearchParams(location.search).get("page"));
-    let position=Math.max(0,Math.min(TOTAL,queryPage||Number(localStorage.getItem(progressKey))||0)),touchX=0,touchY=0,turning=false,soundOn=true,mobileMode=matchMedia("(max-width:700px)").matches;
+    let position=Math.max(0,Math.min(TOTAL,queryPage||Number(localStorage.getItem(progressKey))||0)),touchX=0,touchY=0,touchGestureBlocked=false,turning=false,soundOn=true,mobileMode=matchMedia("(max-width:700px)").matches;
     const isMobile=()=>matchMedia("(max-width:700px)").matches;
     const maxPosition=()=>isMobile()?TOTAL:Math.ceil(TOTAL/2);
     const pagesFor=pos=>!pos?[0,0]:isMobile()?[pos,0]:[(pos-1)*2+1,(pos-1)*2+2];
@@ -152,7 +152,11 @@
     function buildThumbs(){if(els.thumbs.children.length)return;const fragment=document.createDocumentFragment();for(let n=1;n<=TOTAL;n++){const btn=document.createElement("button");btn.className="thumb";btn.type="button";btn.innerHTML=`<img loading="lazy" src="${pageSrc(n)}" alt="Page ${n}"><span>${n}</span>`;btn.addEventListener("click",()=>{go(isMobile()?n:Math.ceil(n/2));closeDrawer()});fragment.appendChild(btn)}els.thumbs.appendChild(fragment)}
     function openDrawer(){buildThumbs();els.drawer.classList.add("open");els.drawer.setAttribute("aria-hidden","false");els.scrim.hidden=false}function closeDrawer(){els.drawer.classList.remove("open");els.drawer.setAttribute("aria-hidden","true");els.scrim.hidden=true}
     $("openBtn").addEventListener("click",()=>go(1));els.prev.addEventListener("click",()=>go(position-1));els.next.addEventListener("click",()=>go(position+1));els.progress.addEventListener("input",event=>go(Number(event.target.value)));$("gridBtn").addEventListener("click",openDrawer);$("closeDrawer").addEventListener("click",closeDrawer);els.scrim.addEventListener("click",closeDrawer);els.sound.addEventListener("click",()=>{soundOn=!soundOn;els.sound.textContent=soundOn?"♪":"×"});$("fullscreenBtn").addEventListener("click",()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());
-    document.addEventListener("keydown",event=>{if(event.key==="ArrowRight"||event.key===" ")go(position+1);if(event.key==="ArrowLeft")go(position-1);if(event.key==="Escape")closeDrawer()});els.book.addEventListener("touchstart",event=>{touchX=event.changedTouches[0].clientX;touchY=event.changedTouches[0].clientY},{passive:true});els.book.addEventListener("touchend",event=>{const dx=event.changedTouches[0].clientX-touchX,dy=event.changedTouches[0].clientY-touchY;if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.25)go(position+(dx<0?1:-1))},{passive:true});
+    document.addEventListener("keydown",event=>{if(event.key==="ArrowRight"||event.key===" ")go(position+1);if(event.key==="ArrowLeft")go(position-1);if(event.key==="Escape")closeDrawer()});
+    els.book.addEventListener("touchstart",event=>{if(event.touches.length!==1){touchGestureBlocked=true;return}if(touchGestureBlocked)return;touchX=event.touches[0].clientX;touchY=event.touches[0].clientY},{passive:true});
+    els.book.addEventListener("touchmove",event=>{if(event.touches.length>1)touchGestureBlocked=true},{passive:true});
+    els.book.addEventListener("touchend",event=>{if(touchGestureBlocked){if(event.touches.length===0)touchGestureBlocked=false;return}const dx=event.changedTouches[0].clientX-touchX,dy=event.changedTouches[0].clientY-touchY;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.35)go(position+(dx<0?1:-1))},{passive:true});
+    els.book.addEventListener("touchcancel",()=>{touchGestureBlocked=false},{passive:true});
     window.addEventListener("resize",()=>{const nextMobile=isMobile();if(nextMobile!==mobileMode){const page=position?(mobileMode?position:(position-1)*2+1):0;position=page?(nextMobile?page:Math.ceil(page/2)):0;mobileMode=nextMobile}render()});render();
   </script>
 </body>

@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
 <title>TAWAKKUL — Le livre numérique</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -388,9 +388,11 @@ window.__PAGES = ["data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1
     else if(e.key==='Home'){ si=0; render(); }
     else if(e.key==='End'){ si=NUM-1; render(); }
   });
-  var sx=0,sy=0,sw=false;
-  book.addEventListener('touchstart', function(e){ if(e.touches.length!==1)return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; sw=true; }, {passive:true});
-  book.addEventListener('touchend', function(e){ if(!sw)return; sw=false; var dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy; if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)){ go(dx<0?1:-1); } }, {passive:true});
+  var sx=0,sy=0,sw=false,touchGestureBlocked=false;
+  book.addEventListener('touchstart', function(e){ if(e.touches.length!==1){touchGestureBlocked=true;sw=false;return;} if(touchGestureBlocked)return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; sw=true; }, {passive:true});
+  book.addEventListener('touchmove', function(e){ if(e.touches.length>1){touchGestureBlocked=true;sw=false;} }, {passive:true});
+  book.addEventListener('touchend', function(e){ if(touchGestureBlocked){if(e.touches.length===0)touchGestureBlocked=false;return;} if(!sw)return; sw=false; var dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy; if(Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)*1.35){ go(dx<0?1:-1); } }, {passive:true});
+  book.addEventListener('touchcancel', function(){touchGestureBlocked=false;sw=false;}, {passive:true});
 
   document.getElementById('thumbBtn').addEventListener('click', function(){ var open=thumbs.classList.toggle('open'); this.classList.toggle('active', open); if(open){ populateThumbs(); updateThumbsActive(); } });
   document.getElementById('restart').addEventListener('click', function(){ si=0; render(); });
