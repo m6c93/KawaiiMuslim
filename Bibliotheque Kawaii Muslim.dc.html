@@ -13,6 +13,21 @@
     min-height: 100%;
     background-color: #141a3c;
   }
+  .km-library-boot {
+    position: fixed;
+    z-index: 1100;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    color: #fff;
+    text-align: center;
+    background: radial-gradient(circle at 50% 22%, #33419a, #141a3c 62%);
+  }
+  .km-library-boot img { width: 76px; height: 76px; object-fit: contain; border-radius: 50%; background: #fff; }
+  .km-library-boot strong { display: block; margin-top: 16px; font: 800 22px/1.15 system-ui, sans-serif; }
+  .km-library-boot span { display: block; margin-top: 7px; color: #d7d8eb; font: 700 13px/1.4 system-ui, sans-serif; }
+  .km-library-boot.is-ready { display: none; }
 </style>
 <link rel="stylesheet" href="./responsive.css?v=tablet-20260818">
 <script src="./support.js"></script>
@@ -20,6 +35,28 @@
   <script src="./km-bottom-nav.js?v=nav-scroll-fix-20260819"></script>
 </head>
 <body class="km-responsive km-library" data-km-section="library">
+<div class="km-library-boot" id="kmLibraryBoot" role="status" aria-live="polite">
+  <div><img src="brand/assets/mascot-nour.png" alt=""><strong>Ouverture de ta bibliothèque…</strong><span>On prépare tes livres.</span></div>
+</div>
+<script>
+  (() => {
+    const boot = document.getElementById("kmLibraryBoot");
+    const finish = () => {
+      const root = document.getElementById("dc-root");
+      if (root && root.firstElementChild) {
+        boot?.classList.add("is-ready");
+        return true;
+      }
+      return false;
+    };
+    if (!finish()) {
+      const observer = new MutationObserver(() => {
+        if (finish()) observer.disconnect();
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    }
+  })();
+</script>
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -135,10 +172,15 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .km-library *, .km-library *::before, .km-library *::after {
+    .km-star-field,
+    .km-moon,
+    .km-reading-cover,
+    .km-reading-button,
+    .km-progress-fill::after,
+    .km-read-label,
+    .km-motion-ready [data-km-reveal] {
       animation-duration:.001ms !important;
       animation-iteration-count:1 !important;
-      scroll-behavior:auto !important;
       transition-duration:.001ms !important;
     }
     .km-motion-ready [data-km-reveal] { opacity:1 !important; transform:none !important; }

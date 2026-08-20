@@ -7,7 +7,9 @@
   const page = decodeURIComponent(window.location.pathname.split("/").pop() || "index.html").toLowerCase();
   const teamPages = new Set(["index.html", "connexion.dc.html", "mfa.dc.html", "admin.dc.html"]);
   const teamPreview = localStorage.getItem("km-site-preview") === "staff";
-  if (!teamPages.has(page) && !teamPreview) {
+  const localPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
+    && new URLSearchParams(window.location.search).get("preview") === "1";
+  if (!teamPages.has(page) && !teamPreview && !localPreview) {
     window.location.replace("/");
   }
 })();
@@ -15,7 +17,7 @@
 </script>
 
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#34386f">
   <title>Safe Place — Mes invocations</title>
 <link rel="stylesheet" href="./responsive.css?v=tablet-20260818">

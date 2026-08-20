@@ -80,13 +80,12 @@
       });
       sessionStorage.setItem("km-nav-index", String(nextIndex));
       sessionStorage.setItem(transitionKey, "1");
-      document.documentElement.classList.add("km-page-leaving");
       document.body.classList.add("km-nav-leaving");
       var cleanTarget = new URL(link.href, window.location.href);
       if (localPreview) cleanTarget.searchParams.set("preview", "1");
       window.setTimeout(function () {
         window.location.assign(cleanTarget.href);
-      }, 110);
+      }, 70);
     });
 
     window.addEventListener("message", function (event) {

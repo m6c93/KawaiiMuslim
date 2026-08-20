@@ -10,26 +10,9 @@ html {
   background: #171b48;
 }
 
-@view-transition {
-  navigation: auto;
-}
-
-::view-transition-old(root) {
-  animation: km-page-old .28s cubic-bezier(.4, 0, 1, 1) both;
-}
-
-::view-transition-new(root) {
-  animation: km-page-new .42s cubic-bezier(.22, 1, .36, 1) both;
-}
-
-@keyframes km-page-old {
-  to { opacity: 0; transform: scale(.992); filter: blur(2px); }
-}
-
-@keyframes km-page-new {
-  from { opacity: 0; transform: translateY(9px) scale(.995); filter: blur(3px); }
-  to { opacity: 1; transform: none; filter: none; }
-}
+/* Safari iPad pouvait conserver une image de l'ancienne page pendant une
+   transition entre documents. La navigation garde son animation propre sans
+   superposer deux pages complètes. */
 
 html::after {
   content: "";
@@ -48,17 +31,8 @@ html::after {
   transition: opacity .28s ease;
 }
 
-html.km-page-leaving::after,
 html.km-page-entering::after {
-  opacity: 1;
-}
-
-html.km-page-leaving::after {
-  transition-duration: .12s;
-}
-
-html.km-page-entering::after {
-  animation: km-veil-out .44s .06s cubic-bezier(.22, 1, .36, 1) forwards;
+  animation: km-veil-out .24s cubic-bezier(.22, 1, .36, 1) forwards;
 }
 
 body.km-shell-child {
@@ -180,11 +154,7 @@ body.km-immersive-reader .km-app-nav {
   outline-offset: -4px;
 }
 
-body.km-nav-leaving > :not(.km-app-nav) {
-  transition: opacity .25s ease, transform .25s ease;
-  opacity: .58;
-  transform: translateY(5px) scale(.997);
-}
+body.km-nav-leaving { overflow: hidden; }
 
 @media (hover: hover) {
   .km-app-nav a:hover {
@@ -221,6 +191,18 @@ body.km-nav-leaving > :not(.km-app-nav) {
     height: 24px;
     font-size: 22px;
   }
+}
+
+@media (orientation: landscape) and (min-width: 700px) and (max-height: 900px) {
+  :root { --km-nav-height: 72px; }
+  .km-app-nav {
+    width: min(calc(100% - 40px), 960px);
+    min-height: 72px;
+    padding: 7px;
+    border-radius: 23px;
+  }
+  .km-nav-indicator { top: 7px; bottom: 7px; left: 7px; width: calc((100% - 14px) / 5); }
+  .km-app-nav a { min-height: 56px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -27,7 +27,7 @@ body {
   max-width: 100%;
   min-height: 100dvh;
   margin: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body.km-library {
@@ -189,6 +189,27 @@ a, button, [role="button"], [onclick], [onClick] {
   max-width: none !important;
 }
 
+/* Une seule surface verticale doit défiler. Le conteneur interne plein écran
+   pouvait faire défiler une couche différente de celle visible sur iPad. */
+.km-library x-dc > div,
+.km-library #dc-root > .sc-host > div {
+  height: auto !important;
+  min-height: 100dvh !important;
+}
+
+.km-library x-dc > div > div,
+.km-library #dc-root > .sc-host > div > div {
+  height: auto !important;
+  min-height: 100dvh !important;
+  overflow: visible !important;
+}
+
+.km-library [style*="height:calc(100% - 86px)"] {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow-y: visible !important;
+}
+
 @media (max-width: 900px) {
   .km-library .km-library-topbar {
     display:grid !important;
@@ -266,6 +287,15 @@ a, button, [role="button"], [onclick], [onClick] {
 
   .km-library [style*="width:240px"] {
     width: min(100%, 300px) !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 900px) {
+  .km-library .km-book-grid,
+  .km-library .km-coloring-grid,
+  .km-library [style*="grid-template-columns:repeat(4,1fr)"],
+  .km-library [style*="grid-template-columns:repeat(5,1fr)"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 }
 
