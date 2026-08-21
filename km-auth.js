@@ -412,6 +412,12 @@ window.KMAuth = (() => {
       return data;
     },
 
+    clearPendingPlan: async () => {
+      return requireSuccess(await client().auth.updateUser({
+        data: { pending_plan_code: null }
+      }));
+    },
+
     login: async ({ email, password }) => {
       const data = requireSuccess(await client().auth.signInWithPassword({
         email: email.trim().toLowerCase(),

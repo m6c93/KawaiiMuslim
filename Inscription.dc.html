@@ -130,6 +130,7 @@
         if (data.session) {
           message.className = "form-message success";
           message.textContent = "Compte créé. Ouverture du paiement sécurisé…";
+          await KMAuth.clearPendingPlan();
           await KMAuth.startCheckout(planCode);
           return;
         }

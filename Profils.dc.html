@@ -187,13 +187,16 @@
       const paymentReturn = params.get("abonnement") === "confirme";
       const checkoutPlan = validCheckoutPlans.has(params.get("checkout_plan"))
         ? params.get("checkout_plan")
-        : "";
+        : validCheckoutPlans.has(context.session.user.user_metadata?.pending_plan_code)
+          ? context.session.user.user_metadata.pending_plan_code
+          : "";
       const active = await refreshSubscription(paymentReturn);
       if (checkoutPlan && !active && subscription?.status !== "incomplete") {
         profiles.innerHTML = "";
         familyOffer.textContent = "Paiement sécurisé";
         message.className = "form-message success";
         message.textContent = "Adresse confirmée. Ouverture du paiement sécurisé…";
+        await KMAuth.clearPendingPlan();
         await KMAuth.startCheckout(checkoutPlan);
         return;
       }
