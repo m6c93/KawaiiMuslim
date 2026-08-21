@@ -1,14 +1,21 @@
-/* Mode préouverture Kawaii Muslim — accès réservé à l’équipe */
+/* Vérification de l’abonnement avant l’ouverture des espaces membres. */
 (() => {
-  const page = decodeURIComponent(window.location.pathname.split("/").pop() || "index.html").toLowerCase();
-  const teamPages = new Set(["index.html", "connexion.dc.html", "mfa.dc.html", "admin.dc.html"]);
-  const teamPreview = localStorage.getItem("km-site-preview") === "staff";
-  const localDesignPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
+  const page = decodeURIComponent(window.location.pathname.split("/").pop() || "").toLowerCase();
+  const protectedPages = new Set([
+    "aujourd'hui.dc.html", "aujourd-hui.dc.html", "bibliotheque kawaii muslim.dc.html",
+    "atelier.dc.html", "safe place.dc.html", "boutique.dc.html", "coloriage.dc.html",
+    "livre.dc.html", "livrecoloriage.dc.html"
+  ]);
+  const localPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
     && new URLSearchParams(window.location.search).get("preview") === "1";
-  if (!teamPages.has(page) && !teamPreview && !localDesignPreview) {
-    window.location.replace("/");
-  }
+  if (!protectedPages.has(page) || localPreview || window.__kmAccessGateStarted) return;
+  document.documentElement.style.visibility = "hidden";
+  const script = document.createElement("script");
+  script.src = "/km-access-gate.js?v=subscription-live-1";
+  script.onerror = () => { document.documentElement.style.visibility = "visible"; };
+  document.head.appendChild(script);
 })();
+
 /* Kawaii Muslim — authentification Supabase sécurisée */
 window.KMAuth = (() => {
   const ACTIVE_PROFILE_KEY = "km-active-profile-v2";
@@ -388,13 +395,18 @@ window.KMAuth = (() => {
         .delete().eq("id", id).eq("owner_id", session.user.id));
     },
 
-    signup: async ({ name, email, password }) => {
+    signup: async ({ name, email, password, planCode = "" }) => {
+      const validPlans = new Set(["family_1_child", "family_2_children", "family_3_children"]);
+      const selectedPlan = validPlans.has(planCode) ? planCode : "";
       const data = requireSuccess(await client().auth.signUp({
         email: email.trim().toLowerCase(),
         password,
         options: {
-          data: { full_name: name.trim() },
-          emailRedirectTo: `${window.location.origin}/Profils.dc.html`
+          data: {
+            full_name: name.trim(),
+            ...(selectedPlan ? { pending_plan_code: selectedPlan } : {})
+          },
+          emailRedirectTo: `${window.location.origin}/Profils.dc.html${selectedPlan ? `?checkout_plan=${encodeURIComponent(selectedPlan)}` : ""}`
         }
       }));
       return data;

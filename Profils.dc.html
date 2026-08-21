@@ -92,6 +92,7 @@
     const profileSetup = document.getElementById("profileSetup");
     const quickChildForm = document.getElementById("quickChildForm");
     const activeBillingStatuses = new Set(["active", "trialing", "past_due"]);
+    const validCheckoutPlans = new Set(["family_1_child", "family_2_children", "family_3_children"]);
     let context = null;
     let subscription = null;
     let childLimit = 0;
@@ -182,8 +183,20 @@
         return;
       }
       KMAuth.clearActiveProfile();
-      const paymentReturn = new URLSearchParams(window.location.search).get("abonnement") === "confirme";
+      const params = new URLSearchParams(window.location.search);
+      const paymentReturn = params.get("abonnement") === "confirme";
+      const checkoutPlan = validCheckoutPlans.has(params.get("checkout_plan"))
+        ? params.get("checkout_plan")
+        : "";
       const active = await refreshSubscription(paymentReturn);
+      if (checkoutPlan && !active && subscription?.status !== "incomplete") {
+        profiles.innerHTML = "";
+        familyOffer.textContent = "Paiement sécurisé";
+        message.className = "form-message success";
+        message.textContent = "Adresse confirmée. Ouverture du paiement sécurisé…";
+        await KMAuth.startCheckout(checkoutPlan);
+        return;
+      }
       renderProfiles();
       if (paymentReturn && active && context.children.length < childLimit) {
         message.className = "form-message success";

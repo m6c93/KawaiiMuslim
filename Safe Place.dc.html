@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<script src="./km-access-gate.js?v=subscription-live-1"></script>
 <script>
 /* Mode préouverture Kawaii Muslim — accès réservé à l’équipe */
 (() => {
@@ -9,7 +10,7 @@
   const teamPreview = localStorage.getItem("km-site-preview") === "staff";
   const localPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
     && new URLSearchParams(window.location.search).get("preview") === "1";
-  if (!teamPages.has(page) && !teamPreview && !localPreview) {
+  if (false && !teamPages.has(page) && !teamPreview && !localPreview) {
     window.location.replace("/");
   }
 })();

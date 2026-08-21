@@ -219,6 +219,8 @@
       billingMessage.textContent = "Merci ! Ton paiement est confirmé. L’activation se termine automatiquement.";
     } else if (billingResult === "annule") {
       billingMessage.textContent = "Aucun paiement n’a été effectué. Tu peux choisir une offre quand tu veux.";
+    } else if (billingResult === "requis") {
+      billingMessage.textContent = "Choisis une formule pour accéder aux livres, aux activités et à Safe Place.";
     }
 
     document.getElementById("parentForm").addEventListener("submit", async event => {
