@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<script src="./km-access-gate.js?v=subscription-live-1"></script>
 <script>
 /* Mode préouverture Kawaii Muslim — accès réservé à l’équipe */
 (() => {
@@ -9,7 +10,7 @@
   const teamPreview = localStorage.getItem("km-site-preview") === "staff";
   const localPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
     && new URLSearchParams(window.location.search).get("preview") === "1";
-  if (!teamPages.has(page) && !teamPreview && !localPreview) {
+  if (false && !teamPages.has(page) && !teamPreview && !localPreview) {
     window.location.replace("/");
   }
 })();
@@ -32,8 +33,11 @@
     @media(max-width:900px){.top{padding-inline:max(18px,env(safe-area-inset-left)) max(18px,env(safe-area-inset-right))}.nav{width:calc(100% - 12px)}.back{flex:0 0 auto;white-space:nowrap}.hero{display:block}.hero h1{font-size:clamp(40px,6.5vw,54px)}.sky-mini{width:min(100%,320px);margin-top:20px;padding:16px 12px}.needs{grid-template-columns:repeat(2,minmax(0,1fr))}.categories{grid-template-columns:repeat(2,minmax(0,1fr))}.learning-dashboard{grid-template-columns:1fr}}
     @media(max-width:560px){.top{padding:15px 16px 78px}.brand small{display:none}.back{width:42px;height:42px;padding:8px;font-size:0;text-align:center}.back:after{content:"←";font-size:18px}.hero{display:block;margin-top:32px}.sky-mini{display:none}.hero p{font-size:14px}.tabs{position:sticky;top:5px;z-index:6}.tab{min-height:44px;padding:11px 4px;font-size:11px}#learnCount{display:none}.moment{grid-template-columns:1fr;padding:20px}.moment .primary{width:100%}.welcome{padding:20px 15px}.needs{gap:8px}.need{min-height:112px;padding:14px 12px}.need strong{font-size:15px}.day-section{padding:20px 14px 22px}.day-section .section-head{margin-bottom:15px}.categories{gap:8px}.category{min-height:112px;padding:14px}.category strong{font-size:15px}.dua-row{grid-template-columns:45px 1fr auto;padding:13px 12px}.dua-top{padding:22px 17px 15px}.audio-studio{margin:0 14px}.arabic{padding:20px 17px 8px;font-size:30px}.phonetic{padding:15px 18px;font-size:15px}.translation{margin:0 14px 18px;padding:15px}.learning-box{margin:0 14px 18px;padding:14px}.steps{grid-template-columns:repeat(2,1fr)}.actions{grid-template-columns:1fr;padding:0 16px 18px}.extras{padding:17px}.section-head{align-items:center}.review-card{order:1;padding:20px;border:2px solid #ddd5ee}.sky-card{order:2;padding:18px}.sky-card .constellation{display:none;margin-top:14px}.sky-card.open .constellation{display:grid}.sky-toggle{display:block;width:100%;min-height:44px}.constellation{gap:7px}.star-node small{display:none}}
   </style>
+  <style>html.km-guest-safe .need{display:none}html.km-guest-safe .need[data-dua="yunus"],html.km-guest-safe .need[data-dua="children"]{display:block}html.km-guest-safe .needs{grid-template-columns:1fr 1fr}html.km-guest-safe .day-section{display:none}html.km-guest-safe .tabs .tab:nth-child(n+2){display:none}html.km-guest-safe .tabs{grid-template-columns:1fr}@media(max-width:650px){html.km-guest-safe .needs{grid-template-columns:1fr}html.km-guest-safe .km-guest-pill{display:none!important}}</style>
   <link rel="stylesheet" href="./km-bottom-nav.css?v=nav-scroll-fix-20260819">
   <script src="./km-bottom-nav.js?v=nav-scroll-fix-20260819"></script>
+  <script src="./km-config.js"></script>
+  <script src="./km-auth.js"></script>
 </head>
 <body data-km-section="invocations">
   <header class="top">
@@ -66,7 +70,7 @@
   <div class="celebrate" id="celebrate"><div class="celebrate-box"><i>★</i><b>Une nouvelle étoile s’illumine.</b><span>Mâ shâ Allah. Continue à revoir cette invocation pour la garder dans ton cœur.</span></div></div><div class="toast" id="toast"></div>
   <script>
   (()=>{"use strict";
-    const duas=[
+     let duas=[
       {id:"yunus",icon:"🕊️",category:"paix",categoryLabel:"Pour retrouver la paix",title:"Quand tout devient trop lourd",arabic:"لَا إِلَٰهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ",phonetic:"Lâ ilâha illâ Anta, subhânaka innî kuntu mina-dh-dhâlimîn.",translation:"Il n’est de divinité que Toi. Gloire à Toi ! J’ai vraiment été du nombre des injustes.",source:"Coran 21:87 — Invocation du prophète Yûnus",url:"https://quran.com/21/87"},
       {id:"anxiety",icon:"🌧️",category:"epreuve",categoryLabel:"Quand je suis inquiète",title:"Quand l’inquiétude devient trop lourde",arabic:"اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ، وَالْعَجْزِ وَالْكَسَلِ، وَالْجُبْنِ وَالْبُخْلِ، وَضَلَعِ الدَّيْنِ، وَغَلَبَةِ الرِّجَالِ",phonetic:"Allâhumma innî a‘ûdhu bika mina-l-hammi wa-l-hazan, wa-l-‘ajzi wa-l-kasal, wa-l-jubni wa-l-bukhl, wa dala‘i-d-dayni wa ghalabati-r-rijâl.",translation:"Ô Allah, je cherche refuge auprès de Toi contre l’angoisse et la tristesse, l’impuissance et la paresse, la lâcheté et l’avarice, le poids des dettes et la domination des hommes.",source:"Sahih al-Bukhari 6369",url:"https://sunnah.com/bukhari:6369"},
       {id:"children",icon:"🤍",category:"enfants",categoryLabel:"Pour mes enfants",title:"Pour protéger mes enfants",arabic:"أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّةِ مِنْ كُلِّ شَيْطَانٍ وَهَامَّةٍ، وَمِنْ كُلِّ عَيْنٍ لَامَّةٍ",phonetic:"A‘ûdhu bi-kalimâti-llâhi-t-tâmmah, min kulli shaytânin wa hâmmah, wa min kulli ‘aynin lâmmah.",translation:"Je cherche protection par les paroles parfaites d’Allah contre tout démon, toute créature nuisible et tout mauvais œil.",source:"Sahih al-Bukhari 3371",url:"https://sunnah.com/bukhari:3371"},
@@ -78,9 +82,12 @@
       {id:"trust",icon:"✨",category:"epreuve",categoryLabel:"Quand j’ai peur",title:"Quand j’ai besoin de placer ma confiance en Allah",arabic:"حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ",phonetic:"Hasbuna-llâhu wa ni‘ma-l-wakîl.",translation:"Allah nous suffit, et quel excellent Garant.",source:"Coran 3:173",url:"https://quran.com/3/173"},
       {id:"good",icon:"🌼",category:"famille",categoryLabel:"Pour ma famille",title:"Pour demander le bien ici-bas et dans l’au-delà",arabic:"رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",phonetic:"Rabbanâ âtinâ fi-d-dunyâ hasanatan wa fi-l-âkhirati hasanatan wa qinâ ‘adhâba-n-nâr.",translation:"Seigneur, accorde-nous une belle part ici-bas, une belle part dans l’au-delà, et protège-nous du châtiment du Feu.",source:"Coran 2:201",url:"https://quran.com/2/201"}
     ];
-    duas.forEach(d=>d.audio=`./audio/safe-place/${d.id}.mp3`);
+     const guestMode=new URLSearchParams(location.search).get('guest')==='1';
+     if(guestMode){document.documentElement.classList.add('km-guest-safe');duas=duas.filter(d=>['yunus','children'].includes(d.id))}
+     duas.forEach(d=>d.audio=`./audio/safe-place/${d.id}.mp3`);
     const categories=[["paix","🕊️","Paix du cœur"],["enfants","🤍","Pour mes enfants"],["epreuve","🌧️","Peur et épreuve"],["patience","🌿","Patience"],["matin","🌅","Matin et soir"],["sommeil","🌙","Avant de dormir"],["sortie","🚪","En sortant"],["gratitude","🌸","Remercier Allah"]];
-    const KEY="km-safe-duas-v1",state=(()=>{try{return JSON.parse(localStorage.getItem(KEY))||{}}catch{return{}}})();state.learning=state.learning||{};state.recited=state.recited||{};state.review=state.review||{};let activeTab="today",previousTab="today",activeId=null,filter=null,query="",currentAudio=null,audioTimer=null,repeatLeft=0,quizSessions={};
+    const activeProfile=window.KMAuth?.getActiveProfile?.()||{type:"parent",id:null},profileScope=activeProfile.type==="child"&&activeProfile.id?`child-${activeProfile.id}`:"parent",KEY=`km-safe-duas-v2:${profileScope}`,LEGACY_KEY="km-safe-duas-v1";
+    const state=(()=>{try{const own=localStorage.getItem(KEY);if(own)return JSON.parse(own)||{};const legacy=localStorage.getItem(LEGACY_KEY);const migrated=legacy?JSON.parse(legacy):{};localStorage.setItem(KEY,JSON.stringify(migrated||{}));return migrated||{}}catch{return{}}})();state.learning=state.learning||{};state.recited=state.recited||{};state.review=state.review||{};let activeTab="today",previousTab="today",activeId=null,filter=null,query="",currentAudio=null,audioTimer=null,repeatLeft=0,quizSessions={};
     const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],find=id=>duas.find(d=>d.id===id),save=()=>localStorage.setItem(KEY,JSON.stringify(state));
     const toast=m=>{$("#toast").textContent=m;$("#toast").classList.add("show");setTimeout(()=>$("#toast").classList.remove("show"),1900)};
     const stageLabel=n=>["À découvrir","Écoutée","Répétée","Mémorisée"][n]||"À découvrir";

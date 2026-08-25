@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#151b4d">
+  <title>Découvrir gratuitement — Kawaii Muslim World</title>
+  <meta name="description" content="Découvre gratuitement un livre, un coloriage et deux invocations de Kawaii Muslim World, sans carte bancaire.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Naskh+Arabic:wght@500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="decouverte.css?v=1">
+</head>
+<body>
+  <header class="discovery-header">
+    <a class="brand" href="index.html" aria-label="Revenir à l’accueil">
+      <img src="brand/assets/logo-kawaii-muslim.png" alt="">
+      <span>Kawaii Muslim <small>WORLD</small></span>
+    </a>
+    <div class="free-badge"><span></span> Mode Découverte · sans carte</div>
+    <a class="login-link" href="Connexion.dc.html">Déjà abonnée ?</a>
+  </header>
+
+  <main>
+    <section class="welcome">
+      <div class="welcome-copy">
+        <p class="eyebrow">Bienvenue dans ton aperçu gratuit</p>
+        <h1>Entre doucement dans notre univers.</h1>
+        <p>Feuillette quatre pages, essaie l’atelier et écoute deux invocations. Aucun compte ni carte bancaire n’est demandé.</p>
+      </div>
+      <img src="brand/assets/landing-tawakkul.webp" alt="Couverture d’un livre Kawaii Muslim World">
+    </section>
+
+    <nav class="experience-nav" aria-label="Les expériences gratuites">
+      <button class="experience-tab active" type="button" data-panel="book"><span>1</span><b>Lire</b><small>4 pages</small></button>
+      <button class="experience-tab" type="button" data-panel="color"><span>2</span><b>Colorier</b><small>1 création</small></button>
+      <button class="experience-tab" type="button" data-panel="duas"><span>3</span><b>Écouter</b><small>2 invocations</small></button>
+      <button class="experience-tab" type="button" data-panel="more"><span>4</span><b>Découvrir</b><small>Tout l’univers</small></button>
+    </nav>
+
+    <section class="experience-panel active" id="panel-book" data-panel-content="book">
+      <div class="panel-heading">
+        <div><p class="eyebrow">Ton livre offert</p><h2>Les Miracles du Coran</h2><p>Glisse la page ou utilise les flèches. Les quatre premières pages sont ouvertes.</p></div>
+        <span class="counter" id="bookCounter">Page 1 sur 4</span>
+      </div>
+      <div class="reader-card">
+        <button class="reader-arrow" id="bookPrev" type="button" aria-label="Page précédente">‹</button>
+        <figure class="reader-page"><img id="bookPage" src="brand/books/miracles-du-coran/page-01.jpg" alt="Page 1 du livre Les Miracles du Coran"></figure>
+        <button class="reader-arrow" id="bookNext" type="button" aria-label="Page suivante">›</button>
+      </div>
+      <div class="reader-progress"><i id="bookProgress"></i></div>
+    </section>
+
+    <section class="experience-panel" id="panel-color" data-panel-content="color" hidden>
+      <div class="panel-heading">
+        <div><p class="eyebrow">Ton coloriage offert</p><h2>Essaie les feutres numériques</h2><p>Choisis une couleur et dessine avec ton doigt ou ta souris. Cet essai reste uniquement sur cet écran.</p></div>
+        <button class="quiet-button" id="clearCanvas" type="button">Recommencer</button>
+      </div>
+      <div class="color-studio">
+        <div class="palette" aria-label="Choisir une couleur">
+          <button class="swatch active" type="button" data-color="#ef6fa9" style="--swatch:#ef6fa9" aria-label="Rose"></button>
+          <button class="swatch" type="button" data-color="#7756c9" style="--swatch:#7756c9" aria-label="Violet"></button>
+          <button class="swatch" type="button" data-color="#50b9c1" style="--swatch:#50b9c1" aria-label="Turquoise"></button>
+          <button class="swatch" type="button" data-color="#f2be43" style="--swatch:#f2be43" aria-label="Jaune"></button>
+          <button class="swatch" type="button" data-color="#65b978" style="--swatch:#65b978" aria-label="Vert"></button>
+          <button class="swatch" type="button" data-color="#363b68" style="--swatch:#363b68" aria-label="Bleu nuit"></button>
+        </div>
+        <div class="canvas-wrap"><canvas id="demoCanvas" width="900" height="900" aria-label="Coloriage interactif"></canvas></div>
+      </div>
+    </section>
+
+    <section class="experience-panel" id="panel-duas" data-panel-content="duas" hidden>
+      <div class="panel-heading">
+        <div><p class="eyebrow">Un aperçu de Safe Place</p><h2>De quoi ton cœur a-t-il besoin ?</h2><p>Choisis une invocation, lis la phonétique puis écoute-la.</p></div>
+      </div>
+      <div class="dua-choices">
+        <button class="dua-choice active" type="button" data-dua="yunus"><b>Retrouver la paix</b><small>Quand tout devient trop lourd</small></button>
+        <button class="dua-choice" type="button" data-dua="children"><b>Protéger mes enfants</b><small>Je les confie à Allah</small></button>
+      </div>
+      <article class="dua-card">
+        <p class="dua-context" id="duaContext">Quand tout devient trop lourd</p>
+        <p class="dua-arabic" id="duaArabic" lang="ar" dir="rtl"></p>
+        <div class="dua-phonetic"><small>Phonétique</small><p id="duaPhonetic"></p></div>
+        <p class="dua-translation" id="duaTranslation"></p>
+        <div class="dua-actions">
+          <button class="audio-button" id="playDua" type="button"><span>▶</span><b>Écouter l’invocation</b></button>
+          <a id="duaSource" href="#" target="_blank" rel="noopener">Voir la source</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="experience-panel" id="panel-more" data-panel-content="more" hidden>
+      <div class="unlock-card">
+        <div class="unlock-copy">
+          <p class="eyebrow">Tu viens de découvrir une petite partie</p>
+          <h2>Tout le reste attend ta famille.</h2>
+          <p>Avec l’abonnement, chaque enfant retrouve son profil, ses livres, ses coloriages, ses invocations à apprendre et ses étoiles. Le parent profite aussi de Safe Place.</p>
+          <ul><li>Toute la bibliothèque</li><li>Sauvegarde permanente</li><li>Un profil pour chaque enfant</li><li>Safe Place complet pour le parent</li></ul>
+          <button class="primary-button" type="button" data-open-plans>Voir les formules</button>
+        </div>
+        <div class="unlock-visual">
+          <img src="brand/assets/landing-today.webp" alt="Aperçu de l’application Kawaii Muslim World">
+          <div class="locked-card"><b>Tout débloquer</b><span>Dès 4,99 € par mois</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="sticky-upgrade" aria-label="Accès à l’abonnement">
+    <div><b>Tu aimes cet aperçu ?</b><span>Débloque tout l’univers dès 4,99 €/mois.</span></div>
+    <button type="button" data-open-plans>Voir les formules</button>
+  </aside>
+
+  <dialog class="plans-modal" id="plansModal">
+    <button class="modal-close" id="closePlans" type="button" aria-label="Fermer">×</button>
+    <div class="modal-heading"><p class="eyebrow">Choisis simplement</p><h2>Combien d’enfants utiliseront l’application ?</h2><p>Le profil parent et tout le contenu sont inclus dans chaque formule.</p></div>
+    <div class="plans-grid">
+      <a class="plan-card" href="Inscription.dc.html?plan=family_1_child"><b>1 enfant</b><strong>4,99 €<small>/mois</small></strong><span>1 parent + 1 profil enfant</span></a>
+      <a class="plan-card featured" href="Inscription.dc.html?plan=family_2_children"><em>Le plus choisi</em><b>2 enfants</b><strong>5,98 €<small>/mois</small></strong><span>1 parent + 2 profils enfants</span></a>
+      <a class="plan-card" href="Inscription.dc.html?plan=family_3_children"><b>3 enfants</b><strong>6,97 €<small>/mois</small></strong><span>1 parent + 3 profils enfants</span></a>
+    </div>
+    <p class="modal-note">Sans engagement · Paiement sécurisé · Résiliation depuis le compte parent</p>
+  </dialog>
+
+  <script src="decouverte.js?v=1"></script>
+</body>
+</html>

@@ -1,14 +1,21 @@
-/* Mode préouverture Kawaii Muslim — accès réservé à l’équipe */
+/* Vérification de l’abonnement avant l’ouverture des espaces membres. */
 (() => {
-  const page = decodeURIComponent(window.location.pathname.split("/").pop() || "index.html").toLowerCase();
-  const teamPages = new Set(["index.html", "connexion.dc.html", "mfa.dc.html", "admin.dc.html"]);
-  const teamPreview = localStorage.getItem("km-site-preview") === "staff";
-  const localDesignPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
+  const page = decodeURIComponent(window.location.pathname.split("/").pop() || "").toLowerCase();
+  const protectedPages = new Set([
+    "aujourd'hui.dc.html", "aujourd-hui.dc.html", "bibliotheque kawaii muslim.dc.html",
+    "atelier.dc.html", "safe place.dc.html", "boutique.dc.html", "coloriage.dc.html",
+    "livre.dc.html", "livrecoloriage.dc.html"
+  ]);
+  const localPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
     && new URLSearchParams(window.location.search).get("preview") === "1";
-  if (!teamPages.has(page) && !teamPreview && !localDesignPreview) {
-    window.location.replace("/");
-  }
+  if (!protectedPages.has(page) || localPreview || window.__kmAccessGateStarted) return;
+  document.documentElement.style.visibility = "hidden";
+  const script = document.createElement("script");
+  script.src = "/km-access-gate.js?v=subscription-live-1";
+  script.onerror = () => { document.documentElement.style.visibility = "visible"; };
+  document.head.appendChild(script);
 })();
+
 /* Kawaii Muslim — authentification Supabase sécurisée */
 window.KMAuth = (() => {
   const ACTIVE_PROFILE_KEY = "km-active-profile-v2";
@@ -50,6 +57,31 @@ window.KMAuth = (() => {
   const requireSuccess = result => {
     if (result?.error) throw new Error(friendlyError(result.error));
     return result?.data;
+  };
+
+  const privateStoragePath = (value, bucket) => {
+    const source = String(value || "").trim();
+    const privatePrefix = `private://${bucket}/`;
+    if (source.startsWith(privatePrefix)) return source.slice(privatePrefix.length);
+    try {
+      const parsed = new URL(source, window.location.href);
+      for (const marker of [
+        `/storage/v1/object/public/${bucket}/`,
+        `/storage/v1/object/sign/${bucket}/`,
+        `/storage/v1/object/authenticated/${bucket}/`
+      ]) {
+        const markerIndex = parsed.pathname.indexOf(marker);
+        if (markerIndex >= 0) return decodeURIComponent(parsed.pathname.slice(markerIndex + marker.length));
+      }
+    } catch {}
+    return "";
+  };
+
+  const signedPrivateUrl = async (value, bucket, expiresIn = 15 * 60) => {
+    const path = privateStoragePath(value, bucket);
+    if (!path) return value;
+    const signed = requireSuccess(await client().storage.from(bucket).createSignedUrl(path, expiresIn));
+    return signed?.signedUrl || "";
   };
 
   const getSession = async () => {
@@ -388,16 +420,27 @@ window.KMAuth = (() => {
         .delete().eq("id", id).eq("owner_id", session.user.id));
     },
 
-    signup: async ({ name, email, password }) => {
+    signup: async ({ name, email, password, planCode = "" }) => {
+      const validPlans = new Set(["family_1_child", "family_2_children", "family_3_children"]);
+      const selectedPlan = validPlans.has(planCode) ? planCode : "";
       const data = requireSuccess(await client().auth.signUp({
         email: email.trim().toLowerCase(),
         password,
         options: {
-          data: { full_name: name.trim() },
-          emailRedirectTo: `${window.location.origin}/Profils.dc.html`
+          data: {
+            full_name: name.trim(),
+            ...(selectedPlan ? { pending_plan_code: selectedPlan } : {})
+          },
+          emailRedirectTo: `${window.location.origin}/Profils.dc.html${selectedPlan ? `?checkout_plan=${encodeURIComponent(selectedPlan)}` : ""}`
         }
       }));
       return data;
+    },
+
+    clearPendingPlan: async () => {
+      return requireSuccess(await client().auth.updateUser({
+        data: { pending_plan_code: null }
+      }));
     },
 
     login: async ({ email, password }) => {
@@ -518,9 +561,17 @@ window.KMAuth = (() => {
     },
 
     listContent: async () => {
-      return requireSuccess(await client().from("content_items")
+      const items = requireSuccess(await client().from("content_items")
         .select("*")
         .order("sort_order", { ascending: true })) || [];
+      return Promise.all(items.map(async item => {
+        if (!privateStoragePath(item.url, "content-books")) return item;
+        try {
+          return { ...item, url: await signedPrivateUrl(item.url, "content-books") };
+        } catch {
+          return item;
+        }
+      }));
     },
 
     saveContent: async item => {
@@ -594,8 +645,7 @@ window.KMAuth = (() => {
         contentType: "application/pdf"
       });
       requireSuccess(uploaded);
-      const publicUrl = client().storage.from("content-books").getPublicUrl(path);
-      return publicUrl.data.publicUrl;
+      return `private://content-books/${path}`;
     },
 
     deleteBook: async url => {
@@ -608,11 +658,7 @@ window.KMAuth = (() => {
         if (readerUrl.pathname.endsWith("/Livre.dc.html") || readerUrl.pathname.endsWith("Livre.dc.html")) {
           source = readerUrl.searchParams.get("src") || "";
         }
-        const objectUrl = new URL(source);
-        const marker = "/storage/v1/object/public/content-books/";
-        const markerIndex = objectUrl.pathname.indexOf(marker);
-        if (objectUrl.hostname !== "pasgxojzybmvbjhuokkk.supabase.co" || markerIndex < 0) return;
-        const path = decodeURIComponent(objectUrl.pathname.slice(markerIndex + marker.length));
+        const path = privateStoragePath(source, "content-books");
         if (!path) return;
         requireSuccess(await client().storage.from("content-books").remove([path]));
       } catch (error) {

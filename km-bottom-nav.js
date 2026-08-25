@@ -5,6 +5,8 @@
   var shellChild = new URLSearchParams(window.location.search).get("kmShell") === "1";
   var localPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
     && new URLSearchParams(window.location.search).get("preview") === "1";
+  var guestMode = new URLSearchParams(window.location.search).get("guest") === "1"
+    || sessionStorage.getItem("km-guest-mode") === "1";
   var incomingTransition = sessionStorage.getItem(transitionKey);
   if (incomingTransition && !shellChild) {
     document.documentElement.classList.add("km-page-entering");
@@ -16,7 +18,7 @@
     { key: "library", label: "Bibliothèque", icon: "menu_book", href: "Bibliotheque%20Kawaii%20Muslim.dc.html" },
     { key: "workshop", label: "Atelier", icon: "brush", href: "Atelier.dc.html" },
     { key: "invocations", label: "Safe Place", icon: "prayer_times", href: "Safe%20Place.dc.html" },
-    { key: "shop", label: "Boutique", icon: "shopping_bag", href: "Boutique.dc.html" }
+    { key: "shop", label: "Boutique", icon: "shopping_bag", href: guestMode ? "index.html#tarifs" : "Boutique.dc.html" }
   ];
 
   function mount() {
@@ -41,6 +43,13 @@
       return '<a href="' + item.href + '" data-km-nav-index="' + index + '"' + current + '><span class="material-symbols-rounded" aria-hidden="true">' + item.icon + '</span><span>' + item.label + '</span></a>';
     }).join("");
     document.body.appendChild(nav);
+    if (guestMode) {
+      var guestPill = document.createElement("a");
+      guestPill.className = "km-guest-pill";
+      guestPill.href = "index.html#tarifs";
+      guestPill.innerHTML = '<b>Mode découverte</b><span>Débloquer tout</span>';
+      document.body.appendChild(guestPill);
+    }
 
     items.forEach(function (item, index) {
       if (index === activeIndex) return;
@@ -49,6 +58,7 @@
       preload.as = "document";
       var preloadTarget = new URL(item.href, window.location.href);
       if (localPreview) preloadTarget.searchParams.set("preview", "1");
+      if (guestMode && item.key !== "shop") preloadTarget.searchParams.set("guest", "1");
       preload.href = preloadTarget.href;
       document.head.appendChild(preload);
     });
@@ -83,6 +93,7 @@
       document.body.classList.add("km-nav-leaving");
       var cleanTarget = new URL(link.href, window.location.href);
       if (localPreview) cleanTarget.searchParams.set("preview", "1");
+      if (guestMode && nextIndex !== 4) cleanTarget.searchParams.set("guest", "1");
       window.setTimeout(function () {
         window.location.assign(cleanTarget.href);
       }, 70);

@@ -164,7 +164,8 @@
 
   function isLocalPreview() {
     var localHost = /^(127\.0\.0\.1|localhost)$/.test(location.hostname);
-    return localHost && new URLSearchParams(location.search).get("preview") === "1";
+    return (localHost && new URLSearchParams(location.search).get("preview") === "1")
+      || new URLSearchParams(location.search).get("guest") === "1";
   }
 
   function enableLocalPreviewLinks() {
@@ -172,7 +173,8 @@
     document.querySelectorAll('a[href]').forEach(function (link) {
       var target = new URL(link.getAttribute('href'), location.href);
       if (target.origin !== location.origin) return;
-      target.searchParams.set('preview', '1');
+      if(new URLSearchParams(location.search).get('guest') === '1') target.searchParams.set('guest','1');
+      else target.searchParams.set('preview', '1');
       link.href = target.href;
     });
   }
@@ -181,7 +183,8 @@
     if (isLocalPreview()) {
       activeChildId = "preview-child";
       activeProfileKey = "preview-child";
-      setProfile("toto", "t", Number(localStorage.getItem("km-preview-star-balance")) || 12);
+      var guest = new URLSearchParams(location.search).get("guest") === "1";
+      setProfile(guest ? "Découverte" : "toto", guest ? "d" : "t", guest ? 0 : (Number(localStorage.getItem("km-preview-star-balance")) || 12));
       reveal();
       initPrayer();
       return;

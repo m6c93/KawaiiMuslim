@@ -549,7 +549,7 @@ insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 values (
   'content-books',
   'content-books',
-  true,
+  false,
   52428800,
   array['application/pdf']
 )
@@ -557,6 +557,23 @@ on conflict (id) do update set
   public = excluded.public,
   file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "content_books_subscriber_read" on storage.objects;
+create policy "content_books_subscriber_read"
+  on storage.objects for select
+  to authenticated
+  using (
+    bucket_id = 'content-books'
+    and (
+      public.can_manage_content()
+      or exists (
+        select 1
+        from public.subscriptions subscription
+        where subscription.user_id = auth.uid()
+          and subscription.status in ('active', 'trialing', 'past_due')
+      )
+    )
+  );
 
 drop policy if exists "content_books_staff_insert" on storage.objects;
 create policy "content_books_staff_insert"

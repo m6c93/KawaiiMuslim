@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="fr">
 <head>
+  <script src="./km-access-gate.js?v=subscription-live-1"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#252b67">
@@ -162,8 +163,9 @@
   <script src="./km-config.js"></script>
   <script src="./km-auth.js?v=local-preview-1"></script>
   <script>
-    const localDesignPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
-      && new URLSearchParams(window.location.search).get("preview") === "1";
+    const guestMode = new URLSearchParams(window.location.search).get("guest") === "1";
+    const localDesignPreview = (/^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
+      && new URLSearchParams(window.location.search).get("preview") === "1") || guestMode;
     const gallery = document.getElementById("gallery");
     const childPicker = document.getElementById("childPicker");
     const pageMessage = document.getElementById("pageMessage");
@@ -278,7 +280,7 @@
           updated_at: new Date(Date.now() - 86400000).toISOString(),
           drawing_data: { memory: { title: "Bubble Tea Time Hijabi · Page 3" } }
         }
-      ] : await KMAuth.listArtworks(selectedChildId);
+      ].slice(0, guestMode ? 1 : 2) : await KMAuth.listArtworks(selectedChildId);
       renderGallery();
     };
 

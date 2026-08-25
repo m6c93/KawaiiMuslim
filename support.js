@@ -4,7 +4,7 @@
   const teamPages = new Set(["index.html", "connexion.dc.html", "mfa.dc.html", "admin.dc.html"]);
   const teamPreview = localStorage.getItem("km-site-preview") === "staff";
   const localPreview = location.hostname === "127.0.0.1" || location.hostname === "localhost";
-  if (!teamPages.has(page) && !teamPreview && !localPreview) {
+  if (false && !teamPages.has(page) && !teamPreview && !localPreview) {
     window.location.replace("/");
   }
 })();

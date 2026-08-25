@@ -1,15 +1,9 @@
-import Stripe from "npm:stripe@18.5.0";
+import Stripe from "npm:stripe@22.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2";
-
-const PLAN_BY_PRICE = {
-  price_1U69cTEwwuZdiQAHVCYyKOy8: { planCode: "family_1_child", childLimit: 1 },
-  price_1U69cUEwwuZdiQAHYwEdet4Y: { planCode: "family_2_children", childLimit: 2 },
-  price_1U69cVEwwuZdiQAH0nOykNZz: { planCode: "family_3_children", childLimit: 3 },
-} as const;
-const planFromPrice = (priceId: string) => PLAN_BY_PRICE[priceId as keyof typeof PLAN_BY_PRICE] || null;
+import { planFromPrice } from "../_shared/billing.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-  apiVersion: "2025-06-30.basil",
+  apiVersion: "2026-06-24.dahlia",
 });
 
 const activeStatuses = new Set(["active", "trialing", "past_due"]);

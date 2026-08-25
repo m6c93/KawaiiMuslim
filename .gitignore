@@ -1,0 +1,20 @@
+# Fichiers locaux de Codex et diagnostics de mise au point
+.agents/
+.git-upload/
+tmp/
+audit-*/
+trace.txt
+push-output.txt
+hero.base64.txt
+design-qa*.png
+design-qa*.md
+design-option-*-reference.png
+design-reference-*.png
+today-v2*.png
+
+# Fichiers système et secrets locaux
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example

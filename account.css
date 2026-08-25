@@ -104,6 +104,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .auth-form h2, .page-title { margin: 0; font-family: "Baloo 2", cursive; font-size: clamp(29px, 4vw, 38px); line-height: 1.08; }
 .form-subtitle { margin: 7px 0 27px; color: #656780; font-size: 13px; line-height: 1.5; }
 .form-subtitle a { color: var(--mint-dark); font-weight: 900; }
+.selected-plan { display: grid; gap: 2px; margin: -10px 0 22px; padding: 14px 16px; border: 1px solid rgba(226,127,174,.28); border-radius: 18px; background: linear-gradient(135deg,rgba(255,245,250,.96),rgba(247,245,255,.96)); }
+.selected-plan span { color: #8a8298; font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.selected-plan strong { color: #292b59; font-family: "Baloo 2", cursive; font-size: 19px; line-height: 1.15; }
+.selected-plan small { color: #656780; font-size: 12px; font-weight: 800; }
 .field-label { display: block; margin: 0 0 7px; color: #5a5c7b; font-size: 12px; font-weight: 900; }
 .field-input, .field-select {
   width: 100%;

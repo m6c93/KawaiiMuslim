@@ -215,3 +215,7 @@ body.km-nav-leaving { overflow: hidden; }
     animation: none !important;
   }
 }
+
+.km-guest-pill{position:fixed;z-index:1003;top:max(10px,env(safe-area-inset-top));right:12px;padding:8px 13px;border:1px solid #ffffff30;border-radius:16px;background:rgba(23,27,77,.9);color:#fff!important;text-decoration:none!important;box-shadow:0 9px 24px rgba(13,16,54,.25);backdrop-filter:blur(12px)}
+.km-guest-pill b,.km-guest-pill span{display:block}.km-guest-pill b{font:800 11px "Baloo 2",sans-serif}.km-guest-pill span{color:#f3bad4;font-size:9px;font-weight:800}
+@media(max-width:600px){.km-guest-pill{top:max(6px,env(safe-area-inset-top));right:7px;padding:6px 9px}.km-guest-pill b{font-size:10px}.km-guest-pill span{display:none}}

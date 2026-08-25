@@ -1,5 +1,6 @@
-import Stripe from "npm:stripe@18.5.0";
+import Stripe from "npm:stripe@22.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { PLANS, SITE_URL, type PlanCode } from "../_shared/billing.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://www.kawaiimuslimworld.com",
@@ -10,17 +11,14 @@ const jsonResponse = (body: unknown, status = 200) => new Response(JSON.stringif
   status,
   headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
 });
-const SITE_URL = "https://www.kawaiimuslimworld.com";
-const PLANS = {
-  family_1_child: { priceId: "price_1U69cTEwwuZdiQAHVCYyKOy8", childLimit: 1 },
-  family_2_children: { priceId: "price_1U69cUEwwuZdiQAHYwEdet4Y", childLimit: 2 },
-  family_3_children: { priceId: "price_1U69cVEwwuZdiQAH0nOykNZz", childLimit: 3 },
-} as const;
-type PlanCode = keyof typeof PLANS;
-
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-  apiVersion: "2025-06-30.basil",
+  apiVersion: "2026-06-24.dahlia",
 });
+
+const checkoutIdentifier = () => {
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  return `kmw_checkout_${Array.from(bytes, (byte) => String.fromCharCode(97 + (byte % 26))).join("")}`;
+};
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -72,12 +70,13 @@ Deno.serve(async (request) => {
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
+      integration_identifier: checkoutIdentifier(),
       customer: customerId,
       client_reference_id: user.id,
       line_items: [{ price: selectedPlan.priceId, quantity: 1 }],
       locale: "fr",
       success_url: `${SITE_URL}/Profils.dc.html?abonnement=confirme&setup=1&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${SITE_URL}/Compte.dc.html?abonnement=annule`,
+      cancel_url: `${SITE_URL}/index.html?paiement=annule#tarifs`,
       metadata: { supabase_user_id: user.id, plan_code: planCode },
       subscription_data: {
         metadata: { supabase_user_id: user.id, plan_code: planCode },

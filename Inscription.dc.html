@@ -14,11 +14,11 @@
 <body>
   <div class="account-shell">
     <nav class="account-nav">
-      <a class="account-brand" href="Kawaii%20Muslim%20-%20Site%20Web.dc.html">
+      <a class="account-brand" href="index.html">
         <img src="brand/assets/mascot-nour.png" alt="Mimi">
         <strong>Kawaii Muslim</strong>
       </a>
-      <a class="nav-link" href="Bibliotheque%20Kawaii%20Muslim.dc.html">← <span>Bibliothèque</span></a>
+      <a class="nav-link" href="index.html#tarifs">← <span>Voir les formules</span></a>
     </nav>
 
     <main class="auth-layout">
@@ -37,6 +37,8 @@
         <form class="auth-form" id="signupForm" novalidate>
           <h2>Créer mon compte parent</h2>
           <p class="form-subtitle">Déjà membre ? <a href="Connexion.dc.html">Se connecter</a></p>
+
+          <div class="selected-plan" id="selectedPlan" aria-live="polite"></div>
 
           <label class="field-label" for="name">Ton prénom</label>
           <input class="field-input" id="name" type="text" autocomplete="name" maxlength="60" placeholder="Ton prénom" required>
@@ -69,6 +71,35 @@
     const message = document.getElementById("message");
     const submitButton = document.getElementById("submitButton");
     const password = document.getElementById("password");
+    const selectedPlan = document.getElementById("selectedPlan");
+    const planOptions = {
+      family_1_child: { label: "1 parent + 1 enfant", price: "4,99 € / mois" },
+      family_2_children: { label: "1 parent + 2 enfants", price: "5,98 € / mois" },
+      family_3_children: { label: "1 parent + 3 enfants", price: "6,97 € / mois" }
+    };
+    const query = new URLSearchParams(window.location.search);
+    const legacyPlan = {
+      "1": "family_1_child",
+      "2": "family_2_children",
+      "3": "family_3_children"
+    }[query.get("children")];
+    const requestedPlan = query.get("plan");
+    const planCode = planOptions[requestedPlan]
+      ? requestedPlan
+      : legacyPlan || "family_1_child";
+    selectedPlan.innerHTML = `<span>Offre choisie</span><strong>${planOptions[planCode].label}</strong><small>${planOptions[planCode].price} · sans engagement</small>`;
+
+    KMAuth.getSession().then(session => {
+      if (!session) return;
+      message.className = "form-message success";
+      message.textContent = "Ton compte est déjà connecté. Ouverture du paiement sécurisé…";
+      submitButton.disabled = true;
+      return KMAuth.startCheckout(planCode);
+    }).catch(error => {
+      message.className = "form-message";
+      message.textContent = KMAuth.friendlyError(error);
+      submitButton.disabled = false;
+    });
 
     document.getElementById("togglePassword").addEventListener("click", () => {
       password.type = password.type === "password" ? "text" : "password";
@@ -93,14 +124,18 @@
         const data = await KMAuth.signup({
           name: document.getElementById("name").value,
           email: document.getElementById("email").value,
-          password: password.value
+          password: password.value,
+          planCode
         });
         if (data.session) {
-          window.location.href = "Profils.dc.html";
+          message.className = "form-message success";
+          message.textContent = "Compte créé. Ouverture du paiement sécurisé…";
+          await KMAuth.clearPendingPlan();
+          await KMAuth.startCheckout(planCode);
           return;
         }
         message.className = "form-message success";
-        message.textContent = "Ton compte est créé. Ouvre l’e-mail reçu pour confirmer ton adresse.";
+        message.textContent = "Ton compte est créé. Confirme ton adresse dans l’e-mail reçu : le paiement sécurisé s’ouvrira ensuite automatiquement.";
         submitButton.textContent = "E-mail envoyé ✓";
       } catch (error) {
         message.textContent = KMAuth.friendlyError(error);

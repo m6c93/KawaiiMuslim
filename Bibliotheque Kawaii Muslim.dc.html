@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<script src="./km-access-gate.js?v=subscription-live-1"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#141a3c">
@@ -290,7 +291,7 @@
         <div style="display:flex; align-items:center; justify-content:space-between; gap:20px; background:linear-gradient(120deg, rgba(240,181,63,.18), rgba(226,127,174,.16)); border:1px solid rgba(240,181,63,.4); border-radius:20px; padding:16px 24px; margin-bottom:24px;">
           <div style="display:flex; align-items:center; gap:14px;">
             <span style="font-size:26px;">🌟</span>
-            <p style="font-size:14px; color:#EDEFFb; margin:0; line-height:1.5;"><strong style="color:#fff;">Débloque toute la bibliothèque.</strong> Lecture illimitée pour toute la famille — 7 jours d'essai gratuit.</p>
+            <p style="font-size:14px; color:#EDEFFb; margin:0; line-height:1.5;"><strong style="color:#fff;">Débloque toute la bibliothèque.</strong> Découvre d’abord une partie de l’application gratuitement, sans carte bancaire.</p>
           </div>
           <span onClick="{{ openPaywall }}" style="cursor:pointer; flex-shrink:0; font-family:'Baloo 2',cursive; font-weight:700; font-size:14px; color:#fff; background:linear-gradient(150deg,#F0B53F,#D8932A); padding:11px 24px; border-radius:24px; white-space:nowrap; box-shadow:0 8px 18px rgba(216,147,42,.34);">Essayer gratuitement</span>
         </div>
@@ -477,7 +478,7 @@
             <span style="font-size:13px; color:#C9CBE6;">✅ Nouveautés chaque mois</span>
           </div>
 
-          <div onClick="{{ subscribe }}" style="cursor:pointer; text-align:center; font-family:'Baloo 2',cursive; font-weight:700; font-size:18px; color:#fff; background:linear-gradient(150deg,#F0AECA,#E27FAE); padding:16px; border-radius:30px; box-shadow:0 14px 30px rgba(226,127,174,.4);">Démarrer les 7 jours gratuits</div>
+          <div onClick="{{ subscribe }}" style="cursor:pointer; text-align:center; font-family:'Baloo 2',cursive; font-weight:700; font-size:18px; color:#fff; background:linear-gradient(150deg,#F0AECA,#E27FAE); padding:16px; border-radius:30px; box-shadow:0 14px 30px rgba(226,127,174,.4);">Choisir cette formule</div>
           <p onClick="{{ closePaywall }}" style="cursor:pointer; text-align:center; font-size:13px; color:#9fa2c8; margin:16px 0 0;">Peut-être plus tard</p>
         </div>
       </div>
@@ -493,17 +494,18 @@ class Component extends DCLogic {
   componentDidMount() {
     const localDesignPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
       && new URLSearchParams(window.location.search).get('preview') === '1';
-    if (localDesignPreview) {
+    const guestMode = new URLSearchParams(window.location.search).get('guest') === '1';
+    if (localDesignPreview || guestMode) {
       this.setState({
         profile: 'enfant',
-        profileName: 'Toto',
+        profileName: guestMode ? 'Découverte' : 'Toto',
         profileEmoji: '🐤',
-        subscribed: true,
+        subscribed: !guestMode,
         catalog: null,
         announcement: '',
         requestedChildren: 1,
-        starBalance: 12,
-        starChildName: 'Toto',
+        starBalance: guestMode ? 0 : 12,
+        starChildName: guestMode ? 'Découverte' : 'Toto',
       });
       return;
     }
@@ -672,7 +674,7 @@ class Component extends DCLogic {
       chooseOneChild: () => this.setState({ requestedChildren: 1 }),
       chooseTwoChildren: () => this.setState({ requestedChildren: 2 }),
       chooseThreeChildren: () => this.setState({ requestedChildren: 3 }),
-      subscribe: () => { window.location.href = `Support.dc.html?category=abonnement&children=${requestedChildren}`; },
+      subscribe: () => { window.location.href = `Inscription.dc.html?plan=famille&children=${requestedChildren}`; },
     };
   }
 }

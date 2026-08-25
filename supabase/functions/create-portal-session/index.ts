@@ -1,5 +1,6 @@
-import Stripe from "npm:stripe@18.5.0";
+import Stripe from "npm:stripe@22.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { PLANS, SITE_URL } from "../_shared/billing.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://www.kawaiimuslimworld.com",
@@ -10,15 +11,8 @@ const jsonResponse = (body: unknown, status = 200) => new Response(JSON.stringif
   status,
   headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
 });
-const SITE_URL = "https://www.kawaiimuslimworld.com";
-const PLANS = {
-  family_1_child: { priceId: "price_1U69cTEwwuZdiQAHVCYyKOy8" },
-  family_2_children: { priceId: "price_1U69cUEwwuZdiQAHYwEdet4Y" },
-  family_3_children: { priceId: "price_1U69cVEwwuZdiQAH0nOykNZz" },
-} as const;
-
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-  apiVersion: "2025-06-30.basil",
+  apiVersion: "2026-06-24.dahlia",
 });
 
 Deno.serve(async (request) => {
