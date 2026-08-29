@@ -241,6 +241,12 @@ window.__PAGES = ["data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1
   for(var i=0;i<SRC.length;i++){ leaves.push({ type:'image', src:SRC[i] }); }
   leaves.push(FIN);
 
+  var PREVIEW_LIMIT = Math.max(0, Number(new URLSearchParams(location.search).get('previewPages')) || 0);
+  if(PREVIEW_LIMIT){
+    leaves = leaves.slice(0, Math.min(PREVIEW_LIMIT, leaves.length));
+    document.documentElement.classList.add('limited-preview');
+  }
+
   // spreads : cover alone, then pairs
   var spreads = [];
   spreads.push([null, 0]);
@@ -249,7 +255,7 @@ window.__PAGES = ["data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1
   if(lastPaired < leaves.length-1){ spreads.push([leaves.length-1, null]); }
   var NUM = spreads.length;
 
-  var KEY='tawakkul_book_spread_v2';
+  var KEY=PREVIEW_LIMIT ? 'tawakkul_book_preview_'+PREVIEW_LIMIT : 'tawakkul_book_spread_v2';
   var si=0;
   try{ var st=parseInt(localStorage.getItem(KEY)); if(!isNaN(st)&&st>=0&&st<NUM) si=st; }catch(e){}
 

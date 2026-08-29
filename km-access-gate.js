@@ -10,10 +10,12 @@
   if (localPreview) return;
 
   var guestMode = new URLSearchParams(window.location.search).get("guest") === "1";
-  var guestBookPreview = guestMode
-    && window.self !== window.top
-    && new URLSearchParams(window.location.search).get("previewPages") === "2"
-    && decodeURIComponent(window.location.pathname) === "/books/aya-armure-de-lumiere.html";
+  var currentPath = decodeURIComponent(window.location.pathname);
+  var previewPages = new URLSearchParams(window.location.search).get("previewPages");
+  var guestBookPreview = guestMode && (
+    (window.self !== window.top && previewPages === "2" && currentPath === "/books/aya-armure-de-lumiere.html")
+    || (previewPages === "5" && currentPath === "/books/tawakkul.html")
+  );
   var guestPages = new Set([
     "/Aujourd'hui.dc.html",
     "/Bibliotheque Kawaii Muslim.dc.html",
