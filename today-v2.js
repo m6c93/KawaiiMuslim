@@ -173,7 +173,10 @@
     document.querySelectorAll('a[href]').forEach(function (link) {
       var target = new URL(link.getAttribute('href'), location.href);
       if (target.origin !== location.origin) return;
-      if(new URLSearchParams(location.search).get('guest') === '1') target.searchParams.set('guest','1');
+      if(new URLSearchParams(location.search).get('guest') === '1') {
+        target.searchParams.set('guest','1');
+        if (/\/LivreColoriage\.dc\.html$/i.test(target.pathname)) target.searchParams.set('previewPages','2');
+      }
       else target.searchParams.set('preview', '1');
       link.href = target.href;
     });

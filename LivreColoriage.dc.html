@@ -71,6 +71,8 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   const params=new URLSearchParams(location.search);
   const slug=params.get("book")||"";
   const title=(params.get("title")||"Livre à colorier").slice(0,160);
+  const guestMode=params.get("guest")==="1";
+  const previewPageLimit=guestMode?2:Math.max(0,Number(params.get("previewPages"))||0);
   const restorePosition=String(params.get("position")||"");
   const resumePage=String(params.get("resumePage")||"");
   const resumeDraft=String(params.get("resumeDraft")||"");
@@ -139,7 +141,7 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   };
   const loadArtworks=async()=>{
     const childId=selectedChild();
-    artworks=childId?await KMAuth.listArtworks(childId).catch(()=>[]):[];
+    artworks=guestMode?[]:(childId?await KMAuth.listArtworks(childId).catch(()=>[]):[]);
     renderActions();
   };
   const scheduleRefresh=()=>{
@@ -151,12 +153,15 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
     if(!page||!selectedChild())return;
     const artwork=matchingArtwork(page.pageNumber);
     const position=currentPosition();
-    const returnUrl=`LivreColoriage.dc.html?book=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}&position=${encodeURIComponent(position)}`;
+    const returnParams=new URLSearchParams({book:slug,title,position:String(position)});
+    if(guestMode){returnParams.set("guest","1");returnParams.set("previewPages",String(previewPageLimit||2))}
+    const returnUrl=`LivreColoriage.dc.html?${returnParams.toString()}`;
     const payload={slug,pageNumber:String(page.pageNumber),imageSrc:page.imageSrc,sourceKey:sourceKey(page.pageNumber),returnUrl,title};
     try{sessionStorage.setItem("km-book-coloring-page",JSON.stringify(payload))}
     catch(error){actions.innerHTML='<span class="empty-action child-empty">Cette page est trop lourde. Réessaie après avoir fermé les autres onglets.</span>';return}
     const editorTitle=`${title} · Page ${page.pageNumber}`;
     const query=new URLSearchParams({bookColoring:"1",book:slug,page:String(page.pageNumber),child:selectedChild(),title:editorTitle,return:returnUrl});
+    if(guestMode)query.set("guest","1");
     if(forcedDraft)query.set("draft",forcedDraft);
     else if(artwork?.status==="in_progress")query.set("draft",artwork.id);
     location.href=`Coloriage.dc.html?${query.toString()}`;
@@ -179,9 +184,13 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   childSelect.addEventListener("change",loadArtworks);
 
   try{
-    context=await KMAuth.getContext();
+    context=guestMode
+      ? {profile:{role:"guest"},children:[{id:"guest-child",name:"Découverte",avatar:"🎨"}]}
+      : await KMAuth.getContext();
     if(!context){location.replace("Connexion.dc.html?next="+encodeURIComponent(location.pathname+location.search));return}
-    const active=KMAuth.validateActiveProfile(context);
+    const active=guestMode
+      ? {type:"child",id:"guest-child",name:"Découverte",avatar:"🎨"}
+      : KMAuth.validateActiveProfile(context);
     childSelect.innerHTML=(context.children||[]).map(child=>`<option value="${escapeHtml(child.id)}">${escapeHtml((child.avatar||"⭐")+" "+child.name)}</option>`).join("");
     const activeChild=active.type==="child"&&context.children.some(child=>child.id===active.id);
     const onlyChild=context.children.length===1?context.children[0]:null;
@@ -216,6 +225,47 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
       responsiveStyle.textContent="html,body{width:100%;max-width:100%;overflow-x:hidden} @media(max-width:650px){header{min-width:0} main{min-width:0} figure{max-width:100%}}";
       frame.contentDocument.head.appendChild(responsiveStyle);
       const doc=frame.contentDocument;
+      if(previewPageLimit){
+        const view=frame.contentWindow;
+        const progress=doc.getElementById("progress");
+        const nextButton=doc.getElementById("nextBtn");
+        const gridButton=doc.getElementById("gridBtn");
+        const book=doc.getElementById("book");
+        const allowedPosition=()=>view.matchMedia("(max-width:700px)").matches?previewPageLimit:Math.ceil(previewPageLimit/2);
+        const atLimit=()=>Number(progress?.value||0)>=allowedPosition();
+        const enforceLimit=()=>{
+          if(!progress||!nextButton)return;
+          progress.max=String(allowedPosition());
+          if(Number(progress.value)>allowedPosition())progress.value=String(allowedPosition());
+          nextButton.disabled=atLimit();
+          if(gridButton)gridButton.hidden=true;
+        };
+        nextButton?.addEventListener("click",event=>{
+          if(atLimit()){event.preventDefault();event.stopImmediatePropagation()}
+        },true);
+        progress?.addEventListener("input",event=>{
+          if(Number(event.target.value)>allowedPosition()){
+            event.target.value=String(allowedPosition());
+            event.preventDefault();event.stopImmediatePropagation();
+          }
+        },true);
+        doc.addEventListener("keydown",event=>{
+          if(atLimit()&&(event.key==="ArrowRight"||event.key===" ")){
+            event.preventDefault();event.stopImmediatePropagation();
+          }
+        },true);
+        let previewTouchX=0;
+        book?.addEventListener("touchstart",event=>{if(event.touches.length===1)previewTouchX=event.touches[0].clientX},{passive:true,capture:true});
+        book?.addEventListener("touchend",event=>{
+          const movedLeft=event.changedTouches.length&&event.changedTouches[0].clientX<previewTouchX-45;
+          if(atLimit()&&movedLeft){event.preventDefault();event.stopImmediatePropagation()}
+        },{capture:true});
+        new MutationObserver(enforceLimit).observe(progress,{attributes:true,attributeFilter:["max","value"]});
+        view.addEventListener("resize",enforceLimit);
+        enforceLimit();
+        document.querySelector(".badge").textContent="🎨 2 pages offertes";
+        document.querySelector(".hint").textContent="Choisis l’une des 2 pages offertes. Tes couleurs restent sur cet appareil.";
+      }
       const observer=new MutationObserver(scheduleRefresh);
       observer.observe(doc.body,{subtree:true,childList:true,attributes:true,attributeFilter:["src","style","class","value"]});
       if(restorePosition){
@@ -245,7 +295,14 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
       actions.innerHTML='<span class="empty-action child-empty">Choisis la page pour reprendre ton coloriage.</span>';
     }
   },6500);
-  frame.src="books/"+allowed[slug];
+  const frameUrl=new URL("books/"+allowed[slug],location.href);
+  if(previewPageLimit){
+    frameUrl.searchParams.set("embed","1");
+    frameUrl.searchParams.set("guest","1");
+    frameUrl.searchParams.set("previewPages",String(previewPageLimit));
+    frameUrl.searchParams.set("v","guest-two-pages-1");
+  }
+  frame.src=frameUrl.href;
 })();
 </script>
 </body>

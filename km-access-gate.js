@@ -10,8 +10,19 @@
   if (localPreview) return;
 
   var guestMode = new URLSearchParams(window.location.search).get("guest") === "1";
-  var guestPages = new Set(["/Aujourd'hui.dc.html", "/Bibliotheque Kawaii Muslim.dc.html", "/Atelier.dc.html", "/Safe Place.dc.html"]);
-  if (guestMode && guestPages.has(decodeURIComponent(window.location.pathname))) {
+  var guestBookPreview = guestMode
+    && window.self !== window.top
+    && new URLSearchParams(window.location.search).get("previewPages") === "2"
+    && decodeURIComponent(window.location.pathname) === "/books/aya-armure-de-lumiere.html";
+  var guestPages = new Set([
+    "/Aujourd'hui.dc.html",
+    "/Bibliotheque Kawaii Muslim.dc.html",
+    "/Atelier.dc.html",
+    "/Safe Place.dc.html",
+    "/LivreColoriage.dc.html",
+    "/Coloriage.dc.html"
+  ]);
+  if ((guestMode && guestPages.has(decodeURIComponent(window.location.pathname))) || guestBookPreview) {
     sessionStorage.setItem("km-guest-mode", "1");
     window.KM_GUEST_MODE = true;
     return;

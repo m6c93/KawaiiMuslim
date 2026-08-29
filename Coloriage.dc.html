@@ -274,6 +274,7 @@ body.book-coloring-mode .title small{color:#daf3eb}
   <script src="./km-auth.js"></script>
   <script type="module">
     const params = new URLSearchParams(location.search);
+    const guestMode = params.get("guest") === "1";
     const source = params.get("src") || "";
     const title = (params.get("title") || "Mon coloriage").slice(0,160);
     const requestedFormat = params.get("format") || "";
@@ -597,6 +598,12 @@ body.book-coloring-mode .title small{color:#daf3eb}
       saving = true;
       savePromise = (async () => {
         try {
+          if (guestMode) {
+            draftId = draftId || `guest-${Date.now()}`;
+            localStorage.setItem(`km-guest-coloring:${artworkSourceKey}`,JSON.stringify({id:draftId,strokes,updatedAt:new Date().toISOString()}));
+            saveStatus.textContent = "Sauvegardé sur cet appareil";
+            return;
+          }
           const saved = await KMAuth.saveArtworkDraft({
             id:draftId,childId,title,sourceUrl:artworkSourceKey,
             drawingData:{version:2,width:drawCanvas.width,height:drawCanvas.height,strokes}
@@ -614,6 +621,18 @@ body.book-coloring-mode .title small{color:#daf3eb}
       return savePromise;
     };
     const loadDraft = async () => {
+      if (guestMode) {
+        try {
+          const saved = JSON.parse(localStorage.getItem(`km-guest-coloring:${artworkSourceKey}`) || "null");
+          if (saved) {
+            draftId = saved.id || draftId;
+            strokes = Array.isArray(saved.strokes) ? saved.strokes : [];
+            redraw();
+            saveStatus.textContent = "Coloriage retrouvé sur cet appareil";
+          }
+        } catch (error) {}
+        return;
+      }
       const draft = await KMAuth.findArtworkDraft({childId,sourceUrl:artworkSourceKey});
       if (!draft) return;
       draftId = draft.id;
@@ -895,6 +914,13 @@ body.book-coloring-mode .title small{color:#daf3eb}
         button.disabled = true;
         button.textContent = "⭐ Enregistrement…";
         await saveDraft();
+        if (guestMode) {
+          document.getElementById("celebrationMessage").textContent = "Bravo ! Ton coloriage découverte est gardé sur cet appareil.";
+          document.getElementById("finishModal").hidden = true;
+          document.getElementById("celebration").hidden = false;
+          setTimeout(() => { window.location.href = bookReturnUrl || "Aujourd%27hui.dc.html?guest=1"; },1800);
+          return;
+        }
         const blob = await mergedBlob();
         const child = context.children.find(item => item.id === childId);
         const memory = {
@@ -933,11 +959,15 @@ body.book-coloring-mode .title small{color:#daf3eb}
 
     try {
       validateSource();
-      context = await KMAuth.getContext();
+      context = guestMode
+        ? {profile:{role:"guest"},children:[{id:"guest-child",name:"Découverte",avatar:"🎨"}]}
+        : await KMAuth.getContext();
       if (!context) {
         window.location.replace(`Connexion.dc.html?next=${encodeURIComponent(location.pathname+location.search)}`);
       } else {
-        const active = KMAuth.getActiveProfile();
+        const active = guestMode
+          ? {type:"child",id:"guest-child",name:"Découverte",avatar:"🎨"}
+          : KMAuth.getActiveProfile();
         childSelect.innerHTML = context.children.map(child => `<option value="${child.id}">${child.avatar} ${child.name}</option>`).join("");
         if (requestedChild && context.children.some(child => child.id === requestedChild)) childSelect.value = requestedChild;
         else if (active.type === "child" && context.children.some(child => child.id === active.id)) childSelect.value = active.id;
