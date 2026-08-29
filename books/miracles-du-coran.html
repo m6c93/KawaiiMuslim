@@ -82,7 +82,8 @@
   </aside>
   <div class="scrim" id="scrim" hidden></div>
   <script>
-    const TOTAL=window.KM_BOOK_EMBED?7:64, ASSET="../brand/books/miracles-du-coran/";
+    const requestedPreview=Math.max(0,Number(new URLSearchParams(location.search).get("previewPages"))||0);
+    const TOTAL=window.KM_BOOK_EMBED?Math.min(5,requestedPreview||5):64, ASSET="../brand/books/miracles-du-coran/";
     const pad=n=>String(n).padStart(2,"0"), pageSrc=n=>`${ASSET}page-${pad(n)}.jpg`, $=id=>document.getElementById(id);
     const els={book:$("book"),cover:$("coverStage"),spread:$("spread"),leftPaper:$("leftPaper"),rightPaper:$("rightPaper"),left:$("leftPage"),right:$("rightPage"),turnSheet:$("turnSheet"),turnFront:$("turnFront"),turnBack:$("turnBack"),prev:$("prevBtn"),next:$("nextBtn"),progress:$("progress"),label:$("pageLabel"),drawer:$("drawer"),scrim:$("scrim"),thumbs:$("thumbs"),sound:$("soundBtn")};
     const activeProfile=(()=>{try{return JSON.parse(localStorage.getItem("km-active-profile-v2"))||{}}catch{return{}}})();
