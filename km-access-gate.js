@@ -13,7 +13,7 @@
   var currentPath = decodeURIComponent(window.location.pathname);
   var previewPages = new URLSearchParams(window.location.search).get("previewPages");
   var guestBookPreview = guestMode && (
-    (window.self !== window.top && previewPages === "2" && currentPath === "/books/aya-armure-de-lumiere.html")
+    (window.self !== window.top && previewPages === "4" && currentPath === "/books/aya-armure-de-lumiere.html")
     || (previewPages === "5" && currentPath === "/books/tawakkul.html")
   );
   var guestPages = new Set([
