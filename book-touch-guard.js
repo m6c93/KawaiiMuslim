@@ -1,16 +1,6 @@
 (function () {
   "use strict";
 
-  var localPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
-    && new URLSearchParams(window.location.search).get("preview") === "1";
-  if (!localPreview && !window.KM_BOOK_EMBED) {
-    document.documentElement.style.visibility = "hidden";
-    var accessGate = document.createElement("script");
-    accessGate.src = "../km-access-gate.js?v=subscription-live-1";
-    accessGate.onerror = function () { document.documentElement.style.visibility = "visible"; };
-    document.head.appendChild(accessGate);
-  }
-
   var multiTouchGesture = false;
 
   document.addEventListener("touchstart", function (event) {

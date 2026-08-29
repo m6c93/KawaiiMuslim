@@ -231,7 +231,7 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
         const nextButton=doc.getElementById("nextBtn");
         const gridButton=doc.getElementById("gridBtn");
         const book=doc.getElementById("book");
-        const allowedPosition=()=>view.matchMedia("(max-width:700px)").matches?previewPageLimit:Math.ceil(previewPageLimit/2);
+        const allowedPosition=()=>Math.ceil(previewPageLimit/2);
         const atLimit=()=>Number(progress?.value||0)>=allowedPosition();
         const enforceLimit=()=>{
           if(!progress||!nextButton)return;
@@ -263,8 +263,8 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
         new MutationObserver(enforceLimit).observe(progress,{attributes:true,attributeFilter:["max","value"]});
         view.addEventListener("resize",enforceLimit);
         enforceLimit();
-        document.querySelector(".badge").textContent="🎨 2 pages offertes";
-        document.querySelector(".hint").textContent="Choisis l’une des 2 pages offertes. Tes couleurs restent sur cet appareil.";
+        document.querySelector(".badge").textContent="🎨 4 pages offertes";
+        document.querySelector(".hint").textContent="Choisis l’une des 4 pages offertes. Tes couleurs restent sur cet appareil.";
       }
       const observer=new MutationObserver(scheduleRefresh);
       observer.observe(doc.body,{subtree:true,childList:true,attributes:true,attributeFilter:["src","style","class","value"]});
@@ -295,12 +295,15 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
       actions.innerHTML='<span class="empty-action child-empty">Choisis la page pour reprendre ton coloriage.</span>';
     }
   },6500);
-  const frameUrl=new URL("books/"+allowed[slug],location.href);
+  const frameFile=guestMode&&slug==="aya-armure-de-lumiere"
+    ? "aya-armure-de-lumiere-demo.html"
+    : allowed[slug];
+  const frameUrl=new URL("books/"+frameFile,location.href);
   if(previewPageLimit){
     frameUrl.searchParams.set("embed","1");
     frameUrl.searchParams.set("guest","1");
     frameUrl.searchParams.set("previewPages",String(previewPageLimit));
-    frameUrl.searchParams.set("v","guest-four-pages-1");
+    frameUrl.searchParams.set("v","guest-resume-mobile-4");
   }
   frame.src=frameUrl.href;
 })();
