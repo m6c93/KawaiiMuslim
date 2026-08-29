@@ -235,8 +235,9 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
         const atLimit=()=>Number(progress?.value||0)>=allowedPosition();
         const enforceLimit=()=>{
           if(!progress||!nextButton)return;
-          progress.max=String(allowedPosition());
-          if(Number(progress.value)>allowedPosition())progress.value=String(allowedPosition());
+          const limit=String(allowedPosition());
+          if(progress.max!==limit)progress.max=limit;
+          if(Number(progress.value)>Number(limit))progress.value=limit;
           nextButton.disabled=atLimit();
           if(gridButton)gridButton.hidden=true;
         };
