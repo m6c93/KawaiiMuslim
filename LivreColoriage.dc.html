@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<script src="./km-access-gate.js?v=subscription-live-1"></script>
+<script src="./km-access-gate.js?v=guest-nav-fix-20260830"></script>
 <script>
 /* Mode préouverture Kawaii Muslim — accès réservé à l’équipe */
 (() => {
@@ -92,7 +92,7 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   const profileChooser=document.getElementById("profileChooser");
   const colorbarInner=document.getElementById("colorbarInner");
   const actions=document.getElementById("pageActions");
-  let context=null,activeChildId="",artworks=[],refreshTimer=null,resumeStarted=false;
+  let context=null,activeChildId="",artworks=[],refreshTimer=null,resumeStarted=false,framePrepareAttempts=0;
 
   const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const sourceKey=pageNumber=>`book-coloring:${slug}:page:${pageNumber}`;
@@ -218,13 +218,20 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   }
 
   frame.addEventListener("load",()=>{
-    loading.hidden=true;
-    document.body.classList.add("book-ready");
     try{
-      const responsiveStyle=frame.contentDocument.createElement("style");
-      responsiveStyle.textContent="html,body{width:100%;max-width:100%;overflow-x:hidden} @media(max-width:650px){header{min-width:0} main{min-width:0} figure{max-width:100%}}";
-      frame.contentDocument.head.appendChild(responsiveStyle);
       const doc=frame.contentDocument;
+      const frameLocation=frame.contentWindow?.location?.href||"";
+      if(!doc?.head||!doc?.body||frameLocation==="about:blank")return;
+      if(previewPageLimit&&(!doc.getElementById("progress")||!doc.getElementById("nextBtn")||!doc.getElementById("book"))){
+        if(framePrepareAttempts++<30)setTimeout(()=>frame.dispatchEvent(new Event("load")),120);
+        return;
+      }
+      framePrepareAttempts=0;
+      loading.hidden=true;
+      document.body.classList.add("book-ready");
+      const responsiveStyle=doc.createElement("style");
+      responsiveStyle.textContent="html,body{width:100%;max-width:100%;overflow-x:hidden} @media(max-width:650px){header{min-width:0} main{min-width:0} figure{max-width:100%}}";
+      doc.head.appendChild(responsiveStyle);
       if(previewPageLimit){
         const view=frame.contentWindow;
         const progress=doc.getElementById("progress");
@@ -284,9 +291,10 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
       doc.addEventListener("keyup",scheduleRefresh,true);
       scheduleRefresh();
     }catch(error){
+      if(framePrepareAttempts++<30){setTimeout(()=>frame.dispatchEvent(new Event("load")),120);return}
       document.documentElement.classList.remove("direct-resume");
       colorbar.hidden=false;
-      actions.innerHTML='<span class="empty-action child-empty">Impossible de préparer cette page.</span>';
+      actions.innerHTML='<span class="empty-action child-empty">Le coloriage n’a pas pu s’ouvrir. Recharge la page pour réessayer.</span>';
     }
   });
   if(resumePage)setTimeout(()=>{
