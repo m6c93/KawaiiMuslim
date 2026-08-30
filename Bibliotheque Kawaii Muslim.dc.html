@@ -671,7 +671,13 @@ class Component extends DCLogic {
       chooseEnfant: () => { window.location.href = 'Profils.dc.html'; },
       chooseMaman: () => { window.location.href = 'Profils.dc.html'; },
       switchProfile: () => { window.location.href = 'Profils.dc.html'; },
-                    openPaywall: () => this.setState({ showPaywall: true }),
+                    openPaywall: () => {
+                        if (guestMode) {
+                            window.location.href = 'index.html#tarifs';
+                            return;
+                        }
+                        this.setState({ showPaywall: true });
+                    },
                     openLockedBook: () => {
                         if (!guestMode) this.setState({ showPaywall: true });
                     },
