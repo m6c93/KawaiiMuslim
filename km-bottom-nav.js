@@ -7,6 +7,21 @@
     && new URLSearchParams(window.location.search).get("preview") === "1";
   var guestMode = new URLSearchParams(window.location.search).get("guest") === "1"
     || sessionStorage.getItem("km-guest-mode") === "1";
+  var guestPaths = new Set([
+    "/Aujourd'hui.dc.html",
+    "/Bibliotheque Kawaii Muslim.dc.html",
+    "/Atelier.dc.html",
+    "/Safe Place.dc.html",
+    "/LivreColoriage.dc.html",
+    "/Coloriage.dc.html"
+  ]);
+  function preserveDiscoveryMode(href) {
+    var target = new URL(href, window.location.href);
+    if (target.origin !== window.location.origin) return href;
+    if (guestMode && guestPaths.has(decodeURIComponent(target.pathname))) target.searchParams.set("guest", "1");
+    if (localPreview && guestPaths.has(decodeURIComponent(target.pathname))) target.searchParams.set("preview", "1");
+    return target.href;
+  }
   var incomingTransition = sessionStorage.getItem(transitionKey);
   if (incomingTransition && !shellChild) {
     document.documentElement.classList.add("km-page-entering");
@@ -40,9 +55,14 @@
     nav.style.setProperty("--km-nav-index", previousIndex);
     nav.innerHTML = '<span class="km-nav-indicator" aria-hidden="true"></span>' + items.map(function (item, index) {
       var current = index === activeIndex ? ' aria-current="page"' : "";
-      return '<a href="' + item.href + '" data-km-nav-index="' + index + '"' + current + '><span class="material-symbols-rounded" aria-hidden="true">' + item.icon + '</span><span>' + item.label + '</span></a>';
+      return '<a href="' + preserveDiscoveryMode(item.href) + '" data-km-nav-index="' + index + '"' + current + '><span class="material-symbols-rounded" aria-hidden="true">' + item.icon + '</span><span>' + item.label + '</span></a>';
     }).join("");
     document.body.appendChild(nav);
+    if (guestMode || localPreview) {
+      document.querySelectorAll('a[href]').forEach(function (link) {
+        link.href = preserveDiscoveryMode(link.getAttribute('href'));
+      });
+    }
     if (guestMode) {
       var guestPill = document.createElement("a");
       guestPill.className = "km-guest-pill";
