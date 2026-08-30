@@ -103,7 +103,9 @@
 
     const choose = selection => {
       KMAuth.setActiveProfile(selection);
-      const target = sessionStorage.getItem("km-after-profile") || "Aujourd%27hui.dc.html";
+      const target = selection?.type === "parent"
+        ? "Compte.dc.html?v=parent-dashboard-1"
+        : sessionStorage.getItem("km-after-profile") || "Aujourd%27hui.dc.html";
       sessionStorage.removeItem("km-after-profile");
       window.location.href = target;
     };
