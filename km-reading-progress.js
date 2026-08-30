@@ -117,7 +117,37 @@
     }
   };
 
+  const connectBookFallback = () => {
+    if (disabled || !activeChild() || document.getElementById("progress")) return;
+    const counter = document.getElementById("counter");
+    const bar = document.getElementById("bar");
+    if (!counter || !bar) return;
+
+    const payload = () => {
+      const label = String(counter.textContent || "");
+      const match = label.match(/(?:Lecture\s+)?(\d+)\s*\/\s*(\d+)/i);
+      if (match) return { position: Number(match[1]), total: Math.max(1, Number(match[2])) };
+      const width = Number.parseFloat(bar.style.width || "0");
+      return { position: Math.round(width), total: 100 };
+    };
+
+    ["prev", "next", "restart", "zoneL", "zoneR"].forEach(id => {
+      document.getElementById(id)?.addEventListener("click", () => setTimeout(() => queueSave(payload()), 1250));
+    });
+    document.addEventListener("keydown", event => {
+      if (["ArrowLeft", "ArrowRight", " ", "Home", "End"].includes(event.key)) {
+        setTimeout(() => queueSave(payload()), 1250);
+      }
+    });
+    window.addEventListener("pagehide", () => save(payload()));
+    setTimeout(() => queueSave(payload()), 1500);
+  };
+
   window.KMReadingProgress = { save, restore, queueSave };
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", connectRangeReader, { once: true });
-  else connectRangeReader();
+  const connect = () => {
+    connectRangeReader();
+    connectBookFallback();
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", connect, { once: true });
+  else connect();
 })();
