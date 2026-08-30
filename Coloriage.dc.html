@@ -9,7 +9,7 @@
   <script>
     (() => {
       const startupParams = new URLSearchParams(location.search);
-      if (startupParams.get("bookColoring") === "1" || startupParams.has("draft")) {
+      if (startupParams.get("bookColoring") === "1" || startupParams.has("draft") || startupParams.get("src") === "builtin-drawing:blank") {
         document.documentElement.classList.add("direct-coloring");
       }
     })();
@@ -275,6 +275,7 @@ body.book-coloring-mode .title small{color:#daf3eb}
   <script type="module">
     const params = new URLSearchParams(location.search);
     const guestMode = params.get("guest") === "1";
+    const localDesignPreview = /^(127\.0\.0\.1|localhost)$/.test(location.hostname) && params.get("preview") === "1";
     const source = params.get("src") || "";
     const title = (params.get("title") || "Mon coloriage").slice(0,160);
     const requestedFormat = params.get("format") || "";
@@ -387,7 +388,13 @@ body.book-coloring-mode .title small{color:#daf3eb}
           "builtin-coloring:abeille-coran":"./brand/assets/coloring-abeille-coran.png",
           "builtin-coloring:tapis-priere":"./brand/assets/coloring-tapis-priere.png"
         };
-        if (builtInColorings[source]) {
+        if (source === "builtin-drawing:blank") {
+          format = "blank";
+          artworkSourceKey = source;
+          document.body.classList.add("free-drawing-mode");
+          document.getElementById("compareButton").hidden = true;
+          document.getElementById("saveStatus").textContent = "Prêt à dessiner";
+        } else if (builtInColorings[source]) {
           format = "image";
           imageSource = new URL(builtInColorings[source],location.href).href;
           artworkSourceKey = source;
@@ -408,6 +415,11 @@ body.book-coloring-mode .title small{color:#daf3eb}
       if (initialized) return;
       if (format === "pdf") {
         throw new Error("Ce coloriage PDF peut être imprimé. Pour les feutres numériques, choisis un coloriage en image.");
+      } else if (format === "blank") {
+        baseCanvas.width = drawCanvas.width = 1200;
+        baseCanvas.height = drawCanvas.height = 1600;
+        baseCtx.fillStyle = "#fff";
+        baseCtx.fillRect(0,0,baseCanvas.width,baseCanvas.height);
       } else {
         const image = new Image();
         image.crossOrigin = "anonymous";
@@ -609,7 +621,7 @@ body.book-coloring-mode .title small{color:#daf3eb}
       saving = true;
       savePromise = (async () => {
         try {
-          if (guestMode) {
+          if (guestMode || localDesignPreview) {
             draftId = draftId || `guest-${Date.now()}`;
             localStorage.setItem(`km-guest-coloring:${artworkSourceKey}`,JSON.stringify({id:draftId,strokes,updatedAt:new Date().toISOString()}));
             saveStatus.textContent = "Sauvegardé sur cet appareil";
@@ -632,7 +644,7 @@ body.book-coloring-mode .title small{color:#daf3eb}
       return savePromise;
     };
     const loadDraft = async () => {
-      if (guestMode) {
+      if (guestMode || localDesignPreview) {
         try {
           const saved = JSON.parse(localStorage.getItem(`km-guest-coloring:${artworkSourceKey}`) || "null");
           if (saved) {
@@ -925,7 +937,7 @@ body.book-coloring-mode .title small{color:#daf3eb}
         button.disabled = true;
         button.textContent = "⭐ Enregistrement…";
         await saveDraft();
-        if (guestMode) {
+        if (guestMode || localDesignPreview) {
           document.getElementById("celebrationMessage").textContent = "Bravo ! Ton coloriage découverte est gardé sur cet appareil.";
           document.getElementById("finishModal").hidden = true;
           document.getElementById("celebration").hidden = false;
@@ -970,14 +982,14 @@ body.book-coloring-mode .title small{color:#daf3eb}
 
     try {
       validateSource();
-      context = guestMode
+      context = guestMode || localDesignPreview
         ? {profile:{role:"guest"},children:[{id:"guest-child",name:"Découverte",avatar:"🎨"}]}
         : await KMAuth.getContext();
       if (!context) {
         window.location.replace(`Connexion.dc.html?next=${encodeURIComponent(location.pathname+location.search)}`);
       } else {
-        const active = guestMode
-          ? {type:"child",id:"guest-child",name:"Découverte",avatar:"🎨"}
+        const active = guestMode || localDesignPreview
+          ? {type:"child",id:requestedChild || "guest-child",name:"Découverte",avatar:"🎨"}
           : KMAuth.getActiveProfile();
         childSelect.innerHTML = context.children.map(child => `<option value="${child.id}">${child.avatar} ${child.name}</option>`).join("");
         if (requestedChild && context.children.some(child => child.id === requestedChild)) childSelect.value = requestedChild;
@@ -988,7 +1000,7 @@ body.book-coloring-mode .title small{color:#daf3eb}
           document.getElementById("quickChild").hidden = false;
           document.getElementById("choiceMessage").textContent = "Une seule fois : indique son prénom pour créer sa galerie privée.";
         }
-        if ((requestedDraft || bookColoring) && childSelect.value) await startEditor();
+        if ((requestedDraft || bookColoring || source === "builtin-drawing:blank") && childSelect.value) await startEditor();
       }
     } catch (error) {
       if (error?.message !== "book_redirect") {
@@ -1003,3 +1015,4 @@ body.book-coloring-mode .title small{color:#daf3eb}
   </script>
 </body>
 </html>
+
