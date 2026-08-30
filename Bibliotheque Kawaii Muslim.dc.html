@@ -620,10 +620,9 @@ class Component extends DCLogic {
     });
 
     const rawColorings = [
-      { title: 'La lune de Ramadan', emoji: '🌙' },
-      { title: "L'abeille du Coran", emoji: '🐝' },
-      { title: 'Le tapis de prière', emoji: '🕌' },
-      { title: 'Aya & Mimi', emoji: '🌸' },
+      { title: 'La lune de Ramadan', emoji: '🌙', cover: 'brand/assets/coloring-lune-ramadan.png', url: 'Coloriage.dc.html?src=builtin-coloring%3Alune-ramadan&title=La%20lune%20de%20Ramadan&format=image' },
+      { title: "L'abeille du Coran", emoji: '🐝', cover: 'brand/assets/coloring-abeille-coran.png', url: 'Coloriage.dc.html?src=builtin-coloring%3Aabeille-coran&title=L%27abeille%20du%20Coran&format=image' },
+      { title: 'Le tapis de prière', emoji: '🕌', cover: 'brand/assets/coloring-tapis-priere.png', url: 'Coloriage.dc.html?src=builtin-coloring%3Atapis-priere&title=Le%20tapis%20de%20pri%C3%A8re&format=image' },
     ];
     const managedColorings = Array.isArray(this.state.catalog)
       ? this.state.catalog
@@ -646,11 +645,11 @@ class Component extends DCLogic {
       ...p,
       coverImg: p.cover || false,
       noImg: !p.cover,
-      url: '#',
-      available: false,
-      soon: true,
-      canDownload: false,
-      locked: false,
+      url: p.url || '#',
+      available: Boolean(p.url),
+      soon: !p.url,
+      canDownload: Boolean(p.url) && subscribed,
+      locked: Boolean(p.url) && !subscribed,
     }));
     const colorings = [...managedColorings, ...placeholderColorings];
 
