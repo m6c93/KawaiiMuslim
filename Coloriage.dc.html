@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <script src="./km-access-gate.js?v=subscription-live-1"></script>
+  <script src="./km-access-gate.js?v=guest-nav-fix-20260830"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#211e56">
@@ -382,13 +382,24 @@ body.book-coloring-mode .title small{color:#daf3eb}
         });
         document.getElementById("finishButton").innerHTML = "⭐<br>J’ai terminé";
       } else {
-        sourceUrl = new URL(source);
-        const valid = sourceUrl.protocol === "https:" && sourceUrl.hostname === allowedHost
-          && sourceUrl.pathname.startsWith("/storage/v1/object/public/content-colorings/");
-        if (!valid) throw new Error("Ce coloriage n’est pas disponible.");
-        format = requestedFormat === "pdf" || sourceUrl.pathname.toLowerCase().endsWith(".pdf") ? "pdf" : "image";
-        imageSource = sourceUrl.href;
-        artworkSourceKey = sourceUrl.href;
+        const builtInColorings = {
+          "builtin-coloring:lune-ramadan":"./brand/assets/coloring-lune-ramadan.png",
+          "builtin-coloring:abeille-coran":"./brand/assets/coloring-abeille-coran.png",
+          "builtin-coloring:tapis-priere":"./brand/assets/coloring-tapis-priere.png"
+        };
+        if (builtInColorings[source]) {
+          format = "image";
+          imageSource = new URL(builtInColorings[source],location.href).href;
+          artworkSourceKey = source;
+        } else {
+          sourceUrl = new URL(source);
+          const valid = sourceUrl.protocol === "https:" && sourceUrl.hostname === allowedHost
+            && sourceUrl.pathname.startsWith("/storage/v1/object/public/content-colorings/");
+          if (!valid) throw new Error("Ce coloriage n’est pas disponible.");
+          format = requestedFormat === "pdf" || sourceUrl.pathname.toLowerCase().endsWith(".pdf") ? "pdf" : "image";
+          imageSource = sourceUrl.href;
+          artworkSourceKey = sourceUrl.href;
+        }
       }
       document.title = `${title} — Kawaii Muslim`;
       document.getElementById("coloringTitle").textContent = title;
