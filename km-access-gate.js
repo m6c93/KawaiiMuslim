@@ -9,10 +9,11 @@
     && new URLSearchParams(window.location.search).get("preview") === "1";
   if (localPreview) return;
 
-  var guestMode = new URLSearchParams(window.location.search).get("guest") === "1";
+  var explicitGuestMode = new URLSearchParams(window.location.search).get("guest") === "1";
+  var storedGuestMode = sessionStorage.getItem("km-guest-mode") === "1";
   var currentPath = decodeURIComponent(window.location.pathname);
   var previewPages = new URLSearchParams(window.location.search).get("previewPages");
-  var guestBookPreview = guestMode && (
+  var guestBookPreview = explicitGuestMode && (
     (window.self !== window.top && previewPages === "4" && currentPath === "/books/aya-armure-de-lumiere.html")
     || (previewPages === "5" && currentPath === "/books/tawakkul.html")
   );
@@ -24,7 +25,13 @@
     "/LivreColoriage.dc.html",
     "/Coloriage.dc.html"
   ]);
-  if ((guestMode && guestPages.has(decodeURIComponent(window.location.pathname))) || guestBookPreview) {
+  if (storedGuestMode && !explicitGuestMode && guestPages.has(currentPath)) {
+    var restoredUrl = new URL(window.location.href);
+    restoredUrl.searchParams.set("guest", "1");
+    window.location.replace(restoredUrl.href);
+    return;
+  }
+  if ((explicitGuestMode && guestPages.has(currentPath)) || guestBookPreview) {
     sessionStorage.setItem("km-guest-mode", "1");
     window.KM_GUEST_MODE = true;
     return;
