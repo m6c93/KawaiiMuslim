@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <script src="./km-access-gate.js?v=subscription-live-1"></script>
+  <script src="./km-access-gate.js?v=guest-nav-fix-20260830"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#252b67">
@@ -37,6 +37,9 @@
     .big-action:nth-child(3) .icon { background:#fff2cd; }
     .big-action strong { display:block; font:800 17px "Baloo 2",cursive; }
     .big-action small { display:block; color:var(--muted); font-size:10px; line-height:1.3; }
+    .big-action.preview-locked { position:relative; padding-right:116px; color:#666982; background:rgba(255,255,255,.9); box-shadow:0 8px 20px rgba(7,9,35,.14); }
+    .big-action.preview-locked::after { content:"🔒 Abonnement"; position:absolute; top:50%; right:13px; padding:7px 9px; color:#754e69; border:1px solid #efd4e2; border-radius:999px; background:#fff0f7; font-size:9px; font-weight:900; line-height:1; transform:translateY(-50%); white-space:nowrap; }
+    .big-action.preview-locked:hover { transform:none; }
     .gallery-head { display:flex; align-items:end; justify-content:space-between; gap:20px; margin:40px 0 20px; }
     .gallery-head h2 { margin:0; font:800 29px "Baloo 2",cursive; }
     .gallery-head p { margin:4px 0 0; color:var(--muted); font-size:13px; }
@@ -96,7 +99,7 @@
     }
   </style>
   <link rel="stylesheet" href="./km-bottom-nav.css?v=nav-scroll-fix-20260819">
-  <script src="./km-bottom-nav.js?v=nav-scroll-fix-20260819"></script>
+  <script src="./km-bottom-nav.js?v=guest-nav-fix-20260830"></script>
 </head>
 <body data-km-section="workshop">
   <div class="shell">
@@ -113,9 +116,9 @@
           <p>Colorie à l’écran, imprime tes dessins préférés ou ajoute une création faite sur papier. Tout reste bien rangé dans ta galerie.</p>
         </div>
         <div class="hero-actions">
-          <a class="big-action" href="Bibliotheque%20Kawaii%20Muslim.dc.html#coloriages"><span class="icon">🖍️</span><span><strong>Colorier</strong><small>Choisir un coloriage numérique</small></span></a>
-          <a class="big-action" href="Bibliotheque%20Kawaii%20Muslim.dc.html#coloriages"><span class="icon">🖨️</span><span><strong>Imprimer</strong><small>Choisir une page à imprimer</small></span></a>
-          <button class="big-action" id="openScan" type="button"><span class="icon">📸</span><span><strong>Ajouter mon dessin</strong><small>Photographier un coloriage papier</small></span></button>
+          <a class="big-action" data-guest-lock href="Bibliotheque%20Kawaii%20Muslim.dc.html#coloriages"><span class="icon">🖍️</span><span><strong>Colorier</strong><small>Choisir un coloriage numérique</small></span></a>
+          <a class="big-action" data-guest-lock href="Bibliotheque%20Kawaii%20Muslim.dc.html#coloriages"><span class="icon">🖨️</span><span><strong>Imprimer</strong><small>Choisir une page à imprimer</small></span></a>
+          <button class="big-action" data-guest-lock id="openScan" type="button"><span class="icon">📸</span><span><strong>Ajouter mon dessin</strong><small>Photographier un coloriage papier</small></span></button>
         </div>
       </section>
 
@@ -166,6 +169,18 @@
     const guestMode = new URLSearchParams(window.location.search).get("guest") === "1";
     const localDesignPreview = (/^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
       && new URLSearchParams(window.location.search).get("preview") === "1") || guestMode;
+    if (guestMode) {
+      document.querySelectorAll("[data-guest-lock]").forEach(action => {
+        action.classList.add("preview-locked");
+        action.setAttribute("aria-label",`${action.querySelector("strong").textContent} — réservé aux abonnés`);
+        action.querySelector("small").textContent = "Disponible avec l’abonnement";
+        action.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          window.location.href = "index.html#tarifs";
+        },true);
+      });
+    }
     const gallery = document.getElementById("gallery");
     const childPicker = document.getElementById("childPicker");
     const pageMessage = document.getElementById("pageMessage");
