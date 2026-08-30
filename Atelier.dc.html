@@ -235,13 +235,21 @@
         return item.status === activeFilter;
       });
       gallery.innerHTML = shown.map(item => {
-        const resumeUrl = `Coloriage.dc.html?src=${encodeURIComponent(item.source_url)}&title=${encodeURIComponent(item.title)}&draft=${item.id}`;
         const isDraft = item.status === "in_progress";
-        const isBook = String(item.source_url || "").startsWith("book-coloring:");
+        const bookMatch = String(item.source_url || "").match(/^book-coloring:([a-z0-9-]+):page:(\d+)$/);
+        const isBook = Boolean(bookMatch);
         const hasUsableImage = /^(https?:|data:|blob:)/i.test(String(item.image_url || ""));
-        const pageNumber = String(item.source_url || "").match(/:page:(\d+)$/)?.[1] || "";
+        const pageNumber = bookMatch?.[2] || "";
         const memory = item.drawing_data?.memory || {};
         const displayTitle = memory.title || item.title;
+        const bookTitle = String(displayTitle).replace(/\s*·\s*Page\s+\d+.*$/i,"").trim() || item.title;
+        const resumeParams = isBook
+          ? new URLSearchParams({book:bookMatch[1],title:bookTitle,position:String(Math.max(0,Math.ceil(Number(pageNumber)/2))),resumePage:pageNumber,resumeDraft:String(item.id),v:"resume-mobile-fix-20260830"})
+          : null;
+        if (resumeParams && guestMode) resumeParams.set("guest","1");
+        const resumeUrl = isBook
+          ? `LivreColoriage.dc.html?${resumeParams.toString()}`
+          : `Coloriage.dc.html?src=${encodeURIComponent(item.source_url)}&title=${encodeURIComponent(item.title)}&draft=${item.id}`;
         const preview = hasUsableImage
           ? `<img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.title)}">`
           : isBook
@@ -276,13 +284,13 @@
         {
           id: "preview-armure",
           child_id: "preview-child",
-          title: "Aya et l’Armure de Lumière · Page 6",
+          title: "Aya et l’Armure de Lumière · Page 3",
           image_url: new URL("brand/assets/coloring-armure-lumiere.png", location.href).href,
-          source_url: "book-coloring:aya-armure-de-lumiere:page:6",
+          source_url: "book-coloring:aya-armure-de-lumiere:page:3",
           status: "in_progress",
           kind: "digital",
           updated_at: new Date().toISOString(),
-          drawing_data: { memory: { title: "Aya et l’Armure de Lumière · Page 6" } }
+          drawing_data: { memory: { title: "Aya et l’Armure de Lumière · Page 3" } }
         },
         {
           id: "preview-bubble",
