@@ -83,7 +83,7 @@
     .button { cursor:pointer; min-height:48px; padding:11px 16px; color:#686a84; border:0; border-radius:24px; background:#f0eef4; font-weight:900; }
     .button.primary { color:#fff; background:linear-gradient(145deg,var(--mint),#378e78); }
     .message { min-height:18px; margin:12px 0 0; color:#ad5276; font-size:11px; font-weight:900; text-align:center; }
-    @media (max-width:900px) { .hero { grid-template-columns:1fr; } .hero-actions { grid-template-columns:repeat(3,1fr); } .big-action { min-height:130px; display:block; text-align:center; } .big-action .icon { margin:0 auto 8px; } .art-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (max-width:900px) { .hero { grid-template-columns:1fr; } .hero-actions { grid-template-columns:repeat(2,1fr); } .big-action { min-height:130px; display:block; text-align:center; } .big-action .icon { margin:0 auto 8px; } .art-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
     @media (max-width:650px) {
       .shell { width:min(100% - 20px,1180px); }
       .brand strong,.back span { display:none; }
@@ -117,6 +117,7 @@
         </div>
         <div class="hero-actions">
           <a class="big-action" data-guest-lock href="Bibliotheque%20Kawaii%20Muslim.dc.html#coloriages"><span class="icon">🖍️</span><span><strong>Colorier</strong><small>Choisir un coloriage numérique</small></span></a>
+          <button class="big-action" data-guest-lock id="openDrawing" type="button"><span class="icon">✏️</span><span><strong>Dessin libre</strong><small>Dessiner sur une feuille blanche</small></span></button>
           <a class="big-action" data-guest-lock href="Bibliotheque%20Kawaii%20Muslim.dc.html#coloriages"><span class="icon">🖨️</span><span><strong>Imprimer</strong><small>Choisir une page à imprimer</small></span></a>
           <button class="big-action" data-guest-lock id="openScan" type="button"><span class="icon">📸</span><span><strong>Ajouter mon dessin</strong><small>Photographier un coloriage papier</small></span></button>
         </div>
@@ -129,6 +130,7 @@
         </header>
         <div class="filters" id="filters">
           <button class="chip active" data-filter="all" type="button">Tout</button>
+          <button class="chip" data-filter="drawings" type="button">✏️ Mes dessins</button>
           <button class="chip" data-filter="books" type="button">📚 Livres</button>
           <button class="chip" data-filter="in_progress" type="button">À terminer</button>
           <button class="chip" data-filter="completed" type="button">Terminés</button>
@@ -229,7 +231,9 @@
     const renderGallery = () => {
       const shown = artworks.filter(item => {
         const isBook = String(item.source_url || "").startsWith("book-coloring:");
+        const isDrawing = item.source_url === "builtin-drawing:blank";
         if (activeFilter === "all") return true;
+        if (activeFilter === "drawings") return isDrawing;
         if (activeFilter === "books") return isBook;
         if (activeFilter === "paper") return item.kind === "paper";
         return item.status === activeFilter;
@@ -238,6 +242,7 @@
         const isDraft = item.status === "in_progress";
         const bookMatch = String(item.source_url || "").match(/^book-coloring:([a-z0-9-]+):page:(\d+)$/);
         const isBook = Boolean(bookMatch);
+        const isDrawing = item.source_url === "builtin-drawing:blank";
         const hasUsableImage = /^(https?:|data:|blob:)/i.test(String(item.image_url || ""));
         const pageNumber = bookMatch?.[2] || "";
         const memory = item.drawing_data?.memory || {};
@@ -249,7 +254,7 @@
         if (resumeParams && guestMode) resumeParams.set("guest","1");
         const resumeUrl = isBook
           ? `LivreColoriage.dc.html?${resumeParams.toString()}`
-          : `Coloriage.dc.html?src=${encodeURIComponent(item.source_url)}&title=${encodeURIComponent(item.title)}&draft=${item.id}`;
+          : `Coloriage.dc.html?src=${encodeURIComponent(item.source_url)}&title=${encodeURIComponent(item.title)}&draft=${item.id}&child=${encodeURIComponent(selectedChildId)}`;
         const preview = hasUsableImage
           ? `<img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.title)}">`
           : isBook
@@ -260,6 +265,7 @@
             ${preview}
             <span class="art-badge ${isDraft ? "draft" : ""}">${isDraft ? "À terminer" : item.kind === "paper" ? "Sur papier" : "Terminé"}</span>
             ${isBook ? `<span class="book-tag">📚 Livre</span>` : ""}
+            ${isDrawing ? `<span class="book-tag">✏️ Dessin libre</span>` : ""}
           </div>
           <div class="art-copy">
             <strong>${escapeHtml(displayTitle)}</strong>
@@ -342,6 +348,16 @@
         await loadGallery();
       } catch (error) { pageMessage.textContent = KMAuth.friendlyError(error); }
     });
+    document.getElementById("openDrawing").addEventListener("click", () => {
+      if (!selectedChildId) return pageMessage.textContent = "Ajoute d’abord un profil enfant.";
+      const drawingUrl = new URL("Coloriage.dc.html", location.href);
+      drawingUrl.searchParams.set("src", "builtin-drawing:blank");
+      drawingUrl.searchParams.set("title", "Mon dessin");
+      drawingUrl.searchParams.set("child", selectedChildId);
+      drawingUrl.searchParams.set("v", "drawing-free-1");
+      if (localDesignPreview && !guestMode) drawingUrl.searchParams.set("preview", "1");
+      window.location.href = drawingUrl.pathname.split("/").pop() + drawingUrl.search;
+    });
     document.getElementById("openScan").addEventListener("click", () => {
       if (!selectedChildId) return pageMessage.textContent = "Ajoute d’abord un profil enfant.";
       scanModal.hidden = false;
@@ -405,3 +421,4 @@
   </script>
 </body>
 </html>
+
