@@ -305,6 +305,17 @@ window.KMAuth = (() => {
     savePlannerDay,
     startInactivityGuard,
 
+    listReadingProgress: async childId => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      let query = client().from("reading_progress")
+        .select("*")
+        .eq("parent_id", session.user.id)
+        .order("last_read_at", { ascending: false });
+      if (childId) query = query.eq("child_profile_id", childId);
+      return requireSuccess(await query) || [];
+    },
+
     listArtworks: async childId => {
       const session = await getSession();
       if (!session) throw new Error("Connexion requise.");

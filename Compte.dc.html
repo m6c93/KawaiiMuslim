@@ -117,15 +117,39 @@
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
     })[character]);
 
+    const formatLastRead = value => {
+      if (!value) return "";
+      const date = new Date(value);
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+      if (date.toDateString() === today.toDateString()) return "aujourd’hui";
+      if (date.toDateString() === yesterday.toDateString()) return "hier";
+      return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+    };
+
     const renderChildren = () => {
       children.innerHTML = context.children.map(child => `
         <article class="profile-card">
-          <div class="profile-main">
-            <span class="profile-avatar">${escapeHtml(child.avatar)}</span>
-            <div class="profile-copy">
-              <strong>${escapeHtml(child.name)}</strong>
-              <small>${escapeHtml(child.age_group)} ans · progression personnelle</small>
+          <div class="profile-details">
+            <div class="profile-main">
+              <span class="profile-avatar">${escapeHtml(child.avatar)}</span>
+              <div class="profile-copy">
+                <strong>${escapeHtml(child.name)}</strong>
+                <small>${escapeHtml(child.age_group)} ans · progression personnelle</small>
+              </div>
             </div>
+            ${(() => {
+              const readings = (context.readingProgress || []).filter(item => item.child_profile_id === child.id);
+              const latest = readings[0];
+              if (!latest) return '<div class="reading-empty">📖 Aucune lecture commencée pour le moment.</div>';
+              const percent = Math.min(100, Math.round((Number(latest.position) / Math.max(1, Number(latest.total_positions))) * 100));
+              return `<div class="reading-summary">
+                <div class="reading-line"><strong>📖 ${escapeHtml(latest.book_title || latest.book_slug)}</strong><span>${percent}%</span></div>
+                <div class="reading-bar" role="progressbar" aria-label="Progression de ${escapeHtml(child.name)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><i style="width:${percent}%"></i></div>
+                <small>${latest.completed ? "Livre terminé" : "Lecture en cours"} · ${readings.length} livre${readings.length > 1 ? "s" : ""} commencé${readings.length > 1 ? "s" : ""} · ${formatLastRead(latest.last_read_at)}</small>
+              </div>`;
+            })()}
           </div>
           <div class="card-actions">
             <a class="small-button" href="Atelier.dc.html?child=${child.id}">🎨 Sa galerie</a>
@@ -153,6 +177,7 @@
       document.getElementById("parentName").value = context.profile.full_name || "";
       document.getElementById("parentAvatar").value = context.profile.avatar || "🌸";
       context.subscription = await KMAuth.getSubscription();
+      context.readingProgress = await KMAuth.listReadingProgress();
       const subscribed = activeBillingStatuses.has(context.subscription?.status);
       childLimit = subscribed ? Number(context.subscription.child_limit || 1) : context.children.length;
       const prices = { 1: "4,99", 2: "5,98", 3: "6,97" };

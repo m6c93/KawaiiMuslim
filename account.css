@@ -178,12 +178,22 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   border-radius: 18px;
   background: var(--cream);
 }
+.profile-details { flex: 1 1 auto; min-width: 0; }
 .profile-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .profile-avatar { flex: 0 0 44px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 15px; background: var(--pink-soft); font-size: 22px; }
 .profile-copy { min-width: 0; }
 .profile-copy strong { display: block; font-family: "Baloo 2", cursive; font-size: 16px; }
 .profile-copy small { display: block; overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 .card-actions { display: flex; align-items: center; gap: 7px; }
+.reading-summary, .reading-empty { margin: 12px 0 0 56px; }
+.reading-empty { color: var(--muted); font-size: 11px; font-weight: 700; }
+.reading-summary { max-width: 520px; }
+.reading-line { display:flex; align-items:center; justify-content:space-between; gap:12px; color:#3b3760; font-size:12px; }
+.reading-line strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.reading-line span { flex:0 0 auto; color:var(--pink); font-weight:900; }
+.reading-bar { height:8px; margin:7px 0 5px; overflow:hidden; border-radius:99px; background:#eadff0; }
+.reading-bar i { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#b69bdc,#e27fae); }
+.reading-summary small { color:var(--muted); font-size:10px; font-weight:700; }
 .small-button {
   cursor: pointer;
   padding: 8px 11px;
@@ -303,6 +313,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .profile-setup-form .primary-button { grid-column: auto; }
   .profile-card { align-items: flex-start; }
   .card-actions { flex-direction: column; }
+  .reading-summary, .reading-empty { margin-left:0; }
   .child-form { grid-template-columns: 1fr; }
   .child-form .primary-button { grid-column: auto; }
 }
