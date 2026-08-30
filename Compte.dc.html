@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./responsive.css?v=tablet-20260818">
-  <link rel="stylesheet" href="./account.css?v=family-profiles-20260819">
+  <link rel="stylesheet" href="./account.css?v=family-reading-2">
 </head>
 <body>
   <div class="account-shell">
@@ -33,6 +33,13 @@
         </div>
         <span class="badge" id="roleBadge">Compte parent</span>
       </header>
+
+      <section class="dash-card full children-overview">
+        <h2>Suivi de mes enfants</h2>
+        <p class="children-overview-intro">Retrouve ici, dès l’ouverture, les livres commencés et l’avancée de chaque enfant.</p>
+        <div class="profile-list" id="children"><p class="loading">Chargement…</p></div>
+        <p class="form-message" id="message"></p>
+      </section>
 
       <div class="dashboard-grid">
         <section class="dash-card">
@@ -93,18 +100,13 @@
           </form>
         </section>
 
-        <section class="dash-card full">
-          <h2>Profils de mes enfants</h2>
-          <div class="profile-list" id="children"><p class="loading">Chargement…</p></div>
-          <p class="form-message" id="message"></p>
-        </section>
       </div>
     </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=family-profiles-20260819"></script>
+  <script src="./km-auth.js?v=family-reading-2"></script>
   <script>
     let context = null;
     const children = document.getElementById("children");
