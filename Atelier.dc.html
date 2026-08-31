@@ -231,7 +231,7 @@
     const renderGallery = () => {
       const shown = artworks.filter(item => {
         const isBook = String(item.source_url || "").startsWith("book-coloring:");
-        const isDrawing = item.source_url === "builtin-drawing:blank";
+        const isDrawing = String(item.source_url || "").startsWith("builtin-drawing:blank");
         if (activeFilter === "all") return true;
         if (activeFilter === "drawings") return isDrawing;
         if (activeFilter === "books") return isBook;
@@ -242,7 +242,7 @@
         const isDraft = item.status === "in_progress";
         const bookMatch = String(item.source_url || "").match(/^book-coloring:([a-z0-9-]+):page:(\d+)$/);
         const isBook = Boolean(bookMatch);
-        const isDrawing = item.source_url === "builtin-drawing:blank";
+        const isDrawing = String(item.source_url || "").startsWith("builtin-drawing:blank");
         const hasUsableImage = /^(https?:|data:|blob:)/i.test(String(item.image_url || ""));
         const pageNumber = bookMatch?.[2] || "";
         const memory = item.drawing_data?.memory || {};
@@ -351,7 +351,8 @@
     document.getElementById("openDrawing").addEventListener("click", () => {
       if (!selectedChildId) return pageMessage.textContent = "Ajoute d’abord un profil enfant.";
       const drawingUrl = new URL("Coloriage.dc.html", location.href);
-      drawingUrl.searchParams.set("src", "builtin-drawing:blank");
+      const drawingId = crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      drawingUrl.searchParams.set("src", `builtin-drawing:blank:${drawingId}`);
       drawingUrl.searchParams.set("title", "Mon dessin");
       drawingUrl.searchParams.set("child", selectedChildId);
       drawingUrl.searchParams.set("v", "drawing-free-1");
