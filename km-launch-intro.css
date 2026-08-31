@@ -15,6 +15,10 @@
   transition: opacity .42s ease, transform .42s ease;
 }
 
+.km-launch-intro[hidden] {
+  display: none !important;
+}
+
 .km-launch-intro.is-leaving {
   opacity: 0;
   transform: scale(1.025);
