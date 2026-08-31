@@ -119,6 +119,7 @@
           email: document.getElementById("email").value,
           password: password.value
         });
+        sessionStorage.setItem("km-show-launch-intro", "1");
         await continueAfterAuthentication();
       } catch (error) {
         message.textContent = KMAuth.friendlyError(error);
@@ -133,3 +134,4 @@
   </script>
 </body>
 </html>
+
