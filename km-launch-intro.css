@@ -1,0 +1,264 @@
+.km-launch-intro {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  isolation: isolate;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: #fff;
+  background: radial-gradient(75% 70% at 50% 32%, #35439b 0%, #222c66 43%, #151a3e 100%);
+  font-family: "Quicksand", system-ui, sans-serif;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity .42s ease, transform .42s ease;
+}
+
+.km-launch-intro.is-leaving {
+  opacity: 0;
+  transform: scale(1.025);
+  pointer-events: none;
+}
+
+body.km-launch-playing {
+  overflow: hidden !important;
+}
+
+.km-launch-stars,
+.km-launch-stars::before,
+.km-launch-stars::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background-repeat: no-repeat;
+}
+
+.km-launch-stars {
+  opacity: .8;
+  background-image:
+    radial-gradient(1.7px 1.7px at 8% 18%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 15% 72%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 29% 11%, #ffe6a0, transparent),
+    radial-gradient(1.2px 1.2px at 42% 78%, #fff, transparent),
+    radial-gradient(1.6px 1.6px at 57% 15%, #fff, transparent),
+    radial-gradient(1.3px 1.3px at 69% 66%, #ffe6a0, transparent),
+    radial-gradient(1.7px 1.7px at 86% 24%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 95% 76%, #fff, transparent);
+  animation: km-launch-twinkle 3.4s ease-in-out infinite;
+}
+
+.km-launch-stars::before {
+  opacity: .55;
+  background-image:
+    radial-gradient(2.5px 2.5px at 21% 38%, rgba(240,174,202,.9), transparent),
+    radial-gradient(2px 2px at 35% 88%, rgba(143,210,228,.9), transparent),
+    radial-gradient(2.5px 2.5px at 74% 36%, rgba(240,181,63,.9), transparent),
+    radial-gradient(2px 2px at 91% 57%, rgba(240,174,202,.9), transparent);
+  animation: km-launch-drift 5s ease-in-out infinite;
+}
+
+.km-launch-stars::after {
+  left: 50%;
+  top: 50%;
+  width: min(84vw, 900px);
+  height: min(62vw, 620px);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(226,127,174,.12), rgba(143,210,228,.06) 42%, transparent 68%);
+  filter: blur(12px);
+}
+
+.km-launch-moon {
+  position: absolute;
+  top: clamp(26px, 6vw, 58px);
+  right: clamp(28px, 7vw, 92px);
+  width: clamp(44px, 6vw, 70px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff9dc, #f7dc84 67%, #dfa943);
+  box-shadow: 0 0 48px rgba(250,224,140,.36);
+  opacity: 0;
+  animation: km-launch-appear .7s .25s ease forwards;
+}
+
+.km-launch-moon::after {
+  content: "";
+  position: absolute;
+  width: 82%;
+  height: 82%;
+  top: -8%;
+  right: -15%;
+  border-radius: 50%;
+  background: #1c2354;
+}
+
+.km-launch-content {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 1100px);
+  display: grid;
+  justify-items: center;
+  padding: 48px 18px 34px;
+  text-align: center;
+}
+
+.km-launch-video-wrap {
+  position: relative;
+  width: min(92vw, 900px);
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 42px;
+  opacity: 0;
+  animation: km-launch-appear .36s .08s ease forwards;
+  -webkit-mask-image: radial-gradient(ellipse 76% 72% at center, #000 48%, transparent 84%);
+  mask-image: radial-gradient(ellipse 76% 72% at center, #000 48%, transparent 84%);
+}
+
+.km-launch-video-wrap video,
+.km-launch-tablet-animation {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+}
+
+.km-launch-video-wrap video {
+  mix-blend-mode: screen;
+}
+
+.km-launch-video-wrap video.is-transparent {
+  mix-blend-mode: normal;
+}
+
+.km-launch-tablet-animation {
+  display: none;
+}
+
+.km-launch-fallback {
+  position: absolute;
+  inset: 0;
+  display: none;
+  place-items: center;
+  font: 800 clamp(42px,10vw,94px) "Baloo 2", cursive;
+  text-shadow: 0 4px 24px rgba(0,0,0,.3);
+}
+
+.km-launch-video-wrap.is-failed video {
+  display: none;
+}
+
+.km-launch-video-wrap.is-failed .km-launch-fallback {
+  display: grid;
+}
+
+.km-launch-tagline {
+  max-width: 680px;
+  margin: clamp(-26px,-3vw,-10px) 0 0;
+  color: #fff;
+  font: 700 clamp(18px,3.2vw,29px)/1.25 "Baloo 2", cursive;
+  letter-spacing: .2px;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: km-launch-tagline .62s 4.6s ease forwards;
+}
+
+.km-launch-tagline strong {
+  color: #fae08c;
+  font-weight: 800;
+}
+
+.km-launch-subline {
+  margin: 8px 0 0;
+  color: #cfd2ec;
+  font-size: clamp(10px,1.6vw,13px);
+  font-weight: 800;
+  letter-spacing: 1.7px;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: km-launch-appear .55s 4.9s ease forwards;
+}
+
+.km-launch-loader {
+  position: absolute;
+  left: 50%;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  width: min(240px,54vw);
+  height: 3px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgba(255,255,255,.12);
+  transform: translateX(-50%);
+}
+
+.km-launch-loader::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg,#e27fae,#f0b53f,#8fd2e4);
+  transform: translateX(-100%);
+  animation: km-launch-load 10s linear forwards;
+}
+
+@keyframes km-launch-twinkle { 0%,100% { opacity:.58 } 50% { opacity:1 } }
+@keyframes km-launch-drift { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-8px) } }
+@keyframes km-launch-appear { to { opacity:1 } }
+@keyframes km-launch-tagline { to { opacity:1; transform:translateY(0) } }
+@keyframes km-launch-load { to { transform:translateX(0) } }
+
+@media (max-width: 1400px), (hover: none), (pointer: coarse) {
+  .km-launch-tablet-animation { display:block }
+  #kmLaunchVideo {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    mix-blend-mode: normal;
+  }
+  .km-launch-video-wrap {
+    width: min(96vw,760px);
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .km-launch-content {
+    width: 100%;
+    padding: clamp(44px,8svh,62px) 0 30px;
+  }
+  .km-launch-video-wrap {
+    width: min(96vw,560px);
+    max-width: 100%;
+    border-radius: 22px;
+  }
+  .km-launch-tagline {
+    width: min(92vw,520px);
+    margin-top: -3vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .km-launch-stars,
+  .km-launch-moon,
+  .km-launch-tagline,
+  .km-launch-subline,
+  .km-launch-loader::after {
+    animation: none !important;
+  }
+  .km-launch-video-wrap,
+  .km-launch-tagline,
+  .km-launch-subline,
+  .km-launch-moon {
+    opacity: 1;
+    transform: none;
+  }
+}
+
