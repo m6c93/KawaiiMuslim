@@ -18,9 +18,28 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="landing-one-page.css?v=cro-pass-23">
+  <link rel="stylesheet" href="km-launch-intro.css?v=planet-return-1">
+  <link rel="stylesheet" href="landing-one-page.css?v=mobile-login-24">
 </head>
 <body>
+  <div class="km-launch-intro" id="kmLaunchIntro" aria-label="Ouverture de Kawaii Muslim World">
+    <div class="km-launch-stars" aria-hidden="true"></div>
+    <div class="km-launch-moon" aria-hidden="true"></div>
+    <div class="km-launch-content">
+      <div class="km-launch-video-wrap" id="kmLaunchVideoWrap">
+        <img class="km-launch-tablet-animation" src="brand/assets/kawaii-muslim-intro-tablet.webp" alt="La planète Kawaii Muslim apparaît dans le ciel étoilé">
+        <video id="kmLaunchVideo" autoplay muted playsinline preload="auto" aria-label="Animation de la planète Kawaii Muslim">
+          <source src="brand/assets/kawaii-muslim-intro.webm" type="video/webm">
+          <source src="brand/assets/kawaii-muslim-intro.mp4" type="video/mp4">
+        </video>
+        <div class="km-launch-fallback" aria-hidden="true">Kawaii Muslim</div>
+      </div>
+      <p class="km-launch-tagline">Grandir, apprendre et se rapprocher <strong>doucement d’Allah</strong>.</p>
+      <p class="km-launch-subline">Bienvenue dans notre univers</p>
+    </div>
+    <div class="km-launch-loader" aria-hidden="true"></div>
+  </div>
+
   <header class="site-header" data-header>
     <a class="brand" href="#top" aria-label="Kawaii Muslim World, accueil">
       <img src="brand/assets/logo-kawaii-muslim.png" alt="">
@@ -262,6 +281,8 @@
     <div><a href="Connexion.dc.html">Connexion</a><a href="Support.dc.html">Aide</a><a href="#tarifs">Tarifs</a></div>
   </footer>
 
+  <script src="km-launch-intro.js?v=planet-return-1"></script>
   <script src="landing-one-page.js?v=cro-pass-23"></script>
 </body>
 </html>
+
