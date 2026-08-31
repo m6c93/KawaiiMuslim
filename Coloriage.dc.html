@@ -9,7 +9,7 @@
   <script>
     (() => {
       const startupParams = new URLSearchParams(location.search);
-      if (startupParams.get("bookColoring") === "1" || startupParams.has("draft") || startupParams.get("src") === "builtin-drawing:blank") {
+      if (startupParams.get("bookColoring") === "1" || startupParams.has("draft") || String(startupParams.get("src") || "").startsWith("builtin-drawing:blank")) {
         document.documentElement.classList.add("direct-coloring");
       }
     })();
@@ -388,11 +388,12 @@ body.book-coloring-mode .title small{color:#daf3eb}
           "builtin-coloring:abeille-coran":"./brand/assets/coloring-abeille-coran.png",
           "builtin-coloring:tapis-priere":"./brand/assets/coloring-tapis-priere.png"
         };
-        if (source === "builtin-drawing:blank") {
+        if (source.startsWith("builtin-drawing:blank")) {
           format = "blank";
           artworkSourceKey = source;
           document.body.classList.add("free-drawing-mode");
           document.getElementById("compareButton").hidden = true;
+          document.getElementById("saveButton").textContent = "☁ Garder dans mon atelier";
           document.getElementById("saveStatus").textContent = "Prêt à dessiner";
         } else if (builtInColorings[source]) {
           format = "image";
@@ -916,7 +917,29 @@ body.book-coloring-mode .title small{color:#daf3eb}
       if (!strokes.length || !confirm("Effacer tous les feutres et recommencer ?")) return;
       redoStack = [...strokes].reverse(); strokes=[]; redraw(); scheduleSave();
     });
-    document.getElementById("saveButton").addEventListener("click",async () => { await saveDraft(); toast("Ton coloriage est bien gardé ☁️"); });
+    document.getElementById("saveButton").addEventListener("click",async event => {
+      const button = event.currentTarget;
+      try {
+        button.disabled = true;
+        button.textContent = format === "blank" ? "☁ Sauvegarde…" : "☁ Sauvegarde…";
+        await saveDraft();
+        if (format === "blank" && !guestMode && !localDesignPreview) {
+          await KMAuth.saveArtworkPreview({id:draftId,childId,imageBlob:await mergedBlob()});
+          saveStatus.textContent = "Dessin sauvegardé dans mon atelier";
+          toast("Ton dessin est dans ton atelier 🎨");
+          window.setTimeout(() => {
+            window.location.href = `Atelier.dc.html?child=${encodeURIComponent(childId)}&saved=1`;
+          },700);
+          return;
+        }
+        toast(format === "blank" ? "Ton dessin est bien gardé ☁️" : "Ton coloriage est bien gardé ☁️");
+      } catch (error) {
+        toast(KMAuth.friendlyError(error));
+      } finally {
+        button.disabled = false;
+        button.textContent = format === "blank" ? "☁ Garder dans mon atelier" : "☁ Sauvegarder";
+      }
+    });
     document.getElementById("printButton").addEventListener("click",() => printCurrent(false));
     document.getElementById("quickPrint").addEventListener("click",() => printCurrent(true));
     document.getElementById("startColoring").addEventListener("click",() => startEditor().catch(error => {
@@ -1000,7 +1023,7 @@ body.book-coloring-mode .title small{color:#daf3eb}
           document.getElementById("quickChild").hidden = false;
           document.getElementById("choiceMessage").textContent = "Une seule fois : indique son prénom pour créer sa galerie privée.";
         }
-        if ((requestedDraft || bookColoring || source === "builtin-drawing:blank") && childSelect.value) await startEditor();
+        if ((requestedDraft || bookColoring || source.startsWith("builtin-drawing:blank")) && childSelect.value) await startEditor();
       }
     } catch (error) {
       if (error?.message !== "book_redirect") {
