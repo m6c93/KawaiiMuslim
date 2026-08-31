@@ -367,6 +367,25 @@ window.KMAuth = (() => {
         .single());
     },
 
+    saveArtworkPreview: async ({ id, childId, imageBlob }) => {
+      const { session } = await validateArtworkChild(childId);
+      if (!id || !imageBlob) throw new Error("Le dessin n’est pas encore prêt.");
+      if (imageBlob.size > 10 * 1024 * 1024) throw new Error("Le dessin est trop lourd pour être enregistré.");
+      const path = `${session.user.id}/${childId}/${id}-preview.png`;
+      requireSuccess(await client().storage.from("child-artworks").upload(path, imageBlob, {
+        cacheControl: "0",
+        upsert: true,
+        contentType: "image/png"
+      }));
+      return requireSuccess(await client().from("child_artworks")
+        .update({ image_path: path })
+        .eq("id", id)
+        .eq("owner_id", session.user.id)
+        .eq("child_profile_id", childId)
+        .select()
+        .single());
+    },
+
     completeArtwork: async ({ id, childId, imageBlob, drawingData }) => {
       const { session } = await validateArtworkChild(childId);
       if (!id || !imageBlob) throw new Error("Le coloriage n’est pas encore prêt.");
@@ -815,3 +834,4 @@ window.KMAuth = (() => {
     }
   };
 })();
+
