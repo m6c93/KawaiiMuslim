@@ -67,3 +67,28 @@
 @media(prefers-reduced-motion:reduce){.book-rail{animation:none!important}}
 
 .final-cta-actions{position:relative;z-index:2;display:flex;align-items:center;gap:22px;flex:0 0 auto}.final-cta-actions .text-link{color:#fff;white-space:nowrap}@media(max-width:720px){.final-cta-actions{width:100%;align-items:stretch;flex-direction:column;gap:15px}.final-cta-actions .button{width:100%}.final-cta-actions .text-link{justify-content:center}}
+
+/* Sur téléphone, l’accès au compte reste toujours visible dans l’en-tête. */
+@media(max-width:720px){
+  .site-header .header-actions{gap:8px}
+  .site-header .login-link{
+    display:inline-flex;
+    min-height:40px;
+    padding:8px 11px;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #eadfeb;
+    border-radius:13px;
+    background:rgba(255,255,255,.78);
+    color:#5f477f;
+    font-size:12px;
+    font-weight:800;
+    line-height:1;
+    white-space:nowrap;
+  }
+}
+@media(max-width:430px){
+  .site-header .button-small{padding-inline:12px;font-size:0}
+  .site-header .button-small::after{content:"Découvrir";font-size:12px}
+}
+
