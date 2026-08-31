@@ -6,6 +6,14 @@
   var videoWrap = document.getElementById("kmLaunchVideoWrap");
   if (!intro || !video || !videoWrap) return;
 
+  var shouldPlay = sessionStorage.getItem("km-show-launch-intro") === "1";
+  if (!shouldPlay) {
+    intro.remove();
+    return;
+  }
+  sessionStorage.removeItem("km-show-launch-intro");
+  intro.hidden = false;
+
   var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var tabletMode = window.matchMedia("(max-width: 1400px), (hover: none), (pointer: coarse)").matches;
   var leaving = false;
