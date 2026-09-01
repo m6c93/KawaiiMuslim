@@ -351,7 +351,7 @@
           <div class="km-book-item" data-km-reveal style="position:relative;">
             <div class="km-book-cover" style="position:relative; border-radius:16px; overflow:hidden; aspect-ratio:1/1; background:#fff; box-shadow:0 16px 34px rgba(0,0,0,.4);">
               <sc-if value="{{ book.coverImg }}" hint-placeholder-val="{{ false }}">
-                <img src="{{ book.coverImg }}" alt="{{ book.title }}" style="width:100%; height:100%; object-fit:contain; display:block;" />
+                <img src="{{ book.coverImg }}" alt="{{ book.title }}" style="width:100%; height:100%; object-fit:{{ book.coverFit }}; object-position:{{ book.coverPosition }}; display:block;" />
               </sc-if>
               <sc-if value="{{ book.noCover }}" hint-placeholder-val="{{ true }}">
                 <div style="width:100%; height:100%; background:{{ book.grad }}; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
@@ -558,6 +558,7 @@ class Component extends DCLogic {
     const rawBooks = [
       { title: 'Tawakkul', sub: 'La confiance en Allah', cover: 'brand/assets/scene-tawakkul.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/tawakkul.html', grad: '', emoji: '' },
       { title: 'Les miracles scientifiques du Coran', sub: '15 signes de la création à explorer', cover: 'brand/books/miracles-du-coran/library-cover.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/miracles-du-coran.html', grad: '', emoji: '' },
+      { title: "Colorie, écris et apprends l’arabe", sub: 'Découvre, trace et colorie les lettres arabes', cover: 'brand/books/colorie-ecris-apprends/front-cover-v2.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/colorie-ecris-apprends.html', grad: '', emoji: '' },
       { title: 'Bubble Tea Time Hijabi', sub: 'Un goûter entre copines', cover: 'brand/assets/coloring-bubble-tea.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/bubble-tea-time-hijabi.html', grad: '', emoji: '' },
       { title: "Aya et l'Armure de Lumière", sub: 'Une aventure de courage', cover: 'brand/assets/coloring-armure-lumiere.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/aya-armure-de-lumiere.html', grad: '', emoji: '' },
       { title: "Exploration de l'espace", sub: 'Les planètes du système solaire', cover: 'brand/assets/cover-exploration-espace.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/exploration-espace.html', grad: '', emoji: '' },
@@ -566,7 +567,7 @@ class Component extends DCLogic {
       { title: 'Les animaux du Coran', sub: 'À la rencontre des créatures d\u2019Allah', cover: 'brand/assets/cover-animaux-coran.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/animaux-du-coran.html', grad: '', emoji: '' },
       { title: 'Vers Allah', sub: 'Le chemin de la foi', cover: 'brand/assets/cover-vers-allah.png', hasCover: true, noCover: false, available: true, soon: false, url: 'books/vers-allah.html', grad: '', emoji: '' },
     ];
-    const managedBooks = Array.isArray(this.state.catalog)
+    let managedBooks = Array.isArray(this.state.catalog)
       ? this.state.catalog
           .filter((item) => item.content_type === 'livre' && item.status === 'published')
           .filter((item) => isMaman || item.audience !== 'maman')
@@ -594,26 +595,39 @@ class Component extends DCLogic {
       'les aliments dans le coran': 'aliments-dans-le-coran',
       'les animaux du coran': 'animaux-du-coran'
     };
+    const alphabetBook = rawBooks.find(item => item.url === 'books/colorie-ecris-apprends.html');
+    if (alphabetBook && !managedBooks.some(item => normalizeColoringBookTitle(item.title) === normalizeColoringBookTitle(alphabetBook.title))) {
+      managedBooks = [alphabetBook, ...managedBooks];
+    }
     const books = managedBooks.map((b) => {
       const normalizedTitle = normalizeColoringBookTitle(b.title);
       const coloringSlug = coloringBookSlugs[normalizedTitle] || '';
       const isColoringBook = Boolean(coloringSlug);
       const isMiraclesBook = normalizedTitle.includes('miracles')
         && normalizedTitle.includes('coran');
+      const isAlphabetBook = normalizedTitle.includes('colorie')
+        && normalizedTitle.includes('apprends')
+        && normalizedTitle.includes('arabe');
       return {
         ...b,
-        url: isMiraclesBook
+        url: isAlphabetBook
+          ? 'books/colorie-ecris-apprends.html'
+          : isMiraclesBook
           ? 'books/miracles-du-coran.html'
           : isColoringBook
           ? `LivreColoriage.dc.html?book=${encodeURIComponent(coloringSlug)}&title=${encodeURIComponent(b.title)}`
           : b.url,
-        coverImg: isMiraclesBook
+        coverImg: isAlphabetBook
+          ? 'brand/books/colorie-ecris-apprends/front-cover-v2.png'
+          : isMiraclesBook
           ? 'brand/books/miracles-du-coran/library-cover.png'
           : b.hasCover && b.cover ? b.cover : false,
-        available: isMiraclesBook || b.available,
-        soon: isMiraclesBook ? false : b.soon,
-        canRead: (isMiraclesBook || b.available) && subscribed,
-        locked: (isMiraclesBook || b.available) && !subscribed,
+        coverFit: isAlphabetBook ? 'cover' : 'contain',
+        coverPosition: isAlphabetBook ? 'right center' : 'center',
+        available: isAlphabetBook || isMiraclesBook || b.available,
+        soon: (isAlphabetBook || isMiraclesBook) ? false : b.soon,
+        canRead: (isAlphabetBook || isMiraclesBook || b.available) && subscribed,
+        locked: (isAlphabetBook || isMiraclesBook || b.available) && !subscribed,
         isColoringBook,
         isRegularBook: !isColoringBook,
       };
@@ -728,3 +742,4 @@ class Component extends DCLogic {
 </script>
 </body>
 </html>
+
