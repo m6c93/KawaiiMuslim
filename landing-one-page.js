@@ -347,3 +347,25 @@
     renderLearning();
   }
 })();
+
+
+/* Bouton d’abonnement discret : apparaît pendant la découverte et s’efface près des tarifs. */
+(()=>{
+  const subscribeFloat=document.querySelector('[data-subscribe-float]');
+  const pricingSection=document.getElementById('tarifs');
+  const finalCta=document.querySelector('.final-cta');
+  if(!subscribeFloat)return;
+  let ticking=false;
+  const update=()=>{
+    const pricingBox=pricingSection?.getBoundingClientRect();
+    const finalBox=finalCta?.getBoundingClientRect();
+    const pricingVisible=!!pricingBox&&pricingBox.top<innerHeight*.88&&pricingBox.bottom>0;
+    const finalVisible=!!finalBox&&finalBox.top<innerHeight*.88&&finalBox.bottom>0;
+    const journeyStarted=scrollY>Math.min(420,innerHeight*.52);
+    subscribeFloat.classList.toggle('is-visible',journeyStarted&&!pricingVisible&&!finalVisible);
+  };
+  const requestUpdate=()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{update();ticking=false})};
+  addEventListener('scroll',requestUpdate,{passive:true});
+  addEventListener('resize',requestUpdate);
+  update();
+})();
