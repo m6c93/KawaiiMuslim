@@ -137,3 +137,16 @@
   .subscribe-float.is-visible{transform:translateX(-50%)}
 }
 @media(prefers-reduced-motion:reduce){.subscribe-float{transition:none}}
+
+
+/* CTA des trois offres : plus visible, animé avec douceur. */
+.subscribe-float{overflow:hidden;border-color:rgba(255,255,255,.48);background:linear-gradient(120deg,#e9539a 0%,#f47aae 52%,#efb537 100%);box-shadow:0 15px 38px rgba(221,79,145,.3),0 0 0 0 rgba(239,181,55,.24);color:#fff}
+.subscribe-float::before{content:"";position:absolute;inset:-40% auto -40% -38%;width:32%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.72),transparent);transform:skewX(-18deg);animation:subscribeShine 3.4s ease-in-out infinite}
+.subscribe-float span{position:relative;color:#fff;text-shadow:0 1px 2px rgba(85,23,67,.2)}
+.subscribe-float small{position:relative;color:#fff8dd;font-weight:800}
+.subscribe-float::after{content:"→";position:relative;display:grid;place-items:center;width:27px;height:27px;margin-left:2px;border-radius:50%;background:rgba(255,255,255,.2);font-size:17px;font-weight:800;line-height:1}
+.subscribe-float.is-visible{animation:subscribeGlow 2.5s ease-in-out infinite}
+.subscribe-float:hover,.subscribe-float:focus-visible{border-color:#fff;box-shadow:0 18px 42px rgba(221,79,145,.4);filter:saturate(1.08) brightness(1.03)}
+@keyframes subscribeShine{0%,58%{left:-38%}85%,100%{left:128%}}
+@keyframes subscribeGlow{0%,100%{box-shadow:0 15px 38px rgba(221,79,145,.3),0 0 0 0 rgba(239,181,55,.22)}50%{box-shadow:0 18px 44px rgba(221,79,145,.38),0 0 0 8px rgba(239,181,55,0)}}
+@media(prefers-reduced-motion:reduce){.subscribe-float,.subscribe-float::before{animation:none}}
