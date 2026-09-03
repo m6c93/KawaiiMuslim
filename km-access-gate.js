@@ -22,6 +22,7 @@
     "/Bibliotheque Kawaii Muslim.dc.html",
     "/Atelier.dc.html",
     "/Safe Place.dc.html",
+    "/Applications.dc.html",
     "/LivreColoriage.dc.html",
     "/Coloriage.dc.html"
   ]);

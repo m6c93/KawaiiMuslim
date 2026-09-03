@@ -12,6 +12,7 @@
     "/Bibliotheque Kawaii Muslim.dc.html",
     "/Atelier.dc.html",
     "/Safe Place.dc.html",
+    "/Applications.dc.html",
     "/LivreColoriage.dc.html",
     "/Coloriage.dc.html"
   ]);
@@ -33,7 +34,7 @@
     { key: "library", label: "Bibliothèque", icon: "menu_book", href: "Bibliotheque%20Kawaii%20Muslim.dc.html" },
     { key: "workshop", label: "Atelier", icon: "brush", href: "Atelier.dc.html" },
     { key: "invocations", label: "Safe Place", icon: "prayer_times", href: "Safe%20Place.dc.html" },
-    { key: "shop", label: "Boutique", icon: "shopping_bag", href: guestMode ? "index.html#tarifs" : "Boutique.dc.html" }
+    { key: "apps", label: "Applications", icon: "apps", href: "Applications.dc.html" }
   ];
 
   function mount() {
@@ -78,7 +79,7 @@
       preload.as = "document";
       var preloadTarget = new URL(item.href, window.location.href);
       if (localPreview) preloadTarget.searchParams.set("preview", "1");
-      if (guestMode && item.key !== "shop") preloadTarget.searchParams.set("guest", "1");
+      if (guestMode) preloadTarget.searchParams.set("guest", "1");
       preload.href = preloadTarget.href;
       document.head.appendChild(preload);
     });
