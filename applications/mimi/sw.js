@@ -1,4 +1,4 @@
-const CACHE = "mimi-fly-initial-v1";
+const CACHE = "mimi-fly-responsive-v1";
 const CORE = [
   "/applications/mimi/",
   "/applications/mimi/manifest.webmanifest",
