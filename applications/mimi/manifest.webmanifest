@@ -1,0 +1,10 @@
+{
+  "name": "Mimi Fly",
+  "short_name": "Mimi Fly",
+  "description": "Fais courir et voler Mimi de plateforme en plateforme.",
+  "start_url": "/applications/mimi/",
+  "display": "standalone",
+  "background_color": "#fffaf1",
+  "theme_color": "#ef80ad",
+  "orientation": "portrait"
+}
