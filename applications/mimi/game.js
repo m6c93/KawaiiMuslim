@@ -1,18 +1,18 @@
 (()=>{
-const c=document.querySelector('#game'),x=c.getContext('2d'),G=476;
+const c=document.querySelector('#game'),x=c.getContext('2d');
 const A=['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
-const bg=new Image(),mimi=new Image();bg.src='level.jpg';mimi.src='../../brand/assets/mascot-nour.png';
-let mode='letters',play=false,over=false,y=G-70,vy=0,ground=true,dist=0,score=0,best=0,time=20,index=0,timer=.8,items=[],last=performance.now(),msg='',msgLife=0;
+const bg=new Image(),mimi=new Image();bg.src='sky.jpg';mimi.src='../../brand/assets/mascot-nour.png';
+let mode='letters',play=false,over=false,y=300,vy=0,dist=0,score=0,best=0,time=20,index=0,timer=.8,items=[],last=performance.now(),msg='',msgLife=0;
 const key=()=>`km-mimi-${mode}-best`;
-function reset(){best=+(localStorage.getItem(key())||0);play=false;over=false;y=G-70;vy=0;ground=true;dist=0;score=0;time=20;index=0;timer=.8;items=[];msg='';document.querySelector('#record').textContent=`Record ${best}`}
+function reset(){best=+(localStorage.getItem(key())||0);play=false;over=false;y=300;vy=0;dist=0;score=0;time=20;index=0;timer=.8;items=[];msg='';document.querySelector('#record').textContent=`Record ${best}`}
 function choose(next){mode=next;document.querySelector('#normal').classList.toggle('active',mode==='normal');document.querySelector('#letters').classList.toggle('active',mode==='letters');reset()}
-function tap(){if(over){reset();play=true}else if(!play){play=true;msg='GO !';msgLife=.7}if(ground){ground=false;vy=-405}}
-function spawn(){if(mode==='letters'){const good=Math.random()<.65;let n=(index+2+Math.floor(Math.random()*24))%A.length;if(n===index)n=(n+4)%A.length;items.push({x:410,y:good?G-116:G-30,type:good?'good':'bad',label:good?A[index]:A[n]})}else items.push({x:410,y:G-34,type:'bad',label:'✦'})}
+function tap(){if(over){reset();play=true}else if(!play){play=true;msg='GO !';msgLife=.7}vy=Math.max(vy-175,-350)}
+function spawn(){const py=145+Math.random()*335;if(mode==='letters'){const good=Math.random()<.65;let n=(index+2+Math.floor(Math.random()*24))%A.length;if(n===index)n=(n+4)%A.length;items.push({x:410,y:py,type:good?'good':'bad',label:good?A[index]:A[n]})}else items.push({x:410,y:py,type:'bad',label:'✦'})}
 function finish(){over=true;play=false;best=Math.max(best,score);localStorage.setItem(key(),best);document.querySelector('#record').textContent=`Record ${best}`}
 function update(dt){
  msgLife=Math.max(0,msgLife-dt);if(!play)return;dist+=140*dt;
  if(mode==='letters'){time=Math.max(0,time-dt);if(time<=0)return finish()}else score=Math.floor(dist/12);
- if(!ground){vy+=930*dt;y+=vy*dt;if(y>=G-70){y=G-70;vy=0;ground=true}}
+ vy+=510*dt;y+=vy*dt;if(y<70){y=70;vy=40}if(y>570)return finish();
  timer-=dt;if(timer<=0){spawn();timer=2.15}items.forEach(o=>o.x-=140*dt);
  for(const o of items){if(o.hit)continue;const hit=o.x+24>72&&o.x-24<132&&o.y+24>y+8&&o.y-24<y+66;if(!hit)continue;o.hit=true;if(mode==='normal')return finish();if(o.type==='good'){index++;score+=10;time+=5;msg=`${o.label} ✓  +5 s`;msgLife=1;if(index===A.length){index=0;score+=100;time+=10;msg='ALPHABET COMPLET !';msgLife=1.6}}else{time=Math.max(0,time-2);msg='MAUVAISE LETTRE  −2 s';msgLife=1;if(time<=0)return finish()}}
  items=items.filter(o=>!o.hit&&o.x>-50);
