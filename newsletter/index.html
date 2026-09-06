@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/newsletter/newsletter.css?v=1">
+  <link rel="stylesheet" href="/newsletter/newsletter.css?v=2">
 </head>
 <body class="is-loading">
   <div class="auth-loader" id="authLoader"><span></span>Ouverture de ton studio privé…</div>
@@ -106,6 +106,11 @@ Histoires autour de l’Islam, découvertes scientifiques, coloriages et espace 
       <section class="studio-view" id="view-history">
         <div class="section-head"><div><p class="eyebrow">Suivre sans deviner</p><h2>Mes campagnes</h2><p>Retrouve les envois, ouvertures et clics communiqués par le service d’envoi.</p></div><button class="primary" id="refreshCampaigns">Actualiser</button></div>
         <div class="panel"><div class="campaign-list" id="campaignList"><p class="empty">Aucune campagne à afficher pour le moment.</p></div></div>
+        <div class="panel engagement-panel" id="engagementPanel" hidden>
+          <div class="panel-head"><div><p class="eyebrow">Détail des destinataires</p><h3 id="engagementTitle">Qui a réagi ?</h3><small>Les ouvertures sont indicatives. Les clics sont plus fiables.</small></div><button class="secondary" id="closeEngagement">Fermer</button></div>
+          <div class="engagement-summary" id="engagementSummary"></div>
+          <div class="table-wrap"><table><thead><tr><th>Contact</th><th>Inscription</th><th>Ouverture</th><th>Clic</th></tr></thead><tbody id="engagementBody"></tbody></table></div>
+        </div>
       </section>
     </main>
   </div>
@@ -121,6 +126,6 @@ Histoires autour de l’Islam, découvertes scientifiques, coloriages et espace 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/km-config.js"></script>
   <script src="/km-auth.js"></script>
-  <script src="/newsletter/newsletter.js?v=1"></script>
+  <script src="/newsletter/newsletter.js?v=2"></script>
 </body>
 </html>
