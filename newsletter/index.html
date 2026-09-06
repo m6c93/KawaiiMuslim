@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#171b45">
+  <title>Studio Newsletter — Kawaii Muslim World</title>
+  <link rel="icon" type="image/png" href="/brand/assets/logo-kawaii-muslim.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/newsletter/newsletter.css?v=1">
+</head>
+<body class="is-loading">
+  <div class="auth-loader" id="authLoader"><span></span>Ouverture de ton studio privé…</div>
+
+  <div class="studio-shell" id="studio" hidden>
+    <aside class="studio-sidebar">
+      <a class="studio-brand" href="/newsletter/" aria-label="Studio Newsletter, accueil">
+        <img src="/brand/assets/logo-kawaii-muslim.png" alt="">
+        <span>Kawaii Muslim <small>STUDIO NEWSLETTER</small></span>
+      </a>
+      <nav aria-label="Rubriques du studio">
+        <button class="nav-item active" data-view="dashboard"><span>✨</span>Vue générale</button>
+        <button class="nav-item" data-view="contacts"><span>👩‍👧</span>Mes contacts</button>
+        <button class="nav-item" data-view="composer"><span>💌</span>Créer un e-mail</button>
+        <button class="nav-item" data-view="history"><span>📊</span>Mes campagnes</button>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="privacy-chip"><span>🔒</span><div><strong>Espace privé</strong><small>Accès administratrice + double sécurité</small></div></div>
+        <a href="/Admin.dc.html">← Retour à l’administration</a>
+        <a href="https://www.kawaiimuslimworld.com/" target="_blank" rel="noopener">Voir le site public ↗</a>
+      </div>
+    </aside>
+
+    <main class="studio-main">
+      <header class="studio-topbar">
+        <button class="mobile-menu" id="mobileMenu" aria-label="Ouvrir le menu">☰</button>
+        <div><p class="eyebrow">Ton espace de communication</p><h1 id="viewTitle">Bonjour <span id="adminFirstName">Maman</span> 🌸</h1></div>
+        <div class="admin-badge"><span>🛡️</span><div><strong id="adminName">Administration</strong><small>Session protégée</small></div></div>
+      </header>
+      <p class="notice" id="notice" role="status" aria-live="polite"></p>
+
+      <section class="studio-view active" id="view-dashboard">
+        <div class="hero-card">
+          <div><p class="eyebrow light">Kawaii Muslim News</p><h2>Crée des e-mails aussi doux que ton univers.</h2><p>Réunis les mamans inscrites depuis Formspree et Shopify, puis prépare une vraie campagne professionnelle en quelques minutes.</p><button class="primary light" data-open-view="composer">Créer mon prochain e-mail <span>→</span></button></div>
+          <div class="hero-art"><div class="mail-card">💌<i>✨</i></div><img src="/brand/assets/logo-kawaii-muslim.png" alt=""></div>
+        </div>
+        <div class="stats-grid">
+          <article class="stat-card"><span class="stat-icon pink">👩‍👧</span><div><strong id="statContacts">—</strong><small>contacts actifs</small></div></article>
+          <article class="stat-card"><span class="stat-icon mint">📝</span><div><strong id="statFormspree">—</strong><small>depuis Formspree</small></div></article>
+          <article class="stat-card"><span class="stat-icon gold">🛍️</span><div><strong id="statShopify">—</strong><small>depuis Shopify</small></div></article>
+          <article class="stat-card"><span class="stat-icon blue">✉️</span><div><strong id="statCampaigns">—</strong><small>campagnes envoyées</small></div></article>
+        </div>
+        <div class="dashboard-grid">
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow">À faire maintenant</p><h3>Préparer le lancement</h3></div><span class="soft-pill">3 étapes</span></div>
+            <ol class="checklist">
+              <li id="checkSender"><span>1</span><div><strong>Authentifier salam@kawaiimuslimworld.com</strong><small>Pour protéger ta réputation et améliorer la réception.</small></div></li>
+              <li id="checkSources"><span>2</span><div><strong>Réunir tous les contacts</strong><small>Formspree et Shopify, sans doublons.</small></div></li>
+              <li><span>3</span><div><strong>Envoyer un test</strong><small>Vérifie toujours le rendu sur ton téléphone avant la campagne.</small></div></li>
+            </ol>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow">Aperçu rapide</p><h3>Ton prochain message</h3></div></div>
+            <div class="mini-email"><div class="mini-email-head"><img src="/brand/assets/logo-kawaii-muslim.png" alt=""><div><strong>Kawaii Muslim World</strong><small>salam@kawaiimuslimworld.com</small></div></div><div class="mini-email-body"><span>🌙 Une belle nouvelle</span><h4>Kawaii Muslim World est prêt !</h4><p>Un univers doux pour lire, apprendre et créer en famille.</p><b>Découvrir l’univers</b></div></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="studio-view" id="view-contacts">
+        <div class="section-head"><div><p class="eyebrow">Une liste propre et réunie</p><h2>Mes contacts</h2><p>Les doublons sont retirés automatiquement. Les désinscrits restent exclus des prochains envois.</p></div><button class="primary" id="refreshContacts">Actualiser</button></div>
+        <div class="source-grid">
+          <article class="source-card"><div class="source-logo formspree">F</div><div><h3>Liste d’attente Formspree</h3><p>Récupère les personnes inscrites pour être averties de l’ouverture.</p><span class="connection" id="formspreeStatus">Configuration à vérifier</span></div><button class="secondary" id="syncFormspree">Synchroniser</button></article>
+          <article class="source-card"><div class="source-logo shopify">S</div><div><h3>Contacts Shopify</h3><p>Récupère uniquement les clients ayant accepté les e-mails marketing.</p><span class="connection" id="shopifyStatus">Configuration à vérifier</span></div><button class="secondary" id="syncShopify">Synchroniser</button></article>
+          <article class="source-card"><div class="source-logo csv">CSV</div><div><h3>Importer un fichier</h3><p>Ajoute une ancienne liste autorisée sans écraser les contacts existants.</p><span class="connection">CSV Formspree ou Shopify</span></div><label class="secondary file-button">Choisir un fichier<input type="file" id="csvFile" accept=".csv,text/csv" hidden></label></article>
+        </div>
+        <div class="panel contacts-panel">
+          <div class="panel-head"><div><p class="eyebrow">Liste d’envoi</p><h3><span id="contactsCount">0</span> contacts actifs</h3></div><div class="contact-tools"><input id="contactSearch" type="search" placeholder="Rechercher un e-mail…"><select id="sourceFilter"><option value="">Toutes les sources</option><option value="formspree">Formspree</option><option value="shopify">Shopify</option><option value="csv">Import CSV</option></select></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Contact</th><th>Source</th><th>Inscription</th><th>Statut</th></tr></thead><tbody id="contactsBody"><tr><td colspan="4" class="empty">Connecte les sources pour afficher tes contacts.</td></tr></tbody></table></div>
+        </div>
+      </section>
+
+      <section class="studio-view" id="view-composer">
+        <div class="section-head"><div><p class="eyebrow">Un vrai e-mail professionnel</p><h2>Créer une campagne</h2><p>Écris à gauche, observe le résultat à droite, puis envoie-toi un test.</p></div><div class="save-state" id="saveState">Brouillon enregistré sur cet appareil</div></div>
+        <div class="composer-grid">
+          <form class="panel composer-form" id="campaignForm">
+            <div class="template-row"><button type="button" class="template active" data-template="launch">🚀 Lancement</button><button type="button" class="template" data-template="newbooks">📚 Nouveaux livres</button><button type="button" class="template" data-template="news">🌙 Nouvelles</button></div>
+            <label>Objet de l’e-mail <small id="subjectCount">0/60</small><input id="subject" maxlength="60" required value="Kawaii Muslim World est enfin prêt ✨"></label>
+            <label>Texte d’aperçu <small id="preheaderCount">0/90</small><input id="preheader" maxlength="90" value="Découvrez un univers doux pour lire, apprendre et créer en famille."></label>
+            <label>Grand titre<input id="emailTitle" maxlength="100" required value="Une nouvelle aventure commence 🌙"></label>
+            <label>Message<textarea id="emailBody" rows="8" maxlength="1800" required>Assalamou alaykoum,
+
+C’est avec beaucoup d’émotion que je vous annonce l’ouverture de Kawaii Muslim World : un univers numérique doux et enrichissant pensé pour accompagner les enfants musulmans.
+
+Histoires autour de l’Islam, découvertes scientifiques, coloriages et espace parent vous attendent.</textarea></label>
+            <div class="two-cols"><label>Texte du bouton<input id="buttonLabel" maxlength="45" value="Découvrir Kawaii Muslim World"></label><label>Lien du bouton<input id="buttonUrl" type="url" value="https://www.kawaiimuslimworld.com/" required></label></div>
+            <div class="test-box"><label>Adresse pour le test<input id="testEmail" type="email" placeholder="ton adresse e-mail"></label><button type="button" class="secondary" id="sendTest">M’envoyer un test</button></div>
+            <div class="send-box"><div><strong id="recipientSummary">Destinataires actifs : —</strong><small>Les désinscrits et adresses bloquées seront exclus automatiquement.</small></div><button type="submit" class="primary" id="sendCampaign">Vérifier puis envoyer</button></div>
+          </form>
+          <aside class="preview-panel"><div class="preview-toolbar"><span>Aperçu</span><div><button class="device active" data-device="desktop" aria-label="Aperçu ordinateur">▭</button><button class="device" data-device="mobile" aria-label="Aperçu téléphone">▯</button></div></div><div class="email-preview-wrap"><iframe id="emailPreview" title="Aperçu de l’e-mail"></iframe></div><p class="preview-note">Le lien de désinscription est ajouté automatiquement en bas de chaque campagne.</p></aside>
+        </div>
+      </section>
+
+      <section class="studio-view" id="view-history">
+        <div class="section-head"><div><p class="eyebrow">Suivre sans deviner</p><h2>Mes campagnes</h2><p>Retrouve les envois, ouvertures et clics communiqués par le service d’envoi.</p></div><button class="primary" id="refreshCampaigns">Actualiser</button></div>
+        <div class="panel"><div class="campaign-list" id="campaignList"><p class="empty">Aucune campagne à afficher pour le moment.</p></div></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="confirm-modal" id="confirmModal" hidden>
+    <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <span class="confirm-icon">💌</span><h2 id="confirmTitle">Prête à envoyer ?</h2><p id="confirmText">Vérifie une dernière fois l’objet, le message et le lien.</p>
+      <label class="confirm-check"><input type="checkbox" id="consentCheck"> Ces contacts ont accepté de recevoir mes communications.</label>
+      <div><button class="secondary" id="cancelSend">Retourner au brouillon</button><button class="primary" id="confirmSend" disabled>Envoyer la campagne</button></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/km-config.js"></script>
+  <script src="/km-auth.js"></script>
+  <script src="/newsletter/newsletter.js?v=1"></script>
+</body>
+</html>
