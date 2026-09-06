@@ -1,9 +1,10 @@
 {
-  "rewrites": [
+  "redirects": [
     {
-      "source": "/:path*",
+      "source": "/",
       "has": [{ "type": "host", "value": "newsletter.kawaiimuslimworld.com" }],
-      "destination": "/newsletter/:path*"
+      "destination": "/newsletter/",
+      "permanent": false
     }
   ],
   "headers": [
