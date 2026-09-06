@@ -105,6 +105,7 @@
   };
 
   const templates = {
+    ...window.KMWGrowthCampaigns,
     launch: { subject:"Kawaii Muslim World est enfin prêt ✨", preheader:"Découvrez un univers doux pour lire, apprendre et créer en famille.", title:"Une nouvelle aventure commence 🌙", body:"Assalamou alaykoum,\n\nC’est avec beaucoup d’émotion que je vous annonce l’ouverture de Kawaii Muslim World : un univers numérique doux et enrichissant pensé pour accompagner les enfants musulmans.\n\nHistoires autour de l’Islam, découvertes scientifiques, coloriages et espace parent vous attendent.", button:"Découvrir Kawaii Muslim World" },
     newbooks: { subject:"De nouveaux livres sont arrivés 📚", preheader:"De nouvelles histoires et activités attendent vos enfants.", title:"De nouvelles découvertes à partager", body:"Assalamou alaykoum,\n\nDe nouveaux livres viennent de rejoindre Kawaii Muslim World. Des histoires douces, des découvertes enrichissantes et des coloriages attendent les enfants.\n\nConnectez-vous pour les découvrir ensemble.", button:"Voir les nouveaux livres" },
     news: { subject:"Des nouvelles de Kawaii Muslim World 🌙", preheader:"Un petit message doux pour toute la famille.", title:"Une belle nouvelle à partager", body:"Assalamou alaykoum,\n\nAujourd’hui, j’avais envie de partager avec vous une nouveauté de l’univers Kawaii Muslim World.\n\nMerci de faire partie de cette belle aventure.", button:"Découvrir la nouveauté" }
@@ -122,6 +123,7 @@
   const applyTemplate = name => {
     const value = templates[name]; if (!value) return;
     $("#subject").value=value.subject; $("#preheader").value=value.preheader; $("#emailTitle").value=value.title; $("#emailBody").value=value.body; $("#buttonLabel").value=value.button;
+    $("#buttonUrl").value=value.url || "https://www.kawaiimuslimworld.com/";
     $$(".template").forEach(button => button.classList.toggle("active", button.dataset.template === name)); updatePreview();
   };
   const restoreDraft = () => {
