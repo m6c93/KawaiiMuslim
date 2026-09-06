@@ -1,4 +1,23 @@
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://pasgxojzybmvbjhuokkk.supabase.co";
+const ALLOWED_SIGNUP_ORIGINS = new Set([
+  "https://kawaiimuslim.com",
+  "https://www.kawaiimuslim.com",
+  "https://kawaiimuslimworld.com",
+  "https://www.kawaiimuslimworld.com",
+  "https://newsletter.kawaiimuslimworld.com"
+]);
+
+function allowSignupOrigin(req,res){
+  const origin=String(req.headers.origin||"");
+  if(origin&&ALLOWED_SIGNUP_ORIGINS.has(origin)){
+    res.setHeader("Access-Control-Allow-Origin",origin);
+    res.setHeader("Vary","Origin");
+    res.setHeader("Access-Control-Allow-Headers","Content-Type");
+    res.setHeader("Access-Control-Allow-Methods","POST, OPTIONS");
+  }
+  return !origin||ALLOWED_SIGNUP_ORIGINS.has(origin);
+}
+
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "sb_publishable_JfiHxlqfI8pXr4Emho4vOw_QBePfSHm";
 const BREVO_API = "https://api.brevo.com/v3";
 const BREVO_KEY = process.env.BREVO_API_KEY || "";
@@ -67,4 +86,38 @@ module.exports=async(req,res)=>{
     if(action==="sendCampaign"){if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});const campaign=validateCampaign(body);const created=await brevo("/emailCampaigns",{method:"POST",body:JSON.stringify({name:campaign.name,subject:campaign.subject,previewText:campaign.preheader,sender:{name:SENDER_NAME,email:SENDER_EMAIL},replyTo:SENDER_EMAIL,type:"classic",htmlContent:campaign.html,recipients:{listIds:[BREVO_LIST_ID]},inlineImageActivation:false,mirrorActive:false})});await brevo(`/emailCampaigns/${created.id}/sendNow`,{method:"POST"});return json(res,200,{campaignId:created.id});}
     return json(res,400,{error:"Action inconnue."});
   }catch(error){console.error("newsletter-api",error);return json(res,error.status||500,{error:error.message||"Erreur interne."});}
+};
+
+async function ensureContactAttribute(name){
+  const current=await brevo("/contacts/attributes");
+  if((current.attributes||[]).some(attribute=>attribute.name===name))return;
+  await brevo(`/contacts/attributes/normal/${encodeURIComponent(name)}`,{method:"POST",body:JSON.stringify({type:"text"})});
+}
+
+async function subscribeFromLanding(body){
+  const email=cleanEmail(body.email);
+  if(body.website)return {subscribed:true};
+  if(!validEmail(email))throw Object.assign(new Error("Adresse e-mail invalide."),{status:400});
+  if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d inscription n est pas encore disponible."),{status:503});
+  await ensureContactAttribute("KM_SOURCE");
+  await ensureContactAttribute("KM_CONSENT_AT");
+  await brevo("/contacts",{method:"POST",body:JSON.stringify({email,listIds:[BREVO_LIST_ID],updateEnabled:true,attributes:{KM_SOURCE:"Landing page Kawaii Muslim",KM_CONSENT_AT:new Date().toISOString()}})});
+  return {subscribed:true};
+}
+
+const newsletterAdminHandler=module.exports;
+module.exports=async(req,res)=>{
+  const action=new URL(req.url,"https://www.kawaiimuslimworld.com").searchParams.get("action");
+  const signupOriginAllowed=allowSignupOrigin(req,res);
+  if(req.method==="OPTIONS")return res.end();
+  if(action!=="subscribe")return newsletterAdminHandler(req,res);
+  if(req.method!=="POST")return json(res,405,{error:"Méthode non autorisée."});
+  try{
+    if(!signupOriginAllowed)throw Object.assign(new Error("Origine non autorisée."),{status:403});
+    const body=await readBody(req);
+    return json(res,200,await subscribeFromLanding(body));
+  }catch(error){
+    console.error("newsletter-signup",error);
+    return json(res,error.status||500,{error:error.message||"Erreur interne."});
+  }
 };
