@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/newsletter/newsletter.css?v=2">
+  <link rel="stylesheet" href="/newsletter/newsletter.css?v=3">
 </head>
 <body class="is-loading">
   <div class="auth-loader" id="authLoader"><span></span>Ouverture de ton studio privé…</div>
@@ -86,7 +86,8 @@
         <div class="section-head"><div><p class="eyebrow">Un vrai e-mail professionnel</p><h2>Créer une campagne</h2><p>Écris à gauche, observe le résultat à droite, puis envoie-toi un test.</p></div><div class="save-state" id="saveState">Brouillon enregistré sur cet appareil</div></div>
         <div class="composer-grid">
           <form class="panel composer-form" id="campaignForm">
-            <div class="template-row"><button type="button" class="template active" data-template="launch">🚀 Lancement</button><button type="button" class="template" data-template="newbooks">📚 Nouveaux livres</button><button type="button" class="template" data-template="news">🌙 Nouvelles</button></div>
+            <div class="template-row"><button type="button" class="template active" data-template="launch">🚀 Lancement</button><button type="button" class="template" data-template="newbooks">📚 Nouveaux livres</button><button type="button" class="template" data-template="news">🌙 Nouvelles</button><label class="template import-email-button">⬆️ Importer mon e-mail<input id="emailHtmlFile" type="file" accept=".html,.htm,text/html" hidden></label></div>
+            <div class="imported-email-state" id="importedEmailState" hidden><div><strong>✓ E-mail importé</strong><small id="importedEmailName"></small></div><button type="button" class="secondary" id="removeImportedEmail">Revenir à l’éditeur</button></div>
             <label>Objet de l’e-mail <small id="subjectCount">0/60</small><input id="subject" maxlength="60" required value="Kawaii Muslim World est enfin prêt ✨"></label>
             <label>Texte d’aperçu <small id="preheaderCount">0/90</small><input id="preheader" maxlength="90" value="Découvrez un univers doux pour lire, apprendre et créer en famille."></label>
             <label>Grand titre<input id="emailTitle" maxlength="100" required value="Une nouvelle aventure commence 🌙"></label>
@@ -99,7 +100,7 @@ Histoires autour de l’Islam, découvertes scientifiques, coloriages et espace 
             <div class="test-box"><label>Adresse pour le test<input id="testEmail" type="email" placeholder="ton adresse e-mail"></label><button type="button" class="secondary" id="sendTest">M’envoyer un test</button></div>
             <div class="send-box"><div><strong id="recipientSummary">Destinataires actifs : —</strong><small>Les désinscrits et adresses bloquées seront exclus automatiquement.</small></div><button type="submit" class="primary" id="sendCampaign">Vérifier puis envoyer</button></div>
           </form>
-          <aside class="preview-panel"><div class="preview-toolbar"><span>Aperçu</span><div><button class="device active" data-device="desktop" aria-label="Aperçu ordinateur">▭</button><button class="device" data-device="mobile" aria-label="Aperçu téléphone">▯</button></div></div><div class="email-preview-wrap"><iframe id="emailPreview" title="Aperçu de l’e-mail"></iframe></div><p class="preview-note">Le lien de désinscription est ajouté automatiquement en bas de chaque campagne.</p></aside>
+          <aside class="preview-panel"><div class="preview-toolbar"><span>Aperçu</span><div><button class="device active" data-device="desktop" aria-label="Aperçu ordinateur">▭</button><button class="device" data-device="mobile" aria-label="Aperçu téléphone">▯</button></div></div><div class="email-preview-wrap"><iframe id="emailPreview" sandbox="" title="Aperçu de l’e-mail"></iframe></div><p class="preview-note">Le lien de désinscription est ajouté automatiquement en bas de chaque campagne.</p></aside>
         </div>
       </section>
 
@@ -126,6 +127,6 @@ Histoires autour de l’Islam, découvertes scientifiques, coloriages et espace 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/km-config.js"></script>
   <script src="/km-auth.js"></script>
-  <script src="/newsletter/newsletter.js?v=2"></script>
+  <script src="/newsletter/newsletter.js?v=3"></script>
 </body>
 </html>
