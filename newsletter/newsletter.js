@@ -16,6 +16,11 @@
     else if (button.dataset.label) button.textContent = button.dataset.label;
     button.disabled = busy;
   };
+  const showSendingLab = (title, message) => {
+    $("#sendingTitle").textContent = title; $("#sendingText").textContent = message;
+    $("#sendingLab").hidden = false; document.body.classList.add("is-sending");
+  };
+  const hideSendingLab = () => { $("#sendingLab").hidden = true; document.body.classList.remove("is-sending"); };
   const getToken = async () => (await KMAuth.getSession())?.access_token || "";
   const api = async (action, payload = {}) => {
     const token = await getToken();
@@ -160,15 +165,15 @@
   const campaignPayload = () => ({ subject:$("#subject").value.trim(), preheader:$("#preheader").value.trim(), html:emailHtml(), name:`${$("#subject").value.trim()} — ${new Date().toLocaleDateString("fr-FR")}` });
   const sendTest = async () => {
     const button=$("#sendTest"), email=$("#testEmail").value.trim(); if(!email) return showNotice("Indique l’adresse qui doit recevoir le test.","error");
-    setBusy(button,true,"Envoi du test…"); try { await api("sendTest",{...campaignPayload(),email}); showNotice(`E-mail test envoyé à ${email}.`,"success"); } catch(error){showNotice(error.message,"error");} finally{setBusy(button,false);}
+    setBusy(button,true,"Envoi du test…"); showSendingLab("Ton test voyage…", `Direction ${email}`); try { await api("sendTest",{...campaignPayload(),email}); showNotice(`E-mail test envoyé à ${email}.`,"success"); } catch(error){showNotice(error.message,"error");} finally{hideSendingLab();setBusy(button,false);}
   };
   const openConfirmation = () => {
     const form=$("#campaignForm"); if(!form.reportValidity())return; $("#confirmText").textContent=`La campagne « ${$("#subject").value.trim()} » sera envoyée à tous les contacts actifs de la liste.`; $("#consentCheck").checked=false; $("#confirmSend").disabled=true; $("#confirmModal").hidden=false;
   };
   const sendCampaign = async () => {
-    const button=$("#confirmSend"); setBusy(button,true,"Envoi en cours…");
+    const button=$("#confirmSend"); setBusy(button,true,"Envoi en cours…"); showSendingLab("Ta campagne décolle…", "Les messages partent vers toutes les familles inscrites.");
     try { const data=await api("sendCampaign",campaignPayload()); $("#confirmModal").hidden=true; showNotice(`Campagne lancée avec succès${data.campaignId?` (n° ${data.campaignId})`:""}.`,"success"); switchView("history"); }
-    catch(error){showNotice(error.message,"error");} finally{setBusy(button,false);}
+    catch(error){showNotice(error.message,"error");} finally{hideSendingLab();setBusy(button,false);}
   };
   const loadCampaigns = async () => {
     if(!state.config?.brevo)return;
@@ -225,3 +230,4 @@
   $("#closeEngagement").addEventListener("click",()=>$("#engagementPanel").hidden=true);
   initialize();
 })();
+
