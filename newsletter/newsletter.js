@@ -2,7 +2,7 @@
   "use strict";
   const $ = selector => document.querySelector(selector);
   const $$ = selector => [...document.querySelectorAll(selector)];
-  const state = { context: null, config: null, contacts: [], campaigns: [], pendingCampaign: null };
+  const state = { context: null, config: null, contacts: [], campaigns: [], pendingCampaign: null, importedHtml: "" };
   const titles = { dashboard: "Bonjour", contacts: "Mes contacts", composer: "Créer un e-mail", history: "Mes campagnes" };
 
   const escapeHtml = value => String(value || "").replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[char]));
@@ -110,8 +110,37 @@
     news: { subject:"Des nouvelles de Kawaii Muslim World 🌙", preheader:"Un petit message doux pour toute la famille.", title:"Une belle nouvelle à partager", body:"Assalamou alaykoum,\n\nAujourd’hui, j’avais envie de partager avec vous une nouveauté de l’univers Kawaii Muslim World.\n\nMerci de faire partie de cette belle aventure.", button:"Découvrir la nouveauté" }
   };
   const emailHtml = () => {
+    if (state.importedHtml) {
+      if (/{{\s*unsubscribe\s*}}/i.test(state.importedHtml)) return state.importedHtml;
+      const footer = '<div style="padding:18px;text-align:center;color:#777095;font:11px/1.5 Arial,sans-serif">Vous recevez cet e-mail car vous êtes inscrit aux nouveautés Kawaii Muslim World.<br><a href="{{ unsubscribe }}" style="color:#777095">Se désinscrire</a></div>';
+      return /<\/body>/i.test(state.importedHtml) ? state.importedHtml.replace(/<\/body>/i, `${footer}</body>`) : `${state.importedHtml}${footer}`;
+    }
     const paragraphHtml = escapeHtml($("#emailBody").value).split(/\n{2,}/).map(p => `<p style="margin:0 0 18px;color:#4f5272;font-size:16px;line-height:1.72">${p.replace(/\n/g,"<br>")}</p>`).join("");
     return `<!doctype html><html><body style="margin:0;background:#f7f3f7;font-family:Arial,sans-serif;color:#292b51"><div style="display:none;max-height:0;overflow:hidden">${escapeHtml($("#preheader").value)}</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7f3f7"><tr><td align="center" style="padding:28px 12px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#fff;border-radius:24px;overflow:hidden"><tr><td align="center" style="padding:28px 24px 20px;background:#1b2258"><img src="https://www.kawaiimuslimworld.com/brand/assets/logo-kawaii-muslim.png" width="72" height="72" alt="Kawaii Muslim World" style="display:block;border-radius:50%;background:#fff7d1"><div style="margin-top:10px;color:#fff;font-size:19px;font-weight:700">Kawaii Muslim World</div></td></tr><tr><td align="center" style="padding:38px 34px 16px"><div style="color:#e477a7;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase">Un univers doux pour grandir</div><h1 style="margin:10px 0 18px;color:#292b51;font-size:34px;line-height:1.1">${escapeHtml($("#emailTitle").value)}</h1></td></tr><tr><td style="padding:0 38px 12px">${paragraphHtml}</td></tr><tr><td align="center" style="padding:12px 28px 42px"><a href="${escapeHtml($("#buttonUrl").value)}" style="display:inline-block;padding:15px 25px;border-radius:999px;background:#e477a7;color:#fff;text-decoration:none;font-size:16px;font-weight:700">${escapeHtml($("#buttonLabel").value)}</a></td></tr><tr><td align="center" style="padding:22px;background:#fff7ed;color:#85819a;font-size:11px;line-height:1.55">Vous recevez cet e-mail car vous avez demandé à suivre les nouveautés de Kawaii Muslim World.<br><a href="{{ unsubscribe }}" style="color:#777095">Se désinscrire</a> · <a href="https://www.kawaiimuslimworld.com/" style="color:#777095">kawaiimuslimworld.com</a></td></tr></table></td></tr></table></body></html>`;
+  };
+  const importEmailHtml = file => {
+    if (!file) return;
+    if (!/\.html?$/i.test(file.name) || file.size > 1500000) {
+      $("#emailHtmlFile").value = "";
+      return showNotice("Choisis un fichier HTML de moins de 1,5 Mo.", "error");
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const html = String(reader.result || "");
+      if (!/<(?:html|body|table|div)\b/i.test(html)) return showNotice("Ce fichier ne ressemble pas à un e-mail HTML valide.", "error");
+      state.importedHtml = html;
+      $("#importedEmailName").textContent = file.name;
+      $("#importedEmailState").hidden = false;
+      $$(".template").forEach(button => button.classList.remove("active"));
+      updatePreview();
+      showNotice(`L’e-mail « ${file.name} » est prêt pour le test et l’envoi.`, "success");
+    };
+    reader.onerror = () => showNotice("Impossible de lire ce fichier.", "error");
+    reader.readAsText(file);
+  };
+  const removeImportedEmail = () => {
+    state.importedHtml = ""; $("#emailHtmlFile").value = ""; $("#importedEmailState").hidden = true;
+    updatePreview(); showNotice("Éditeur classique réactivé.", "success");
   };
   const updatePreview = () => {
     $("#subjectCount").textContent = `${$("#subject").value.length}/60`; $("#preheaderCount").textContent = `${$("#preheader").value.length}/90`;
@@ -121,6 +150,7 @@
   };
   const applyTemplate = name => {
     const value = templates[name]; if (!value) return;
+    state.importedHtml = ""; $("#emailHtmlFile").value = ""; $("#importedEmailState").hidden = true;
     $("#subject").value=value.subject; $("#preheader").value=value.preheader; $("#emailTitle").value=value.title; $("#emailBody").value=value.body; $("#buttonLabel").value=value.button;
     $$(".template").forEach(button => button.classList.toggle("active", button.dataset.template === name)); updatePreview();
   };
@@ -182,6 +212,8 @@
   $("#syncFormspree").addEventListener("click",()=>syncSource("formspree",$("#syncFormspree")));
   $("#syncShopify").addEventListener("click",()=>syncSource("shopify",$("#syncShopify")));
   $("#csvFile").addEventListener("change",event=>event.target.files[0]&&importCsv(event.target.files[0]));
+  $("#emailHtmlFile").addEventListener("change",event=>importEmailHtml(event.target.files[0]));
+  $("#removeImportedEmail").addEventListener("click",removeImportedEmail);
   $("#refreshContacts").addEventListener("click",loadContacts); $("#contactSearch").addEventListener("input",renderContacts); $("#sourceFilter").addEventListener("change",renderContacts);
   $$(".composer-form input,.composer-form textarea").forEach(input=>input.addEventListener("input",updatePreview));
   $$(".template").forEach(button=>button.addEventListener("click",()=>applyTemplate(button.dataset.template)));
