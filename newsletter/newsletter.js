@@ -142,8 +142,19 @@
   };
   const loadCampaigns = async () => {
     if(!state.config?.brevo)return;
-    try { const data=await api("campaigns"); state.campaigns=data.campaigns||[]; $("#statCampaigns").textContent=data.count??state.campaigns.length; $("#campaignList").innerHTML=state.campaigns.map(item=>`<article class="campaign-row"><div><strong>${escapeHtml(item.subject||item.name)}</strong><small>${formatDate(item.sentDate||item.scheduledAt||item.createdAt)} · ${escapeHtml(item.status||"brouillon")}</small></div><div class="campaign-metric"><b>${item.statistics?.globalStats?.uniqueViews||0}</b><small>ouvertures</small></div><div class="campaign-metric"><b>${item.statistics?.globalStats?.clickers||0}</b><small>clics</small></div><div class="campaign-metric"><b>${item.statistics?.globalStats?.unsubscriptions||0}</b><small>désinscriptions</small></div></article>`).join("")||'<p class="empty">Aucune campagne envoyée pour le moment.</p>'; }
+    try { const data=await api("campaigns"); state.campaigns=data.campaigns||[]; $("#statCampaigns").textContent=data.count??state.campaigns.length; $("#campaignList").innerHTML=state.campaigns.map(item=>`<article class="campaign-row"><div><strong>${escapeHtml(item.subject||item.name)}</strong><small>${formatDate(item.sentDate||item.scheduledAt||item.createdAt)} · ${escapeHtml(item.status||"brouillon")}</small></div><div class="campaign-metric"><b>${item.statistics?.globalStats?.uniqueViews||0}</b><small>ouvertures</small></div><div class="campaign-metric"><b>${item.statistics?.globalStats?.clickers||0}</b><small>clics</small></div><div class="campaign-metric"><b>${item.statistics?.globalStats?.unsubscriptions||0}</b><small>désinscriptions</small></div>${item.status==="sent"?`<button class="secondary campaign-detail" data-campaign-id="${item.id}" data-campaign-name="${escapeHtml(item.subject||item.name)}">Voir qui a ouvert et cliqué</button>`:""}</article>`).join("")||'<p class="empty">Aucune campagne envoyée pour le moment.</p>'; }
     catch(error){showNotice(error.message,"error");}
+  };
+  const loadEngagement = async button => {
+    const campaignId=button.dataset.campaignId,panel=$("#engagementPanel"); setBusy(button,true,"Analyse…");
+    try {
+      const data=await api("campaignEngagement",{campaignId}),rows=data.contacts||[];
+      $("#engagementTitle").textContent=button.dataset.campaignName||"Qui a réagi ?";
+      const opened=rows.filter(item=>item.opened).length,clicked=rows.filter(item=>item.clicked).length;
+      $("#engagementSummary").innerHTML=`<span><b>${rows.length}</b> destinataires retrouvés</span><span><b>${opened}</b> ont ouvert</span><span><b>${clicked}</b> ont cliqué</span>`;
+      $("#engagementBody").innerHTML=rows.map(item=>`<tr><td><strong>${escapeHtml(item.firstName||item.email)}</strong>${item.firstName?`<small>${escapeHtml(item.email)}</small>`:""}<small>${escapeHtml(item.source||"Newsletter")}</small></td><td><span class="engagement-badge yes">✓ Inscrit</span></td><td><span class="engagement-badge ${item.opened?"open":"no"}">${item.opened?`✓ Oui${item.openCount>1?` (${item.openCount})`:""}`:"— Pas encore"}</span>${item.lastOpen?`<small>${formatDate(item.lastOpen)}</small>`:""}</td><td><span class="engagement-badge ${item.clicked?"click":"no"}">${item.clicked?`✓ Oui${item.clickCount>1?` (${item.clickCount})`:""}`:"— Pas encore"}</span>${item.lastClick?`<small>${formatDate(item.lastClick)}</small>`:""}</td></tr>`).join("")||'<tr><td colspan="4" class="empty">Aucune activité enregistrée pour cette campagne.</td></tr>';
+      panel.hidden=false; panel.scrollIntoView({behavior:"smooth",block:"start"});
+    } catch(error){showNotice(error.message,"error");} finally{setBusy(button,false);}
   };
 
   const initialize = async () => {
@@ -178,5 +189,7 @@
   $("#sendTest").addEventListener("click",sendTest); $("#campaignForm").addEventListener("submit",event=>{event.preventDefault();openConfirmation();});
   $("#consentCheck").addEventListener("change",event=>$("#confirmSend").disabled=!event.target.checked); $("#cancelSend").addEventListener("click",()=>$("#confirmModal").hidden=true); $("#confirmSend").addEventListener("click",sendCampaign);
   $("#refreshCampaigns").addEventListener("click",loadCampaigns);
+  $("#campaignList").addEventListener("click",event=>{const button=event.target.closest(".campaign-detail");if(button)loadEngagement(button);});
+  $("#closeEngagement").addEventListener("click",()=>$("#engagementPanel").hidden=true);
   initialize();
 })();
