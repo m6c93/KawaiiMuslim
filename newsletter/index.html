@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/newsletter/newsletter.css?v=3">
+  <link rel="stylesheet" href="/newsletter/newsletter.css?v=4">
 </head>
 <body class="is-loading">
   <div class="auth-loader" id="authLoader"><span></span>Ouverture de ton studio privé…</div>
@@ -83,7 +83,12 @@
       </section>
 
       <section class="studio-view" id="view-composer">
-        <div class="section-head"><div><p class="eyebrow">Un vrai e-mail professionnel</p><h2>Créer une campagne</h2><p>Écris à gauche, observe le résultat à droite, puis envoie-toi un test.</p></div><div class="save-state" id="saveState">Brouillon enregistré sur cet appareil</div></div>
+        <div class="newsletter-lab-head">
+          <div class="lab-orbit" aria-hidden="true"><span class="lab-planet">🌍</span><i>✉️</i></div>
+          <div><p class="eyebrow">Le labo des belles nouvelles</p><h2>Crée, teste, envoie.</h2><p>Tout est réuni ici pour préparer un joli message sans te perdre dans les réglages.</p></div>
+          <div class="lab-steps" aria-label="Étapes de création"><span><b>1</b> Choisis</span><span><b>2</b> Personnalise</span><span><b>3</b> Envoie</span></div>
+        </div>
+        <div class="composer-meta"><span class="lab-status"><i></i> Labo prêt</span><div class="save-state" id="saveState">✓ Brouillon enregistré sur cet appareil</div></div>
         <div class="composer-grid">
           <form class="panel composer-form" id="campaignForm">
             <div class="template-row"><button type="button" class="template active" data-template="launch">🚀 Lancement</button><button type="button" class="template" data-template="newbooks">📚 Nouveaux livres</button><button type="button" class="template" data-template="news">🌙 Nouvelles</button><label class="template import-email-button">⬆️ Importer mon e-mail<input id="emailHtmlFile" type="file" accept=".html,.htm,text/html" hidden></label></div>
@@ -124,9 +129,20 @@ Histoires autour de l’Islam, découvertes scientifiques, coloriages et espace 
     </div>
   </div>
 
+  <div class="sending-lab" id="sendingLab" hidden role="status" aria-live="polite" aria-busy="true">
+    <div class="sending-space" aria-hidden="true">
+      <span class="sending-star star-one">✦</span><span class="sending-star star-two">✦</span><span class="sending-star star-three">✦</span>
+      <div class="sending-orbit orbit-one"><span>✉️</span></div><div class="sending-orbit orbit-two"><span>💌</span></div>
+      <div class="sending-planet"><span>🌍</span><i></i></div>
+    </div>
+    <p class="eyebrow light">Mission en cours</p><h2 id="sendingTitle">Ton message décolle…</h2><p id="sendingText">Nous préparons soigneusement ton e-mail.</p>
+    <div class="sending-progress"><i></i></div><small>Ne ferme pas cette page pendant quelques secondes.</small>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/km-config.js"></script>
   <script src="/km-auth.js"></script>
-  <script src="/newsletter/newsletter.js?v=3"></script>
+  <script src="/newsletter/newsletter.js?v=4"></script>
 </body>
 </html>
+
