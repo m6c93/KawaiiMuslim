@@ -28,6 +28,7 @@ const FORMSPREE_TOKEN = process.env.FORMSPREE_TOKEN || "";
 const FORMSPREE_FORM_ID = process.env.FORMSPREE_FORM_ID || "xnjedkpy";
 const SHOPIFY_STORE = String(process.env.SHOPIFY_STORE_DOMAIN || "").replace(/^https?:\/\//, "").replace(/\/$/, "");
 const SHOPIFY_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN || ""; const SHOPIFY_CLIENT_ID = process.env.SHOPIFY_CLIENT_ID || ""; const SHOPIFY_CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET || ""; let shopifyTokenCache = { value: "", expiresAt: 0 };
+const engagementCache = new Map();
 
 const json = (res, status, data) => { res.statusCode=status; res.setHeader("Content-Type","application/json; charset=utf-8"); res.setHeader("Cache-Control","no-store"); res.end(JSON.stringify(data)); };
 const readBody = req => new Promise((resolve,reject)=>{let raw="";req.on("data",chunk=>{raw+=chunk;if(raw.length>2_000_000)reject(new Error("Requête trop volumineuse."));});req.on("end",()=>{try{resolve(JSON.parse(raw||"{}"));}catch(error){reject(new Error("Données invalides."));}});req.on("error",reject);});
@@ -82,12 +83,33 @@ module.exports=async(req,res)=>{
     if(action==="syncShopify"){const contacts=await shopifyContacts();return json(res,200,await importContacts(contacts,"Shopify"));}
     if(action==="contacts"){if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});const data=await brevo(`/contacts/lists/${BREVO_LIST_ID}/contacts?limit=500&offset=0&sort=desc`);const contacts=(data.contacts||[]).filter(item=>!item.emailBlacklisted&&!(item.listUnsubscribed||[]).includes(BREVO_LIST_ID));return json(res,200,{contacts,count:contacts.length,total:data.count||0});}
     if(action==="campaigns"){const data=await brevo("/emailCampaigns?type=classic&limit=30&offset=0&sort=desc");return json(res,200,{campaigns:data.campaigns||[],count:data.count||0});}
+    if(action==="campaignEngagement"){if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});return json(res,200,await campaignEngagement(body.campaignId));}
     if(action==="sendTest"){const campaign=validateCampaign(body),email=cleanEmail(body.email);if(!validEmail(email))throw Object.assign(new Error("Adresse de test invalide."),{status:400});const data=await brevo("/smtp/email",{method:"POST",body:JSON.stringify({sender:{name:SENDER_NAME,email:SENDER_EMAIL},to:[{email}],replyTo:{email:SENDER_EMAIL,name:SENDER_NAME},subject:`[TEST] ${campaign.subject}`,htmlContent:campaign.html.replace(/{{\s*unsubscribe\s*}}/gi,"https://www.kawaiimuslimworld.com/")})});return json(res,200,{messageId:data.messageId});}
     if(action==="sendCampaign"){if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});const campaign=validateCampaign(body);const created=await brevo("/emailCampaigns",{method:"POST",body:JSON.stringify({name:campaign.name,subject:campaign.subject,previewText:campaign.preheader,sender:{name:SENDER_NAME,email:SENDER_EMAIL},replyTo:SENDER_EMAIL,type:"classic",htmlContent:campaign.html,recipients:{listIds:[BREVO_LIST_ID]},inlineImageActivation:false,mirrorActive:false})});await brevo(`/emailCampaigns/${created.id}/sendNow`,{method:"POST"});return json(res,200,{campaignId:created.id});}
     return json(res,400,{error:"Action inconnue."});
   }catch(error){console.error("newsletter-api",error);return json(res,error.status||500,{error:error.message||"Erreur interne."});}
 };
 
+const campaignEntries = (stats,key,campaignId) => (stats?.[key]||[]).filter(item=>Number(item.campaignId)===Number(campaignId));
+async function campaignEngagement(campaignId){
+  const id=Number(campaignId); if(!Number.isInteger(id)||id<1)throw Object.assign(new Error("Campagne invalide."),{status:400});
+  const cached=engagementCache.get(id); if(cached&&cached.expiresAt>Date.now())return cached.data;
+  const list=await brevo(`/contacts/lists/${BREVO_LIST_ID}/contacts?limit=500&offset=0&sort=desc`);
+  const contacts=(list.contacts||[]).filter(item=>!item.emailBlacklisted&&!(item.listUnsubscribed||[]).includes(BREVO_LIST_ID));
+  const rows=[];
+  for(let offset=0;offset<contacts.length;offset+=6){
+    const batch=contacts.slice(offset,offset+6);
+    const results=await Promise.all(batch.map(async contact=>{try{return await brevo(`/contacts/${encodeURIComponent(contact.email)}/campaignStats`);}catch(error){return {email:contact.email,_error:error.message};}}));
+    results.forEach((stats,index)=>{
+      const contact=batch[index],sent=campaignEntries(stats,"messagesSent",id),opened=campaignEntries(stats,"opened",id),clicked=campaignEntries(stats,"clicked",id),delivered=campaignEntries(stats,"delivered",id);
+      if(!sent.length&&!opened.length&&!clicked.length&&!delivered.length)return;
+      const clickLinks=clicked.flatMap(item=>item.links||[]);
+      rows.push({email:contact.email,firstName:safeText(contact.attributes?.PRENOM||contact.attributes?.FIRSTNAME||contact.attributes?.FIRST_NAME,80),source:safeText(contact.attributes?.KM_SOURCE||contact.attributes?.SOURCE||"Newsletter",80),subscribed:true,delivered:!!delivered.length,opened:!!opened.length,openCount:opened.reduce((sum,item)=>sum+(Number(item.count)||1),0),clicked:!!clicked.length,clickCount:clickLinks.reduce((sum,item)=>sum+(Number(item.count)||1),0)||clicked.length,lastOpen:opened.map(item=>item.eventTime).filter(Boolean).sort().at(-1)||null,lastClick:clickLinks.map(item=>item.eventTime).filter(Boolean).sort().at(-1)||clicked.map(item=>item.eventTime).filter(Boolean).sort().at(-1)||null});
+    });
+  }
+  rows.sort((a,b)=>Number(b.clicked)-Number(a.clicked)||Number(b.opened)-Number(a.opened)||a.email.localeCompare(b.email));
+  const data={campaignId:id,contacts:rows,count:rows.length,limited:contacts.length>=500}; engagementCache.set(id,{data,expiresAt:Date.now()+120000}); return data;
+}
 async function ensureContactAttribute(name){
   const current=await brevo("/contacts/attributes");
   if((current.attributes||[]).some(attribute=>attribute.name===name))return;
