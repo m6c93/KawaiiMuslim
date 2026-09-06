@@ -52,12 +52,12 @@ async function brevo(path,options={}){
   const data=await response.json().catch(()=>({})); if(!response.ok)throw Object.assign(new Error(data.message||"Le service d’envoi a refusé la demande."),{status:response.status}); return data;
 }
 function normalizeContacts(items,source){
-  const map=new Map(); for(const raw of items||[]){const email=cleanEmail(raw.email);if(!validEmail(email))continue;map.set(email,{email,attributes:{PRENOM:safeText(raw.firstName||raw.firstname||raw.name,80),NOM:safeText(raw.lastName||raw.lastname,80),KM_SOURCE:safeText(raw.source||source||"Newsletter",80)}});} return [...map.values()];
+  const map=new Map(); for(const raw of items||[]){const email=cleanEmail(raw.email);if(!validEmail(email))continue;map.set(email,{email,attributes:{PRENOM:safeText(raw.firstName||raw.firstname||raw.name,80),NOM:safeText(raw.lastName||raw.lastname,80),SOURCE:safeText(raw.source||source||"Newsletter",80)}});} return [...map.values()];
 }
 async function importContacts(items,source){
   if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});
   const contacts=normalizeContacts(items,source); if(!contacts.length)return {imported:0}; if(contacts.length>10000)throw Object.assign(new Error("Import limité à 10 000 contacts à la fois."),{status:400});
-  await ensureContactAttribute("KM_SOURCE"); const result=await brevo("/contacts/import",{method:"POST",body:JSON.stringify({jsonBody:contacts,listIds:[BREVO_LIST_ID],updateExistingContacts:true,emptyContactsAttributes:false,emailBlacklist:false,smsBlacklist:false})}); return {imported:contacts.length,processId:result.processId};
+  await ensureContactAttribute("SOURCE"); const result=await brevo("/contacts/import",{method:"POST",body:JSON.stringify({jsonBody:contacts,listIds:[BREVO_LIST_ID],updateExistingContacts:true,emptyContactsAttributes:false,emailBlacklist:false,smsBlacklist:false})}); return {imported:contacts.length,processId:result.processId};
 }
 async function formspreeContacts(){
   if(!FORMSPREE_TOKEN)throw Object.assign(new Error("Formspree doit encore être connecté au studio."),{status:503});
