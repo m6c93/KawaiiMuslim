@@ -87,6 +87,12 @@
         <div class="composer-grid">
           <form class="panel composer-form" id="campaignForm">
             <div class="template-row"><button type="button" class="template active" data-template="launch">🚀 Lancement</button><button type="button" class="template" data-template="newbooks">📚 Nouveaux livres</button><button type="button" class="template" data-template="news">🌙 Nouvelles</button></div>
+            <div class="template-row" role="group" aria-label="Campagnes de découverte">
+              <button type="button" class="template" data-template="discovery">Aperçu gratuit</button>
+              <button type="button" class="template" data-template="coloring">Pause coloriage</button>
+              <button type="button" class="template" data-template="familyPlans">Formules famille</button>
+              <button type="button" class="template" data-template="familyMoment">Moment ensemble</button>
+            </div>
             <label>Objet de l’e-mail <small id="subjectCount">0/60</small><input id="subject" maxlength="60" required value="Kawaii Muslim World est enfin prêt ✨"></label>
             <label>Texte d’aperçu <small id="preheaderCount">0/90</small><input id="preheader" maxlength="90" value="Découvrez un univers doux pour lire, apprendre et créer en famille."></label>
             <label>Grand titre<input id="emailTitle" maxlength="100" required value="Une nouvelle aventure commence 🌙"></label>
@@ -121,6 +127,7 @@ Histoires autour de l’Islam, découvertes scientifiques, coloriages et espace 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/km-config.js"></script>
   <script src="/km-auth.js"></script>
-  <script src="/newsletter/newsletter.js?v=1"></script>
+  <script src="/newsletter/growth-campaigns.js?v=20260906"></script>
+  <script src="/newsletter/newsletter.js?v=20260906"></script>
 </body>
 </html>
