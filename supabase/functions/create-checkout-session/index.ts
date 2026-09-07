@@ -12,7 +12,7 @@ const jsonResponse = (body: unknown, status = 200) => new Response(JSON.stringif
   headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
 });
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-  apiVersion: "2026-06-24.dahlia",
+  apiVersion: "2026-07-29.dahlia",
 });
 
 const checkoutIdentifier = () => {
@@ -75,10 +75,13 @@ Deno.serve(async (request) => {
       client_reference_id: user.id,
       line_items: [{ price: selectedPlan.priceId, quantity: 1 }],
       locale: "fr",
+      payment_method_collection: "always",
       success_url: `${SITE_URL}/Profils.dc.html?abonnement=confirme&setup=1&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE_URL}/index.html?paiement=annule#tarifs`,
       metadata: { supabase_user_id: user.id, plan_code: planCode },
       subscription_data: {
+        trial_period_days: 7,
+        trial_settings: { end_behavior: { missing_payment_method: "cancel" } },
         metadata: { supabase_user_id: user.id, plan_code: planCode },
       },
     });
