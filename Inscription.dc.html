@@ -52,8 +52,6 @@
             <button class="password-toggle" id="togglePassword" type="button" aria-label="Afficher le mot de passe">👁️</button>
           </div>
 
-          <label class="field-label" for="passwordConfirm">Confirme le mot de passe</label>
-          <input class="field-input" id="passwordConfirm" type="password" autocomplete="new-password" minlength="8" placeholder="Écris-le une deuxième fois" required>
 
           <button class="primary-button pink" id="submitButton" type="submit">Continuer vers l’essai gratuit</button>
           <p class="form-message" id="message" role="status" aria-live="polite"></p>
@@ -109,13 +107,8 @@
       event.preventDefault();
       message.className = "form-message";
       message.textContent = "";
-      const confirmation = document.getElementById("passwordConfirm").value;
       if (password.value.length < 8) {
         message.textContent = "Choisis un mot de passe d’au moins 8 caractères.";
-        return;
-      }
-      if (password.value !== confirmation) {
-        message.textContent = "Les deux mots de passe ne sont pas identiques.";
         return;
       }
       submitButton.disabled = true;
