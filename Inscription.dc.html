@@ -35,7 +35,7 @@
 
       <section class="auth-panel">
         <form class="auth-form" id="signupForm" novalidate>
-          <h2>Créer mon compte parent</h2>
+          <h2>Commencer mes 7 jours gratuits</h2>
           <p class="form-subtitle">Déjà membre ? <a href="Connexion.dc.html">Se connecter</a></p>
 
           <div class="selected-plan" id="selectedPlan" aria-live="polite"></div>
@@ -55,9 +55,9 @@
           <label class="field-label" for="passwordConfirm">Confirme le mot de passe</label>
           <input class="field-input" id="passwordConfirm" type="password" autocomplete="new-password" minlength="8" placeholder="Écris-le une deuxième fois" required>
 
-          <button class="primary-button pink" id="submitButton" type="submit">Créer mon espace familial</button>
+          <button class="primary-button pink" id="submitButton" type="submit">Continuer vers l’essai gratuit</button>
           <p class="form-message" id="message" role="status" aria-live="polite"></p>
-          <p class="privacy-note">En créant ton compte, tu acceptes les conditions d’utilisation et la politique de confidentialité.</p>
+          <p class="privacy-note">0 € aujourd’hui. Une carte bancaire sera demandée à l’étape suivante. L’abonnement démarre automatiquement au 8ᵉ jour, sauf annulation avant la fin de l’essai. En créant ton compte, tu acceptes les conditions d’utilisation et la politique de confidentialité.</p>
         </form>
       </section>
     </main>
@@ -87,7 +87,7 @@
     const planCode = planOptions[requestedPlan]
       ? requestedPlan
       : legacyPlan || "family_1_child";
-    selectedPlan.innerHTML = `<span>Offre choisie</span><strong>${planOptions[planCode].label}</strong><small>${planOptions[planCode].price} · sans engagement</small>`;
+    selectedPlan.innerHTML = `<span>Offre choisie</span><strong>${planOptions[planCode].label}</strong><small>0 € aujourd’hui · puis ${planOptions[planCode].price} après 7 jours · annulable avant la fin de l’essai</small>`;
 
     KMAuth.getSession().then(session => {
       if (!session) return;
