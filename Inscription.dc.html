@@ -87,7 +87,7 @@
     const planCode = planOptions[requestedPlan]
       ? requestedPlan
       : legacyPlan || "family_1_child";
-    selectedPlan.innerHTML = `<span>Offre choisie</span><strong>${planOptions[planCode].label}</strong><small>0 € aujourd’hui · puis ${planOptions[planCode].price} après 7 jours</small>`;
+    selectedPlan.innerHTML = `<span>Offre choisie</span><strong>${planOptions[planCode].label}</strong><small>${planOptions[planCode].price} · sans engagement</small>`;
 
     KMAuth.getSession().then(session => {
       if (!session) return;
@@ -119,7 +119,7 @@
         return;
       }
       submitButton.disabled = true;
-      submitButton.textContent = "Création de ton essai gratuit…";
+      submitButton.textContent = "Création de ton espace…";
       try {
         const data = await KMAuth.signup({
           name: document.getElementById("name").value,
