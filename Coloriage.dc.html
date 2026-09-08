@@ -9,9 +9,10 @@
   <script>
     (() => {
       const startupParams = new URLSearchParams(location.search);
-      if (startupParams.get("bookColoring") === "1" || startupParams.has("draft") || String(startupParams.get("src") || "").startsWith("builtin-drawing:blank")) {
+      if (startupParams.get("bookColoring") === "1" || startupParams.has("draft") || String(startupParams.get("src") || "").startsWith("builtin-drawing:blank") || startupParams.get("embed") === "1") {
         document.documentElement.classList.add("direct-coloring");
       }
+      if (startupParams.get("embed") === "1") document.documentElement.classList.add("embedded-coloring-demo");
     })();
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -141,6 +142,16 @@ body.book-coloring-mode #safeModeButton{display:none!important}
 body.book-coloring-mode .tools{gap:10px}
 body.book-coloring-mode .top-actions{gap:7px}
 body.book-coloring-mode .title small{color:#daf3eb}
+html.embedded-coloring-demo,html.embedded-coloring-demo body{overflow:hidden}
+html.embedded-coloring-demo .app{min-height:100vh;height:100vh}
+html.embedded-coloring-demo .topbar{min-height:54px;padding:6px 10px;grid-template-columns:minmax(0,1fr) auto}
+html.embedded-coloring-demo #backAction,html.embedded-coloring-demo #compareButton,html.embedded-coloring-demo #printButton,html.embedded-coloring-demo #saveButton{display:none!important}
+html.embedded-coloring-demo .title{text-align:left}
+html.embedded-coloring-demo .workspace{grid-template-columns:78px minmax(0,1fr)}
+html.embedded-coloring-demo .tools{top:54px;height:calc(100vh - 54px);padding:10px 6px;gap:7px}
+html.embedded-coloring-demo .palette{grid-template-columns:repeat(2,29px);gap:6px}
+html.embedded-coloring-demo .color,html.embedded-coloring-demo .custom-color{width:29px;height:29px}
+html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px}
 </style>
 </head>
 <body>
@@ -1021,7 +1032,7 @@ body.book-coloring-mode .title small{color:#daf3eb}
           document.getElementById("quickChild").hidden = false;
           document.getElementById("choiceMessage").textContent = "Une seule fois : indique son prénom pour créer sa galerie privée.";
         }
-        if ((requestedDraft || bookColoring || source.startsWith("builtin-drawing:blank")) && childSelect.value) await startEditor();
+        if ((requestedDraft || bookColoring || source.startsWith("builtin-drawing:blank") || params.get("embed") === "1") && childSelect.value) await startEditor();
       }
     } catch (error) {
       if (error?.message !== "book_redirect") {
