@@ -419,6 +419,8 @@ document.querySelectorAll("[data-mini-coloring]").forEach(demo => {
 });
 /* Lance automatiquement Mimi Fly en mode lettres arabes dans la partie 04. */
 document.querySelectorAll("iframe[data-mimi-arabic]").forEach(frame => {
+  const demo = frame.closest(".mimi-game-demo");
+  const replayButton = demo?.querySelector("[data-mimi-replay]");
   const activateArabicMode = () => {
     try {
       const doc = frame.contentDocument;
@@ -428,10 +430,15 @@ document.querySelectorAll("iframe[data-mimi-arabic]").forEach(frame => {
       if (!doc.getElementById("km-landing-mimi-style")) {
         const style = doc.createElement("style");
         style.id = "km-landing-mimi-style";
-        style.textContent = ".game-header{display:none!important}.page-shell{min-height:0!important;padding:12px!important}.game-column{max-width:none!important}.mode-picker{display:none!important}.instructions{margin-top:8px!important}.instructions p{font-size:12px!important}.game-frame{min-height:390px!important}";
+        style.textContent = ".game-header,.mode-picker,.instructions{display:none!important}.page-shell{min-height:0!important;padding:4px 0!important}.game-column{width:min(100%,280px)!important;margin:auto!important}.game-frame{min-height:0!important}";
         doc.head.appendChild(style);
       }
     } catch (error) {}
   };
-  frame.addEventListener("load", () => [0,300,900,1800,3200].forEach(delay => setTimeout(activateArabicMode, delay)));
+  const prepareGame = () => [0,300,900,1800,3200].forEach(delay => setTimeout(activateArabicMode, delay));
+  frame.addEventListener("load", prepareGame);
+  replayButton?.addEventListener("click", () => {
+    const source = frame.getAttribute("src").split("&replay=")[0];
+    frame.setAttribute("src", source + "&replay=" + Date.now());
+  });
 });
