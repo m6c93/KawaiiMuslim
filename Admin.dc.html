@@ -71,6 +71,19 @@
           <div class="admin-stat"><strong id="statPublished">—</strong><span>contenus publiés</span></div>
           <div class="admin-stat"><strong id="statTickets">—</strong><span>demandes ouvertes</span></div>
         </div>
+        <article class="admin-card full" style="margin-bottom:18px">
+          <div class="admin-section-heading">
+            <div><p class="eyebrow">Fréquentation</p><h3>Visiteurs du site</h3></div>
+            <span class="admin-badge">Anonyme & privé</span>
+          </div>
+          <div class="admin-stats">
+            <div class="admin-stat"><strong id="visitToday">—</strong><span>aujourd’hui</span></div>
+            <div class="admin-stat"><strong id="visit7Days">—</strong><span>sur 7 jours</span></div>
+            <div class="admin-stat"><strong id="visit30Days">—</strong><span>sur 30 jours</span></div>
+            <div class="admin-stat"><strong id="visitTotal">—</strong><span>visiteurs uniques</span></div>
+          </div>
+          <p class="admin-empty" style="margin:12px 0 0">Une même personne est comptée une fois par jour. Aucune donnée personnelle n’est enregistrée.</p>
+        </article>
         <div class="admin-grid">
           <article class="admin-card full">
             <div class="admin-notice private"><strong>🔒 Confidentialité renforcée</strong><br>Les émotions, priorités et réflexions du Planner Cocon sont invisibles pour toute l’équipe, y compris le super-administrateur.</div>
@@ -266,7 +279,7 @@
       update_ticket: "Demande support mise à jour", update_setting: "Paramètre modifié", export_data: "Données exportées",
       insert_content_items: "Contenu ajouté", update_content_items: "Contenu modifié", delete_content_items: "Contenu supprimé"
     };
-    const state = { context: null, families: [], content: [], tickets: [], logs: [], settings: [] };
+    const state = { context: null, families: [], content: [], tickets: [], logs: [], settings: [], visits: null };
     let pendingCriticalAction = null;
     let selectedPlanFamily = null;
     let selectedCoverFile = null;
@@ -386,6 +399,11 @@
       $("#statChildren").textContent = permissions().families ? state.families.reduce((sum, item) => sum + Number(item.children_count || 0), 0) : "—";
       $("#statPublished").textContent = permissions().content ? state.content.filter(item => item.status === "published").length : "—";
       $("#statTickets").textContent = permissions().support ? state.tickets.filter(item => ["open","in_progress"].includes(item.status)).length : "—";
+      const visits = state.visits || {};
+      $("#visitToday").textContent = permissions().admin ? Number(visits.today || 0).toLocaleString("fr-FR") : "—";
+      $("#visit7Days").textContent = permissions().admin ? Number(visits.days7 || 0).toLocaleString("fr-FR") : "—";
+      $("#visit30Days").textContent = permissions().admin ? Number(visits.days30 || 0).toLocaleString("fr-FR") : "—";
+      $("#visitTotal").textContent = permissions().admin ? Number(visits.total || 0).toLocaleString("fr-FR") : "—";
       const urgent = state.tickets.filter(item => item.priority === "urgent" && !["resolved","closed"].includes(item.status));
       const inactive = state.families.filter(item => !item.is_active);
       $("#attentionList").innerHTML = [
@@ -457,7 +475,8 @@
         access.content ? KMAuth.listContent().then(value => state.content = value) : Promise.resolve(),
         access.support ? KMAuth.listTickets().then(value => state.tickets = value) : Promise.resolve(),
         KMAuth.listAuditLogs().then(value => state.logs = value),
-        access.content ? KMAuth.getSettings().then(value => state.settings = value) : Promise.resolve()
+        access.content ? KMAuth.getSettings().then(value => state.settings = value) : Promise.resolve(),
+        access.admin ? KMAuth.getVisitStats().then(value => state.visits = value) : Promise.resolve()
       ];
       await Promise.all(tasks);
       if (access.families) { renderFamilies(); renderSubscriptions(); }
