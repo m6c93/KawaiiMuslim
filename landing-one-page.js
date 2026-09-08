@@ -367,6 +367,41 @@
   addEventListener('scroll',requestUpdate,{passive:true});
   addEventListener('resize',requestUpdate);
   update();
+
+
+  const offerDeadline=new Date("2026-09-15T00:00:00+02:00").getTime();
+  const offerCountdowns=[...document.querySelectorAll("[data-offer-countdown]")];
+  const offerCountdownShorts=[...document.querySelectorAll("[data-offer-countdown-short]")];
+  const launchCountdowns=[...document.querySelectorAll("[data-launch-countdown]")];
+
+  const updateOfferCountdown=()=>{
+    const remaining=offerDeadline-Date.now();
+    if(remaining<=0){
+      launchCountdowns.forEach(element=>element.hidden=true);
+      offerCountdownShorts.forEach(element=>element.textContent="0 € aujourd’hui");
+      return;
+    }
+    const totalMinutes=Math.max(1,Math.floor(remaining/60000));
+    const days=Math.floor(totalMinutes/1440);
+    const hours=Math.floor((totalMinutes%1440)/60);
+    const minutes=totalMinutes%60;
+    const full=days>0
+      ? `Plus que ${days} jour${days>1?"s":""} et ${hours} h`
+      : hours>0
+        ? `Plus que ${hours} h et ${minutes} min`
+        : `Plus que ${minutes} min`;
+    const short=days>0
+      ? `${days} j restant${days>1?"s":""}`
+      : hours>0
+        ? `${hours} h restantes`
+        : `${minutes} min restantes`;
+    offerCountdowns.forEach(element=>element.textContent=full);
+    offerCountdownShorts.forEach(element=>element.textContent=short);
+  };
+
+  updateOfferCountdown();
+  setInterval(updateOfferCountdown,60000);
+
 })();
 /* Mini atelier de coloriage présenté dans la landing page. */
 document.querySelectorAll("[data-mini-coloring]").forEach(demo => {
