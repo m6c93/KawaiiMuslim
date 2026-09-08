@@ -369,6 +369,7 @@
   update();
 
 
+  const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const offerDeadline=new Date("2026-09-15T00:00:00+02:00").getTime();
   const offerCountdowns=[...document.querySelectorAll("[data-offer-countdown]")];
   const offerCountdownShorts=[...document.querySelectorAll("[data-offer-countdown-short]")];
@@ -477,8 +478,25 @@ document.querySelectorAll("iframe[data-mimi-arabic]").forEach(frame => {
       }
     } catch (error) {}
   };
-  const prepareGame = () => [0,300,900,1800,3200].forEach(delay => setTimeout(activateArabicMode, delay));
+  let modeObserver;
+  let preparationTimers = [];
+  const prepareGame = () => {
+    preparationTimers.forEach(clearTimeout);
+    modeObserver?.disconnect();
+    const doc = frame.contentDocument;
+    if (!doc || !doc.querySelector(".mode-picker")) return;
+    activateArabicMode();
+    // React may hydrate after the iframe load event. Observe the actual mode.
+    modeObserver = new MutationObserver(() => {
+      const letters = doc.querySelector(".mode-picker button.letters");
+      if (letters && !letters.classList.contains("active")) activateArabicMode();
+    });
+    modeObserver.observe(doc.body, {subtree:true, childList:true, attributes:true, attributeFilter:["class"]});
+    preparationTimers = [100,300,900,1800,3200].map(delay => setTimeout(activateArabicMode, delay));
+  };
   frame.addEventListener("load", prepareGame);
+  // A cached frame may already have loaded before the landing script runs.
+  prepareGame();
   replayButton?.addEventListener("click", () => {
     try {
       const gameFrame = frame.contentDocument?.querySelector(".game-frame");
