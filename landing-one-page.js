@@ -397,6 +397,13 @@
         : `${minutes} min restantes`;
     offerCountdowns.forEach(element=>element.textContent=full);
     offerCountdownShorts.forEach(element=>element.textContent=short);
+    if(!reduceMotion){
+      launchCountdowns.forEach(element=>{
+        element.classList.remove("is-ticking");
+        requestAnimationFrame(()=>element.classList.add("is-ticking"));
+        setTimeout(()=>element.classList.remove("is-ticking"),900);
+      });
+    }
   };
 
   updateOfferCountdown();
