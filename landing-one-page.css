@@ -177,14 +177,14 @@
 /* Partie 04 — mini-jeu Mimi en mode lettres arabes */
 .journey-game{padding-bottom:90px;grid-template-columns:minmax(0,1fr) minmax(360px,.82fr)}
 .journey-game .journey-copy{justify-self:center}
-.mimi-game-demo{position:relative;width:min(100%,360px);min-width:0;justify-self:center;padding:68px 10px 34px;border:5px solid #fff;border-radius:25px;background:linear-gradient(145deg,#fff2f7,#eef9f5);box-shadow:0 20px 46px rgba(30,35,82,.14);overflow:hidden}
+.mimi-game-demo{position:relative;width:min(100%,330px);min-width:0;justify-self:center;padding:68px 10px 34px;border:5px solid #fff;border-radius:25px;background:linear-gradient(145deg,#fff2f7,#eef9f5);box-shadow:0 20px 46px rgba(30,35,82,.14);overflow:hidden}
 .mimi-game-heading{position:absolute;z-index:2;top:14px;left:15px;right:15px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;color:var(--ink)}
 .mimi-game-heading span{padding:6px 9px;border-radius:999px;color:#fff;background:var(--pink-deep);font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
 .mimi-game-heading strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:"Baloo 2",sans-serif;font-size:15px}
 .mimi-game-heading button{min-height:34px;padding:6px 10px;border:1px solid #e2d6e8;border-radius:11px;background:#fff;color:#5f477f;font:800 11px "Quicksand",sans-serif;cursor:pointer;box-shadow:0 5px 12px rgba(42,35,91,.08)}
 .mimi-game-heading button:hover,.mimi-game-heading button:focus-visible{border-color:var(--pink);color:var(--pink-deep);outline:none}
-.mimi-game-demo iframe{display:block;width:100%;height:500px;border:0;border-radius:17px;background:#fffaf1}
+.mimi-game-demo iframe{display:block;width:100%;height:425px;border:0;border-radius:17px;background:#fffaf1}
 .mimi-game-hint{position:absolute;left:12px;right:12px;bottom:10px;color:var(--muted);font-size:10px;font-weight:700;text-align:center}
 @media(max-width:900px){.journey-game{grid-template-columns:1fr}.journey-game .journey-copy{justify-self:start}.mimi-game-demo{margin-inline:auto}}
-@media(max-width:720px){.journey-game{padding-bottom:55px}.mimi-game-demo{width:min(100%,330px);padding:61px 6px 31px;border-width:4px;border-radius:21px}.mimi-game-heading{top:11px;left:9px;right:9px;gap:6px}.mimi-game-heading span{padding:5px 7px;font-size:8px}.mimi-game-heading strong{font-size:13px}.mimi-game-heading button{min-height:31px;padding:5px 8px;font-size:10px}.mimi-game-demo iframe{height:445px;border-radius:14px}}
-@media(max-width:380px){.mimi-game-demo{width:min(100%,310px)}.mimi-game-heading strong{font-size:12px}.mimi-game-demo iframe{height:420px}}
+@media(max-width:720px){.journey-game{padding-bottom:55px}.mimi-game-demo{width:min(100%,310px);padding:61px 6px 31px;border-width:4px;border-radius:21px}.mimi-game-heading{top:11px;left:9px;right:9px;gap:6px}.mimi-game-heading span{padding:5px 7px;font-size:8px}.mimi-game-heading strong{font-size:13px}.mimi-game-heading button{min-height:31px;padding:5px 8px;font-size:10px}.mimi-game-demo iframe{height:410px;border-radius:14px}}
+@media(max-width:380px){.mimi-game-demo{width:min(100%,295px)}.mimi-game-heading strong{font-size:12px}.mimi-game-demo iframe{height:395px}}
