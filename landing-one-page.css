@@ -162,3 +162,15 @@
 .creative-demo-label span{color:#fff;background:var(--pink-deep);text-transform:uppercase;letter-spacing:.08em}
 .creative-demo-label strong{color:var(--ink)}
 @media(max-width:720px){.creative-stack-live{min-height:560px}.creative-stack-live .creative-cover{width:150px;top:35px;right:-5px}.creative-stack-live .creative-cover-secondary{width:145px;top:330px;left:-4px}.creative-coloring-demo{top:22px;width:min(350px,88%);height:510px;border-width:5px;border-radius:24px}.creative-demo-label strong{display:none}}
+/* Atelier interactif directement visible dans la landing page */
+.mini-coloring-app{height:100%;display:grid;grid-template-rows:62px minmax(0,1fr);color:#fff;background:linear-gradient(145deg,#17143e,#302968 60%,#211e56)}
+.mini-coloring-top{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 10px;border-bottom:1px solid rgba(255,255,255,.12)}
+.mini-coloring-top b{font-family:"Baloo 2",sans-serif;font-size:16px}.mini-coloring-top small{color:#e8c5d8;font-weight:800}
+.mini-coloring-body{min-height:0;display:grid;grid-template-columns:58px minmax(0,1fr)}
+.mini-palette{display:flex;flex-direction:column;align-items:center;gap:9px;padding:17px 8px;border-right:1px solid rgba(255,255,255,.1);background:rgba(15,13,48,.3)}
+.mini-palette button{width:32px;height:32px;padding:0;border:3px solid rgba(255,255,255,.28);border-radius:50%;background:var(--mini-color);cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.16)}
+.mini-palette button.active{border-color:#fff;transform:scale(1.12)}.mini-palette .mini-clear{margin-top:auto;color:#fff;border-radius:11px;background:rgba(255,255,255,.12);font-size:18px}
+.mini-coloring-paper{position:relative;min-width:0;margin:14px;overflow:hidden;border-radius:15px;background:#fff;touch-action:none}
+.mini-coloring-paper img,.mini-coloring-paper canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.mini-coloring-paper canvas{z-index:2;cursor:crosshair}
+@media(max-width:720px){.mini-coloring-app{grid-template-rows:52px minmax(0,1fr)}.mini-coloring-top{padding:14px 14px 8px}.mini-coloring-body{grid-template-columns:48px minmax(0,1fr)}.mini-palette{gap:7px;padding:12px 6px}.mini-palette button{width:28px;height:28px}.mini-coloring-paper{margin:9px}}
