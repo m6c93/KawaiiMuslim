@@ -430,7 +430,7 @@ document.querySelectorAll("iframe[data-mimi-arabic]").forEach(frame => {
       if (!doc.getElementById("km-landing-mimi-style")) {
         const style = doc.createElement("style");
         style.id = "km-landing-mimi-style";
-        style.textContent = ".game-header,.mode-picker,.instructions{display:none!important}.page-shell{min-height:0!important;padding:4px 0!important}.game-column{width:min(100%,280px)!important;margin:auto!important}.game-frame{min-height:0!important}";
+        style.textContent = "html,body{overflow:hidden!important}.game-header,.mode-picker,.instructions{display:none!important}.page-shell{min-height:0!important;padding:4px 0!important;overflow:hidden!important}.game-column{width:min(100%,232px)!important;margin:auto!important}.game-frame{min-height:0!important}";
         doc.head.appendChild(style);
       }
     } catch (error) {}
