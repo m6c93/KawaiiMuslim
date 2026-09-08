@@ -817,6 +817,12 @@ window.KMAuth = (() => {
       }));
     },
 
+    getVisitStats: async () => {
+      return requireSuccess(await client().rpc("admin_site_visit_stats")) || {
+        today: 0, days7: 0, days30: 0, total: 0
+      };
+    },
+
     getSettings: async () => {
       return requireSuccess(await client().from("site_settings")
         .select("*").order("key", { ascending: true })) || [];
