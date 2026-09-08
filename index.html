@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="landing-one-page.css?v=live-coloring-demo-20260908">
+  <link rel="stylesheet" href="landing-one-page.css?v=mini-coloring-live-20260908">
 </head>
 <body>
   <header class="site-header" data-header>
@@ -152,9 +152,26 @@
           </div>
           <div class="creative-stack creative-stack-live" data-parallax="0.04">
             <figure class="creative-cover interactive-tilt"><img src="brand/assets/coloring-armure-lumiere.png" alt="Aya et l’Armure de Lumière"></figure>
-            <div class="creative-coloring-demo">
+            <div class="creative-coloring-demo" data-mini-coloring>
               <div class="creative-demo-label"><span>Démo réelle</span><strong>Colorie directement ici</strong></div>
-              <iframe src="Coloriage.dc.html?src=builtin-coloring%3Alune-ramadan&amp;title=La%20lune%20du%20Ramadan&amp;guest=1&amp;child=guest-child&amp;embed=1&amp;v=live-coloring-demo-20260908-3" title="Vraie interface de coloriage Kawaii Muslim World" loading="eager"></iframe>
+              <div class="mini-coloring-app">
+                <div class="mini-coloring-top"><b>Kawaii Muslim World</b><small>L’Atelier 🎨</small></div>
+                <div class="mini-coloring-body">
+                  <div class="mini-palette" aria-label="Choisir une couleur">
+                    <button class="active" type="button" data-mini-color="#ef6f9f" style="--mini-color:#ef6f9f" aria-label="Rose"></button>
+                    <button type="button" data-mini-color="#7d72df" style="--mini-color:#7d72df" aria-label="Violet"></button>
+                    <button type="button" data-mini-color="#4a92e8" style="--mini-color:#4a92e8" aria-label="Bleu"></button>
+                    <button type="button" data-mini-color="#4fc0a1" style="--mini-color:#4fc0a1" aria-label="Vert"></button>
+                    <button type="button" data-mini-color="#f0b53f" style="--mini-color:#f0b53f" aria-label="Jaune"></button>
+                    <button type="button" data-mini-color="#ed754d" style="--mini-color:#ed754d" aria-label="Orange"></button>
+                    <button class="mini-clear" type="button" data-mini-clear aria-label="Effacer le coloriage">↶</button>
+                  </div>
+                  <div class="mini-coloring-paper">
+                    <img src="brand/assets/coloring-lune-ramadan.png" alt="Coloriage de la lune du Ramadan">
+                    <canvas aria-label="Zone de coloriage interactive"></canvas>
+                  </div>
+                </div>
+              </div>
             </div>
             <figure class="creative-cover creative-cover-secondary interactive-tilt"><img src="brand/assets/coloring-bubble-tea.png" alt="Bubble Tea Time Hijabi"></figure>
           </div>
@@ -275,6 +292,6 @@
     <small>0 € aujourd’hui</small>
   </a>
 
-  <script src="landing-one-page.js?v=aya-removed-20260908"></script>
+  <script src="landing-one-page.js?v=mini-coloring-live-20260908"></script>
 </body>
 </html>
