@@ -188,3 +188,49 @@
 @media(max-width:900px){.journey-game{grid-template-columns:1fr}.journey-game .journey-copy{justify-self:start}.mimi-game-demo{margin-inline:auto}}
 @media(max-width:720px){.journey-game{padding-bottom:55px}.mimi-game-demo{width:min(100%,310px);padding:61px 6px 31px;border-width:4px;border-radius:21px}.mimi-game-heading{top:11px;left:9px;right:9px;gap:6px}.mimi-game-heading span{padding:5px 7px;font-size:8px}.mimi-game-heading strong{font-size:13px}.mimi-game-heading button{min-height:31px;padding:5px 8px;font-size:10px}.mimi-game-demo iframe{height:410px;border-radius:14px}}
 @media(max-width:380px){.mimi-game-demo{width:min(100%,295px)}.mimi-game-heading strong{font-size:12px}.mimi-game-demo iframe{height:395px}}
+
+/* Offre de lancement : urgence douce, lisible et non intrusive */
+.launch-countdown{
+  width:max-content;
+  max-width:100%;
+  margin:18px 0 20px;
+  padding:10px 14px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  border:1px solid rgba(243,189,72,.46);
+  border-radius:16px;
+  background:linear-gradient(135deg,rgba(255,250,226,.98),rgba(255,240,247,.98));
+  box-shadow:0 10px 28px rgba(31,35,84,.09);
+}
+.launch-countdown-label{
+  padding:5px 9px;
+  border-radius:999px;
+  background:linear-gradient(135deg,#f3bd48,#efa934);
+  color:#fff;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.08em;
+  line-height:1.2;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.launch-countdown strong{
+  color:#5f477f;
+  font-family:"Baloo 2",sans-serif;
+  font-size:16px;
+  line-height:1.1;
+  white-space:nowrap;
+}
+.launch-countdown small{
+  color:var(--muted);
+  font-size:10px;
+  font-weight:700;
+  line-height:1.25;
+}
+.subscribe-float small b{color:#fff6cf;font-weight:900}
+@media(max-width:600px){
+  .launch-countdown{width:100%;align-items:center;flex-wrap:wrap;gap:7px 9px;margin:15px 0 17px;padding:10px 12px}
+  .launch-countdown strong{font-size:15px}
+  .launch-countdown small{width:100%;padding-left:2px}
+}
