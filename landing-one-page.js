@@ -438,6 +438,14 @@ document.querySelectorAll("iframe[data-mimi-arabic]").forEach(frame => {
   const prepareGame = () => [0,300,900,1800,3200].forEach(delay => setTimeout(activateArabicMode, delay));
   frame.addEventListener("load", prepareGame);
   replayButton?.addEventListener("click", () => {
+    try {
+      const gameFrame = frame.contentDocument?.querySelector(".game-frame");
+      if (gameFrame?.classList.contains("status-over") || gameFrame?.classList.contains("status-ready")) {
+        gameFrame.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true, pointerId: 1, pointerType: "mouse" }));
+        gameFrame.focus();
+        return;
+      }
+    } catch (error) {}
     const source = frame.getAttribute("src").split("&replay=")[0];
     frame.setAttribute("src", source + "&replay=" + Date.now());
   });
