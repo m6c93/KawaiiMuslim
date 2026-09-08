@@ -419,17 +419,19 @@ document.querySelectorAll("[data-mini-coloring]").forEach(demo => {
 });
 /* Lance automatiquement Mimi Fly en mode lettres arabes dans la partie 04. */
 document.querySelectorAll("iframe[data-mimi-arabic]").forEach(frame => {
-  frame.addEventListener("load", () => {
+  const activateArabicMode = () => {
     try {
       const doc = frame.contentDocument;
-      const letters = doc?.querySelector(".mode-picker button.letters");
+      if (!doc) return;
+      const letters = doc.querySelector(".mode-picker button.letters");
       if (letters && !letters.classList.contains("active")) letters.click();
-      if (doc && !doc.getElementById("km-landing-mimi-style")) {
+      if (!doc.getElementById("km-landing-mimi-style")) {
         const style = doc.createElement("style");
         style.id = "km-landing-mimi-style";
         style.textContent = ".game-header{display:none!important}.page-shell{min-height:0!important;padding:12px!important}.game-column{max-width:none!important}.mode-picker{display:none!important}.instructions{margin-top:8px!important}.instructions p{font-size:12px!important}.game-frame{min-height:390px!important}";
         doc.head.appendChild(style);
       }
     } catch (error) {}
-  });
+  };
+  frame.addEventListener("load", () => [0,300,900,1800,3200].forEach(delay => setTimeout(activateArabicMode, delay)));
 });
