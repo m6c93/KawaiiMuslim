@@ -90,7 +90,7 @@
     const progressKey=`km-reading:miracles-du-coran:${activeProfile.id||"parent"}`;
     const queryPage=Number(new URLSearchParams(location.search).get("page"));
     const savedPosition=window.KM_BOOK_EMBED?0:Number(localStorage.getItem(progressKey))||0;
-    let position=Math.max(0,Math.min(TOTAL,queryPage||savedPosition)),touchX=0,touchY=0,touchGestureBlocked=false,turning=false,soundOn=true,mobileMode=isBookSinglePage();
+    let position=Math.max(0,Math.min(TOTAL,queryPage||savedPosition)),touchX=0,touchY=0,touchGestureBlocked=false,turning=false,soundOn=true,mobileMode=window.KM_BOOK_EMBED?false:matchMedia("(max-width:700px)").matches;
     const isMobile=()=>matchMedia("(max-width:700px)").matches;
     const isBookSinglePage=()=>!window.KM_BOOK_EMBED&&isMobile();
     const maxPosition=()=>isBookSinglePage()?TOTAL:Math.ceil(TOTAL/2);
