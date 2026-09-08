@@ -89,7 +89,8 @@
     const activeProfile=(()=>{try{return JSON.parse(localStorage.getItem("km-active-profile-v2"))||{}}catch{return{}}})();
     const progressKey=`km-reading:miracles-du-coran:${activeProfile.id||"parent"}`;
     const queryPage=Number(new URLSearchParams(location.search).get("page"));
-    const savedPosition=window.KM_BOOK_EMBED?0:Number(localStorage.getItem(progressKey))||0;\n    let position=Math.max(0,Math.min(TOTAL,queryPage||savedPosition)),touchX=0,touchY=0,touchGestureBlocked=false,turning=false,soundOn=true,mobileMode=matchMedia("(max-width:700px)").matches;
+    const savedPosition=window.KM_BOOK_EMBED?0:Number(localStorage.getItem(progressKey))||0;
+    let position=Math.max(0,Math.min(TOTAL,queryPage||savedPosition)),touchX=0,touchY=0,touchGestureBlocked=false,turning=false,soundOn=true,mobileMode=matchMedia("(max-width:700px)").matches;
     const isMobile=()=>matchMedia("(max-width:700px)").matches;
     const maxPosition=()=>isMobile()?TOTAL:(window.KM_BOOK_EMBED?1+Math.ceil((TOTAL-1)/2):Math.ceil(TOTAL/2));
     const pagesFor=pos=>!pos?[0,0]:isMobile()?[pos,0]:(window.KM_BOOK_EMBED?(pos===1?[0,1]:[(pos-1)*2,(pos-1)*2+1]):[(pos-1)*2+1,(pos-1)*2+2]);
