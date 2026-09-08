@@ -35,7 +35,7 @@
       .progress-wrap{width:min(440px,72vw);grid-template-columns:88px 1fr 68px;gap:9px;margin-top:4px;font-size:11px}.hint{margin-top:2px}
     }
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-    .embed-book .topbar,.embed-book .progress-wrap,.embed-book .hint,.embed-book .drawer,.embed-book .scrim{display:none!important}.embed-book .reader{height:100dvh;padding:12px}.embed-book .book{width:min(calc(100vw - 112px),calc((100dvh - 34px)*2),1200px)}.embed-book body{background:radial-gradient(circle at 50% 0,#343d94,#12194c 72%)}
+    .embed-book .topbar,.embed-book .progress-wrap,.embed-book .hint,.embed-book .drawer,.embed-book .scrim{display:none!important}.embed-book .reader{height:100dvh;padding:8px}.embed-book .book-shell{gap:8px}.embed-book .book{width:min(calc(100vw - 88px),calc((100dvh - 20px)*2),1200px);aspect-ratio:2/1!important}.embed-book .cover-stage{inset:0 0 0 50%;width:auto}.embed-book .spread{grid-template-columns:1fr 1fr}.embed-book .paper{display:block}.embed-book .left-paper{border-radius:13px 2px 2px 13px}.embed-book .right-paper{border-radius:2px 13px 13px 2px}.embed-book .binding{display:block}.embed-book body{background:radial-gradient(circle at 50% 0,#343d94,#12194c 72%)}
   </style>
 </head>
 <body>
@@ -90,12 +90,13 @@
     const progressKey=`km-reading:miracles-du-coran:${activeProfile.id||"parent"}`;
     const queryPage=Number(new URLSearchParams(location.search).get("page"));
     const savedPosition=window.KM_BOOK_EMBED?0:Number(localStorage.getItem(progressKey))||0;
-    let position=Math.max(0,Math.min(TOTAL,queryPage||savedPosition)),touchX=0,touchY=0,touchGestureBlocked=false,turning=false,soundOn=true,mobileMode=matchMedia("(max-width:700px)").matches;
+    let position=Math.max(0,Math.min(TOTAL,queryPage||savedPosition)),touchX=0,touchY=0,touchGestureBlocked=false,turning=false,soundOn=true,mobileMode=isBookSinglePage();
     const isMobile=()=>matchMedia("(max-width:700px)").matches;
-    const maxPosition=()=>isMobile()?TOTAL:(window.KM_BOOK_EMBED?1+Math.ceil((TOTAL-1)/2):Math.ceil(TOTAL/2));
-    const pagesFor=pos=>!pos?[0,0]:isMobile()?[pos,0]:(window.KM_BOOK_EMBED?(pos===1?[0,1]:[(pos-1)*2,(pos-1)*2+1]):[(pos-1)*2+1,(pos-1)*2+2]);
+    const isBookSinglePage=()=>!window.KM_BOOK_EMBED&&isMobile();
+    const maxPosition=()=>isBookSinglePage()?TOTAL:Math.ceil(TOTAL/2);
+    const pagesFor=pos=>!pos?[0,0]:isBookSinglePage()?[pos,0]:[(pos-1)*2+1,(pos-1)*2+2];
     function renderBase(){
-      position=Math.min(position,maxPosition());const[a,b]=pagesFor(position),mobile=isMobile();
+      position=Math.min(position,maxPosition());const[a,b]=pagesFor(position),mobile=isBookSinglePage();
       els.progress.max=maxPosition();els.progress.value=position;els.prev.disabled=position===0;els.next.disabled=position>=maxPosition();els.cover.hidden=position!==0;els.spread.hidden=position===0;els.book.style.aspectRatio=mobile?"1/1":"2/1";
       if(!position)els.label.textContent="Couverture";else{els.left.src=pageSrc(a);els.left.alt=`Page ${a} du livre`;els.right.src=b<=TOTAL?pageSrc(b):"";els.right.alt=b<=TOTAL?`Page ${b} du livre`:"";els.rightPaper.style.visibility=b<=TOTAL?"visible":"hidden";els.leftPaper.classList.toggle("mobile-visible",mobile);els.rightPaper.classList.remove("mobile-visible");els.label.textContent=b&&b<=TOTAL?`Pages ${a}–${b}`:`Page ${a}`}
       try{localStorage.setItem(progressKey,String(position))}catch{}
@@ -105,7 +106,7 @@
     function setEmbedPage(image,page){image.hidden=!page;if(page){image.src=pageSrc(page);image.alt=`Page ${page} du livre`}else{image.removeAttribute("src");image.alt=""}}
     function render(){
       if(!window.KM_BOOK_EMBED){renderBase();return}
-      position=Math.min(position,maxPosition());const[a,b]=pagesFor(position),mobile=isMobile();
+      position=Math.min(position,maxPosition());const[a,b]=pagesFor(position),mobile=isBookSinglePage();
       els.progress.max=maxPosition();els.progress.value=position;els.prev.disabled=position===0;els.next.disabled=position>=maxPosition();els.cover.hidden=position!==0;els.spread.hidden=position===0;els.book.style.aspectRatio=mobile?"1/1":"2/1";
       if(!position)els.label.textContent="Couverture";else{setEmbedPage(els.left,a);setEmbedPage(els.right,b);els.leftPaper.style.visibility="visible";els.rightPaper.style.visibility="visible";els.leftPaper.classList.toggle("mobile-visible",mobile);els.rightPaper.classList.remove("mobile-visible");els.label.textContent=a&&b?`Pages ${a}–${b}`:`Page ${a||b}`}
     }
@@ -116,7 +117,7 @@
       if(target===position||turning)return;
       pageSound();
       const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
-      if(reduce||isMobile()||position===0||target===0){
+      if(reduce||isBookSinglePage()||position===0||target===0){
         turning=true;
         els.book.style.transition="opacity .26s ease";
         els.book.style.opacity="0";
@@ -171,7 +172,7 @@
       leaf.addEventListener("transitionend",done);
       setTimeout(()=>done(),duration+140);
     }
-    function buildThumbs(){if(els.thumbs.children.length)return;const fragment=document.createDocumentFragment();for(let n=1;n<=TOTAL;n++){const btn=document.createElement("button");btn.className="thumb";btn.type="button";btn.innerHTML=`<img loading="lazy" src="${pageSrc(n)}" alt="Page ${n}"><span>${n}</span>`;btn.addEventListener("click",()=>{go(isMobile()?n:Math.ceil(n/2));closeDrawer()});fragment.appendChild(btn)}els.thumbs.appendChild(fragment)}
+    function buildThumbs(){if(els.thumbs.children.length)return;const fragment=document.createDocumentFragment();for(let n=1;n<=TOTAL;n++){const btn=document.createElement("button");btn.className="thumb";btn.type="button";btn.innerHTML=`<img loading="lazy" src="${pageSrc(n)}" alt="Page ${n}"><span>${n}</span>`;btn.addEventListener("click",()=>{go(isBookSinglePage()?n:Math.ceil(n/2));closeDrawer()});fragment.appendChild(btn)}els.thumbs.appendChild(fragment)}
     function openDrawer(){buildThumbs();els.drawer.classList.add("open");els.drawer.setAttribute("aria-hidden","false");els.scrim.hidden=false}function closeDrawer(){els.drawer.classList.remove("open");els.drawer.setAttribute("aria-hidden","true");els.scrim.hidden=true}
     $("openBtn").addEventListener("click",()=>go(1));els.prev.addEventListener("click",()=>go(position-1));els.next.addEventListener("click",()=>go(position+1));els.leftPaper.addEventListener("click",()=>go(position-1));els.rightPaper.addEventListener("click",()=>go(position+1));els.progress.addEventListener("input",event=>go(Number(event.target.value)));$("gridBtn").addEventListener("click",openDrawer);$("closeDrawer").addEventListener("click",closeDrawer);els.scrim.addEventListener("click",closeDrawer);els.sound.addEventListener("click",()=>{soundOn=!soundOn;els.sound.textContent=soundOn?"♪":"×"});$("fullscreenBtn").addEventListener("click",()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());
     document.addEventListener("keydown",event=>{if(event.key==="ArrowRight"||event.key===" ")go(position+1);if(event.key==="ArrowLeft")go(position-1);if(event.key==="Escape")closeDrawer()});
@@ -179,7 +180,7 @@
     els.book.addEventListener("touchmove",event=>{if(event.touches.length>1)touchGestureBlocked=true},{passive:true});
     els.book.addEventListener("touchend",event=>{if(touchGestureBlocked){if(event.touches.length===0)touchGestureBlocked=false;return}const dx=event.changedTouches[0].clientX-touchX,dy=event.changedTouches[0].clientY-touchY;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.35)go(position+(dx<0?1:-1))},{passive:true});
     els.book.addEventListener("touchcancel",()=>{touchGestureBlocked=false},{passive:true});
-    window.addEventListener("resize",()=>{const nextMobile=isMobile();if(nextMobile!==mobileMode){const page=position?(mobileMode?position:(position-1)*2+1):0;position=page?(nextMobile?page:Math.ceil(page/2)):0;mobileMode=nextMobile}render()});render();
+    window.addEventListener("resize",()=>{const nextMobile=isBookSinglePage();if(nextMobile!==mobileMode){const page=position?(mobileMode?position:(position-1)*2+1):0;position=page?(nextMobile?page:Math.ceil(page/2)):0;mobileMode=nextMobile}render()});render();
   </script>
 </body>
 </html>
