@@ -293,3 +293,20 @@
   .subscribe-float{box-sizing:border-box;max-width:calc(100vw - 32px)}
   .subscribe-float.is-visible{transform:translateX(-50%)}
 }
+
+
+/* Mobile — couvertures nettes et respiration du carrousel */
+@media(max-width:720px){
+  .library-runway .runway-heading{margin-bottom:44px}
+  .library-runway .book-cover{width:158px;gap:15px}
+  .library-runway .book-cover img{
+    display:block;
+    width:158px;
+    height:158px;
+    aspect-ratio:1 / 1;
+    object-fit:cover;
+    border-radius:20px;
+    overflow:hidden;
+  }
+  .library-runway .book-cover span{display:block;line-height:1.25;padding-inline:3px}
+}
