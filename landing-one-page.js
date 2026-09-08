@@ -368,3 +368,52 @@
   addEventListener('resize',requestUpdate);
   update();
 })();
+/* Mini atelier de coloriage présenté dans la landing page. */
+document.querySelectorAll("[data-mini-coloring]").forEach(demo => {
+  const canvas = demo.querySelector("canvas");
+  const paper = demo.querySelector(".mini-coloring-paper");
+  const palette = [...demo.querySelectorAll("[data-mini-color]")];
+  const clear = demo.querySelector("[data-mini-clear]");
+  if (!canvas || !paper) return;
+  const context = canvas.getContext("2d");
+  let color = "#ef6f9f";
+  let drawing = false;
+  const resize = () => {
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = paper.getBoundingClientRect();
+    const previous = document.createElement("canvas");
+    previous.width = canvas.width; previous.height = canvas.height;
+    previous.getContext("2d").drawImage(canvas, 0, 0);
+    canvas.width = Math.max(1, Math.round(rect.width * ratio));
+    canvas.height = Math.max(1, Math.round(rect.height * ratio));
+    context.lineCap = "round"; context.lineJoin = "round";
+    if (previous.width) context.drawImage(previous, 0, 0, canvas.width, canvas.height);
+  };
+  const point = event => {
+    const rect = canvas.getBoundingClientRect();
+    return [(event.clientX - rect.left) * canvas.width / rect.width, (event.clientY - rect.top) * canvas.height / rect.height];
+  };
+  const begin = event => {
+    drawing = true; canvas.setPointerCapture?.(event.pointerId);
+    const [x,y] = point(event); context.beginPath(); context.moveTo(x,y);
+  };
+  const move = event => {
+    if (!drawing) return;
+    const [x,y] = point(event);
+    context.strokeStyle = color; context.globalAlpha = .72;
+    context.lineWidth = Math.max(12, canvas.width / 34);
+    context.lineTo(x,y); context.stroke();
+  };
+  const end = () => { drawing = false; context.closePath(); };
+  palette.forEach(button => button.addEventListener("click", () => {
+    color = button.dataset.miniColor;
+    palette.forEach(item => item.classList.toggle("active", item === button));
+  }));
+  clear?.addEventListener("click", () => context.clearRect(0,0,canvas.width,canvas.height));
+  canvas.addEventListener("pointerdown", begin);
+  canvas.addEventListener("pointermove", move);
+  canvas.addEventListener("pointerup", end);
+  canvas.addEventListener("pointercancel", end);
+  resize();
+  window.addEventListener("resize", resize);
+});
