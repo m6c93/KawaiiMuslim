@@ -368,39 +368,3 @@
   addEventListener('resize',requestUpdate);
   update();
 })();
-
-
-/* Aya guide la visite et le fond étoilé suit doucement le défilement. */
-(()=>{
-  const guide=document.querySelector('[data-aya-guide]');
-  const message=document.querySelector('[data-aya-message]');
-  const sparkles=document.querySelector('.page-parallax-sparkles');
-  if(!guide||!message)return;
-  const stops=[
-    {selector:'#apercu-gratuit',text:'Tu peux déjà découvrir gratuitement ✨'},
-    {selector:'.library-runway',text:'Regarde tous les livres qui t’attendent 📚'},
-    {selector:'.journey-step[data-chapter="01"]',text:'Clique sur une page pour feuilleter le vrai livre'},
-    {selector:'.journey-step[data-chapter="02"]',text:'Ici, les enfants créent et colorient 🎨'},
-    {selector:'.journey-step[data-chapter="03"]',text:'Un espace doux pour apprendre les invocations'},
-    {selector:'#famille',text:'Chaque enfant garde sa progression ⭐'},
-    {selector:'#tarifs',text:'7 jours gratuits · 0 € aujourd’hui'}
-  ].map(item=>({...item,node:document.querySelector(item.selector)})).filter(item=>item.node);
-  const quietZones=[document.querySelector('.sample-real-reader'),document.querySelector('#tarifs'),document.querySelector('.final-cta'),document.querySelector('footer')].filter(Boolean);
-  let current=-1,ticking=false;
-  const update=()=>{
-    const focus=innerHeight*.52;
-    let next=-1,best=Infinity;
-    stops.forEach((stop,index)=>{const rect=stop.node.getBoundingClientRect();const distance=Math.abs((rect.top+Math.min(rect.height,innerHeight)*.38)-focus);if(rect.bottom>0&&rect.top<innerHeight&&distance<best){best=distance;next=index}});
-    const blocked=quietZones.some(node=>{const rect=node.getBoundingClientRect();return rect.top<innerHeight*.82&&rect.bottom>innerHeight*.18});
-    const visible=scrollY>Math.min(260,innerHeight*.28)&&!blocked;
-    guide.classList.toggle('is-visible',visible);
-    guide.classList.toggle('is-resting',blocked);
-    guide.setAttribute('aria-hidden',visible?'false':'true');
-    if(next!==-1&&next!==current){current=next;message.textContent=stops[next].text;guide.classList.remove('message-pop');void guide.offsetWidth;guide.classList.add('message-pop')}
-    if(sparkles&&!matchMedia('(prefers-reduced-motion: reduce)').matches)sparkles.style.setProperty('--spark-y',`${Math.round(scrollY*-.055)}px`);
-  };
-  const requestUpdate=()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{update();ticking=false})};
-  addEventListener('scroll',requestUpdate,{passive:true});
-  addEventListener('resize',requestUpdate);
-  update();
-})();
