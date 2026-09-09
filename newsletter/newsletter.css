@@ -28,3 +28,5 @@
 @media(max-width:760px){.newsletter-lab-head{grid-template-columns:1fr;padding:21px;text-align:center}.lab-orbit{margin:auto}.lab-steps{justify-content:center}.composer-meta{align-items:flex-start;gap:8px}}
 @media(max-width:430px){.lab-steps{display:grid;grid-template-columns:repeat(3,1fr);width:100%}.lab-steps span{min-width:0}.composer-meta{display:grid}.sending-space{transform:scale(.88);margin-bottom:-6px}}
 
+
+.delivery-report{margin-top:12px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:#fff;font-size:13px;line-height:1.5}.delivery-report h4{margin:0 0 8px;font-size:14px}.delivery-report ul{margin:8px 0 0;padding-left:18px}.delivery-report li{margin:4px 0}.delivery-report .ok{color:#226d5a;font-weight:800}.delivery-report .ko{color:#a13f54;font-weight:800}.delivery-report small{color:var(--muted)}
