@@ -31,7 +31,7 @@ const SHOPIFY_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN || ""; const SHOPIFY_CLIEN
 const engagementCache = new Map();
 
 const json = (res, status, data) => { res.statusCode=status; res.setHeader("Content-Type","application/json; charset=utf-8"); res.setHeader("Cache-Control","no-store"); res.end(JSON.stringify(data)); };
-const readBody = req => new Promise((resolve,reject)=>{let raw="";req.on("data",chunk=>{raw+=chunk;if(raw.length>2_000_000)reject(new Error("Requête trop volumineuse."));});req.on("end",()=>{try{resolve(JSON.parse(raw||"{}"));}catch(error){reject(new Error("Données invalides."));}});req.on("error",reject);});
+const readBody = req => new Promise((resolve,reject)=>{let raw="";req.on("data",chunk=>{raw+=chunk;if(raw.length>12_000_000)reject(new Error("Requête trop volumineuse."));});req.on("end",()=>{try{resolve(JSON.parse(raw||"{}"));}catch(error){reject(new Error("Données invalides."));}});req.on("error",reject);});
 const decodeJwt = token => { try { return JSON.parse(Buffer.from(token.split(".")[1],"base64url").toString("utf8")); } catch (_) { return {}; } };
 const cleanEmail = value => String(value||"").trim().toLowerCase();
 const validEmail = value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail(value));
@@ -45,7 +45,7 @@ async function authenticateAdmin(req){
   const profileResponse=await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${encodeURIComponent(user.id)}&select=role,is_active&limit=1`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${token}`}});
   const profiles=profileResponse.ok?await profileResponse.json():[]; const profile=profiles[0];
   if(!profile||profile.role!=="admin"||!profile.is_active)throw Object.assign(new Error("Accès administratrice requis."),{status:403});
-  return user;
+  return {...user,token};
 }
 async function brevo(path,options={}){
   if(!BREVO_KEY)throw Object.assign(new Error("Le service d’envoi doit encore être connecté."),{status:503});
@@ -76,12 +76,49 @@ function normalizeEmailHtml(value){
     .replace(/(src|background|poster)=(["'])(\/(?!\/)[^"']*)\2/gi,(_,attr,quote,url)=>`${attr}=${quote}https://www.kawaiimuslimworld.com${url}${quote}`)
     .replace(/(src|background|poster)=(["'])(?!https?:|cid:|data:|\/\/)([^"']+)\2/gi,(_,attr,quote,url)=>`${attr}=${quote}https://www.kawaiimuslimworld.com/${url.replace(/^\.\//,"")}${quote}`);
 }
-function validateCampaign(body){const subject=safeText(body.subject,60),html=normalizeEmailHtml(body.html),name=safeText(body.name||subject,120),preheader=safeText(body.preheader,90);if(!subject||!html||html.length>250000)throw Object.assign(new Error("Le contenu de la campagne est incomplet."),{status:400});if(/(?:src|background|poster)=(["'])(?:blob:|file:)/i.test(html))throw Object.assign(new Error("Une image locale ne peut pas être envoyée. Utilise une image déjà publiée sur le site."),{status:400});return{subject,html,name,preheader};}
+const IMAGE_BUCKET="newsletter-images";
+const IMAGE_MIME={jpeg:"image/jpeg",jpg:"image/jpeg",png:"image/png",webp:"image/webp",gif:"image/gif"};
+const imageAttrRe=/(src|background|poster)=(["'])([^"']*)\2/gi;
+async function uploadInlineImage(dataUrl,token,index){
+  const match=/^data:image\/(jpeg|jpg|png|webp|gif);base64,([a-z0-9+/=\s]+)$/i.exec(dataUrl);
+  if(!match)throw Object.assign(new Error("Une image intégrée à l’e-mail a un format non pris en charge (JPG, PNG, WEBP ou GIF uniquement)."),{status:400});
+  const mime=IMAGE_MIME[match[1].toLowerCase()],bytes=Buffer.from(match[2].replace(/\s+/g,""),"base64");
+  if(!bytes.length||bytes.length>5*1024*1024)throw Object.assign(new Error("Une image de l’e-mail dépasse 5 Mo. Réduis-la avant l’import."),{status:400});
+  const hash=require("crypto").createHash("sha1").update(bytes).digest("hex").slice(0,16);
+  const path=`${new Date().toISOString().slice(0,10)}/${hash}-${index}.${mime.split("/")[1]}`;
+  const response=await fetch(`${SUPABASE_URL}/storage/v1/object/${IMAGE_BUCKET}/${path}`,{method:"POST",headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${token}`,"Content-Type":mime,"x-upsert":"true","cache-control":"public, max-age=31536000"},body:bytes});
+  if(!response.ok){const data=await response.json().catch(()=>({}));throw Object.assign(new Error(`Impossible d’héberger une image de l’e-mail (${data.message||data.error||response.status}). Vérifie que le bucket « ${IMAGE_BUCKET} » existe dans Supabase.`),{status:502});}
+  return `${SUPABASE_URL}/storage/v1/object/public/${IMAGE_BUCKET}/${path}`;
+}
+async function rehostImages(html,token){
+  const uploads=new Map(); let index=0; const matches=[];
+  html.replace(imageAttrRe,(full,attr,quote,url)=>{if(/^data:/i.test(url))matches.push(url);return full;});
+  for(const url of matches){if(uploads.has(url))continue;uploads.set(url,await uploadInlineImage(url,token,++index));}
+  const out=html.replace(imageAttrRe,(full,attr,quote,url)=>uploads.has(url)?`${attr}=${quote}${uploads.get(url)}${quote}`:full);
+  return {html:out,rehosted:uploads.size};
+}
+async function checkRemoteImages(html){
+  const urls=new Set(); html.replace(imageAttrRe,(full,attr,quote,url)=>{if(/^https?:\/\//i.test(url))urls.add(url);return full;});
+  const missing=[];
+  await Promise.all([...urls].slice(0,40).map(async url=>{try{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),6000);let response=await fetch(url,{method:"HEAD",redirect:"follow",signal:controller.signal});if(response.status===405||response.status===403)response=await fetch(url,{method:"GET",redirect:"follow",signal:controller.signal});clearTimeout(timer);if(!response.ok)missing.push(url);}catch(_){missing.push(url);}}));
+  return missing;
+}
+async function validateCampaign(body,token){
+  const subject=safeText(body.subject,60),name=safeText(body.name||subject,120),preheader=safeText(body.preheader,90);
+  let html=normalizeEmailHtml(body.html);
+  if(!subject||!html)throw Object.assign(new Error("Le contenu de la campagne est incomplet."),{status:400});
+  if(/(?:src|background|poster)=(["'])(?:blob:|file:)/i.test(html))throw Object.assign(new Error("Une image locale ne peut pas être envoyée. Utilise une image déjà publiée sur le site."),{status:400});
+  const rehost=await rehostImages(html,token); html=rehost.html;
+  if(html.length>250000)throw Object.assign(new Error("L’e-mail est trop lourd (250 Ko max une fois les images hébergées). Allège le HTML."),{status:400});
+  const missingImages=await checkRemoteImages(html);
+  if(missingImages.length)throw Object.assign(new Error(`Ces images sont introuvables et n’apparaîtraient pas chez tes abonnées : ${missingImages.slice(0,3).map(u=>u.split("/").pop()).join(", ")}. Corrige les liens avant l’envoi.`),{status:400});
+  return{subject,html,name,preheader,rehosted:rehost.rehosted};
+}
 
 module.exports=async(req,res)=>{
   if(req.method!=="POST")return json(res,405,{error:"Méthode non autorisée."});
   try{
-    await authenticateAdmin(req); const body=await readBody(req); const action=body.action;
+    const admin=await authenticateAdmin(req); const body=await readBody(req); const action=body.action;
     if(action==="status")return json(res,200,{brevo:!!(BREVO_KEY&&BREVO_LIST_ID),sender:!!(BREVO_KEY&&BREVO_LIST_ID&&SENDER_EMAIL),formspree:!!FORMSPREE_TOKEN,shopify:!!(SHOPIFY_STORE&&(SHOPIFY_TOKEN||(SHOPIFY_CLIENT_ID&&SHOPIFY_CLIENT_SECRET))),senderEmail:SENDER_EMAIL});
     if(action==="importContacts")return json(res,200,await importContacts(body.contacts,"CSV"));
     if(action==="syncFormspree"){const contacts=await formspreeContacts();return json(res,200,await importContacts(contacts,"Formspree"));}
@@ -89,8 +126,8 @@ module.exports=async(req,res)=>{
     if(action==="contacts"){if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});const data=await brevo(`/contacts/lists/${BREVO_LIST_ID}/contacts?limit=500&offset=0&sort=desc`);const contacts=(data.contacts||[]).filter(item=>!item.emailBlacklisted&&!(item.listUnsubscribed||[]).includes(BREVO_LIST_ID));return json(res,200,{contacts,count:contacts.length,total:data.count||0});}
     if(action==="campaigns"){const data=await brevo("/emailCampaigns?type=classic&limit=30&offset=0&sort=desc");return json(res,200,{campaigns:data.campaigns||[],count:data.count||0});}
     if(action==="campaignEngagement"){if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});return json(res,200,await campaignEngagement(body.campaignId));}
-    if(action==="sendTest"){const campaign=validateCampaign(body),email=cleanEmail(body.email);if(!validEmail(email))throw Object.assign(new Error("Adresse de test invalide."),{status:400});const data=await brevo("/smtp/email",{method:"POST",body:JSON.stringify({sender:{name:SENDER_NAME,email:SENDER_EMAIL},to:[{email}],replyTo:{email:SENDER_EMAIL,name:SENDER_NAME},subject:`[TEST] ${campaign.subject}`,htmlContent:campaign.html.replace(/{{\s*unsubscribe\s*}}/gi,"https://www.kawaiimuslimworld.com/"),headers:{"X-Mailin-trackClick":"1","X-Mailin-trackOpen":"1"}})});return json(res,200,{messageId:data.messageId});}
-    if(action==="sendCampaign"){if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});const campaign=validateCampaign(body);const created=await brevo("/emailCampaigns",{method:"POST",body:JSON.stringify({name:campaign.name,subject:campaign.subject,previewText:campaign.preheader,sender:{name:SENDER_NAME,email:SENDER_EMAIL},replyTo:SENDER_EMAIL,type:"classic",htmlContent:campaign.html,recipients:{listIds:[BREVO_LIST_ID]},inlineImageActivation:true,mirrorActive:false,trackLinks:"enabled"})});await brevo(`/emailCampaigns/${created.id}/sendNow`,{method:"POST"});return json(res,200,{campaignId:created.id});}
+    if(action==="sendTest"){const campaign=await validateCampaign(body,admin.token),email=cleanEmail(body.email);if(!validEmail(email))throw Object.assign(new Error("Adresse de test invalide."),{status:400});const data=await brevo("/smtp/email",{method:"POST",body:JSON.stringify({sender:{name:SENDER_NAME,email:SENDER_EMAIL},to:[{email}],replyTo:{email:SENDER_EMAIL,name:SENDER_NAME},subject:`[TEST] ${campaign.subject}`,htmlContent:campaign.html.replace(/{{\s*unsubscribe\s*}}/gi,"https://www.kawaiimuslimworld.com/"),headers:{"X-Mailin-trackClick":"1","X-Mailin-trackOpen":"1"}})});return json(res,200,{messageId:data.messageId,rehosted:campaign.rehosted});}
+    if(action==="sendCampaign"){if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});const campaign=await validateCampaign(body,admin.token);const created=await brevo("/emailCampaigns",{method:"POST",body:JSON.stringify({name:campaign.name,subject:campaign.subject,previewText:campaign.preheader,sender:{name:SENDER_NAME,email:SENDER_EMAIL},replyTo:SENDER_EMAIL,type:"classic",htmlContent:campaign.html,recipients:{listIds:[BREVO_LIST_ID]},inlineImageActivation:false,mirrorActive:true,trackLinks:"enabled"})});await brevo(`/emailCampaigns/${created.id}/sendNow`,{method:"POST"});return json(res,200,{campaignId:created.id,rehosted:campaign.rehosted});}
     return json(res,400,{error:"Action inconnue."});
   }catch(error){console.error("newsletter-api",error);return json(res,error.status||500,{error:error.message||"Erreur interne."});}
 };

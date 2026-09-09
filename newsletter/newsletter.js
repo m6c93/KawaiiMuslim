@@ -125,9 +125,9 @@
   };
   const importEmailHtml = file => {
     if (!file) return;
-    if (!/\.html?$/i.test(file.name) || file.size > 1500000) {
+    if (!/\.html?$/i.test(file.name) || file.size > 10000000) {
       $("#emailHtmlFile").value = "";
-      return showNotice("Choisis un fichier HTML de moins de 1,5 Mo.", "error");
+      return showNotice("Choisis un fichier HTML de moins de 10 Mo.", "error");
     }
     const reader = new FileReader();
     reader.onload = () => {
@@ -138,7 +138,8 @@
       $("#importedEmailState").hidden = false;
       $$(".template").forEach(button => button.classList.remove("active"));
       updatePreview();
-      showNotice(`L’e-mail « ${file.name} » est prêt pour le test et l’envoi.`, "success");
+      const embedded = (html.match(/(?:src|background|poster)=["']data:image/gi) || []).length;
+      showNotice(embedded ? `L’e-mail « ${file.name} » est prêt. Ses ${embedded} image(s) intégrée(s) seront hébergées automatiquement à l’envoi pour s’afficher chez tes abonnées.` : `L’e-mail « ${file.name} » est prêt pour le test et l’envoi.`, "success");
     };
     reader.onerror = () => showNotice("Impossible de lire ce fichier.", "error");
     reader.readAsText(file);
@@ -165,14 +166,14 @@
   const campaignPayload = () => ({ subject:$("#subject").value.trim(), preheader:$("#preheader").value.trim(), html:emailHtml(), name:`${$("#subject").value.trim()} — ${new Date().toLocaleDateString("fr-FR")}` });
   const sendTest = async () => {
     const button=$("#sendTest"), email=$("#testEmail").value.trim(); if(!email) return showNotice("Indique l’adresse qui doit recevoir le test.","error");
-    setBusy(button,true,"Envoi du test…"); showSendingLab("Ton test voyage…", `Direction ${email}`); try { await api("sendTest",{...campaignPayload(),email}); showNotice(`E-mail test envoyé à ${email}.`,"success"); } catch(error){showNotice(error.message,"error");} finally{hideSendingLab();setBusy(button,false);}
+    setBusy(button,true,"Envoi du test…"); showSendingLab("Ton test voyage…", `Direction ${email}`); try { const data=await api("sendTest",{...campaignPayload(),email}); showNotice(`E-mail test envoyé à ${email}${data.rehosted?` (${data.rehosted} image(s) hébergée(s) en ligne)`:""}.`,"success"); } catch(error){showNotice(error.message,"error");} finally{hideSendingLab();setBusy(button,false);}
   };
   const openConfirmation = () => {
     const form=$("#campaignForm"); if(!form.reportValidity())return; $("#confirmText").textContent=`La campagne « ${$("#subject").value.trim()} » sera envoyée à tous les contacts actifs de la liste.`; $("#consentCheck").checked=false; $("#confirmSend").disabled=true; $("#confirmModal").hidden=false;
   };
   const sendCampaign = async () => {
     const button=$("#confirmSend"); setBusy(button,true,"Envoi en cours…"); showSendingLab("Ta campagne décolle…", "Les messages partent vers toutes les familles inscrites.");
-    try { const data=await api("sendCampaign",campaignPayload()); $("#confirmModal").hidden=true; showNotice(`Campagne lancée avec succès${data.campaignId?` (n° ${data.campaignId})`:""}.`,"success"); switchView("history"); }
+    try { const data=await api("sendCampaign",campaignPayload()); $("#confirmModal").hidden=true; showNotice(`Campagne lancée avec succès${data.campaignId?` (n° ${data.campaignId})`:""}${data.rehosted?`, ${data.rehosted} image(s) hébergée(s) en ligne`:""}.`,"success"); switchView("history"); }
     catch(error){showNotice(error.message,"error");} finally{hideSendingLab();setBusy(button,false);}
   };
   const loadCampaigns = async () => {
