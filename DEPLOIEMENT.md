@@ -46,3 +46,12 @@ pour 100 clients) :
 
 Un développeur peut faire ce branchement en quelques jours sans toucher au
 design : toute l'interface est déjà prête.
+
+## Newsletter : images des e-mails
+
+Les clients mail (Gmail, Outlook, Apple Mail) n’affichent pas les images intégrées en base64 dans le HTML.
+Le studio newsletter héberge donc automatiquement ces images sur Supabase Storage avant l’envoi
+et vérifie que chaque image en ligne est bien accessible.
+
+À faire une fois : exécuter `supabase/newsletter-images.sql` dans l’éditeur SQL de Supabase
+pour créer le bucket public `newsletter-images` (réservé aux administratrices en écriture).
