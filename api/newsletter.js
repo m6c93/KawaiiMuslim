@@ -126,6 +126,7 @@ module.exports=async(req,res)=>{
     if(action==="contacts"){if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});const data=await brevo(`/contacts/lists/${BREVO_LIST_ID}/contacts?limit=500&offset=0&sort=desc`);const contacts=(data.contacts||[]).filter(item=>!item.emailBlacklisted&&!(item.listUnsubscribed||[]).includes(BREVO_LIST_ID));return json(res,200,{contacts,count:contacts.length,total:data.count||0});}
     if(action==="campaigns"){const data=await brevo("/emailCampaigns?type=classic&limit=30&offset=0&sort=desc");return json(res,200,{campaigns:data.campaigns||[],count:data.count||0});}
     if(action==="campaignEngagement"){if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});return json(res,200,await campaignEngagement(body.campaignId));}
+    if(action==="deliveryCheck"){const email=cleanEmail(body.email);if(!validEmail(email))throw Object.assign(new Error("Adresse invalide."),{status:400});return json(res,200,await deliveryCheck(email));}
     if(action==="sendTest"){const campaign=await validateCampaign(body,admin.token),email=cleanEmail(body.email);if(!validEmail(email))throw Object.assign(new Error("Adresse de test invalide."),{status:400});const data=await brevo("/smtp/email",{method:"POST",body:JSON.stringify({sender:{name:SENDER_NAME,email:SENDER_EMAIL},to:[{email}],replyTo:{email:SENDER_EMAIL,name:SENDER_NAME},subject:`[TEST] ${campaign.subject}`,htmlContent:campaign.html.replace(/{{\s*unsubscribe\s*}}/gi,"https://www.kawaiimuslimworld.com/"),headers:{"X-Mailin-trackClick":"1","X-Mailin-trackOpen":"1"}})});return json(res,200,{messageId:data.messageId,rehosted:campaign.rehosted});}
     if(action==="sendCampaign"){if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});const campaign=await validateCampaign(body,admin.token);const created=await brevo("/emailCampaigns",{method:"POST",body:JSON.stringify({name:campaign.name,subject:campaign.subject,previewText:campaign.preheader,sender:{name:SENDER_NAME,email:SENDER_EMAIL},replyTo:SENDER_EMAIL,type:"classic",htmlContent:campaign.html,recipients:{listIds:[BREVO_LIST_ID]},inlineImageActivation:false,mirrorActive:true,trackLinks:"enabled"})});await brevo(`/emailCampaigns/${created.id}/sendNow`,{method:"POST"});return json(res,200,{campaignId:created.id,rehosted:campaign.rehosted});}
     return json(res,400,{error:"Action inconnue."});
@@ -151,6 +152,17 @@ async function campaignEngagement(campaignId){
   }
   rows.sort((a,b)=>Number(b.clicked)-Number(a.clicked)||Number(b.opened)-Number(a.opened)||a.email.localeCompare(b.email));
   const data={campaignId:id,contacts:rows,count:rows.length,limited:contacts.length>=500}; engagementCache.set(id,{data,expiresAt:Date.now()+120000}); return data;
+}
+const EVENT_LABELS={requests:"reçu par Brevo",delivered:"délivré ✅",opened:"ouvert ✅",clicks:"cliqué ✅",softBounces:"rejeté temporairement (soft bounce)",hardBounces:"rejeté définitivement (hard bounce)",blocked:"bloqué par Brevo",invalid:"adresse invalide",deferred:"différé par la messagerie",spam:"signalé comme spam",unsubscribed:"désinscrit",error:"erreur d’envoi"};
+async function deliveryCheck(email){
+  const [events,senders]=await Promise.all([
+    brevo(`/smtp/statistics/events?email=${encodeURIComponent(email)}&limit=30&days=7&sort=desc`).catch(error=>({_error:error.message})),
+    brevo("/senders").catch(error=>({_error:error.message}))
+  ]);
+  const senderList=senders.senders||[];const sender=senderList.find(item=>cleanEmail(item.email)===cleanEmail(SENDER_EMAIL));
+  const domain=SENDER_EMAIL.split("@")[1]||"";
+  const rows=(events.events||[]).map(item=>({date:item.date,event:item.event,label:EVENT_LABELS[item.event]||item.event,subject:safeText(item.subject,120),reason:safeText(item.reason,300),from:item.from}));
+  return {email,senderEmail:SENDER_EMAIL,senderDomain:domain,senderKnown:!!sender,senderActive:!!(sender&&sender.active),sendersError:senders._error||"",eventsError:events._error||"",events:rows};
 }
 async function ensureContactAttribute(name){
   const current=await brevo("/contacts/attributes");

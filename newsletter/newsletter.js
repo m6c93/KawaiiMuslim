@@ -168,6 +168,22 @@
     const button=$("#sendTest"), email=$("#testEmail").value.trim(); if(!email) return showNotice("Indique l’adresse qui doit recevoir le test.","error");
     setBusy(button,true,"Envoi du test…"); showSendingLab("Ton test voyage…", `Direction ${email}`); try { const data=await api("sendTest",{...campaignPayload(),email}); showNotice(`E-mail test envoyé à ${email}${data.rehosted?` (${data.rehosted} image(s) hébergée(s) en ligne)`:""}.`,"success"); } catch(error){showNotice(error.message,"error");} finally{hideSendingLab();setBusy(button,false);}
   };
+  const checkDelivery = async () => {
+    const button=$("#checkDelivery"), email=$("#testEmail").value.trim(), box=$("#deliveryReport"); if(!email) return showNotice("Indique l’adresse du test à vérifier.","error");
+    setBusy(button,true,"Vérification…");
+    try {
+      const d=await api("deliveryCheck",{email}); box.hidden=false;
+      const senderLine = d.sendersError ? `<li class="ko">Impossible de lire les expéditeurs Brevo : ${escapeHtml(d.sendersError)}</li>`
+        : !d.senderKnown ? `<li class="ko">L’expéditeur ${escapeHtml(d.senderEmail)} n’existe pas dans Brevo. Ajoute-le dans Brevo → Expéditeurs et domaines, puis valide-le.</li>`
+        : !d.senderActive ? `<li class="ko">L’expéditeur ${escapeHtml(d.senderEmail)} n’est pas encore validé dans Brevo. Clique sur le lien de validation reçu, ou authentifie le domaine ${escapeHtml(d.senderDomain)}.</li>`
+        : `<li class="ok">Expéditeur ${escapeHtml(d.senderEmail)} validé.</li>`;
+      const eventsLine = d.eventsError ? `<li class="ko">Impossible de lire les logs Brevo : ${escapeHtml(d.eventsError)}</li>`
+        : !d.events.length ? `<li class="ko">Aucun envoi vers ${escapeHtml(email)} dans les logs Brevo des 7 derniers jours. Le test n’est jamais parti : réessaie « M’envoyer un test » et regarde le message affiché.</li>`
+        : d.events.slice(0,8).map(e=>`<li class="${/delivered|opened|clicks|requests/.test(e.event)?"ok":"ko"}">${escapeHtml(new Date(e.date).toLocaleString("fr-FR"))} — ${escapeHtml(e.label)}${e.subject?` <small>« ${escapeHtml(e.subject)} »</small>`:""}${e.reason?`<br><small>Motif : ${escapeHtml(e.reason)}</small>`:""}</li>`).join("");
+      const delivered=d.events.some(e=>e.event==="delivered");
+      box.innerHTML=`<h4>Livraison vers ${escapeHtml(email)}</h4><ul>${senderLine}${eventsLine}</ul>${delivered?`<p class="ok">Brevo confirme la livraison : si tu ne vois rien, regarde le dossier Spam et l’onglet Promotions de Gmail.</p>`:""}`;
+    } catch(error){ showNotice(error.message,"error"); } finally{ setBusy(button,false); }
+  };
   const openConfirmation = () => {
     const form=$("#campaignForm"); if(!form.reportValidity())return; $("#confirmText").textContent=`La campagne « ${$("#subject").value.trim()} » sera envoyée à tous les contacts actifs de la liste.`; $("#consentCheck").checked=false; $("#confirmSend").disabled=true; $("#confirmModal").hidden=false;
   };
@@ -224,7 +240,7 @@
   $$(".composer-form input,.composer-form textarea").forEach(input=>input.addEventListener("input",updatePreview));
   $$(".template").forEach(button=>button.addEventListener("click",()=>applyTemplate(button.dataset.template)));
   $$(".device").forEach(button=>button.addEventListener("click",()=>{$$(".device").forEach(item=>item.classList.toggle("active",item===button));$(".email-preview-wrap").classList.toggle("mobile",button.dataset.device==="mobile");}));
-  $("#sendTest").addEventListener("click",sendTest); $("#campaignForm").addEventListener("submit",event=>{event.preventDefault();openConfirmation();});
+  $("#sendTest").addEventListener("click",sendTest); $("#checkDelivery").addEventListener("click",checkDelivery); $("#campaignForm").addEventListener("submit",event=>{event.preventDefault();openConfirmation();});
   $("#consentCheck").addEventListener("change",event=>$("#confirmSend").disabled=!event.target.checked); $("#cancelSend").addEventListener("click",()=>$("#confirmModal").hidden=true); $("#confirmSend").addEventListener("click",sendCampaign);
   $("#refreshCampaigns").addEventListener("click",loadCampaigns);
   $("#campaignList").addEventListener("click",event=>{const button=event.target.closest(".campaign-detail");if(button)loadEngagement(button);});
