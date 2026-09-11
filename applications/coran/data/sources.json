@@ -1,0 +1,47 @@
+{
+  "retrievedAt": "2026-09-11T15:34:41.760Z",
+  "surahs": 114,
+  "verses": 6236,
+  "editions": [
+    {
+      "edition": "quran-uthmani",
+      "sha256": "0df03e1d6da4fc8138208fec1688f2b416f0dd4ebbd514179f3e5e0fbaf4195f",
+      "metadata": {
+        "identifier": "quran-uthmani",
+        "language": "ar",
+        "name": "القرآن الكريم برسم العثماني (uthmani)",
+        "englishName": "Uthmani",
+        "format": "text",
+        "type": "quran"
+      }
+    },
+    {
+      "edition": "fr.hamidullah",
+      "sha256": "a4d6ee05b614c6dbd9175046d1becc97f0ebde746832833adbeee1feb1e5ff98",
+      "metadata": {
+        "identifier": "fr.hamidullah",
+        "language": "fr",
+        "name": "Hamidullah",
+        "englishName": "Muhammad Hamidullah",
+        "format": "text",
+        "type": "translation"
+      }
+    },
+    {
+      "edition": "ar.hudhaify",
+      "sha256": "dc525e85b80c34c9882eca722385e5683dfea5e84751ab8b719a9debfd01580e",
+      "metadata": {
+        "identifier": "ar.hudhaify",
+        "language": "ar",
+        "name": "علي بن عبدالرحمن الحذيفي",
+        "englishName": "Hudhaify",
+        "format": "audio",
+        "type": "versebyverse"
+      }
+    }
+  ],
+  "textLicense": "https://tanzil.net/docs/Text_License",
+  "serviceTerms": "https://alquran.cloud/terms-and-conditions",
+  "cdnDocs": "https://alquran.cloud/cdn",
+  "audioMode": "Direct streaming; no audio files copied to this project; rights remain with reciters."
+}

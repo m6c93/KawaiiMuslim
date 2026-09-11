@@ -316,6 +316,47 @@ window.KMAuth = (() => {
       return requireSuccess(await query) || [];
     },
 
+    listQuranProgress: async childId => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      let query = client().from("quran_verse_progress").select("child_profile_id,surah,verse,practiced_at").eq("parent_id", session.user.id);
+      if (childId) query = query.eq("child_profile_id", childId);
+      return requireSuccess(await query) || [];
+    },
+
+    saveQuranVerseProgress: async ({ childId, surah, verse }) => {
+      const session = await getSession();
+      if (!session || !childId) throw new Error("Profil enfant requis.");
+      return requireSuccess(await client().from("quran_verse_progress").upsert({
+        child_profile_id: childId,
+        parent_id: session.user.id,
+        surah: Number(surah),
+        verse: Number(verse),
+        practiced_at: new Date().toISOString()
+      }, { onConflict: "child_profile_id,surah,verse" }).select().single());
+    },
+
+    listQuranValidations: async childId => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      let query = client().from("quran_surah_validations").select("child_profile_id,surah,validated_at").eq("parent_id", session.user.id);
+      if (childId) query = query.eq("child_profile_id", childId);
+      return requireSuccess(await query) || [];
+    },
+
+    setQuranSurahValidation: async ({ childId, surah, validated }) => {
+      const session = await getSession();
+      if (!session || !childId) throw new Error("Profil enfant requis.");
+      const base = client().from("quran_surah_validations");
+      if (!validated) return requireSuccess(await base.delete().eq("parent_id", session.user.id).eq("child_profile_id", childId).eq("surah", Number(surah)));
+      return requireSuccess(await base.upsert({
+        child_profile_id: childId,
+        parent_id: session.user.id,
+        surah: Number(surah),
+        validated_at: new Date().toISOString()
+      }, { onConflict: "child_profile_id,surah" }).select().single());
+    },
+
     listArtworks: async childId => {
       const session = await getSession();
       if (!session) throw new Error("Connexion requise.");

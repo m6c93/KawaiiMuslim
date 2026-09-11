@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {mountParallax} from '../applications/coran/motion.mjs';
+const listeners=new Map();let queued,removed=0,value,top=100;
+const reduced={matches:false,addEventListener:(k,f)=>listeners.set('motion',f),removeEventListener:()=>removed++};
+globalThis.matchMedia=()=>reduced;globalThis.innerWidth=1000;globalThis.innerHeight=800;
+globalThis.window={addEventListener:(k,f)=>listeners.set(k,f),removeEventListener:()=>removed++};
+globalThis.requestAnimationFrame=f=>(queued=f,1);globalThis.cancelAnimationFrame=()=>{};
+const layer={dataset:{depth:'0.1'},style:{setProperty:(k,v)=>value=v}};
+const scene={getBoundingClientRect:()=>({top,height:200}),querySelectorAll:()=>[layer]};
+const dispose=mountParallax({querySelectorAll:()=>[scene]});queued();assert.equal(value,'16.00px');
+top=-500;listeners.get('scroll')();queued();assert.equal(value,'32.00px');
+globalThis.innerWidth=390;listeners.get('resize')();queued();assert.equal(value,'12.00px');
+reduced.matches=true;listeners.get('motion')();queued();assert.equal(value,'0.00px');
+dispose();assert.equal(removed,3);console.log('Parallax: scroll, bounds, mobile, reduced motion and cleanup passed.');

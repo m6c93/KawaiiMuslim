@@ -20,7 +20,7 @@
     var target = new URL(href, window.location.href);
     if (target.origin !== window.location.origin) return href;
     if (guestMode && guestPaths.has(decodeURIComponent(target.pathname))) target.searchParams.set("guest", "1");
-    if (localPreview && guestPaths.has(decodeURIComponent(target.pathname))) target.searchParams.set("preview", "1");
+    if (localPreview && (guestPaths.has(decodeURIComponent(target.pathname)) || target.pathname === "/applications/coran/")) target.searchParams.set("preview", "1");
     return target.href;
   }
   var incomingTransition = sessionStorage.getItem(transitionKey);

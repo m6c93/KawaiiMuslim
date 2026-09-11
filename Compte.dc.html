@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./responsive.css?v=tablet-20260818">
-  <link rel="stylesheet" href="./account.css?v=family-reading-2">
+  <link rel="stylesheet" href="./account.css?v=quran-parent-1">
 </head>
 <body>
   <div class="account-shell">
@@ -39,6 +39,12 @@
         <p class="children-overview-intro">Retrouve ici, dès l’ouverture, les livres commencés et l’avancée de chaque enfant.</p>
         <div class="profile-list" id="children"><p class="loading">Chargement…</p></div>
         <p class="form-message" id="message"></p>
+      </section>
+
+      <section class="dash-card full quran-parent-card">
+        <div class="quran-parent-head"><div><span>🌙 MON CORAN</span><h2>Valider les sourates de mes enfants</h2><p>Seul le parent confirme une sourate. L’enfant verra ensuite la validation dans « Mon parcours ».</p></div><a class="small-button" href="applications/coran/#journey">Ouvrir Mon Coran</a></div>
+        <div id="quranParentProgress"><p class="loading">Chargement du parcours Coran…</p></div>
+        <p class="form-message" id="quranMessage" role="status"></p>
       </section>
 
       <div class="dashboard-grid">
@@ -106,14 +112,17 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=family-reading-2"></script>
+  <script src="./km-auth.js?v=quran-parent-1"></script>
   <script>
     let context = null;
     const children = document.getElementById("children");
     const message = document.getElementById("message");
     const billingMessage = document.getElementById("billingMessage");
+    const quranParentProgress = document.getElementById("quranParentProgress");
+    const quranMessage = document.getElementById("quranMessage");
     const activeBillingStatuses = new Set(["active", "trialing", "past_due"]);
     let childLimit = 0;
+    let quranIndex = [];
 
     const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
@@ -161,6 +170,25 @@
       `).join("") || '<p class="loading">Aucun profil enfant. Tu peux en ajouter un juste au-dessus.</p>';
     };
 
+    const quranChapter = id => quranIndex.find(item => item.id === Number(id));
+    const renderQuranProgress = () => {
+      if (!context.children.length) {
+        quranParentProgress.innerHTML = '<p class="reading-empty">Ajoute d’abord un profil enfant.</p>';
+        return;
+      }
+      quranParentProgress.innerHTML = context.children.map(child => {
+        const progress = (context.quranProgress || []).filter(item => item.child_profile_id === child.id);
+        const validations = (context.quranValidations || []).filter(item => item.child_profile_id === child.id);
+        const counts = progress.reduce((map,item) => (map[item.surah] = (map[item.surah] || 0) + 1,map),{});
+        const options = quranIndex.map(surah => `<option value="${surah.id}">${escapeHtml(surah.name)} · ${counts[surah.id] || 0}/${surah.count} versets</option>`).join("");
+        const approved = validations.sort((a,b) => a.surah-b.surah).map(item => {
+          const surah = quranChapter(item.surah);
+          return `<span class="quran-approved"><strong>✓ ${escapeHtml(surah?.name || `Sourate ${item.surah}`)}</strong><button type="button" data-quran-remove="${item.surah}" data-child="${child.id}" aria-label="Retirer la validation de ${escapeHtml(surah?.name || item.surah)}">Retirer</button></span>`;
+        }).join("") || '<small>Aucune sourate validée pour le moment.</small>';
+        return `<article class="quran-child-card"><header><span class="profile-avatar">${escapeHtml(child.avatar)}</span><div><h3>${escapeHtml(child.name)}</h3><p>${progress.length} verset${progress.length>1?'s':''} travaillé${progress.length>1?'s':''} · ${validations.length} sourate${validations.length>1?'s':''} validée${validations.length>1?'s':''}</p></div></header><div class="quran-validation-row"><label>Choisir une sourate<select data-quran-select="${child.id}" class="field-select">${options}</select></label><button class="primary-button pink" type="button" data-quran-validate="${child.id}">Valider cette sourate</button></div><div class="quran-approved-list">${approved}</div></article>`;
+      }).join("");
+    };
+
     const load = async () => {
       context = await KMAuth.getContext();
       if (!context) {
@@ -180,6 +208,8 @@
       document.getElementById("parentAvatar").value = context.profile.avatar || "🌸";
       context.subscription = await KMAuth.getSubscription();
       context.readingProgress = await KMAuth.listReadingProgress();
+      quranIndex = quranIndex.length ? quranIndex : await fetch("applications/coran/data/index.json").then(response => response.json());
+      [context.quranProgress, context.quranValidations] = await Promise.all([KMAuth.listQuranProgress(), KMAuth.listQuranValidations()]);
       const subscribed = activeBillingStatuses.has(context.subscription?.status);
       childLimit = subscribed ? Number(context.subscription.child_limit || 1) : context.children.length;
       const prices = { 1: "4,99", 2: "5,98", 3: "6,97" };
@@ -207,7 +237,29 @@
           ? `Limite de l’offre : ${childLimit} enfant${childLimit > 1 ? "s" : ""}`
           : "Ajouter ce profil";
       renderChildren();
+      renderQuranProgress();
     };
+
+    quranParentProgress.addEventListener("click", async event => {
+      const validate = event.target.closest("[data-quran-validate]");
+      const remove = event.target.closest("[data-quran-remove]");
+      if (!validate && !remove) return;
+      const childId = validate?.dataset.quranValidate || remove.dataset.child;
+      const surah = remove ? Number(remove.dataset.quranRemove) : Number(quranParentProgress.querySelector(`[data-quran-select="${childId}"]`).value);
+      const chapter = quranChapter(surah);
+      event.target.disabled = true;
+      try {
+        await KMAuth.setQuranSurahValidation({ childId, surah, validated: Boolean(validate) });
+        context.quranValidations = await KMAuth.listQuranValidations();
+        quranMessage.className = "form-message success";
+        quranMessage.textContent = validate ? `${chapter.name} est maintenant validée par le parent.` : `La validation de ${chapter.name} a été retirée.`;
+        renderQuranProgress();
+      } catch (error) {
+        event.target.disabled = false;
+        quranMessage.className = "form-message";
+        quranMessage.textContent = KMAuth.friendlyError(error);
+      }
+    });
 
     document.getElementById("planOptions").addEventListener("click", async event => {
       const option = event.target.closest("[data-plan]");

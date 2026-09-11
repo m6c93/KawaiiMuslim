@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#191d4b">
+  <title>Mon Coran — Kawaii Muslim World</title>
+  <script src="../../km-access-gate.js?v=coran-v1"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800;900&family=Noto+Naskh+Arabic:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="coran.css">
+  <link rel="stylesheet" href="garden.css?v=1">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../../km-config.js"></script>
+  <script defer src="../../km-auth.js?v=quran-parent-1"></script>
+  <script type="module" src="coran.mjs?v=13"></script>
+</head>
+<body>
+  <aside class="sidebar"><a id="applications" class="world-link" href="../../Applications.dc.html"><img src="../../brand/assets/mascot-nour.png" alt=""><span>Kawaii Muslim<small>WORLD · APPLICATIONS</small></span></a><div class="side-rule"></div><div class="product-mark"><span lang="ar">ق</span><div>Mon Coran<small>Un verset à la fois</small></div></div><nav id="navigation" aria-label="Mon Coran"></nav><div class="sidebar-bottom"><div class="side-mimi"><img src="../../brand/assets/mascot-nour.png" alt="Mimi"><p>Chaque petit pas<br>fait grandir ta lumière.</p></div><a href="../../Applications.dc.html" class="return-link">← Mes applications</a></div></aside>
+  <div class="workspace"><header class="top"><a class="mobile-exit" href="../../Applications.dc.html" aria-label="Retour aux applications">←</a><a class="mobile-brand" href="#home">Mon Coran</a><span class="breadcrumb">Kawaii Muslim World <span>/</span> Mon Coran</span><button id="together" class="parent-button" aria-pressed="false">Avec un parent</button></header><main id="app" tabindex="-1"><div class="loading"><span class="loading-orbit"></span><h1>Bienvenue dans Mon Coran</h1><p>Je prépare ton petit moment…</p></div></main><footer class="source-footer"><button data-action="sources">Sources du Coran et des récitations</button><span id="storage-note">Ton parcours reste sur cet appareil.</span></footer></div>
+  <section id="player" class="player" aria-label="Lecteur de récitation" hidden><div class="track"><span class="track-symbol" aria-hidden="true">♪</span><div><strong id="track-name"></strong><small id="track-reciter">Ali Al-Houdhaïfi</small></div></div><div class="transport"><button id="audio-prev" aria-label="Verset précédent"></button><button id="audio-toggle" class="audio-main" aria-label="Pause"></button><button id="audio-next" aria-label="Verset suivant"></button></div><div class="scrubber"><label for="seek" id="audio-status">Récitation</label><input id="seek" type="range" min="0" max="1" step="0.1" value="0" aria-label="Position dans le verset"><div class="time"><span id="elapsed">0:00</span><span id="duration">0:00</span></div></div><button id="audio-speed" class="speed-button" aria-label="Vitesse de lecture">1×</button><button id="audio-stop" class="close-player" aria-label="Fermer le lecteur">×</button></section><audio id="recitation" preload="none"></audio>
+  <noscript>Active JavaScript pour ouvrir le parcours Coran.</noscript>
+</body>
+</html>
