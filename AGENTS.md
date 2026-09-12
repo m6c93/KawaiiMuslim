@@ -1,16 +1,15 @@
 # Mon Coran integration (11 September 2026)
 
 ## Interactive garden
-Latest request adds Mon jardin to the navigation. A tree is earned only after a
-10-repeat sequence finishes in Coran, placeable on 24-slot plots; no duplicate
-trees for reviews. Parent/child and guided lesson completions do not earn trees.
-garden.mjs stores positions and watering separately from learning progress under
-km-coran-garden-v1. Seven days prompts review, eight softens colors. No deletion.
-Three original generated transparent tree illustrations yield 114 deterministic
-surah variants through shape/color combinations; do not claim 114 separately
-generated illustrations. The lawn is also generated. Garden-specific tests cover
-all variants, positions, persistence sanitation and 7/8-day freshness boundaries.
-Garden refreshes also require a new 10-repeat sequence from Coran.
+Mon jardin uses one evolving tree per surah. Each verse joins that tree only after
+a 10-repeat sequence finishes in Coran; progress is the number of earned verses
+divided by that surah's real verse count. Five transparent illustrations show the
+seedling, sapling, young, blossom and completed stages. The small garden holds 12
+chosen trees; every other started surah stays in the collection. Parent/child and
+guided lesson completions do not grow trees. garden.mjs stores the 12 positions
+under km-coran-garden-v1 and migrates the former verse-tree positions. Seven days
+prompts review, eight softens colors. Nothing is deleted. A refresh requires a new
+10-repeat sequence from Coran. Do not claim 114 separately generated illustrations.
 
 User wants a polished child-friendly Mon Coran in Applications, using the
 existing Aya/Mimi identity. Initial four-verse prototype was judged too basic.
