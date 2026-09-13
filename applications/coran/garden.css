@@ -5,3 +5,11 @@
 /* Une sourate = un arbre ; douze arbres choisis restent visibles. */
 .grove-toolbar>div{display:block}.grove-toolbar>div p{margin:2px 0;color:#7a705f;font-size:12px}.grove-toolbar>span{padding:7px 12px;border-radius:99px;background:#eef1dd;color:#65754f;font-weight:800}.grove-board{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(3,1fr);gap:8px;padding:55px 8% 42px;aspect-ratio:1.45}.tree-drop b{display:inline-grid;place-items:center;min-width:17px;height:17px;margin-left:-5px;border-radius:50%;background:#fff;color:#537099;font:800 9px Arial}.grove-inventory-tree{gap:4px}.tree-growth{width:100%;height:6px;overflow:hidden;border-radius:99px;background:#e2dfcf}.tree-growth span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#a6c879,#5f8a58)}.tree-stage-label{font-size:9px;color:#67734e;font-style:normal}.grove-card-title>div:last-child{flex:1}.grove-preview .tree-number{display:none}.tree-review-callout{margin:18px 0;padding:13px 16px;border-radius:15px;background:#e8f3fb;color:#526d85;font-size:13px}.tree-review-callout.fresh{background:#edf4e4;color:#5d7353}
 @media(max-width:540px){.grove-board{aspect-ratio:.9;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(4,1fr);padding:38px 7% 30px}.grove-toolbar{align-items:flex-start}.grove-inventory{grid-template-columns:repeat(2,minmax(0,1fr))}.grove-inventory-tree img{width:105px;height:105px}.grove-inventory-tree strong{font-size:12px}.grove-preview{width:76px;height:88px}}
+
+/* Cinquante identités : dix familles illustrées, cinq variantes chacune. */
+.tree-sprite{display:block;width:62%;height:100%;margin:auto;background-image:var(--tree-image);background-repeat:no-repeat;background-size:auto var(--tree-zoom);background-position:var(--tree-position) bottom;filter:hue-rotate(var(--tree-hue)) saturate(.92);scale:var(--tree-shape);transform-origin:center bottom;pointer-events:none}
+.grove-tree .tree-sprite{position:absolute;inset:-15% 19% 0;height:115%}
+.grove-inventory-tree .tree-sprite{width:64px;height:106px;flex:none}
+.grove-preview .tree-sprite{width:64%;height:100%}
+.tree-sprite.tree-faded{opacity:.65;filter:hue-rotate(var(--tree-hue)) saturate(.25)}
+@media(max-width:540px){.grove-inventory-tree .tree-sprite{width:70px;height:112px}.grove-tree .tree-sprite{width:66%;inset:-12% 17% 0}}

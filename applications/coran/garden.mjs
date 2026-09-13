@@ -1,14 +1,16 @@
 const DAY=86400000;
 export const PLOTS=12;
+export const TREE_FAMILIES=['olive','date-palm','pomegranate','cedar','fig','orange','cherry','willow','baobab','almond'];
+const TREE_VARIANTS=[{hue:0,shape:1},{hue:-14,shape:.97},{hue:14,shape:1.03},{hue:28,shape:1.06},{hue:-28,shape:.94}];
 
 export function treeStage(percent){
- if(percent>=100)return{file:'apple',label:'Arbre accompli'};
- if(percent>=75)return{file:'blossom',label:'En fleurs'};
- if(percent>=50)return{file:'young',label:'Jeune arbre'};
- if(percent>=25)return{file:'sapling',label:'Petit arbre'};
- return{file:'seedling',label:'Jeune pousse'};
+ if(percent>=100)return{index:4,file:'apple',label:'Arbre accompli'};
+ if(percent>=75)return{index:3,file:'blossom',label:'En fleurs'};
+ if(percent>=50)return{index:2,file:'young',label:'Jeune arbre'};
+ if(percent>=25)return{index:1,file:'sapling',label:'Petit arbre'};
+ return{index:0,file:'seedling',label:'Jeune pousse'};
 }
-export function treeAppearance(surah,percent=100){const stage=treeStage(percent),n=surah-1,base=stage.file==='seedling'?1.55:stage.file==='sapling'?1.18:1;return{...stage,hue:(n*47)%360,shape:base+(n%5)*.025}}
+export function treeAppearance(surah,percent=100){const stage=treeStage(percent),n=surah-1,family=TREE_FAMILIES[n%TREE_FAMILIES.length],variant=Math.floor(n/TREE_FAMILIES.length)%TREE_VARIANTS.length,cycle=Math.floor(n/50),look=TREE_VARIANTS[variant],positions=[0,13,32,59,90],zooms=[180,160,120,100,100];return{...stage,family,variant,identity:(n%50)+1,hue:look.hue+cycle*4,shape:look.shape+(cycle%3)*.012,position:positions[stage.index],zoom:zooms[stage.index]}}
 export function treeHealth(last,now=Date.now()){const days=Math.max(0,Math.floor((now-last)/DAY));return{days,thirsty:days>=7,faded:days>=8,label:days>=7?'À rafraîchir':`Prochaine révision dans ${7-days} jour${7-days>1?'s':''}`}}
 const surahId=id=>String(id).split(':')[0];
 export function earnedSurahs(completed){return new Set(Object.keys(completed||{}).filter(id=>completed[id]).map(surahId))}
@@ -37,7 +39,7 @@ export function createGarden({getProgress,index,review,escape:esc}){
  }
  function ids(){return[...earnedSurahs(earnedMap())].map(Number).sort((a,b)=>a-b)}
  function nextVerse(id){const x=summary(id);return x.due[0]||Array.from({length:x.s.count},(_,i)=>i+1).find(v=>!x.done.includes(v))||x.done[0]||1}
- function image(id){const x=summary(id);return`<img src="art/tree-${x.a.file}.png" alt="" style="--tree-hue:${x.a.hue}deg;--tree-shape:${x.a.shape}" class="${x.faded?'tree-faded':''}" width="1280" height="1280"><span class="tree-number">${x.s.id}</span>${x.due.length?`<span class="tree-drop" aria-label="${x.due.length} versets à revoir">💧<b>${x.due.length}</b></span>`:''}`}
+ function image(id){const x=summary(id);return`<span class="tree-sprite ${x.faded?'tree-faded':''}" aria-hidden="true" style="--tree-image:url('art/tree-family-${x.a.family}.png');--tree-hue:${x.a.hue}deg;--tree-shape:${x.a.shape};--tree-position:${x.a.position}%;--tree-zoom:${x.a.zoom}%"></span><span class="tree-number">${x.s.id}</span>${x.due.length?`<span class="tree-drop" aria-label="${x.due.length} versets à revoir">💧<b>${x.due.length}</b></span>`:''}`}
  function progressBar(x){return`<div class="tree-growth"><span style="width:${x.percent}%"></span></div><small>${x.done.length} / ${x.s.count} versets · ${x.percent}%</small>`}
  function draw(){
   if(!root?.isConnected)return;state=cleanGarden(state,earnedMap());const all=ids(),placed=Object.keys(state.positions).length;
@@ -51,7 +53,7 @@ export function createGarden({getProgress,index,review,escape:esc}){
   <div id="grove-detail"></div>
   <section class="grove-collection"><div class="grove-toolbar"><div><h2>Ma collection</h2><p>Tous les arbres de mes sourates restent ici.</p></div><label>Afficher <select id="grove-filter"><option value="all" ${filter==='all'?'selected':''}>Toutes</option><option value="waiting" ${filter==='waiting'?'selected':''}>À placer (${waiting.length})</option><option value="thirsty" ${filter==='thirsty'?'selected':''}>À rafraîchir (${thirsty.length})</option></select></label></div>
   ${all.length?`<div class="grove-inventory">${matches.slice(0,limit).map(id=>{const x=summary(id);return`<button data-g="tree" data-id="${id}" class="grove-inventory-tree">${image(id)}<strong>${esc(x.s.name)}</strong>${progressBar(x)}<em class="tree-stage-label">${x.a.label}${state.positions[id]===undefined?' · À placer':''}</em></button>`}).join('')||'<p>Aucun arbre dans cette sélection.</p>'}</div>${matches.length>limit?'<button data-g="more">Voir plus</button>':''}`:'<div class="grove-empty"><h3>Ta première pousse t’attend 🌱</h3><p>Dans Coran, répète un verset 10 fois pour commencer l’arbre de sa sourate.</p><a href="#read" class="primary">Choisir une sourate</a></div>'}</section>
-  <details class="grove-help"><summary>Comment mon arbre grandit-il ?</summary><p>Une sourate correspond à un arbre. Chaque verset répété 10 fois dans Coran ajoute une étape à sa croissance. L’évolution est calculée selon le nombre total de versets de la sourate.</p><p>Après 7 jours, une goutte indique les versets à revoir. Dès le 8e jour, les couleurs s’adoucissent. Une nouvelle série de 10 répétitions les rafraîchit. Aucun arbre ne disparaît.</p><p>Le petit jardin accueille 12 arbres choisis. Tous les autres restent disponibles dans ta collection.</p></details><p class="grove-save">${memoryOnly?'La sauvegarde est indisponible : garde cette page ouverte.':'Jardin enregistré sur cet appareil.'}</p>`;
+  <details class="grove-help"><summary>Comment mon arbre grandit-il ?</summary><p>Une sourate correspond à un arbre. La collection comprend 50 arbres différents, créés avec 10 familles botaniques et 5 variantes. Chaque sourate garde toujours la même identité visuelle.</p><p>Chaque verset répété 10 fois dans Coran ajoute une étape à sa croissance. L’évolution est calculée selon le nombre total de versets de la sourate.</p><p>Après 7 jours, une goutte indique les versets à revoir. Dès le 8e jour, les couleurs s’adoucissent. Une nouvelle série de 10 répétitions les rafraîchit. Aucun arbre ne disparaît.</p><p>Le petit jardin accueille 12 arbres choisis. Tous les autres restent disponibles dans ta collection.</p></details><p class="grove-save">${memoryOnly?'La sauvegarde est indisponible : garde cette page ouverte.':'Jardin enregistré sur cet appareil.'}</p>`;
   if(selected&&all.includes(Number(selected)))detail();
  }
  function detail(){const x=summary(selected),verse=nextVerse(selected),placed=state.positions[selected]!==undefined,host=root.querySelector('#grove-detail');if(!host)return;host.innerHTML=`<section class="grove-card"><button class="grove-close" data-g="close" aria-label="Fermer">×</button><div class="grove-card-title"><div class="grove-preview">${image(selected)}</div><div><p class="eyebrow">ARBRE DE LA SOURATE ${x.s.id}</p><h2>${esc(x.s.name)}</h2><p>${x.a.label}</p>${progressBar(x)}</div></div><div class="tree-review-callout ${x.due.length?'':'fresh'}">${x.due.length?`💧 ${x.due.length} verset${x.due.length>1?'s':''} à répéter pour rafraîchir cet arbre.`:'🌸 Cet arbre est bien rafraîchi.'}</div><div class="grove-actions"><button data-g="review" class="primary">${x.due.length?'Revoir le prochain verset':'Continuer cet arbre'}</button><button data-g="move">${placed?'Déplacer':'Placer dans mon jardin'}</button>${placed?'<button data-g="remove">Retirer du petit jardin</button>':''}</div><p role="status">Le verset ${verse} s’ouvrira dans Coran. Dix répétitions le feront compter dans cet arbre.</p></section>`;if(focusRequested){focusRequested=false;host.scrollIntoView({behavior:'smooth',block:'center'})}}

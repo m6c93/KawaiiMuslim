@@ -1,0 +1,46 @@
+import {JUZ_RANGES} from './juz-data.mjs';
+import {treeAppearance,treeHealth,cleanGarden} from './garden.mjs?v=5';
+export const homeJuz=s=>JUZ_RANGES.find(r=>r.surah===Number(s))?.ranges[0].juz;
+export function juzStats(juz,progress){
+ const refs=JUZ_RANGES.flatMap(s=>s.ranges.filter(r=>r.juz===juz).flatMap(r=>Array.from({length:r.to-r.from+1},(_,i)=>`${s.surah}:${r.from+i}`)));
+ const earned=new Set(progress.treeEarned),done=refs.filter(r=>earned.has(r)),due=done.filter(r=>treeHealth(progress.treeReview[r]||0).thirsty);
+ return{refs,done,due,percent:Math.floor(done.length/refs.length*100)};
+}
+export function createGarden({getProgress,index,review,escape:esc}){
+ const KEY='km-coran-parcels-v1';let root,screen='home',parcel=30,selected='',moving='',notice='',state={last:30,plots:{},favorite:{}},memoryOnly=false;
+ try{const saved=JSON.parse(localStorage.getItem(KEY));if(saved&&typeof saved==='object')state={...state,...saved};else{const old=cleanGarden(JSON.parse(localStorage.getItem('km-coran-garden-v1')),Object.fromEntries(getProgress().treeEarned.map(id=>[id,true])));for(const[s,p]of Object.entries(old.positions))state.favorite[s]={x:15+(p%4)*23,y:25+Math.floor(p/4)*28}}}catch{}
+ if(!state.plots||typeof state.plots!=='object')state.plots={};if(!state.favorite||typeof state.favorite!=='object')state.favorite={};if(!Number.isInteger(state.last)||state.last<1||state.last>30)state.last=30;
+ function save(){try{localStorage.setItem(KEY,JSON.stringify(state));memoryOnly=false}catch{memoryOnly=true}}
+ const info=s=>index.find(c=>c.id===Number(s));
+ const earned=s=>getProgress().treeEarned.filter(id=>id.startsWith(`${s}:`));
+ const positions=()=>{if(parcel==='favorite')return state.favorite;if(!state.plots[parcel]||typeof state.plots[parcel]!=='object')state.plots[parcel]={};return state.plots[parcel]};
+ const trees=()=>index.filter(s=>parcel==='favorite'?earned(s.id).length:homeJuz(s.id)===parcel);
+ function art(s){const percent=earned(s).length/info(s).count*100,a=treeAppearance(s,percent);return `<span class="tree-sprite" aria-hidden="true" style="--tree-image:url('art/tree-family-${a.family}.png');--tree-position:${a.position}%;--tree-zoom:${a.zoom}%;--tree-hue:${a.hue}deg;--tree-shape:${a.shape}"></span>`}
+ function bar(p){return `<div class="tree-growth" role="progressbar" aria-valuenow="${p}" aria-valuemin="0" aria-valuemax="100" aria-label="Versets travaillés"><span style="width:${p}%"></span></div><small>${p}%</small>`}
+ function open(p){parcel=p;screen='parcel';selected=moving='';notice='';if(p!=='favorite')state.last=p;save();draw();root.scrollIntoView({block:'start'})}
+ function draw(){if(!root?.isConnected)return;
+ const header=`<div class="grove-header"><div><p class="eyebrow">MON JARDIN DU CORAN</p><h1>${screen==='home'?'Mon jardin, à ma façon.':screen==='map'?'Les 30 parcelles':parcel==='favorite'?'Ma parcelle préférée':`Ma parcelle · Juz’ ${parcel}`}</h1></div><img src="art/aya-mimi-lecture-transparent.png" alt="Aya et Mimi" width="155" height="155"></div>`;
+ if(screen==='home'){root.innerHTML=header+`<p>Un verset après l’autre, prends soin de ton jardin.</p><div class="parcel-menu"><button class="primary" data-j="continue">🌱 Continuer mon Juz’ <small>Retrouver la parcelle ${state.last}</small></button><button data-j="map">🌿 Voir les 30 parcelles</button><button data-j="favorite">🌸 Ma parcelle préférée</button></div>`;return}
+ if(screen==='map'){root.innerHTML=header+`<button data-j="home">← Mon jardin</button><div class="parcel-map">${Array.from({length:30},(_,i)=>{const j=i+1,s=juzStats(j,getProgress());return `<button data-j="open" data-id="${j}"><span class="parcel-mini">🌳</span><strong>Juz’ ${j}</strong>${bar(s.percent)}<small>${s.done.length} / ${s.refs.length} versets</small>${s.due.length?`<span>💧 ${s.due.length} à revoir</span>`:''}</button>`}).join('')}</div>`;return}
+ const pos=positions();for(const[s,p]of Object.entries(pos)){if(!earned(s).length||!p||!Number.isFinite(p.x)||!Number.isFinite(p.y)||(parcel!=='favorite'&&homeJuz(s)!==parcel))delete pos[s]}
+ const stats=parcel==='favorite'?null:juzStats(parcel,getProgress()),available=trees().filter(s=>!pos[s.id]);
+ root.innerHTML=header+`<div class="grove-toolbar"><button data-j="map">← Les 30 parcelles</button><button data-j="home">Mon jardin</button></div>${stats?`<div class="parcel-progress">${bar(stats.percent)}<small>${stats.done.length} / ${stats.refs.length} versets travaillés dans ce Juz’</small>${stats.due.length?`<button data-j="due">💧 ${stats.due.length} versets à revoir</button>`:''}</div>`:'<p>Expose jusqu’à 12 arbres favoris. Ils gardent aussi leur place dans leur Juz’.</p>'}
+ <section class="parcel-tray"><h2>Mes arbres à placer</h2><p>Un arbre se débloque après 10 répétitions d’un premier verset dans Coran.</p><div class="parcel-scroll">${available.map(s=>{const unlocked=earned(s.id).length>0;return `<button class="grove-inventory-tree ${unlocked?'':'tree-locked'}" data-j="${unlocked?'select':'unlock'}" data-id="${s.id}">${art(s.id)}<strong>${esc(s.name)}</strong><small>${unlocked?'Choisir une place':'🔒 À débloquer'}</small></button>`}).join('')||'<p>Tous tes arbres sont dans la parcelle 🌿</p>'}</div></section>
+ <p role="status">${moving?'Touche le jardin à l’endroit où tu veux planter ton arbre.':notice||'Touche un arbre pour le déplacer ou continuer sa sourate.'}${moving?'<button data-j="cancel">Annuler</button>':''}</p>
+ <div class="parcel-land ${moving?'placing':''}" role="group" aria-label="Parcelle : emplacement libre">${moving?'<button class="parcel-place-keyboard" data-j="center">Planter au centre</button>':''}${Object.entries(pos).map(([s,p])=>`<button class="parcel-tree" data-j="select" data-id="${s}" style="left:${Math.max(8,Math.min(92,p.x))}%;top:${Math.max(20,Math.min(90,p.y))}%" aria-label="${esc(info(s).name)}">${art(s)}<small>${esc(info(s).name)}</small></button>`).join('')}</div>
+ <div class="parcel-detail">${selected?detail():''}</div>${stats?continuations():''}<p class="grove-save">${memoryOnly?'Sauvegarde indisponible. Garde cette page ouverte.':'Tes emplacements sont enregistrés sur cet appareil.'}</p>`;
+ }
+ function continuations(){const others=JUZ_RANGES.filter(s=>s.ranges.some(r=>r.juz===parcel)&&homeJuz(s.surah)!==parcel);return others.length?`<details class="grove-help"><summary>Sourates commencées dans un autre Juz’</summary><p>Leur arbre reste dans sa première parcelle. Les versets de ce Juz’ comptent ici.</p>${others.map(s=>`<button data-j="part" data-id="${s.surah}">${esc(info(s.surah).name)} · Continuer dans ce Juz’</button>`).join('')}</details>`:''}
+ function detail(){const s=Number(selected),refs=earned(s),due=refs.find(r=>treeHealth(getProgress().treeReview[r]||0).thirsty);return `<section class="grove-card"><h2>${esc(info(s).name)}</h2>${bar(Math.floor(refs.length/info(s).count*100))}<p>${refs.length} / ${info(s).count} versets</p><div class="grove-actions"><button class="primary" data-j="learn">${due?'💧 Revoir un verset':'Continuer la sourate'}</button><button data-j="move">${positions()[s]?'Déplacer':'Placer cet arbre'}</button>${positions()[s]?'<button data-j="remove">Remettre dans la rangée</button>':''}<button data-j="cancel">Fermer</button></div></section>`}
+ function plant(x,y){if(parcel==='favorite'&&!positions()[moving]&&Object.keys(positions()).length>=12){notice='Ta parcelle préférée contient déjà 12 arbres. Remets-en un dans la rangée.';moving='';draw();return}positions()[moving]={x:Math.max(8,Math.min(92,x)),y:Math.max(20,Math.min(90,y))};moving=selected='';notice='Ton arbre a trouvé sa place 🌱';save();draw()}
+ function click(e){const b=e.target.closest('[data-j]');if(!b){const land=e.target.closest('.parcel-land');if(land&&moving){const r=land.getBoundingClientRect();plant((e.clientX-r.left)/r.width*100,(e.clientY-r.top)/r.height*100)}return}const a=b.dataset.j,s=Number(b.dataset.id);
+ if(a==='continue')open(state.last);else if(a==='favorite')open('favorite');else if(a==='open')open(s);else if(a==='home'||a==='map'){screen=a;selected=moving='';draw()}
+ else if(a==='select'){selected=String(s);moving='';draw();root.querySelector('.parcel-detail').scrollIntoView({block:'nearest',behavior:'smooth'})}
+ else if(a==='unlock')review(`${s}:1`);else if(a==='due')review(juzStats(parcel,getProgress()).due[0]);
+ else if(a==='part'){const r=JUZ_RANGES.find(x=>x.surah===s).ranges.find(r=>r.juz===parcel);review(`${s}:${r.from}`)}
+ else if(a==='learn'){const refs=earned(selected),due=refs.find(r=>treeHealth(getProgress().treeReview[r]||0).thirsty),next=Array.from({length:info(selected).count},(_,i)=>`${selected}:${i+1}`).find(r=>!refs.includes(r));review(due||next||refs[0])}
+ else if(a==='move'){moving=selected;selected='';draw();root.querySelector('.parcel-land').scrollIntoView({block:'center',behavior:'smooth'})}
+ else if(a==='remove'){delete positions()[selected];selected='';save();draw()}else if(a==='center')plant(50,55);else if(a==='cancel'){selected=moving='';draw()}
+ }
+ return{mount(el){root=el;const[,s]=location.hash.slice(1).split('/');if(info(s)&&earned(Number(s)).length){parcel=homeJuz(s);screen='parcel';selected=String(Number(s))}root.addEventListener('click',click);draw()},unmount(){root?.removeEventListener('click',click);root=null},refresh:draw};
+}

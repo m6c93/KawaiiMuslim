@@ -1,6 +1,6 @@
 import {RECITER,STEPS,STARTER,GOALS,cleanProgress,validRef,nextRef,createSession,completeVerse,earnTree,matches,parentPlan,splitBasmala} from './model.mjs';
 import {QuranPlayer} from './audio.mjs?v=2';
-import {createGarden} from './garden.mjs?v=4';
+import {createGarden} from './juz-garden.mjs?v=1';
 let grove=null;
 import {mountParallax} from './motion.mjs';
 let disposeMotion=()=>{};let bookMode=false,nightMode=false,familyTurn=0,familyTogetherRepeat=3,familyReady=false,pendingFamily=null;
