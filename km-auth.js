@@ -48,6 +48,9 @@ window.KMAuth = (() => {
     if (/rate limit|too many requests/i.test(message) || status === 429) return "Trop de tentatives ont été effectuées. Attends quelques minutes avant de réessayer.";
     if (/expired|invalid.*(?:token|otp)|otp.*invalid/i.test(message)) return "Ce lien ou ce code a expiré. Demande-en un nouveau.";
     if (/signup.*disabled|signups not allowed/i.test(message)) return "Les inscriptions sont momentanément fermées.";
+    if (/schema cache|could not find the table|relation .* does not exist/i.test(message)) {
+      return "Cette partie de l’espace est momentanément indisponible. Réessaie dans quelques instants.";
+    }
     if (/network|fetch|timeout|timed out|load failed|connection refused|service unavailable/i.test(message) || status >= 500) {
       return "Le service de connexion est momentanément indisponible. Réessaie dans quelques minutes.";
     }

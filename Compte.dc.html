@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./responsive.css?v=tablet-20260818">
-  <link rel="stylesheet" href="./account.css?v=quran-parent-1">
+  <link rel="stylesheet" href="./account.css?v=account-access-1">
 </head>
 <body>
   <div class="account-shell">
@@ -19,7 +19,7 @@
         <strong>Kawaii Muslim</strong>
       </a>
       <div class="nav-links">
-        <a class="nav-link" href="Profils.dc.html">⇄ <span>Changer de profil</span></a>
+        <a class="nav-link" href="Profils.dc.html" data-member-only hidden>⇄ <span>Changer de profil</span></a>
         <a class="nav-link" href="Support.dc.html">❔ <span>Aide</span></a>
         <button class="ghost-button" id="logout" type="button">Déconnexion</button>
       </div>
@@ -34,21 +34,21 @@
         <span class="badge" id="roleBadge">Compte parent</span>
       </header>
 
-      <section class="dash-card full children-overview">
+      <section class="dash-card full children-overview" data-member-only hidden>
         <h2>Suivi de mes enfants</h2>
         <p class="children-overview-intro">Retrouve ici, dès l’ouverture, les livres commencés et l’avancée de chaque enfant.</p>
         <div class="profile-list" id="children"><p class="loading">Chargement…</p></div>
         <p class="form-message" id="message"></p>
       </section>
 
-      <section class="dash-card full quran-parent-card">
+      <section class="dash-card full quran-parent-card" data-member-only hidden>
         <div class="quran-parent-head"><div><span>🌙 MON CORAN</span><h2>Valider les sourates de mes enfants</h2><p>Seul le parent confirme une sourate. L’enfant verra ensuite la validation dans « Mon parcours ».</p></div><a class="small-button" href="applications/coran/#journey">Ouvrir Mon Coran</a></div>
         <div id="quranParentProgress"><p class="loading">Chargement du parcours Coran…</p></div>
         <p class="form-message" id="quranMessage" role="status"></p>
       </section>
 
       <div class="dashboard-grid">
-        <section class="dash-card">
+        <section class="dash-card" data-member-only hidden>
           <h2>Mon profil parent</h2>
           <form id="parentForm">
             <label class="field-label" for="parentName">Prénom</label>
@@ -68,24 +68,24 @@
             <p class="subscription-price" id="familyPrice">Dès 4,99€/mois</p>
             <p class="subscription-breakdown" id="familyBreakdown">Choisis le nombre de profils enfants</p>
           </div>
-          <p class="subscription-intro">Une seule formule familiale, adaptée au nombre d’enfants. Tu pourras changer d’offre ou arrêter depuis ton espace sécurisé.</p>
+          <p class="subscription-intro" id="subscriptionIntro">Reprends ton inscription : choisis simplement le nombre d’enfants pour commencer tes 7 jours gratuits.</p>
           <div class="plan-options" id="planOptions" aria-label="Choisir une offre">
             <button class="plan-option" type="button" data-plan="family_1_child" data-limit="1">
-              <span class="plan-children">1 enfant</span><strong>4,99€</strong><small>par mois</small>
+              <span class="plan-children">1 enfant</span><strong>4,99€</strong><small>par mois après 7 jours gratuits</small>
             </button>
             <button class="plan-option" type="button" data-plan="family_2_children" data-limit="2">
-              <span class="plan-children">2 enfants</span><strong>5,98€</strong><small>par mois</small>
+              <span class="plan-children">2 enfants</span><strong>5,98€</strong><small>par mois après 7 jours gratuits</small>
             </button>
             <button class="plan-option" type="button" data-plan="family_3_children" data-limit="3">
-              <span class="plan-children">3 enfants</span><strong>6,97€</strong><small>par mois</small>
+              <span class="plan-children">3 enfants</span><strong>6,97€</strong><small>par mois après 7 jours gratuits</small>
             </button>
           </div>
           <button class="primary-button pink" id="subscriptionAction" type="button" hidden>Gérer mon abonnement</button>
-          <p class="billing-note">Paiement sécurisé par Stripe · Annulation depuis ton compte</p>
+          <p class="billing-note" id="billingNote">0 € aujourd’hui · Paiement sécurisé par Stripe · Annulation à tout moment</p>
           <p class="form-message" id="billingMessage" role="status"></p>
         </section>
 
-        <section class="dash-card">
+        <section class="dash-card" data-member-only hidden>
           <h2>Ajouter un profil enfant</h2>
           <form id="childForm">
             <label class="field-label" for="childName">Prénom de l’enfant</label>
@@ -112,7 +112,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=quran-parent-1"></script>
+  <script src="./km-auth.js?v=quran-parent-2"></script>
   <script>
     let context = null;
     const children = document.getElementById("children");
@@ -120,6 +120,10 @@
     const billingMessage = document.getElementById("billingMessage");
     const quranParentProgress = document.getElementById("quranParentProgress");
     const quranMessage = document.getElementById("quranMessage");
+    const subscriptionCard = document.querySelector(".subscription-card");
+    const subscriptionIntro = document.getElementById("subscriptionIntro");
+    const billingNote = document.getElementById("billingNote");
+    const memberOnlyElements = document.querySelectorAll("[data-member-only]");
     const activeBillingStatuses = new Set(["active", "trialing", "past_due"]);
     let childLimit = 0;
     let quranIndex = [];
@@ -207,10 +211,9 @@
       document.getElementById("parentName").value = context.profile.full_name || "";
       document.getElementById("parentAvatar").value = context.profile.avatar || "🌸";
       context.subscription = await KMAuth.getSubscription();
-      context.readingProgress = await KMAuth.listReadingProgress();
-      quranIndex = quranIndex.length ? quranIndex : await fetch("applications/coran/data/index.json").then(response => response.json());
-      [context.quranProgress, context.quranValidations] = await Promise.all([KMAuth.listQuranProgress(), KMAuth.listQuranValidations()]);
       const subscribed = activeBillingStatuses.has(context.subscription?.status);
+      memberOnlyElements.forEach(element => { element.hidden = !subscribed; });
+      subscriptionCard.classList.toggle("signup-only", !subscribed);
       childLimit = subscribed ? Number(context.subscription.child_limit || 1) : context.children.length;
       const prices = { 1: "4,99", 2: "5,98", 3: "6,97" };
       document.getElementById("subscriptionStatus").textContent = subscribed
@@ -221,13 +224,34 @@
         : "Dès 4,99€/mois";
       document.getElementById("familyBreakdown").textContent = subscribed
         ? `1 parent + ${childLimit} profil${childLimit > 1 ? "s" : ""} enfant${childLimit > 1 ? "s" : ""}`
-        : "1 parent et jusqu’à 3 enfants";
+        : "Choisis ton offre pour activer ton espace famille";
+      subscriptionIntro.textContent = subscribed
+        ? "Une seule formule familiale, adaptée au nombre d’enfants. Tu peux changer d’offre ou arrêter depuis ton espace sécurisé."
+        : "Reprends ton inscription : choisis simplement le nombre d’enfants pour commencer tes 7 jours gratuits.";
+      billingNote.textContent = subscribed
+        ? "Paiement sécurisé par Stripe · Annulation depuis ton compte"
+        : "0 € aujourd’hui · Paiement sécurisé par Stripe · Annulation à tout moment";
       document.querySelectorAll(".plan-option").forEach(option => {
         option.hidden = subscribed;
         option.classList.toggle("selected", Number(option.dataset.limit) === childLimit);
       });
       const subscriptionAction = document.getElementById("subscriptionAction");
       subscriptionAction.hidden = !subscribed;
+      if (!subscribed) return;
+
+      context.readingProgress = await KMAuth.listReadingProgress();
+      const quranResults = await Promise.allSettled([
+        quranIndex.length ? quranIndex : fetch("applications/coran/data/index.json").then(response => {
+          if (!response.ok) throw new Error("Index Coran indisponible");
+          return response.json();
+        }),
+        KMAuth.listQuranProgress(),
+        KMAuth.listQuranValidations()
+      ]);
+      const quranReady = quranResults.every(result => result.status === "fulfilled");
+      quranIndex = quranResults[0].status === "fulfilled" ? quranResults[0].value : [];
+      context.quranProgress = quranResults[1].status === "fulfilled" ? quranResults[1].value : [];
+      context.quranValidations = quranResults[2].status === "fulfilled" ? quranResults[2].value : [];
       const childSubmitButton = document.querySelector("#childForm button[type='submit']");
       const childLimitReached = context.children.length >= childLimit;
       childSubmitButton.disabled = childLimitReached;
@@ -237,7 +261,12 @@
           ? `Limite de l’offre : ${childLimit} enfant${childLimit > 1 ? "s" : ""}`
           : "Ajouter ce profil";
       renderChildren();
-      renderQuranProgress();
+      if (quranReady) {
+        quranMessage.textContent = "";
+        renderQuranProgress();
+      } else {
+        quranParentProgress.innerHTML = '<p class="reading-empty">Le suivi Coran est momentanément indisponible. Réessaie dans quelques instants.</p>';
+      }
     };
 
     quranParentProgress.addEventListener("click", async event => {
@@ -366,7 +395,8 @@
 
     load().catch(error => {
       children.innerHTML = "";
-      message.textContent = KMAuth.friendlyError(error);
+      message.textContent = "Une partie de ton espace n’a pas pu être chargée. Actualise la page ou réessaie dans quelques instants.";
+      console.error("Chargement du compte impossible", error);
     });
   </script>
 </body>

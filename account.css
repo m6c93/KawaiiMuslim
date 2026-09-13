@@ -166,6 +166,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .plan-option strong { margin:5px 0 0; font-family:"Baloo 2",cursive; font-size:22px; line-height:1; }
 .plan-option small { color:var(--muted); font-size:9px; font-weight:800; }
 .subscription-card > .primary-button { margin-top:14px; }
+.subscription-card.signup-only { grid-column:1 / -1; width:min(100%,680px); justify-self:center; }
 .billing-note { margin:12px 0 0; color:#7a748d; font-size:10px; font-weight:800; text-align:center; }
 .profile-list, .family-list { display: grid; gap: 11px; }
 .profile-card {
