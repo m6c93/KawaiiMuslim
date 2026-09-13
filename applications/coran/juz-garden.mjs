@@ -1,5 +1,5 @@
 import {JUZ_NAMES,JUZ_RANGES} from './juz-data.mjs?v=2';
-import {treeAppearance,treeHealth,cleanGarden} from './garden.mjs?v=5';
+import {treeAppearance,treeGrowthPercent,treeHealth,cleanGarden} from './garden.mjs?v=6';
 export const homeJuz=s=>JUZ_RANGES.find(r=>r.surah===Number(s))?.ranges[0].juz;
 export const juzLabel=juz=>`Juz’ ${juz} · ${JUZ_NAMES[Number(juz)]||''}`.trim();
 export function juzStats(juz,progress){
@@ -16,7 +16,7 @@ export function createGarden({getProgress,index,review,escape:esc}){
  const earned=s=>getProgress().treeEarned.filter(id=>id.startsWith(`${s}:`));
  const positions=()=>{if(parcel==='favorite')return state.favorite;if(!state.plots[parcel]||typeof state.plots[parcel]!=='object')state.plots[parcel]={};return state.plots[parcel]};
  const trees=()=>index.filter(s=>parcel==='favorite'?earned(s.id).length:homeJuz(s.id)===parcel);
- function art(s){const percent=earned(s).length/info(s).count*100,a=treeAppearance(s,percent);return `<span class="tree-sprite" aria-hidden="true" style="--tree-image:url('art/tree-family-${a.family}.png');--tree-position:${a.position}%;--tree-zoom:${a.zoom}%;--tree-hue:${a.hue}deg;--tree-shape:${a.shape}"></span>`}
+ function art(s){const a=treeAppearance(s,treeGrowthPercent(earned(s).length,info(s).count));return `<span class="tree-sprite" aria-hidden="true" style="--tree-image:url('art/tree-family-${a.family}.png');--tree-position:${a.position}%;--tree-zoom:${a.zoom}%;--tree-hue:${a.hue}deg;--tree-shape:${a.shape}"></span>`}
  function bar(p){return `<div class="tree-growth" role="progressbar" aria-valuenow="${p}" aria-valuemin="0" aria-valuemax="100" aria-label="Versets travaillés"><span style="width:${p}%"></span></div><small>${p}%</small>`}
  function open(p){parcel=p;screen='parcel';selected=moving='';notice='';if(p!=='favorite')state.last=p;save();draw();root.scrollIntoView({block:'start'})}
  function draw(){if(!root?.isConnected)return;

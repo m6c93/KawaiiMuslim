@@ -5,11 +5,12 @@ const TREE_VARIANTS=[{hue:0,shape:1},{hue:-14,shape:.97},{hue:14,shape:1.03},{hu
 
 export function treeStage(percent){
  if(percent>=100)return{index:4,file:'apple',label:'Arbre accompli'};
- if(percent>=75)return{index:3,file:'blossom',label:'En fleurs'};
- if(percent>=50)return{index:2,file:'young',label:'Jeune arbre'};
- if(percent>=25)return{index:1,file:'sapling',label:'Petit arbre'};
- return{index:0,file:'seedling',label:'Jeune pousse'};
+ if(percent>=80)return{index:3,file:'blossom',label:'En fleurs'};
+ if(percent>=60)return{index:2,file:'young',label:'Jeune arbre'};
+ if(percent>=30)return{index:1,file:'sapling',label:'Petit arbre'};
+ return{index:0,file:'seedling',label:'Petite pousse'};
 }
+export function treeGrowthPercent(earned,total){const done=Math.max(0,Number(earned)||0),count=Math.max(1,Number(total)||1);if(!done)return 0;if(done===1)return 1;if(done>=count)return 100;return Math.min(99,Math.round(done/count*100))}
 export function treeAppearance(surah,percent=100){const stage=treeStage(percent),n=surah-1,family=TREE_FAMILIES[n%TREE_FAMILIES.length],variant=Math.floor(n/TREE_FAMILIES.length)%TREE_VARIANTS.length,cycle=Math.floor(n/50),look=TREE_VARIANTS[variant],positions=[0,13,32,59,90],zooms=[180,160,120,100,100];return{...stage,family,variant,identity:(n%50)+1,hue:look.hue+cycle*4,shape:look.shape+(cycle%3)*.012,position:positions[stage.index],zoom:zooms[stage.index]}}
 export function treeHealth(last,now=Date.now()){const days=Math.max(0,Math.floor((now-last)/DAY));return{days,thirsty:days>=7,faded:days>=8,label:days>=7?'À rafraîchir':`Prochaine révision dans ${7-days} jour${7-days>1?'s':''}`}}
 const surahId=id=>String(id).split(':')[0];
@@ -35,7 +36,7 @@ export function createGarden({getProgress,index,review,escape:esc}){
   const due=done.filter(v=>treeHealth(getProgress().treeReview[`${id}:${v}`]||0,now).thirsty);
   const faded=done.some(v=>treeHealth(getProgress().treeReview[`${id}:${v}`]||0,now).faded);
   const percent=Math.min(100,Math.round(done.length/s.count*100));
-  return{s,done,due,faded,percent,a:treeAppearance(s.id,percent)};
+  return{s,done,due,faded,percent,a:treeAppearance(s.id,treeGrowthPercent(done.length,s.count))};
  }
  function ids(){return[...earnedSurahs(earnedMap())].map(Number).sort((a,b)=>a-b)}
  function nextVerse(id){const x=summary(id);return x.due[0]||Array.from({length:x.s.count},(_,i)=>i+1).find(v=>!x.done.includes(v))||x.done[0]||1}
