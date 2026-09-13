@@ -2,8 +2,8 @@
   "use strict";
   const $ = selector => document.querySelector(selector);
   const $$ = selector => [...document.querySelectorAll(selector)];
-  const state = { context: null, config: null, contacts: [], campaigns: [], pendingCampaign: null, importedHtml: "" };
-  const titles = { dashboard: "Bonjour", contacts: "Mes contacts", composer: "Créer un e-mail", history: "Mes campagnes" };
+  const state = { context: null, config: null, contacts: [], campaigns: [], emailHistory: [], pendingCampaign: null, importedHtml: "" };
+  const titles = { dashboard: "Bonjour", contacts: "Mes contacts", composer: "Créer un e-mail", history: "Historique des e-mails" };
 
   const escapeHtml = value => String(value || "").replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[char]));
   const showNotice = (message, type = "") => {
@@ -41,6 +41,7 @@
   };
 
   const formatDate = value => value ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(new Date(value)) : "—";
+  const formatDateTime = value => value ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value)) : "—";
   const renderStatus = () => {
     const config = state.config || {};
     $("#formspreeStatus").textContent = config.formspree ? "Connecté" : "Connexion nécessaire";
@@ -194,7 +195,14 @@
   };
   const loadCampaigns = async () => {
     if(!state.config?.brevo)return;
-    try { const data=await api("campaigns"); state.campaigns=data.campaigns||[]; $("#statCampaigns").textContent=data.count??state.campaigns.length; $("#campaignList").innerHTML=state.campaigns.map(item=>`<article class="campaign-row"><div><strong>${escapeHtml(item.subject||item.name)}</strong><small>${formatDate(item.sentDate||item.scheduledAt||item.createdAt)} · ${escapeHtml(item.status||"brouillon")}</small></div><div class="campaign-metric"><b>${item.statistics?.globalStats?.uniqueViews||0}</b><small>ouvertures</small></div><div class="campaign-metric"><b>${item.statistics?.globalStats?.clickers||0}</b><small>clics</small></div><div class="campaign-metric"><b>${item.statistics?.globalStats?.unsubscriptions||0}</b><small>désinscriptions</small></div>${item.status==="sent"?`<button class="secondary campaign-detail" data-campaign-id="${item.id}" data-campaign-name="${escapeHtml(item.subject||item.name)}">Voir qui a ouvert et cliqué</button>`:""}</article>`).join("")||'<p class="empty">Aucune campagne envoyée pour le moment.</p>'; }
+    try {
+      const [campaignData,historyData]=await Promise.all([api("campaigns"),api("emailHistory")]);
+      state.campaigns=campaignData.campaigns||[]; state.emailHistory=historyData.emails||[];
+      $("#statCampaigns").textContent=campaignData.count??state.campaigns.length;
+      $("#emailHistoryCount").textContent=`${state.emailHistory.length} e-mail${state.emailHistory.length>1?"s":""}`;
+      $("#emailHistoryBody").innerHTML=state.emailHistory.map(item=>`<tr><td><div class="history-message"><strong>${escapeHtml(item.subject)}</strong><small>${escapeHtml(item.messageId||"")}</small></div></td><td>${escapeHtml(item.email||"—")}</td><td>${formatDateTime(item.sentAt)}</td><td><span class="history-status ${item.failed?"failed":item.delivered?"yes":item.sent?"pending":"no"}">${item.failed?"Problème":item.delivered?"Délivré":item.sent?"Envoyé":"En attente"}</span>${item.reason?`<small class="history-reason">${escapeHtml(item.reason)}</small>`:""}</td><td><span class="history-status ${item.opened?"open":"no"}">${item.opened?"Ouvert":"Pas encore"}</span></td><td><span class="history-status ${item.clicked?"click":"no"}">${item.clicked?"Cliqué":"Pas encore"}</span></td></tr>`).join("")||'<tr><td colspan="6" class="empty">Aucun e-mail récent à afficher.</td></tr>';
+      $("#campaignList").innerHTML=state.campaigns.map(item=>`<article class="campaign-row"><div><strong>${escapeHtml(item.subject||item.name)}</strong><small>${formatDate(item.sentDate||item.scheduledAt||item.createdAt)} · ${escapeHtml(item.status||"brouillon")}</small></div><div class="campaign-metric"><b>${item.statistics?.globalStats?.uniqueViews||0}</b><small>ouvertures</small></div><div class="campaign-metric"><b>${item.statistics?.globalStats?.clickers||0}</b><small>clics</small></div><div class="campaign-metric"><b>${item.statistics?.globalStats?.unsubscriptions||0}</b><small>désinscriptions</small></div>${item.status==="sent"?`<button class="secondary campaign-detail" data-campaign-id="${item.id}" data-campaign-name="${escapeHtml(item.subject||item.name)}">Voir qui a ouvert et cliqué</button>`:""}</article>`).join("")||'<p class="empty">Aucune campagne envoyée pour le moment.</p>';
+    }
     catch(error){showNotice(error.message,"error");}
   };
   const loadEngagement = async button => {

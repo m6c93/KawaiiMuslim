@@ -110,7 +110,12 @@ Histoires autour de l’Islam, découvertes scientifiques, coloriages et espace 
       </section>
 
       <section class="studio-view" id="view-history">
-        <div class="section-head"><div><p class="eyebrow">Suivre sans deviner</p><h2>Mes campagnes</h2><p>Retrouve les envois, ouvertures et clics communiqués par le service d’envoi.</p></div><button class="primary" id="refreshCampaigns">Actualiser</button></div>
+        <div class="section-head"><div><p class="eyebrow">Suivre sans deviner</p><h2>Historique des e-mails</h2><p>Retrouve chaque envoi avec son destinataire et son statut de lecture.</p></div><button class="primary" id="refreshCampaigns">Actualiser</button></div>
+        <div class="panel email-history-panel">
+          <div class="panel-head"><div><h3>Tous les e-mails récents</h3><small>Les tests et les autres e-mails envoyés depuis salam@kawaiimuslimworld.com apparaissent ici.</small></div><span class="soft-pill" id="emailHistoryCount">0 e-mail</span></div>
+          <div class="table-wrap"><table class="email-history-table"><thead><tr><th>E-mail</th><th>Destinataire</th><th>Envoi</th><th>Livraison</th><th>Ouverture</th><th>Lien cliqué</th></tr></thead><tbody id="emailHistoryBody"><tr><td colspan="6" class="empty">Chargement de l’historique…</td></tr></tbody></table></div>
+        </div>
+        <div class="history-subhead"><div><p class="eyebrow">Envois groupés</p><h3>Campagnes envoyées à la liste</h3></div></div>
         <div class="panel"><div class="campaign-list" id="campaignList"><p class="empty">Aucune campagne à afficher pour le moment.</p></div></div>
         <div class="panel engagement-panel" id="engagementPanel" hidden>
           <div class="panel-head"><div><p class="eyebrow">Détail des destinataires</p><h3 id="engagementTitle">Qui a réagi ?</h3><small>Les ouvertures sont indicatives. Les clics sont plus fiables.</small></div><button class="secondary" id="closeEngagement">Fermer</button></div>
@@ -142,7 +147,7 @@ Histoires autour de l’Islam, découvertes scientifiques, coloriages et espace 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/km-config.js"></script>
   <script src="/km-auth.js"></script>
-  <script src="/newsletter/newsletter.js?v=4"></script>
+  <script src="/newsletter/newsletter.js?v=5"></script>
 </body>
 </html>
 
