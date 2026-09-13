@@ -1,6 +1,6 @@
 import Stripe from "npm:stripe@22.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { PLANS, SITE_URL } from "../_shared/billing.ts";
+import { SITE_URL } from "../_shared/billing.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://www.kawaiimuslimworld.com",
@@ -59,15 +59,7 @@ Deno.serve(async (request) => {
             options: ["too_expensive", "missing_features", "switched_service", "unused", "other"],
           },
         },
-        subscription_update: {
-          enabled: true,
-          default_allowed_updates: ["price"],
-          proration_behavior: "create_prorations",
-          products: [{
-            product: "prod_V6MKu5snqlf8SQ",
-            prices: Object.values(PLANS).map((plan) => plan.priceId),
-          }],
-        },
+        subscription_update: { enabled: false },
       },
     });
 
