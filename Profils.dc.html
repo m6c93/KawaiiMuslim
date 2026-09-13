@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./km-launch-intro.css?v=after-login-2">
   <link rel="stylesheet" href="./responsive.css?v=tablet-20260818">
-  <link rel="stylesheet" href="./account.css?v=family-profiles-20260819">
+  <link rel="stylesheet" href="./account.css?v=gender-theme-1">
 </head>
 <body>
   <div class="km-launch-intro" id="kmLaunchIntro" aria-label="Ouverture de Kawaii Muslim World" hidden>
@@ -78,6 +78,11 @@
               <option value="13+">13 ans et plus</option>
             </select>
           </label>
+          <fieldset class="gender-field">
+            <legend class="field-label">Son univers</legend>
+            <label class="gender-option"><input type="radio" name="quickChildGender" value="girl" checked><span>👧 Fille</span></label>
+            <label class="gender-option"><input type="radio" name="quickChildGender" value="boy"><span>👦 Garçon</span></label>
+          </fieldset>
           <label>
             <span class="field-label">Son symbole</span>
             <select class="field-select" id="quickChildAvatar">
@@ -101,7 +106,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=family-profiles-20260819"></script>
+  <script src="./km-auth.js?v=child-gender-1"></script>
   <script>
     const profiles = document.getElementById("profiles");
     const teamZone = document.getElementById("teamZone");
@@ -164,14 +169,15 @@
         id: child.id,
         name: child.name,
         avatar: child.avatar,
-        label: `Profil enfant · ${child.age_group} ans`
+        gender: child.gender === "boy" ? "boy" : "girl",
+        label: `Profil ${child.gender === "boy" ? "garçon" : "fille"} · ${child.age_group} ans`
       }))];
 
       const remainingSlots = Math.max(0, childLimit - context.children.length);
       const profileCards = cards.map(card => `
         <button class="mode-card" type="button"
           data-type="${card.type}" data-id="${card.id || ""}"
-          data-name="${escapeHtml(card.name)}" data-avatar="${escapeHtml(card.avatar)}">
+          data-name="${escapeHtml(card.name)}" data-avatar="${escapeHtml(card.avatar)}" data-gender="${card.gender || ""}">
           <span class="profile-avatar">${escapeHtml(card.avatar)}</span>
           <strong>${escapeHtml(card.name)}</strong>
           <small>${escapeHtml(card.label)}</small>
@@ -253,7 +259,8 @@
         type: card.dataset.type,
         id: card.dataset.id || null,
         name: card.dataset.name,
-        avatar: card.dataset.avatar
+        avatar: card.dataset.avatar,
+        gender: card.dataset.gender
       });
     });
 
@@ -273,7 +280,8 @@
         await KMAuth.addChild({
           name: document.getElementById("quickChildName").value,
           ageGroup: document.getElementById("quickChildAge").value,
-          avatar: document.getElementById("quickChildAvatar").value
+          avatar: document.getElementById("quickChildAvatar").value,
+          gender: new FormData(quickChildForm).get("quickChildGender")
         });
         context = await KMAuth.getContext();
         renderProfiles();

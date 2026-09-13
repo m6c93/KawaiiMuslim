@@ -185,7 +185,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .profile-copy { min-width: 0; }
 .profile-copy strong { display: block; font-family: "Baloo 2", cursive; font-size: 16px; }
 .profile-copy small { display: block; overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-.card-actions { display: flex; align-items: center; gap: 7px; }
+.card-actions { display: flex; flex-wrap:wrap; align-items: center; justify-content:flex-end; gap: 7px; }
 .reading-summary, .reading-empty { margin: 12px 0 0 56px; }
 .reading-empty { color: var(--muted); font-size: 11px; font-weight: 700; }
 .reading-summary { max-width: 520px; }
@@ -205,7 +205,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   background: #e9f7f1;
 }
 .small-button.danger { color: #b04f72; background: var(--pink-soft); }
-.child-form { display: grid; grid-template-columns: 1.2fr .8fr .8fr auto; gap: 9px; margin-top: 15px; }
+.small-button.is-selected { color:#fff; border-color:#c95c8c; background:#c95c8c; box-shadow:0 7px 16px rgba(201,92,140,.2); }
+.child-form { display: grid; grid-template-columns: 1.2fr .8fr 1.2fr .8fr auto; gap: 9px; margin-top: 15px; align-items:end; }
 .child-form .field-input, .child-form .field-select { margin: 0; min-height: 44px; }
 .mode-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
 .mode-card {
@@ -244,11 +245,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .profile-setup-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
 .profile-setup-head h2 { margin: 9px 0 3px; font: 800 24px "Baloo 2",cursive; }
 .profile-setup-head p { max-width: 700px; margin: 0; color: var(--muted); line-height: 1.5; }
-.profile-setup-form { display: grid; grid-template-columns: 1.2fr .8fr .7fr auto; gap: 10px; align-items: end; margin-top: 20px; }
+.profile-setup-form { display: grid; grid-template-columns: 1.2fr .8fr 1.2fr .7fr auto; gap: 10px; align-items: end; margin-top: 20px; }
 .profile-setup-form label { min-width: 0; }
 .profile-setup-form .field-input,
 .profile-setup-form .field-select { min-height: 48px; margin: 0; }
 .profile-setup-form .primary-button { min-height: 48px; white-space: nowrap; }
+.gender-field { min-width:0; margin:0; padding:0; border:0; }
+.gender-field .field-label { margin-bottom:7px; }
+.gender-option { display:inline-flex; margin:0 5px 0 0; cursor:pointer; }
+.gender-option input { position:absolute; opacity:0; pointer-events:none; }
+.gender-option span { display:flex; align-items:center; justify-content:center; min-height:48px; padding:0 12px; border:1px solid #dedbea; border-radius:14px; background:#fff; color:#5a5c7b; font-size:13px; font-weight:900; transition:.18s ease; }
+.gender-option input:checked + span { border-color:#e98db8; background:#fce6f0; color:#713d59; box-shadow:0 0 0 3px rgba(233,141,184,.12); }
+.gender-option input:focus-visible + span { outline:3px solid #f0bd48; outline-offset:2px; }
 .team-zone { display:grid; grid-template-columns:minmax(0,1fr) minmax(260px,360px); gap:22px; align-items:center; margin-top:34px; padding:24px; border:1px solid #d9dced; border-radius:25px; background:linear-gradient(145deg,#f1f3fb,#fff); }
 .team-zone-copy h2 { margin:9px 0 4px; font-family:"Baloo 2",cursive; font-size:22px; }
 .team-zone-copy p { max-width:580px; margin:0; color:#666985; line-height:1.55; }
@@ -357,7 +365,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .reading-line strong { white-space: normal; line-height: 1.35; }
   .reading-summary small { display: block; line-height: 1.4; }
   .card-actions { flex-direction: row; width: 100%; }
-  .card-actions .small-button { flex: 1; min-height: 42px; display: grid; place-items: center; text-align: center; }
+  .card-actions .small-button { flex: 1 1 44%; min-height: 42px; display: grid; place-items: center; text-align: center; }
 
   .quran-parent-head { gap: 14px; margin-bottom: 14px; }
   .quran-parent-head h2 { margin: 4px 0 0; font-size: 21px; line-height: 1.12; }

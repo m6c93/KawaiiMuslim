@@ -3,6 +3,7 @@
 
   var loading = document.getElementById("todayLoading");
   var profileName = document.getElementById("todayProfileName");
+  var welcomeName = document.getElementById("todayWelcomeName");
   var avatar = document.getElementById("todayAvatar");
   var starBalance = document.getElementById("todayStarBalance");
   var starUnit = document.getElementById("todayStarUnit");
@@ -41,6 +42,7 @@
     var count = Number(stars) || 0;
     currentBalance = count;
     if (profileName) profileName.textContent = safeName;
+    if (welcomeName) welcomeName.textContent = safeName;
     if (avatar) avatar.textContent = avatarValue || safeName.charAt(0).toLowerCase();
     if (starBalance) starBalance.textContent = count;
     if (starUnit) starUnit.textContent = " étoile" + (count > 1 ? "s" : "");
@@ -284,13 +286,86 @@
       gsap.registerPlugin(ScrollTrigger);
     }
 
-    gsap.from(".today-header > *", {
-      autoAlpha: 0,
-      y: -14,
-      duration: .55,
-      stagger: .07,
-      ease: "power2.out"
+    var intro = gsap.timeline({ defaults: { ease: "power3.out" } });
+    intro
+      .from(".today-header > *", { autoAlpha: 0, y: -18, duration: .55, stagger: .08 })
+      .from(".child-hero", { autoAlpha: 0, y: 24, scale: .975, duration: .72 }, "-=.25")
+      .from(".child-eyebrow", { autoAlpha: 0, y: 12, duration: .38 }, "-=.38")
+      .from(".child-hero h1", { autoAlpha: 0, y: 25, clipPath: "inset(0 0 100% 0)", duration: .62 }, "-=.24")
+      .from(".child-hero-copy > p:not(.child-eyebrow)", { autoAlpha: 0, y: 12, duration: .4 }, "-=.27")
+      .from(".child-primary", { autoAlpha: 0, y: 12, scale: .94, duration: .45 }, "-=.22")
+      .from(".child-hero-art", { autoAlpha: 0, x: 58, y: 25, scale: .9, rotation: 2.5, duration: .82 }, "-=.62");
+
+    gsap.to(".child-hero-art", {
+      y: -10,
+      rotation: 1.2,
+      duration: 3.2,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+      delay: .8
     });
+
+    var destinations = gsap.utils.toArray(".destination");
+    gsap.from(destinations, {
+      autoAlpha: 0,
+      y: 34,
+      scale: .94,
+      duration: .58,
+      stagger: .09,
+      ease: "back.out(1.25)",
+      scrollTrigger: window.ScrollTrigger ? {
+        trigger: ".destination-grid",
+        start: "clamp(top 88%)",
+        once: true
+      } : undefined
+    });
+
+    gsap.from([".child-resume", ".child-prayer"], {
+      autoAlpha: 0,
+      y: 30,
+      duration: .62,
+      stagger: .12,
+      ease: "power3.out",
+      scrollTrigger: window.ScrollTrigger ? {
+        trigger: ".child-resume",
+        start: "clamp(top 88%)",
+        once: true
+      } : undefined
+    });
+
+    var hero = document.querySelector(".child-hero");
+    var heroArt = document.querySelector(".child-hero-art");
+    if (hero && heroArt && window.matchMedia("(hover:hover) and (pointer:fine)").matches) {
+      var moveArt = gsap.quickTo(heroArt, "x", { duration: .7, ease: "power3.out" });
+      hero.addEventListener("pointermove", function (event) {
+        var rect = hero.getBoundingClientRect();
+        var x = (event.clientX - rect.left) / rect.width;
+        var y = (event.clientY - rect.top) / rect.height;
+        hero.style.setProperty("--hero-mx", (x * 100).toFixed(1) + "%");
+        hero.style.setProperty("--hero-my", (y * 100).toFixed(1) + "%");
+        moveArt((x - .5) * 15);
+      });
+      hero.addEventListener("pointerleave", function () {
+        hero.style.setProperty("--hero-mx", "74%");
+        hero.style.setProperty("--hero-my", "22%");
+        moveArt(0);
+      });
+
+      destinations.forEach(function (card) {
+        card.addEventListener("pointermove", function (event) {
+          var rect = card.getBoundingClientRect();
+          var x = (event.clientX - rect.left) / rect.width;
+          var y = (event.clientY - rect.top) / rect.height;
+          card.style.setProperty("--spot-x", (x * 100).toFixed(1) + "%");
+          card.style.setProperty("--spot-y", (y * 100).toFixed(1) + "%");
+          gsap.to(card, { rotationY: (x - .5) * 5, rotationX: (.5 - y) * 5, duration: .35, ease: "power2.out", overwrite: "auto" });
+        });
+        card.addEventListener("pointerleave", function () {
+          gsap.to(card, { rotationY: 0, rotationX: 0, duration: .55, ease: "elastic.out(1,.5)", overwrite: "auto" });
+        });
+      });
+    }
 
     var steps = gsap.utils.toArray("[data-journey-step]");
     steps.forEach(function (step) {

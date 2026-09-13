@@ -251,9 +251,11 @@ window.KMAuth = (() => {
     }));
   };
 
+  const childGender = selection => selection?.gender === "boy" || selection?.avatar === "👦" ? "boy" : "girl";
+
   const setActiveProfile = selection => {
     const clean = selection?.type === "child"
-      ? { type: "child", id: String(selection.id), name: String(selection.name || ""), avatar: String(selection.avatar || "🐤") }
+      ? { type: "child", id: String(selection.id), name: String(selection.name || ""), avatar: String(selection.avatar || "🐤"), gender: childGender(selection) }
       : { type: "parent", id: null, name: String(selection?.name || ""), avatar: String(selection?.avatar || "🌸") };
     localStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(clean));
     return clean;
@@ -556,14 +558,15 @@ window.KMAuth = (() => {
         .single());
     },
 
-    addChild: async ({ name, avatar, ageGroup }) => {
+    addChild: async ({ name, avatar, ageGroup, gender = "girl" }) => {
       const session = await getSession();
       if (!session) throw new Error("Connexion requise.");
       return requireSuccess(await client().from("child_profiles").insert({
         parent_id: session.user.id,
         name: name.trim(),
         avatar,
-        age_group: ageGroup
+        age_group: ageGroup,
+        gender: gender === "boy" ? "boy" : "girl"
       }).select().single());
     },
 

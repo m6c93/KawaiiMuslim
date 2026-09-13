@@ -20,6 +20,7 @@ create table if not exists public.child_profiles (
   parent_id uuid not null references public.profiles(id) on delete cascade,
   name text not null check (char_length(name) between 1 and 40),
   avatar text not null default '🐤',
+  gender text not null default 'girl' check (gender in ('girl', 'boy')),
   age_group text not null default '6-8' check (age_group in ('3-5', '6-8', '9-12', '13+')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

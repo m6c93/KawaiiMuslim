@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./responsive.css?v=tablet-20260818">
-  <link rel="stylesheet" href="./account.css?v=account-mobile-2">
+  <link rel="stylesheet" href="./account.css?v=gender-theme-1">
 </head>
 <body>
   <div class="account-shell">
@@ -97,6 +97,11 @@
               <option value="9-12">9 à 12 ans</option>
               <option value="13+">13 ans et plus</option>
             </select>
+            <fieldset class="gender-field">
+              <legend class="field-label">Son univers</legend>
+              <label class="gender-option"><input type="radio" name="childGender" value="girl" checked><span>👧 Fille</span></label>
+              <label class="gender-option"><input type="radio" name="childGender" value="boy"><span>👦 Garçon</span></label>
+            </fieldset>
             <label class="field-label" for="childAvatar">Petit symbole</label>
             <select class="field-select" id="childAvatar">
               <option>🐤</option><option>👧</option><option>👦</option><option>🧒</option><option>⭐</option><option>🌱</option>
@@ -112,7 +117,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=quran-parent-2"></script>
+  <script src="./km-auth.js?v=child-gender-1"></script>
   <script>
     let context = null;
     const children = document.getElementById("children");
@@ -151,7 +156,7 @@
               <span class="profile-avatar">${escapeHtml(child.avatar)}</span>
               <div class="profile-copy">
                 <strong>${escapeHtml(child.name)}</strong>
-                <small>${escapeHtml(child.age_group)} ans · progression personnelle</small>
+                <small>${child.gender === "boy" ? "Garçon" : "Fille"} · ${escapeHtml(child.age_group)} ans · progression personnelle</small>
               </div>
             </div>
             ${(() => {
@@ -167,6 +172,8 @@
             })()}
           </div>
           <div class="card-actions">
+            <button class="small-button ${child.gender === "boy" ? "" : "is-selected"}" type="button" data-set-gender="girl" data-child="${child.id}">👧 Univers Aya</button>
+            <button class="small-button ${child.gender === "boy" ? "is-selected" : ""}" type="button" data-set-gender="boy" data-child="${child.id}">👦 Univers Adam</button>
             <a class="small-button" href="Atelier.dc.html?child=${child.id}">🎨 Sa galerie</a>
             <button class="small-button danger" type="button" data-remove="${child.id}">Retirer</button>
           </div>
@@ -363,7 +370,8 @@
         await KMAuth.addChild({
           name: document.getElementById("childName").value,
           ageGroup: document.getElementById("childAge").value,
-          avatar: document.getElementById("childAvatar").value
+          avatar: document.getElementById("childAvatar").value,
+          gender: new FormData(event.target).get("childGender")
         });
         event.target.reset();
         document.getElementById("childAge").value = "6-8";
@@ -377,6 +385,21 @@
     });
 
     children.addEventListener("click", async event => {
+      const genderButton = event.target.closest("[data-set-gender]");
+      if (genderButton) {
+        genderButton.disabled = true;
+        try {
+          await KMAuth.updateChild(genderButton.dataset.child, { gender: genderButton.dataset.setGender });
+          message.className = "form-message success";
+          message.textContent = genderButton.dataset.setGender === "boy" ? "L’univers d’Adam est activé pour ce profil." : "L’univers d’Aya est activé pour ce profil.";
+          await load();
+        } catch (error) {
+          genderButton.disabled = false;
+          message.className = "form-message";
+          message.textContent = KMAuth.friendlyError(error);
+        }
+        return;
+      }
       const button = event.target.closest("[data-remove]");
       if (!button) return;
       if (!window.confirm("Retirer ce profil enfant et sa progression ?")) return;
