@@ -52,6 +52,28 @@ async function brevo(path,options={}){
   const response=await fetch(`${BREVO_API}${path}`,{...options,headers:{accept:"application/json","api-key":BREVO_KEY,...(options.body?{"content-type":"application/json"}:{}),...(options.headers||{})}});
   const data=await response.json().catch(()=>({})); if(!response.ok)throw Object.assign(new Error(data.message||"Le service d’envoi a refusé la demande."),{status:response.status}); return data;
 }
+const EMAIL_EVENT_FAILURES=new Set(["softBounces","hardBounces","blocked","invalid","error","spam"]);
+async function emailHistory(){
+  const data=await brevo("/smtp/statistics/events?limit=5000&days=90&sort=desc");
+  const messages=new Map();
+  for(const item of data.events||[]){
+    if(cleanEmail(item.from)!==cleanEmail(SENDER_EMAIL))continue;
+    const email=cleanEmail(item.email),messageId=safeText(item.messageId,300);
+    const key=messageId||`${email}|${safeText(item.subject,160)}|${String(item.date||"").slice(0,16)}`;
+    if(!key)continue;
+    const row=messages.get(key)||{messageId,email,subject:safeText(item.subject,160)||"E-mail sans objet",sentAt:item.date||null,lastEventAt:item.date||null,events:new Set(),reason:""};
+    row.events.add(item.event);
+    if(item.date&&(!row.sentAt||new Date(item.date)<new Date(row.sentAt)))row.sentAt=item.date;
+    if(item.date&&(!row.lastEventAt||new Date(item.date)>new Date(row.lastEventAt)))row.lastEventAt=item.date;
+    if(EMAIL_EVENT_FAILURES.has(item.event)&&item.reason)row.reason=safeText(item.reason,300);
+    messages.set(key,row);
+  }
+  const emails=[...messages.values()].map(row=>{
+    const events=[...row.events],failed=events.some(event=>EMAIL_EVENT_FAILURES.has(event));
+    return{messageId:row.messageId,email:row.email,subject:row.subject,sentAt:row.sentAt,lastEventAt:row.lastEventAt,sent:events.some(event=>["requests","sent","delivered","opened","clicks"].includes(event)),delivered:events.includes("delivered"),opened:events.includes("opened"),clicked:events.includes("clicks"),failed,reason:row.reason,events};
+  }).sort((a,b)=>new Date(b.lastEventAt||0)-new Date(a.lastEventAt||0)).slice(0,250);
+  return{emails,count:emails.length};
+}
 function normalizeContacts(items,source){
   const map=new Map(); for(const raw of items||[]){const email=cleanEmail(raw.email);if(!validEmail(email))continue;map.set(email,{email,attributes:{PRENOM:safeText(raw.firstName||raw.firstname||raw.name,80),NOM:safeText(raw.lastName||raw.lastname,80),SOURCE:safeText(raw.source||source||"Newsletter",80)}});} return [...map.values()];
 }
@@ -124,10 +146,11 @@ module.exports=async(req,res)=>{
     if(action==="syncFormspree"){const contacts=await formspreeContacts();return json(res,200,await importContacts(contacts,"Formspree"));}
     if(action==="syncShopify"){const contacts=await shopifyContacts();return json(res,200,await importContacts(contacts,"Shopify"));}
     if(action==="contacts"){if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});const data=await brevo(`/contacts/lists/${BREVO_LIST_ID}/contacts?limit=500&offset=0&sort=desc`);const contacts=(data.contacts||[]).filter(item=>!item.emailBlacklisted&&!(item.listUnsubscribed||[]).includes(BREVO_LIST_ID));return json(res,200,{contacts,count:contacts.length,total:data.count||0});}
+    if(action==="emailHistory")return json(res,200,await emailHistory());
     if(action==="campaigns"){const data=await brevo("/emailCampaigns?type=classic&limit=30&offset=0&sort=desc");return json(res,200,{campaigns:data.campaigns||[],count:data.count||0});}
     if(action==="campaignEngagement"){if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});return json(res,200,await campaignEngagement(body.campaignId));}
     if(action==="deliveryCheck"){const email=cleanEmail(body.email);if(!validEmail(email))throw Object.assign(new Error("Adresse invalide."),{status:400});return json(res,200,await deliveryCheck(email));}
-    if(action==="sendTest"){const campaign=await validateCampaign(body,admin.token),email=cleanEmail(body.email);if(!validEmail(email))throw Object.assign(new Error("Adresse de test invalide."),{status:400});const data=await brevo("/smtp/email",{method:"POST",body:JSON.stringify({sender:{name:SENDER_NAME,email:SENDER_EMAIL},to:[{email}],replyTo:{email:SENDER_EMAIL,name:SENDER_NAME},subject:`[TEST] ${campaign.subject}`,htmlContent:campaign.html.replace(/{{\s*unsubscribe\s*}}/gi,"https://www.kawaiimuslimworld.com/"),headers:{"X-Mailin-trackClick":"1","X-Mailin-trackOpen":"1"}})});return json(res,200,{messageId:data.messageId,rehosted:campaign.rehosted});}
+    if(action==="sendTest"){const campaign=await validateCampaign(body,admin.token),email=cleanEmail(body.email);if(!validEmail(email))throw Object.assign(new Error("Adresse de test invalide."),{status:400});const data=await brevo("/smtp/email",{method:"POST",body:JSON.stringify({sender:{name:SENDER_NAME,email:SENDER_EMAIL},to:[{email}],replyTo:{email:SENDER_EMAIL,name:SENDER_NAME},subject:`[TEST] ${campaign.subject}`,htmlContent:campaign.html.replace(/{{\s*unsubscribe\s*}}/gi,"https://www.kawaiimuslimworld.com/"),tags:["newsletter-studio-test"],headers:{"X-Mailin-trackClick":"1","X-Mailin-trackOpen":"1"}})});return json(res,200,{messageId:data.messageId,rehosted:campaign.rehosted});}
     if(action==="sendCampaign"){if(!BREVO_LIST_ID)throw Object.assign(new Error("La liste d’envoi doit encore être configurée."),{status:503});const campaign=await validateCampaign(body,admin.token);const created=await brevo("/emailCampaigns",{method:"POST",body:JSON.stringify({name:campaign.name,subject:campaign.subject,previewText:campaign.preheader,sender:{name:SENDER_NAME,email:SENDER_EMAIL},replyTo:SENDER_EMAIL,type:"classic",htmlContent:campaign.html,recipients:{listIds:[BREVO_LIST_ID]},inlineImageActivation:false,mirrorActive:true,trackLinks:"enabled"})});await brevo(`/emailCampaigns/${created.id}/sendNow`,{method:"POST"});return json(res,200,{campaignId:created.id,rehosted:campaign.rehosted});}
     return json(res,400,{error:"Action inconnue."});
   }catch(error){console.error("newsletter-api",error);return json(res,error.status||500,{error:error.message||"Erreur interne."});}
