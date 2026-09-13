@@ -1,6 +1,7 @@
-import {JUZ_RANGES} from './juz-data.mjs';
+import {JUZ_NAMES,JUZ_RANGES} from './juz-data.mjs?v=2';
 import {treeAppearance,treeHealth,cleanGarden} from './garden.mjs?v=5';
 export const homeJuz=s=>JUZ_RANGES.find(r=>r.surah===Number(s))?.ranges[0].juz;
+export const juzLabel=juz=>`Juz’ ${juz} · ${JUZ_NAMES[Number(juz)]||''}`.trim();
 export function juzStats(juz,progress){
  const refs=JUZ_RANGES.flatMap(s=>s.ranges.filter(r=>r.juz===juz).flatMap(r=>Array.from({length:r.to-r.from+1},(_,i)=>`${s.surah}:${r.from+i}`)));
  const earned=new Set(progress.treeEarned),done=refs.filter(r=>earned.has(r)),due=done.filter(r=>treeHealth(progress.treeReview[r]||0).thirsty);
@@ -19,9 +20,9 @@ export function createGarden({getProgress,index,review,escape:esc}){
  function bar(p){return `<div class="tree-growth" role="progressbar" aria-valuenow="${p}" aria-valuemin="0" aria-valuemax="100" aria-label="Versets travaillés"><span style="width:${p}%"></span></div><small>${p}%</small>`}
  function open(p){parcel=p;screen='parcel';selected=moving='';notice='';if(p!=='favorite')state.last=p;save();draw();root.scrollIntoView({block:'start'})}
  function draw(){if(!root?.isConnected)return;
- const header=`<div class="grove-header"><div><p class="eyebrow">MON JARDIN DU CORAN</p><h1>${screen==='home'?'Mon jardin, à ma façon.':screen==='map'?'Les 30 parcelles':parcel==='favorite'?'Ma parcelle préférée':`Ma parcelle · Juz’ ${parcel}`}</h1></div><img src="art/aya-mimi-lecture-transparent.png" alt="Aya et Mimi" width="155" height="155"></div>`;
- if(screen==='home'){root.innerHTML=header+`<p>Un verset après l’autre, prends soin de ton jardin.</p><div class="parcel-menu"><button class="primary" data-j="continue">🌱 Continuer mon Juz’ <small>Retrouver la parcelle ${state.last}</small></button><button data-j="map">🌿 Voir les 30 parcelles</button><button data-j="favorite">🌸 Ma parcelle préférée</button></div>`;return}
- if(screen==='map'){root.innerHTML=header+`<button data-j="home">← Mon jardin</button><div class="parcel-map">${Array.from({length:30},(_,i)=>{const j=i+1,s=juzStats(j,getProgress());return `<button data-j="open" data-id="${j}"><span class="parcel-mini">🌳</span><strong>Juz’ ${j}</strong>${bar(s.percent)}<small>${s.done.length} / ${s.refs.length} versets</small>${s.due.length?`<span>💧 ${s.due.length} à revoir</span>`:''}</button>`}).join('')}</div>`;return}
+ const header=`<div class="grove-header"><div><p class="eyebrow">MON JARDIN DU CORAN</p><h1>${screen==='home'?'Mon jardin, à ma façon.':screen==='map'?'Les 30 parcelles':parcel==='favorite'?'Ma parcelle préférée':`Ma parcelle · ${juzLabel(parcel)}`}</h1></div><img src="art/aya-mimi-lecture-transparent.png" alt="Aya et Mimi" width="155" height="155"></div>`;
+ if(screen==='home'){root.innerHTML=header+`<p>Un verset après l’autre, prends soin de ton jardin.</p><div class="parcel-menu"><button class="primary" data-j="continue">🌱 Continuer mon Juz’ <small>Retrouver ${juzLabel(state.last)}</small></button><button data-j="map">🌿 Voir les 30 parcelles</button><button data-j="favorite">🌸 Ma parcelle préférée</button></div>`;return}
+ if(screen==='map'){root.innerHTML=header+`<button data-j="home">← Mon jardin</button><div class="parcel-map">${Array.from({length:30},(_,i)=>{const j=i+1,s=juzStats(j,getProgress());return `<button data-j="open" data-id="${j}"><span class="parcel-mini">🌳</span><strong>${juzLabel(j)}</strong>${bar(s.percent)}<small>${s.done.length} / ${s.refs.length} versets</small>${s.due.length?`<span>💧 ${s.due.length} à revoir</span>`:''}</button>`}).join('')}</div>`;return}
  const pos=positions();for(const[s,p]of Object.entries(pos)){if(!earned(s).length||!p||!Number.isFinite(p.x)||!Number.isFinite(p.y)||(parcel!=='favorite'&&homeJuz(s)!==parcel))delete pos[s]}
  const stats=parcel==='favorite'?null:juzStats(parcel,getProgress()),available=trees().filter(s=>!pos[s.id]);
  root.innerHTML=header+`<div class="grove-toolbar"><button data-j="map">← Les 30 parcelles</button><button data-j="home">Mon jardin</button></div>${stats?`<div class="parcel-progress">${bar(stats.percent)}<small>${stats.done.length} / ${stats.refs.length} versets travaillés dans ce Juz’</small>${stats.due.length?`<button data-j="due">💧 ${stats.due.length} versets à revoir</button>`:''}</div>`:'<p>Expose jusqu’à 12 arbres favoris. Ils gardent aussi leur place dans leur Juz’.</p>'}
