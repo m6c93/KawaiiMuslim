@@ -1,4 +1,6 @@
 {
+  "outputDirectory": ".",
+  "framework": null,
   "redirects": [
     {
       "source": "/",
