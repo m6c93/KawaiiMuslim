@@ -383,7 +383,11 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
         artworkSourceKey = saved.sourceKey;
         format = "image";
         const returnCandidate = new URL(requestedReturn || saved.returnUrl || "Bibliotheque%20Kawaii%20Muslim.dc.html", location.href);
-        bookReturnUrl = returnCandidate.origin === location.origin && (/\/LivreColoriage\.dc\.html$/i.test(returnCandidate.pathname) || /\/books\/colorie-ecris-apprends\.html$/i.test(returnCandidate.pathname))\n          ? returnCandidate.pathname + returnCandidate.search\n          : "Bibliotheque%20Kawaii%20Muslim.dc.html";
+        bookReturnUrl = returnCandidate.origin === location.origin
+          && (/\/LivreColoriage\.dc\.html$/i.test(returnCandidate.pathname)
+            || /\/books\/colorie-ecris-apprends\.html$/i.test(returnCandidate.pathname))
+          ? returnCandidate.pathname + returnCandidate.search
+          : "Bibliotheque%20Kawaii%20Muslim.dc.html";
         document.getElementById("backAction").href = bookReturnUrl;
         document.getElementById("backLabel").textContent = "Livre";
         document.body.classList.add("book-coloring-mode");
