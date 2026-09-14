@@ -55,3 +55,22 @@ et vérifie que chaque image en ligne est bien accessible.
 
 À faire une fois : exécuter `supabase/newsletter-images.sql` dans l’éditeur SQL de Supabase
 pour créer le bucket public `newsletter-images` (réservé aux administratrices en écriture).
+
+## Studio d’agents IA (`/agents/`)
+
+Espace privé (admin + double authentification) pour créer des agents IA avec un avatar,
+une mission, un ton et des outils. Chaque agent peut sortir sur le web (recherche et lecture
+de pages, exécutées côté Anthropic), retenir des informations d’une mission à l’autre et
+revenir avec une réponse sourcée. Modèle utilisé : `claude-opus-5`.
+
+Mise en place, une seule fois :
+
+1. Exécuter `supabase/agents.sql` dans l’éditeur SQL de Supabase (tables `ai_agents`,
+   `ai_conversations`, `ai_memories`, réservées aux administratrices).
+2. Ajouter la variable `ANTHROPIC_API_KEY` dans Vercel (Settings → Environment Variables),
+   puis redéployer. Optionnel : `AGENTS_MODEL` pour changer de modèle.
+3. Vercel installe `@anthropic-ai/sdk` grâce au `package.json` à la racine. La fonction
+   `api/agents.js` a une durée maximale de 60 s (`vercel.json`).
+
+Accès : https://www.kawaiimuslimworld.com/agents/ (ou le sous-domaine `agents.` si tu le
+crées dans Vercel, la redirection est déjà prévue).
