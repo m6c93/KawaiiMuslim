@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#171b45">
+  <title>Studio d’agents — Kawaii Muslim World</title>
+  <link rel="icon" type="image/png" href="/brand/assets/logo-kawaii-muslim.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/agents/agents.css?v=1">
+</head>
+<body class="is-loading">
+  <div class="auth-loader" id="authLoader"><span></span>Réveil de tes agents…</div>
+
+  <div class="studio-shell" id="studio" hidden>
+    <aside class="studio-sidebar">
+      <a class="studio-brand" href="/agents/" aria-label="Studio d’agents, accueil">
+        <img src="/brand/assets/logo-kawaii-muslim.png" alt="">
+        <span>Studio d’agents<small>KAWAII MUSLIM WORLD</small></span>
+      </a>
+      <div class="agent-roster">
+        <p class="roster-title">Mon équipe</p>
+        <div id="agentRoster" class="roster-list"></div>
+        <button type="button" class="roster-add" id="newAgent">＋ Créer un agent</button>
+      </div>
+      <nav class="side-links">
+        <a href="/newsletter/">💌 Studio newsletter</a>
+        <a href="/Admin.dc.html">⚙️ Administration</a>
+        <a href="/Bibliotheque%20Kawaii%20Muslim.dc.html">📚 Retour au site</a>
+      </nav>
+      <div class="admin-badge"><span>🌸</span><div><strong id="adminName">Administration</strong><small>Espace privé</small></div></div>
+    </aside>
+
+    <main class="studio-main">
+      <header class="studio-topbar">
+        <button type="button" class="mobile-menu" id="mobileMenu" aria-label="Menu">☰</button>
+        <div class="topbar-title" id="topbarTitle"><p class="eyebrow">Studio d’agents</p><h1>Bonjour <span id="adminFirstName">Maman</span> 🌸</h1></div>
+        <div class="topbar-actions" id="topbarActions"></div>
+      </header>
+      <div class="notice" id="notice" role="status"></div>
+
+      <!-- Accueil : galerie -->
+      <section class="studio-view active" id="view-home">
+        <div class="hero-card">
+          <div>
+            <p class="eyebrow light">Ton équipe d’assistantes IA</p>
+            <h2>Des agents qui sortent chercher, puis reviennent te répondre.</h2>
+            <p>Chaque agent a un prénom, un visage, une mission et une mémoire. Il peut naviguer sur le web, lire des pages, retenir tes préférences et t’aider dans toutes tes tâches du quotidien.</p>
+            <div class="hero-actions"><button type="button" class="primary" id="heroNewAgent">Créer mon premier agent</button><button type="button" class="ghost" id="heroPresets">Choisir un modèle prêt à l’emploi</button></div>
+          </div>
+          <div class="hero-art" id="heroArt"></div>
+        </div>
+        <div class="setup-card" id="setupCard" hidden>
+          <h3>Il reste une étape avant de réveiller les agents</h3>
+          <ol id="setupSteps"></ol>
+        </div>
+        <h3 class="section-title">Mes agents <small id="agentCount"></small></h3>
+        <div class="agent-grid" id="agentGrid"></div>
+        <h3 class="section-title">Modèles prêts à l’emploi</h3>
+        <div class="preset-grid" id="presetGrid"></div>
+      </section>
+
+      <!-- Création / édition -->
+      <section class="studio-view" id="view-editor">
+        <form class="editor-layout" id="agentForm" autocomplete="off">
+          <div class="editor-card">
+            <h3>Identité</h3>
+            <label>Prénom de l’agent<input id="agentName" maxlength="60" required placeholder="Ex. Noor"></label>
+            <label>Son rôle en une ligne<input id="agentRole" maxlength="120" placeholder="Ex. Assistante newsletter et réseaux"></label>
+            <label>Sa mission<textarea id="agentMission" rows="7" maxlength="4000" placeholder="Décris ce qu’il doit faire pour toi, tes attentes, ton style, ce qu’il doit éviter…"></textarea></label>
+            <label>Son ton
+              <select id="agentTone"><option value="douce">Douce et chaleureuse</option><option value="pro">Professionnelle et concise</option><option value="enjouée">Enjouée et créative</option><option value="calme">Calme et structurée</option></select>
+            </label>
+            <h3>Ce qu’il peut faire</h3>
+            <div class="tool-toggles">
+              <label class="toggle"><input type="checkbox" id="toolSearch" checked><span><strong>🔎 Sortir sur le web</strong><small>Recherche des informations récentes</small></span></label>
+              <label class="toggle"><input type="checkbox" id="toolFetch" checked><span><strong>📄 Lire des pages</strong><small>Ouvre un lien et en extrait le contenu</small></span></label>
+              <label class="toggle"><input type="checkbox" id="toolMemory" checked><span><strong>🧠 Se souvenir</strong><small>Retient tes préférences d’une mission à l’autre</small></span></label>
+            </div>
+            <div class="editor-actions"><button type="button" class="ghost" id="cancelEditor">Annuler</button><button type="submit" class="primary" id="saveAgent">Enregistrer l’agent</button></div>
+          </div>
+          <div class="editor-card avatar-card">
+            <h3>Son visage</h3>
+            <div class="avatar-preview" id="avatarPreview"></div>
+            <div class="avatar-controls">
+              <div class="control"><span>Couleur</span><div class="swatches" id="swatchColor"></div></div>
+              <div class="control"><span>Peau</span><div class="swatches" id="swatchSkin"></div></div>
+              <div class="control"><span>Coiffe</span><div class="chips" id="chipHead"></div></div>
+              <div class="control"><span>Yeux</span><div class="chips" id="chipEyes"></div></div>
+              <div class="control"><span>Accessoire</span><div class="chips" id="chipAccessory"></div></div>
+              <div class="control"><span>Humeur</span><div class="chips" id="chipMouth"></div></div>
+              <button type="button" class="ghost small" id="randomAvatar">🎲 Au hasard</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Conversation -->
+      <section class="studio-view" id="view-chat">
+        <div class="chat-layout">
+          <aside class="chat-side">
+            <div class="chat-agent-card" id="chatAgentCard"></div>
+            <div class="side-block">
+              <div class="side-head"><h4>Missions</h4><button type="button" class="ghost small" id="newConversation">＋ Nouvelle</button></div>
+              <div class="conversation-list" id="conversationList"></div>
+            </div>
+            <div class="side-block">
+              <div class="side-head"><h4>Mémoire</h4><button type="button" class="ghost small" id="addMemory">＋ Ajouter</button></div>
+              <div class="memory-list" id="memoryList"></div>
+            </div>
+          </aside>
+          <div class="chat-main">
+            <div class="chat-scroll" id="chatScroll">
+              <div class="chat-empty" id="chatEmpty"></div>
+              <div class="chat-thread" id="chatThread"></div>
+            </div>
+            <form class="chat-composer" id="chatForm">
+              <textarea id="chatInput" rows="2" placeholder="Confie une tâche à ton agent… (Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne)"></textarea>
+              <button type="submit" class="primary" id="chatSend">Envoyer</button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="confirmModal" hidden>
+    <div class="modal-card"><h3 id="confirmTitle">Confirmer</h3><p id="confirmText"></p><div class="modal-actions"><button type="button" class="ghost" id="confirmCancel">Annuler</button><button type="button" class="danger" id="confirmOk">Supprimer</button></div></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/km-config.js"></script>
+  <script src="/km-auth.js?v=agents-1"></script>
+  <script src="/agents/agents.js?v=1"></script>
+</body>
+</html>
