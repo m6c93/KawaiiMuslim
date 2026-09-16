@@ -11,7 +11,8 @@
 .garden-legend span{display:flex;align-items:center;gap:5px;padding:5px 9px;border:1px solid #fff9;border-radius:999px;background:#fffdf1e8;box-shadow:0 4px 12px #34512d20;color:#435f4c;font-size:9px;font-weight:900;backdrop-filter:blur(6px)}
 .garden-legend b{display:grid;place-items:center;width:16px;height:16px;border-radius:50%;background:#3f875f;color:#fff;font-size:9px}
 .surah-tree{position:absolute;z-index:4;width:105px;margin:0;text-align:center;animation:tree-breathe 4.5s ease-in-out infinite}
-.surah-tree img{display:block;width:100%;height:118px;object-fit:contain;filter:drop-shadow(0 8px 7px #2d512c36)}
+.tree-picture{display:block;width:100%;height:118px;background-repeat:no-repeat;background-size:500% 100%;background-position:100% center;filter:drop-shadow(0 8px 7px #2d512c36)}
+.tree-palm{background-image:url("assets/tree-date-palm.png")}.tree-cherry{background-image:url("assets/tree-cherry.png")}.tree-olive{background-image:url("assets/tree-olive.png")}
 .surah-tree figcaption,.surah-bulb{padding:4px 7px;border:1px solid #fff9;border-radius:11px;background:#fffdf2e8;box-shadow:0 5px 13px #304c2925;backdrop-filter:blur(5px)}
 .surah-tree strong,.surah-tree small,.surah-bulb strong,.surah-bulb small{display:block;line-height:1.15}
 .surah-tree strong,.surah-bulb strong{font-size:9px}
@@ -34,7 +35,7 @@
   .garden-legend{gap:4px}
   .garden-legend span{padding:4px 6px;font-size:7px}
   .surah-tree{width:78px}
-  .surah-tree img{height:88px}
+  .tree-picture{height:88px}
   .surah-tree figcaption{padding:3px 5px}
   .surah-tree strong,.surah-bulb strong{font-size:7px}
   .surah-tree small,.surah-bulb small{font-size:6px}
