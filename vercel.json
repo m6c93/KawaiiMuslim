@@ -9,6 +9,12 @@
   "redirects": [
     {
       "source": "/",
+      "has": [{ "type": "host", "value": "coran.kawaiimuslimworld.com" }],
+      "destination": "/coran-licence/",
+      "permanent": false
+    },
+    {
+      "source": "/",
       "has": [{ "type": "host", "value": "newsletter.kawaiimuslimworld.com" }],
       "destination": "/newsletter/",
       "permanent": false
