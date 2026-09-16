@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f4f2e6"><meta name="robots" content="noindex">
+  <title>Créer mon accès — Kawaii Muslim Coran</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="account.css">
+</head>
+<body>
+  <header class="account-header"><a class="brand" href="index.html"><span class="brand-mark">🌳</span><span><strong>Kawaii Muslim</strong><small>CORAN · POUR LES CLASSES</small></span></a><span class="header-note">Accès pilote · Aucun paiement aujourd’hui</span></header>
+  <main class="signup-shell">
+    <section class="signup-story"><h1>Votre classe de Coran,<br><em>réunie au même endroit.</em></h1><p>Créez votre accès professeur puis laissez-vous guider pour ouvrir votre première classe.</p><div class="story-garden"><img src="assets/tree-date-palm.png" alt=""><img src="assets/tree-cherry.png" alt=""><img src="assets/tree-olive.png" alt=""><span>🌸 Chaque validation fait grandir le jardin</span></div></section>
+    <section class="auth-card">
+      <div class="mode-tabs" role="tablist"><button id="signupTab" role="tab" aria-selected="true" type="button">Créer mon compte</button><button id="loginTab" role="tab" aria-selected="false" type="button">Me connecter</button></div>
+      <form class="auth-form" id="signupForm"><h2>Bienvenue 🌿</h2><p>Commençons par votre accès professeur.</p><div class="selected-plan"><span>LICENCE CHOISIE</span><strong id="selectedPlan">Enseignant</strong></div><div class="field-row"><label>Votre prénom<input name="firstName" autocomplete="given-name" required></label><label>Votre nom<input name="lastName" autocomplete="family-name" required></label></div><label>Nom de l’école ou de la mosquée<input name="organization" autocomplete="organization" placeholder="Ex. Institut Les Oliviers" required></label><label>Votre e-mail professionnel<input name="email" type="email" autocomplete="email" required></label><label>Créer un mot de passe<input name="password" type="password" autocomplete="new-password" minlength="8" required><small class="password-hint">8 caractères minimum</small></label><label>Confirmer le mot de passe<input name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required></label><button class="button" type="submit">Créer mon accès et continuer</button><p class="legal-note">Version pilote : aucun paiement n’est effectué. Votre mot de passe n’est pas conservé dans cette démonstration locale.</p><p class="auth-status" id="signupStatus" role="status"></p></form>
+      <form class="auth-form" id="loginForm" hidden><h2>Heureux de vous revoir</h2><p>Retrouvez vos classes et vos élèves.</p><label>Votre e-mail<input name="email" type="email" autocomplete="email" required></label><label>Votre mot de passe<input name="password" type="password" autocomplete="current-password" required></label><button class="button" type="submit">Ouvrir mon interface</button><p class="legal-note">Dans cette version pilote, utilisez l’e-mail du compte créé sur cet appareil.</p><p class="auth-status" id="loginStatus" role="status"></p></form>
+      <div class="pilot-note"><span>🔒</span><span>Cette inscription sert à tester le parcours complet. L’authentification en ligne et la facturation seront activées lors du déploiement commercial.</span></div>
+    </section>
+  </main>
+  <script src="account.js"></script>
+</body></html>
