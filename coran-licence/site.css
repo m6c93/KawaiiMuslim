@@ -4,3 +4,42 @@
 @media(max-width:640px){.section{width:min(100% - 28px,1180px)}.site-header{height:70px;padding-inline:14px}.site-header>.button{font-size:0;min-width:45px;padding:10px}.site-header>.button::after{content:"Démo";font-size:12px}.brand-mark{width:38px;height:38px}.brand strong{font-size:17px}.brand small{font-size:7px}.hero{min-height:auto;padding:46px 0 60px;gap:30px}.hero h1{font-size:45px}.hero-lead{font-size:17px}.hero-actions{flex-direction:column;gap:13px}.trust-points{display:grid;gap:8px;text-align:left}.hero-visual{min-height:430px}.orbit-one{width:380px;height:380px}.orbit-two{width:320px;height:320px}.app-window{width:100%;padding:10px}.garden{height:285px}.tree{width:78px;height:105px}.tree-two{width:92px}.teacher-note{right:-4px;bottom:-2px;width:275px}.audience-strip{justify-content:flex-start;overflow:auto;white-space:nowrap}.intro,.benefits,.request{padding-block:75px}.section-heading h2,.benefits h2,.request h2{font-size:38px}.steps{grid-template-columns:1fr}.step{min-height:0}.showcase{padding:75px 0}.showcase-inner{gap:45px}.dash-stats{grid-template-columns:1fr}.student-row{align-items:flex-start}.student-row .status{margin-left:auto}.benefits{gap:50px}.benefits-art{min-height:460px}.floating-card{font-size:10px}.benefit-grid{grid-template-columns:1fr}.licences{padding:75px 0}.plans{margin-top:42px}.plan{padding:25px}.request-form{padding:21px}.form-grid{grid-template-columns:1fr}.final-cta{align-items:flex-start;flex-direction:column;padding:34px 26px;margin-bottom:35px}.final-cta .button{width:100%}footer{align-items:flex-start;flex-direction:column}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
 .header-actions{display:flex;align-items:center;gap:14px}.login-link{font-weight:900;text-decoration:none;color:#49675d;font-size:14px}@media(max-width:640px){.header-actions .login-link{display:none}.header-actions .button{font-size:0;min-width:45px;padding:10px}.header-actions .button::after{content:"Accès";font-size:12px}}
+
+/* Le jardin explique immédiatement le principe : une sourate validée devient un arbre. */
+.garden::after{z-index:8}
+.garden-legend{position:absolute;z-index:10;left:12px;right:12px;top:10px;display:flex;justify-content:center;gap:8px}
+.garden-legend span{display:flex;align-items:center;gap:5px;padding:5px 9px;border:1px solid #fff9;border-radius:999px;background:#fffdf1e8;box-shadow:0 4px 12px #34512d20;color:#435f4c;font-size:9px;font-weight:900;backdrop-filter:blur(6px)}
+.garden-legend b{display:grid;place-items:center;width:16px;height:16px;border-radius:50%;background:#3f875f;color:#fff;font-size:9px}
+.surah-tree{position:absolute;z-index:4;width:105px;margin:0;text-align:center;animation:tree-breathe 4.5s ease-in-out infinite}
+.surah-tree img{display:block;width:100%;height:118px;object-fit:contain;filter:drop-shadow(0 8px 7px #2d512c36)}
+.surah-tree figcaption,.surah-bulb{padding:4px 7px;border:1px solid #fff9;border-radius:11px;background:#fffdf2e8;box-shadow:0 5px 13px #304c2925;backdrop-filter:blur(5px)}
+.surah-tree strong,.surah-tree small,.surah-bulb strong,.surah-bulb small{display:block;line-height:1.15}
+.surah-tree strong,.surah-bulb strong{font-size:9px}
+.surah-tree small{margin-top:2px;color:#2f7854;font-size:8px;font-weight:900}
+.surah-tree.tree-one{left:5%;bottom:13%}
+.surah-tree.tree-two{left:36%;bottom:28%;width:116px;animation-delay:-1.4s}
+.surah-tree.tree-three{right:4%;bottom:12%;animation-delay:-2.7s}
+.surah-bulb{position:absolute;z-index:3;width:78px;text-align:center;color:#625d45}
+.surah-bulb .bulb-art{position:relative;display:block;width:34px;height:39px;margin:-27px auto 1px;border-radius:50% 50% 48% 48%;background:linear-gradient(145deg,#f1cf88,#b8813f);border:2px solid #956833;box-shadow:inset 6px 2px 0 #ffe6ab77,0 6px 7px #35522f2c;transform-origin:bottom center;animation:sprout-sway 3.8s ease-in-out infinite}
+.surah-bulb .bulb-art::before,.surah-bulb .bulb-art::after{content:"";position:absolute;bottom:28px;width:14px;height:25px;border-radius:100% 0 100% 0;background:linear-gradient(145deg,#79aa61,#3e7b50);border:1px solid #356744}
+.surah-bulb .bulb-art::before{left:3px;transform:rotate(-24deg)}.surah-bulb .bulb-art::after{right:2px;transform:scaleX(-1) rotate(-24deg)}
+.surah-bulb small{margin-top:2px;color:#8a7440;font-size:7px;font-weight:900}
+.bulb-one{left:6%;top:34%}.bulb-two{left:43%;bottom:8%}.bulb-three{right:6%;top:34%}
+.bulb-two .bulb-art{animation-delay:-1.2s}.bulb-three .bulb-art{animation-delay:-2.1s}
+@keyframes sprout-sway{50%{transform:rotate(4deg) scale(1.05)}}
+
+@media(max-width:640px){
+  .student-summary strong{max-width:205px;font-size:13px;line-height:1.15}
+  .garden{height:300px}
+  .garden-legend{gap:4px}
+  .garden-legend span{padding:4px 6px;font-size:7px}
+  .surah-tree{width:78px}
+  .surah-tree img{height:88px}
+  .surah-tree figcaption{padding:3px 5px}
+  .surah-tree strong,.surah-bulb strong{font-size:7px}
+  .surah-tree small,.surah-bulb small{font-size:6px}
+  .surah-tree.tree-two{width:88px}
+  .surah-bulb{width:64px;padding:3px 4px}
+  .surah-bulb .bulb-art{width:29px;height:33px;margin-top:-22px}
+  .surah-bulb .bulb-art::before,.surah-bulb .bulb-art::after{bottom:24px;width:12px;height:21px}
+}
