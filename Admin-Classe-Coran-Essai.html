@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Classe Coran · Essai local — Kawaii Muslim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./applications/classroom/classroom.css?v=verse-comments-v2">
+  <style>
+    body{margin:0;background:#f2f4e9;font-family:Nunito,sans-serif;color:#234c42}
+    main{max-width:1160px;margin:0 auto;padding:16px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 4px}
+    header strong{font-family:'Baloo 2',sans-serif;font-size:24px}
+    header span{font-size:14px;color:#587060}
+    @media(max-width:600px){header{flex-wrap:wrap}header strong{font-size:20px}}
+  </style>
+</head>
+<body>
+  <main>
+    <header><strong>🌳 Kawaii Muslim · Classe Coran</strong><span>Aperçu local de l’administration</span></header>
+    <div id="classroomRoot" role="main">Chargement de vos classes d’essai…</div>
+  </main>
+  <script type="module">
+    const local = ['127.0.0.1','localhost','[::1]'].includes(location.hostname);
+    const root = document.getElementById('classroomRoot');
+    if (!local || new URLSearchParams(location.search).get('preview') !== '1') {
+      root.textContent = 'Cet aperçu fonctionne uniquement sur l’ordinateur local avec le mode essai.';
+    } else {
+      try {
+        const {mountClassroom} = await import('./applications/classroom/classroom.mjs?v=verse-comments-v2');
+        const params = new URLSearchParams(location.search);
+        await mountClassroom(root,{id:params.get('qa')==='motion'?'local-preview-admin-motion-qa':'local-preview-admin',role:'admin',full_name:'Professeur de démonstration'},
+          {studentId:params.get('student-id'),classId:params.get('class-id'),
+           studentName:params.get('student'),className:params.get('class')});
+      } catch (error) {
+        root.textContent = `L’aperçu ne peut pas se charger : ${error?.message || 'erreur inconnue'}`;
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
