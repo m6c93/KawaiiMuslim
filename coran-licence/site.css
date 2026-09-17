@@ -45,6 +45,42 @@
   .surah-bulb .bulb-art::before,.surah-bulb .bulb-art::after{bottom:24px;width:12px;height:21px}
 }
 
+/* Jardin de référence : cinq sourates, de la première pousse à l’arbre validé. */
+.garden .surah-tree{width:92px;z-index:4}
+.garden .tree-picture{height:92px}
+.garden .surah-tree figcaption{min-width:96px;padding:7px 9px;border-radius:14px}
+.garden .surah-tree strong{font-size:10px}
+.garden .surah-tree small{font-size:8px}
+.garden .stage-sprout .tree-picture{background-position:0 center}
+.garden .stage-young .tree-picture{background-position:25% center}
+.garden .stage-growing .tree-picture{background-position:50% center}
+.garden .stage-grown .tree-picture{background-position:100% center}
+.garden .tree-masad{left:4%;top:27%;width:72px}
+.garden .tree-masad .tree-picture{height:66px}
+.garden .tree-falaq{left:28%;bottom:4%;width:88px;animation-delay:-1.2s}
+.garden .tree-naas{left:47%;top:24%;width:100px;animation-delay:-2.1s}
+.garden .tree-nasr{right:22%;bottom:2%;width:78px;animation-delay:-.7s}
+.garden .tree-nasr .tree-picture{height:74px}
+.garden .tree-ikhlas{right:3%;top:22%;width:92px;animation-delay:-2.8s}
+
+@media(max-width:640px){
+  .garden .garden-legend{top:8px;left:7px;right:7px}
+  .garden .garden-legend span{font-size:6px;white-space:nowrap}
+  .garden .surah-tree figcaption{min-width:67px;padding:4px 5px;border-radius:10px}
+  .garden .surah-tree strong{font-size:7px}
+  .garden .surah-tree small{font-size:6px}
+  .garden .tree-masad{left:2%;top:30%;width:52px}
+  .garden .tree-masad .tree-picture{height:54px}
+  .garden .tree-falaq{left:24%;bottom:6%;width:65px}
+  .garden .tree-falaq .tree-picture{height:70px}
+  .garden .tree-naas{left:45%;top:27%;width:72px}
+  .garden .tree-naas .tree-picture{height:76px}
+  .garden .tree-nasr{right:19%;bottom:4%;width:56px}
+  .garden .tree-nasr .tree-picture{height:58px}
+  .garden .tree-ikhlas{right:1%;top:25%;width:67px}
+  .garden .tree-ikhlas .tree-picture{height:70px}
+}
+
 /* Parcours professeur/élève complet présenté sur la page publique. */
 .steps{grid-template-columns:repeat(3,1fr)}
 .step{min-height:255px}
