@@ -1,19 +1,18 @@
 <!doctype html>
-<html lang="fr">
-<head>
+<html lang="fr"><head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#f7f3e6">
   <meta name="description" content="Une plateforme simple pour organiser les classes de Coran, écouter les récitations et suivre la progression de chaque élève dans son jardin.">
   <title>Kawaii Muslim Coran — La classe de Coran qui fait grandir chaque élève</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="site.css?v=garden-reference-v1">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="site.css?v=motion-v2">
 </head>
 <body>
   <a class="skip-link" href="#contenu">Aller au contenu</a>
-  <header class="site-header" data-header>
+  <header class="site-header" data-header="" style="--scroll-progress: 0%;">
     <a class="brand" href="#accueil" aria-label="Kawaii Muslim Coran, accueil">
       <span class="brand-mark" aria-hidden="true">🌳</span>
       <span><strong>Kawaii Muslim</strong><small>CORAN · POUR LES CLASSES</small></span>
@@ -34,7 +33,7 @@
         <p class="hero-lead">Créez vos classes, donnez accès aux sourates et aux Juz’, écoutez les récitations puis validez les progrès. Chaque élève voit son apprentissage prendre vie dans un jardin personnel.</p>
         <div class="hero-actions">
           <a class="button" href="inscription.html">Créer mon accès pilote</a>
-          <a class="button button-outline" href="interface.html?demo=1">Tester l’interface maintenant</a>
+          <a class="text-link" href="#apercu">Voir l’interface <span aria-hidden="true">↓</span></a>
         </div>
         <ul class="trust-points" aria-label="Avantages principaux">
           <li>Une classe créée en quelques minutes</li>
@@ -55,23 +54,23 @@
           <div class="progress"><i style="--value:34%"></i></div>
           <div class="garden">
             <div class="garden-legend"><span><b>🌱</b> La sourate pousse avec l’apprentissage</span><span><b>✓</b> Colorée après validation</span></div>
-            <figure class="surah-tree tree-masad stage-sprout">
-              <span class="tree-picture tree-cherry" role="img" aria-label="Première pousse de la sourate Al-Masad"></span>
+            <figure class="surah-tree tree-one stage-one">
+              <span class="tree-picture tree-pomegranate" role="img" aria-label="Première pousse de la sourate Al-Masad"></span>
               <figcaption><strong>Al-Masad</strong><small>Première pousse</small></figcaption>
             </figure>
-            <figure class="surah-tree tree-falaq stage-growing">
+            <figure class="surah-tree tree-two stage-three">
               <span class="tree-picture tree-cherry" role="img" aria-label="Arbre en croissance de la sourate Al-Falaq"></span>
               <figcaption><strong>Al-Falaq</strong><small>En croissance</small></figcaption>
             </figure>
-            <figure class="surah-tree tree-naas stage-grown">
+            <figure class="surah-tree tree-three stage-five">
               <span class="tree-picture tree-olive" role="img" aria-label="Olivier adulte de la sourate An-Naas"></span>
               <figcaption><strong>An-Naas</strong><small>Validée ✓</small></figcaption>
             </figure>
-            <figure class="surah-tree tree-nasr stage-young">
-              <span class="tree-picture tree-olive" role="img" aria-label="Petite pousse de la sourate An-Nasr"></span>
+            <figure class="surah-tree tree-four stage-two">
+              <span class="tree-picture tree-fig" role="img" aria-label="Petite pousse de la sourate An-Nasr"></span>
               <figcaption><strong>An-Nasr</strong><small>Petite pousse</small></figcaption>
             </figure>
-            <figure class="surah-tree tree-ikhlas stage-grown">
+            <figure class="surah-tree tree-five stage-five">
               <span class="tree-picture tree-palm" role="img" aria-label="Palmier adulte de la sourate Al-Ikhlaas"></span>
               <figcaption><strong>Al-Ikhlaas</strong><small>Validée ✓</small></figcaption>
             </figure>
@@ -86,22 +85,46 @@
     </section>
 
     <section class="section intro" id="fonctionnement">
-      <div class="section-heading reveal">
-        <p class="eyebrow">Un parcours facile à comprendre</p>
-        <h2>Le professeur garde la main.<br>L’élève voit ses efforts.</h2>
-        <p>Six étapes simples relient le cours, la récitation et le jardin de chaque élève.</p>
+      <div class="section-heading centered reveal">
+        <p class="eyebrow">Tout le parcours dans un seul outil</p>
+        <h2>Vous envoyez les versets.<br>L’élève les écoute, les récite et fait grandir son arbre.</h2>
+        <p>Chaque élève sait exactement quoi travailler. Vous retrouvez sa récitation, votre consigne et ses progrès au même endroit.</p>
       </div>
-      <div class="steps">
-        <article class="step reveal"><b>01</b><span class="step-icon">🏫</span><h3>Créez votre classe</h3><p>Nommez la classe et ajoutez autant d’élèves que le permet votre licence.</p></article>
-        <article class="step reveal"><b>02</b><span class="step-icon">📖</span><h3>Donnez le travail</h3><p>Ouvrez un Juz’, une sourate ou seulement les versets à apprendre.</p></article>
-        <article class="step reveal"><b>03</b><span class="step-icon">🎧</span><h3>L’élève écoute</h3><p>Il choisit son passage, le récitateur et le nombre de répétitions.</p></article>
-        <article class="step reveal"><b>04</b><span class="step-icon">🎙️</span><h3>Il vous l’envoie</h3><p>Il enregistre sa récitation librement, puis vous transmet son audio.</p></article>
-        <article class="step reveal"><b>05</b><span class="step-icon">💬</span><h3>Vous l’accompagnez</h3><p>Laissez un message écrit ou audio sous le verset concerné.</p></article>
-        <article class="step reveal step-final"><b>06</b><span class="step-icon">🌳</span><h3>Vous validez</h3><p>La sourate, la date et votre appréciation restent dans l’historique. L’arbre se colore.</p></article>
+      <div class="steps learning-flow">
+        <article class="step flow-step reveal">
+          <b>01</b><span class="step-icon">📖</span><h3>Choisissez le travail</h3>
+          <p>Débloquez une sourate ou un Juz’ et indiquez précisément les versets à apprendre ou à réviser.</p>
+          <div class="mini-assignment"><span>Al-Falaq</span><strong>Versets 1 à 5</strong><small>Envoyé à Maryam ✓</small></div>
+        </article>
+        <article class="step flow-step reciter-step reveal">
+          <b>02</b><span class="step-icon">🎧</span><h3>Il écoute un vrai récitateur</h3>
+          <p>L’élève ouvre votre consigne et écoute chaque verset avec Sheikh Al-Hudhaifi, autant de fois que nécessaire.</p>
+          <div class="mini-player"><span class="play-dot">▶</span><div><strong>Al-Hudhaifi</strong><small>Al-Falaq · verset 1</small></div><em>x3</em><em>x5</em><em>x10</em></div>
+        </article>
+        <article class="step flow-step reveal">
+          <b>03</b><span class="step-icon">🎙️</span><h3>Il récite et vous l’envoie</h3>
+          <p>L’élève enregistre le passage depuis son espace. La récitation arrive directement dans votre classe.</p>
+          <div class="mini-recording"><span>Maryam</span><i></i><i></i><i></i><i></i><i></i><strong>0:42</strong></div>
+        </article>
+        <article class="step flow-step reveal">
+          <b>04</b><span class="step-icon">💌</span><h3>Vous l’accompagnez</h3>
+          <p>Écoutez, consultez son historique et envoyez une appréciation ou les prochains versets à revoir.</p>
+          <div class="mini-feedback"><strong>Message envoyé</strong><small>« Revois doucement les versets 4 et 5. »</small></div>
+        </article>
+        <article class="step flow-step tree-result reveal">
+          <b>05</b><span class="step-icon">🌳</span><h3>Vous validez la sourate</h3>
+          <p>Après votre validation, l’arbre devient complet et coloré dans le jardin personnel de l’élève.</p>
+          <div class="mini-tree-result" aria-label="Évolution de l’arbre d’Al-Ikhlaas">
+            <span class="tree-phase"><img src="assets/trees/al-ikhlaas-stage-1.png" alt="Première pousse"><small>Première pousse</small></span>
+            <i aria-hidden="true">→</i>
+            <span class="tree-phase"><img src="assets/trees/al-ikhlaas-stage-3.png" alt="Jeune palmier"><small>En progrès</small></span>
+            <i aria-hidden="true">→</i>
+            <span class="tree-phase tree-phase-final"><img src="assets/trees/al-ikhlaas-stage-5.png" alt="Palmier complet et coloré"><small>Validée ✓</small></span>
+            <strong>Al-Ikhlaas</strong>
+          </div>
+        </article>
       </div>
-      <div class="journey-summary reveal" aria-label="Résumé du parcours">
-        <span><b>Professeur</b> donne le travail</span><i aria-hidden="true">→</i><span><b>Élève</b> écoute et récite</span><i aria-hidden="true">→</i><span><b>Professeur</b> corrige et valide</span><i aria-hidden="true">→</i><span><b>Jardin</b> montre le progrès</span>
-      </div>
+      <div class="flow-reassurance reveal"><span>✓ Consigne précise</span><span>✓ Vrai récitateur</span><span>✓ Retour personnalisé</span><span>✓ Validation par le professeur</span></div>
     </section>
 
     <section class="showcase" id="apercu">
@@ -112,8 +135,7 @@
           <ul>
             <li><span>✓</span><div><strong>Progression par élève</strong><p>Nombre de sourates et de versets validés, sans tableau compliqué.</p></div></li>
             <li><span>✓</span><div><strong>Récitations à écouter</strong><p>Les enregistrements reçus arrivent dans une liste simple et ordonnée.</p></div></li>
-            <li><span>✓</span><div><strong>Retours sous chaque verset</strong><p>Laissez un message écrit ou audio exactement à l’endroit à retravailler.</p></div></li>
-            <li><span>✓</span><div><strong>Historique complet</strong><p>Retrouvez les récitations, les appréciations, la date et l’heure de chaque validation.</p></div></li>
+            <li><span>✓</span><div><strong>Consignes personnalisées</strong><p>Indiquez les versets à revoir et laissez un message sous chaque arbre.</p></div></li>
           </ul>
         </div>
         <div class="dashboard-preview reveal" aria-label="Aperçu de l’interface professeur">
@@ -122,7 +144,6 @@
           <div class="student-row"><span class="avatar">M</span><div><strong>Maryam</strong><small>Juz’ 30 · Al-Falaq à valider</small></div><i class="status status-wait">À écouter</i></div>
           <div class="student-row"><span class="avatar avatar-green">A</span><div><strong>Adam</strong><small>Juz’ 30 · 5 sourates validées</small></div><i class="status">À jour</i></div>
           <div class="student-row"><span class="avatar avatar-gold">I</span><div><strong>Inaya</strong><small>Juz’ 29 · Versets 1 à 6 à revoir</small></div><i class="status status-review">À revoir</i></div>
-          <a class="demo-dashboard-link" href="inscription.html">Créer mon accès pilote <span aria-hidden="true">→</span></a>
         </div>
       </div>
     </section>
@@ -189,18 +210,18 @@
       <form class="request-form reveal" id="licenceForm">
         <div class="form-head"><span>🌿</span><div><strong>Demander ma démonstration</strong><small>Aucun paiement à cette étape</small></div></div>
         <label>Je représente
-          <select id="profile" name="profile" required><option value="">Choisir…</option><option>Un professeur indépendant</option><option>Une mosquée</option><option>Une école</option><option>Un institut</option><option>Un réseau d’établissements</option></select>
+          <select id="profile" name="profile" required=""><option value="">Choisir…</option><option>Un professeur indépendant</option><option>Une mosquée</option><option>Une école</option><option>Un institut</option><option>Un réseau d’établissements</option></select>
         </label>
         <div class="form-grid">
-          <label>Nombre d’élèves<input id="students" name="students" type="number" min="1" max="10000" inputmode="numeric" placeholder="Ex. 35" required></label>
-          <label>Nombre d’enseignants<input id="teachers" name="teachers" type="number" min="1" max="1000" inputmode="numeric" value="1" required></label>
+          <label>Nombre d’élèves<input id="students" name="students" type="number" min="1" max="10000" inputmode="numeric" placeholder="Ex. 35" required=""></label>
+          <label>Nombre d’enseignants<input id="teachers" name="teachers" type="number" min="1" max="1000" inputmode="numeric" value="1" required=""></label>
         </div>
         <label>Licence souhaitée
-          <select id="plan" name="plan" required><option>Enseignant</option><option>École</option><option>Réseau</option><option>Je souhaite être conseillé</option></select>
+          <select id="plan" name="plan" required=""><option>Enseignant</option><option>École</option><option>Réseau</option><option>Je souhaite être conseillé</option></select>
         </label>
         <div class="form-grid">
-          <label>Votre prénom<input id="name" name="name" autocomplete="given-name" required></label>
-          <label>Votre e-mail<input id="email" name="email" type="email" autocomplete="email" required></label>
+          <label>Votre prénom<input id="name" name="name" autocomplete="given-name" required=""></label>
+          <label>Votre e-mail<input id="email" name="email" type="email" autocomplete="email" required=""></label>
         </div>
         <label>Votre besoin en quelques mots <span class="optional">facultatif</span><textarea id="message" name="message" rows="3" placeholder="Ex. Nous avons 3 classes le week-end…"></textarea></label>
         <button class="button submit-button" type="submit">Préparer ma demande</button>
@@ -230,6 +251,7 @@
     <p>Une branche autonome de l’univers Kawaii Muslim, dédiée à l’apprentissage du Coran en classe.</p>
     <a href="#accueil">Retour en haut ↑</a>
   </footer>
-  <script src="site.js?v=garden-reference-v1"></script>
-</body>
-</html>
+  <script src="site.js?v=motion-v2"></script>
+
+
+</body></html>
