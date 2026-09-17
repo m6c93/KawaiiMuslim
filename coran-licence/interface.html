@@ -36,7 +36,12 @@
   </main>
   <script type="module">
     const ACCOUNT_KEY='km-coran-pro-account-v1';
-    const account=JSON.parse(localStorage.getItem(ACCOUNT_KEY)||'null');
+    const params=new URLSearchParams(location.search);
+    let account=JSON.parse(localStorage.getItem(ACCOUNT_KEY)||'null');
+    if(!account&&params.get('demo')==='1'){
+      account={id:'demonstration',firstName:'Sarah',lastName:'Benali',organization:'Institut Les Oliviers',plan:'Démonstration'};
+      localStorage.setItem(ACCOUNT_KEY,JSON.stringify(account));
+    }
     if(!account){location.replace('inscription.html');throw new Error('Compte pilote requis')}
     const fullName=`${account.firstName||''} ${account.lastName||''}`.trim()||'Professeur';
     document.querySelector('#accountName').textContent=fullName;
@@ -45,7 +50,6 @@
     const root=document.querySelector('#classroomRoot');
     try{
       const {mountClassroom}=await import('../applications/classroom/classroom.mjs?v=verse-comments-v2');
-      const params=new URLSearchParams(location.search);
       root.classList.remove('teacher-loading');
       await mountClassroom(root,{id:`teacher-${account.id}`,role:'admin',full_name:fullName},{studentId:params.get('student-id'),classId:params.get('class-id'),studentName:params.get('student'),className:params.get('class')});
     }catch(error){root.textContent=`Votre espace ne peut pas se charger : ${error?.message||'erreur inconnue'}`;console.error(error)}
