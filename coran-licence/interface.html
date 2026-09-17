@@ -1,9 +1,54 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f1f3e9"><meta name="robots" content="noindex"><title>Mon interface — Kawaii Muslim Coran</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="account.css"></head>
-<body class="dashboard-body"><header class="account-header"><a class="brand" href="interface.html"><span class="brand-mark">🌳</span><span><strong>Kawaii Muslim</strong><small>CORAN · POUR LES CLASSES</small></span></a><span class="header-note" id="organizationHeader"></span></header>
-<div class="dashboard-shell"><aside class="sidebar"><div class="account-user"><span class="account-avatar" id="accountInitial">P</span><div><strong id="accountName">Professeur</strong><small id="accountPlan">Licence Enseignant</small></div></div><nav class="side-nav" aria-label="Interface professeur"><button class="active" type="button">🏠 Vue d’ensemble</button><button type="button">🏫 Mes classes</button><button type="button">🎙️ Récitations</button><button type="button">🌳 Jardins</button><button type="button">⚙️ Paramètres</button></nav><div class="side-foot"><small>Licence active</small><strong id="sidePlan">Enseignant</strong></div></aside>
-<main class="dashboard-main"><header class="dashboard-head"><div><h1 id="welcomeTitle">Bienvenue 👋</h1><p>Votre espace professeur est prêt. Créons maintenant votre première classe.</p></div><button class="button" id="newClassTop" type="button">+ Créer une classe</button></header>
-<section class="onboarding" id="onboarding"><article class="welcome-card"><h2>Votre jardin de classe commence ici.</h2><p>Créez une classe, ajoutez vos élèves puis choisissez le premier Juz’ ou la première sourate à ouvrir.</p><button class="button" id="startClass" type="button">Créer ma première classe</button><img class="welcome-tree" src="assets/tree-cherry.png" alt=""></article><article class="checklist"><h2>Pour bien commencer</h2><ol><li>Créer votre première classe</li><li>Ajouter ou inviter les élèves</li><li>Ouvrir un Juz’ ou une sourate</li><li>Écouter la première récitation</li></ol></article></section>
-<section class="stats"><article class="stat-card"><small>Classes</small><strong id="classCount">0</strong></article><article class="stat-card"><small>Élèves</small><strong id="studentCount">0</strong></article><article class="stat-card"><small>Récitations à écouter</small><strong>0</strong></article></section>
-<section class="create-panel" id="createPanel"><h2>Créer une classe</h2><form class="class-form" id="classForm"><label>Nom de la classe<input name="className" placeholder="Ex. Les oliviers" required></label><label>Niveau ou groupe<select name="level"><option>Débutants</option><option>Intermédiaires</option><option>Avancés</option><option>Groupe mixte</option></select></label><button class="button" type="submit">Créer la classe</button></form></section>
-<section class="classes-section"><div class="section-title"><h2>Mes classes</h2><button class="button secondary" id="newClassSecondary" type="button">+ Nouvelle classe</button></div><div id="classesView"></div></section></main></div><div class="toast" id="toast" role="status" aria-live="polite"></div><script src="dashboard.js"></script></body></html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f1f3e9">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Mon espace professeur — Kawaii Muslim Coran</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="account.css?v=classe-complete-1">
+  <link rel="stylesheet" href="../applications/classroom/classroom.css?v=classe-complete-1">
+  <style>
+    body{margin:0;background:#f2f4e9;font-family:Nunito,sans-serif;color:#234c42}
+    .teacher-shell{max-width:1180px;margin:0 auto;padding:16px 20px 64px}
+    .teacher-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:9px 2px 18px}
+    .teacher-head .brand{text-decoration:none;color:inherit}
+    .teacher-account{display:flex;align-items:center;gap:10px}
+    .teacher-account>span{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:#dcead8;color:#2d694f;font-weight:900}
+    .teacher-account strong,.teacher-account small{display:block}.teacher-account small{color:#6f8278}
+    .pilot-banner{margin-bottom:14px;padding:11px 15px;border:1px solid #d3dfcf;border-radius:14px;background:#fffaf0;color:#61766c;font-size:12px;text-align:center}
+    .teacher-shell #classroomRoot>.cc-note{display:none}
+    .teacher-loading{min-height:320px;display:grid;place-items:center;border-radius:24px;background:#fffdf7;color:#60766b;font-weight:800}
+    @media(max-width:640px){.teacher-shell{padding:10px 12px 40px}.teacher-head{align-items:flex-start}.teacher-head .brand small{display:none}.teacher-account small{display:none}}
+  </style>
+</head>
+<body>
+  <main class="teacher-shell">
+    <header class="teacher-head">
+      <a class="brand" href="./"><span class="brand-mark">🌳</span><span><strong>Kawaii Muslim</strong><small>CORAN · ESPACE PROFESSEUR</small></span></a>
+      <div class="teacher-account"><span id="accountInitial">P</span><div><strong id="accountName">Professeur</strong><small id="accountPlan">Accès pilote</small></div></div>
+    </header>
+    <p class="pilot-banner">Version pilote : les classes et les enregistrements restent sur cet appareil pendant la démonstration.</p>
+    <div id="classroomRoot" class="teacher-loading" role="main">Préparation de vos classes…</div>
+  </main>
+  <script type="module">
+    const ACCOUNT_KEY='km-coran-pro-account-v1';
+    const account=JSON.parse(localStorage.getItem(ACCOUNT_KEY)||'null');
+    if(!account){location.replace('inscription.html');throw new Error('Compte pilote requis')}
+    const fullName=`${account.firstName||''} ${account.lastName||''}`.trim()||'Professeur';
+    document.querySelector('#accountName').textContent=fullName;
+    document.querySelector('#accountInitial').textContent=(account.firstName?.[0]||'P').toUpperCase();
+    document.querySelector('#accountPlan').textContent=`${account.organization||'Organisation pilote'} · ${account.plan||'Enseignant'}`;
+    const root=document.querySelector('#classroomRoot');
+    try{
+      const {mountClassroom}=await import('../applications/classroom/classroom.mjs?v=verse-comments-v2');
+      const params=new URLSearchParams(location.search);
+      root.classList.remove('teacher-loading');
+      await mountClassroom(root,{id:`teacher-${account.id}`,role:'admin',full_name:fullName},{studentId:params.get('student-id'),classId:params.get('class-id'),studentName:params.get('student'),className:params.get('class')});
+    }catch(error){root.textContent=`Votre espace ne peut pas se charger : ${error?.message||'erreur inconnue'}`;console.error(error)}
+  </script>
+</body>
+</html>
