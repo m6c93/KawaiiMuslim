@@ -10,11 +10,12 @@ export async function mountClassroom(root,profile,options={}){
  if(profile?.role!=='admin')throw new Error('Accès administrateur requis');
  const base=new URL('../coran/',import.meta.url),response=await fetch(new URL('data/index.json',base));
  if(!response.ok)throw new Error('Catalogue indisponible');
- const index=await response.json(),key=`km-classroom-preview-v1:${profile.id}`,teacher=profile.full_name||'Professeur (essai)';
+ const index=await response.json(),key=`km-classroom-preview-v1:${profile.id}`,teacher=profile.full_name||'Professeur',cloud=options.cloud||null;
  let db={classes:[]},classId='',studentId='',selected=0,studentView=false,parcel=30,moving=false,notice='',activePlayer=null,requestVersion=0,studentSection='garden',librarySurah=1,reciteSurah=112,recordingSession=null,draftBlob=null,draftUrl=null,playedUrl=null,verseNoteSession=null,verseNoteBlob=null,verseNoteUrl=null,recitationData=null,recitationState={surah:112,from:1,to:1,message:'',phase:'idle',errorCode:''},bloom=null,latestSent=null,sendMotionUntil=0,progressFrame=0;
- try{const stored=JSON.parse(localStorage.getItem(key));if(stored?.classes)db=stored}catch{notice='La sauvegarde précédente ne peut pas être lue. Les essais restent disponibles.'}
- if(!db.demoV2){db.classes.push(...demoClasses(index));db.demoV2=true;save();}
- if(!db.demoReviewV3){
+ if(cloud){try{db=await cloud.load()}catch(error){notice=error?.message||'Les données de la classe ne peuvent pas être chargées.'}}
+ else {try{const stored=JSON.parse(localStorage.getItem(key));if(stored?.classes)db=stored}catch{notice='La sauvegarde précédente ne peut pas être lue. Les essais restent disponibles.'}}
+ if(!cloud&&!db.demoV2){db.classes.push(...demoClasses(index));db.demoV2=true;save();}
+ if(!cloud&&!db.demoReviewV3){
   const maryam=db.classes.find(c=>c.id==='demo-v2-class-1')?.students.find(s=>s.name==='Maryam');
   if(maryam?.trees[114]&&!maryam.trees[114].assignment){
    assignReview(maryam.trees[114],5,6,6,'Mme Sarah · Démonstration',
@@ -22,7 +23,7 @@ export async function mountClassroom(root,profile,options={}){
   }
   db.demoReviewV3=true;save();
  }
- if(!db.demoVerseCommentsV1){
+ if(!cloud&&!db.demoVerseCommentsV1){
   const maryam=db.classes.find(c=>c.id==='demo-v2-class-1')?.students.find(s=>s.name==='Maryam');
   const t=maryam?.trees?.[114];
   if(t){t.verseComments||=[];t.verseComments.push({id:'demo-verse-note-114-5',verse:5,text:'Reprends ce verset doucement et fais une petite pause à la fin. Ta récitation progresse très bien.',author:'Mme Sarah · Démonstration',at:new Date(Date.now()-43200000).toISOString()});}
@@ -33,8 +34,9 @@ export async function mountClassroom(root,profile,options={}){
    .find(({classroom,student})=>options.studentId
     ?classroom.id===options.classId&&student.id===options.studentId
     :student.name===options.studentName&&(!options.className||classroom.name.includes(options.className)));
-  if(match){classId=match.classroom.id;studentId=match.student.id;studentView=true;parcel=initialParcel(match.classroom);}
+ if(match){classId=match.classroom.id;studentId=match.student.id;studentView=true;parcel=initialParcel(match.classroom);}
  }
+ if(!studentView&&options.classId&&db.classes.some(c=>c.id===options.classId))classId=options.classId;
  const motion=createClassroomMotion(root);
  let shellIdentity='',inboxTab='pending',activeMoment=null,incomingDb=null,transitionBusy=false;
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -46,7 +48,7 @@ export async function mountClassroom(root,profile,options={}){
  const tree=id=>pupil().trees[id]||(pupil().trees[id]=emptyTree());
  const nameDate=d=>new Date(d).toLocaleString('fr-FR',{dateStyle:'long',timeStyle:'short'});
  const button=(text,action,id='',primary=false)=>`<button data-action="${action}" data-id="${id}" class="${primary?'cc-primary':''}">${text}</button>`;
- function save(){try{localStorage.setItem(key,JSON.stringify(db));return true}catch{notice='Attention : sauvegarde impossible dans ce navigateur. Gardez cet onglet ouvert.';return false}}
+ function save(){try{if(!cloud)localStorage.setItem(key,JSON.stringify(db));else cloud.save(db).catch(error=>{notice=error?.message||'La sauvegarde en ligne a échoué. Actualisez avant de continuer.';root.querySelector('.cc-status')?.replaceChildren(document.createTextNode(notice))});return true}catch{notice='Attention : sauvegarde impossible dans ce navigateur. Gardez cet onglet ouvert.';return false}}
  function growthMotion(id){return bloom?.studentId===studentId&&bloom?.surahId===Number(id)&&performance.now()-bloom.at<1600}
  function progressSnapshot(id){const t=tree(id);return {verses:t.verses.length,pending:(t.pendingVerses||[]).length,completed:Boolean(t.completedAt)}}
  function cueGrowth(id,previous){const current=tree(id),pending=(current.pendingVerses||[]).length;if(current.verses.length>previous.verses||pending<previous.pending){queueTreeMoment(current,previous,chapter(id).count);const encouragement=root.querySelector('[name="encouragement"]')?.value.trim();if(encouragement&&current.moment){const message={text:encouragement,author:teacher,at:current.moment.at};current.messages.unshift(message);current.moment.message=message}bloom={studentId,surahId:Number(id),at:performance.now(),progressFrom:Number(root.querySelector('progress[aria-label="Avancement du Juz’"]')?.value),colorReveal:previous.pending>0&&pending===0,complete:!previous.completed&&Boolean(current.completedAt)}}}
@@ -130,7 +132,7 @@ export async function mountClassroom(root,profile,options={}){
   const state=recitationState,blob=draftBlob;if(!blob||state.phase==='sending')return;
   state.phase='sending';state.message='Je dépose ton enregistrement dans la classe…';renderRecitationWorkspace();
   const id=crypto.randomUUID(),item={id,surah:recitationData.id,from:state.from,to:state.to,at:new Date().toISOString(),listenedAt:null};
-  try{await saveRecording(id,blob);if(draftBlob!==blob)return;const inbox=pupil().submissions||(pupil().submissions=[]);inbox.push(item);if(!save()){inbox.pop();throw new Error('Sauvegarde impossible')}URL.revokeObjectURL(draftUrl);draftUrl=null;draftBlob=null;latestSent={studentId,id,at:performance.now()};sendMotionUntil=performance.now()+1600;state.phase='sent';state.message='Enregistrement envoyé au professeur dans cet essai. Tu peux en faire un autre quand tu veux.';renderRecitationWorkspace()}
+  try{if(cloud)await cloud.audioSave(classId,studentId,id,blob);else await saveRecording(id,blob);if(draftBlob!==blob)return;const inbox=pupil().submissions||(pupil().submissions=[]);inbox.push(item);if(!save()){inbox.pop();throw new Error('Sauvegarde impossible')}URL.revokeObjectURL(draftUrl);draftUrl=null;draftBlob=null;latestSent={studentId,id,at:performance.now()};sendMotionUntil=performance.now()+1600;state.phase='sent';state.message='Enregistrement envoyé au professeur. Tu peux en faire un autre quand tu veux.';renderRecitationWorkspace()}
   catch{state.phase='ready';state.errorCode='L’envoi n’a pas été sauvegardé. Réessaie sans fermer cette page.';state.message='Ton essai reste ici pour que tu puisses réessayer.';renderRecitationWorkspace()}
  }
  function teacherInbox(){

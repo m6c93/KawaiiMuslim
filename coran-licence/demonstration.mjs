@@ -1,0 +1,3 @@
+const root=document.querySelector('#demoRoot'),params=new URLSearchParams(location.search);
+if(params.get('view')==='admin'){const {mountSuperAdmin}=await import('../applications/classroom/platform-admin-v2.mjs');mountSuperAdmin(root,{full_name:'Meriem · Démonstration'})}
+else{const {mountClassroom}=await import('../applications/classroom/classroom.mjs');await mountClassroom(root,{id:'public-demonstration-v1',role:'admin',full_name:'Professeur · Démonstration'},{studentName:params.get('student'),className:'Les oliviers'})}
