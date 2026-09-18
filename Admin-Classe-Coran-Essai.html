@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./applications/classroom/classroom.css?v=verse-comments-v2">
+  <link rel="stylesheet" href="./applications/classroom/classroom.css?v=classroom-motion-v1">
   <style>
     body{margin:0;background:#f2f4e9;font-family:Nunito,sans-serif;color:#234c42}
     main{max-width:1160px;margin:0 auto;padding:16px}
@@ -30,7 +30,7 @@
       root.textContent = 'Cet aperçu fonctionne uniquement sur l’ordinateur local avec le mode essai.';
     } else {
       try {
-        const {mountClassroom} = await import('./applications/classroom/classroom.mjs?v=verse-comments-v2');
+        const {mountClassroom} = await import('./applications/classroom/classroom.mjs?v=classroom-motion-v1');
         const params = new URLSearchParams(location.search);
         await mountClassroom(root,{id:params.get('qa')==='motion'?'local-preview-admin-motion-qa':'local-preview-admin',role:'admin',full_name:'Professeur de démonstration'},
           {studentId:params.get('student-id'),classId:params.get('class-id'),

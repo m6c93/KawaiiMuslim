@@ -1,0 +1,123 @@
+// Runs against the local preview in an isolated browser, never the user's data.
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const url=process.env.PREVIEW_URL||'http://127.0.0.1:4210/Admin-Coran-Plateforme-Essai.html?preview=1&v=admin-jardin-v5';
+const out=path.resolve(process.env.QA_OUTPUT||path.join(require('node:os').tmpdir(),'kawaii-admin-design-qa'));
+fs.mkdirSync(out,{recursive:true});
+const KEY='km-quran-super-admin-v2';
+const pages=['Accueil','Structures','Utilisateurs','À traiter','Licences','Rapports','Réglages'];
+(async()=>{
+ const browser=await chromium.launch({headless:true,...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{channel:'chrome'})});
+ const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'no-preference'});
+ const page=await context.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ const nav=()=>page.getByRole('navigation',{name:'Administration Coran'});
+ const go=name=>nav().getByRole('button',{name,exact:name!=='À traiter'}).click();
+ const data=()=>page.evaluate(k=>JSON.parse(localStorage.getItem(k)),KEY);
+ const screenshot=async name=>{await page.waitForTimeout(720);await page.screenshot({path:path.join(out,name+'.png'),fullPage:true})};
+ const noOverflow=async()=>{
+  const result=await page.evaluate(()=>({view:innerWidth,width:document.documentElement.scrollWidth,over:[...document.querySelectorAll('#quranPlatformRoot .qa-workspace *')].filter(el=>{const r=el.getBoundingClientRect();return r.width&&r.right>innerWidth+2}).slice(0,8).map(n=>n.className)}));
+  assert.ok(result.width<=result.view+1,JSON.stringify(result));
+ };
+ await page.goto(url);
+ await page.getByRole('heading',{name:/Bonjour Meriem/}).waitFor();
+ await page.evaluate(()=>document.fonts.ready);
+ await screenshot('01-accueil-desktop');
+ const hero=await page.locator('.qa-hero').elementHandle(),menu=await nav().elementHandle();
+ for(const name of pages){await go(name);await noOverflow();assert.ok(await hero.evaluate(n=>n.isConnected));assert.ok(await menu.evaluate(n=>n.isConnected));}
+ await go('Utilisateurs');
+ await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));
+ await go('Structures');
+ assert.ok(await page.locator('.qa-page-head').evaluate(n=>n.getBoundingClientRect().top>=0),'Switching sections must reveal the new heading');
+ await go('Structures');
+ await page.getByRole('searchbox',{name:'Rechercher'}).fill('Nour');
+ assert.equal(await page.locator('.qa-org-v2').count(),1);
+ assert.equal(await page.getByRole('searchbox').inputValue(),'Nour');
+ await page.getByRole('button',{name:'Ouvrir',exact:true}).click();
+ const dialog=()=>page.getByRole('dialog');
+ await dialog().waitFor();
+ await page.keyboard.press('Tab');
+ assert.ok(await dialog().evaluate(n=>n.contains(document.activeElement)));
+ await page.keyboard.press('Shift+Tab');
+ assert.ok(await dialog().evaluate(n=>n.contains(document.activeElement)));
+ await dialog().getByRole('button',{name:'Licence',exact:true}).click();
+ assert.equal(await page.evaluate(()=>document.activeElement.dataset.orgTab),'license');
+ await dialog().getByRole('button',{name:'+ 10 places',exact:true}).click();
+ assert.equal(await page.evaluate(()=>document.activeElement.dataset.action),'add-seats');
+ assert.equal((await data()).organizations.find(x=>x.id==='nour').limit,50);
+ await screenshot('02-fiche-structure');
+ await page.keyboard.press('Escape');
+ assert.equal(await dialog().count(),0);
+ assert.equal(await page.evaluate(()=>document.body.style.overflow),'');
+ assert.equal(await page.locator('.qa-workspace').evaluate(n=>n.inert),false);
+ // Rebinding the persistent shell must never add duplicate submit handlers.
+ await go('Accueil');await go('Structures');
+ await page.getByRole('button',{name:'+ Créer une structure',exact:true}).click();
+ await dialog().getByLabel('Nom de la structure').fill('École Test UI');
+ await dialog().getByLabel('Ville',{exact:true}).fill('Lyon');
+ await dialog().getByLabel('Responsable',{exact:true}).fill('Test');
+ await dialog().getByLabel('E-mail du responsable').fill('test@example.invalid');
+ await dialog().getByRole('button',{name:'Créer et préparer l’invitation'}).click();
+ assert.equal((await data()).organizations.filter(o=>o.name==='École Test UI').length,1);
+ assert.equal((await data()).invites.filter(o=>o.email==='test@example.invalid').length,1);
+ await page.keyboard.press('Escape');
+ await go('À traiter');
+ const task=page.locator('[data-task-id="t2"]');
+ await task.getByRole('button',{name:'Passer en priorité'}).click();
+ assert.equal((await data()).tasks.find(t=>t.id==='t2').priority,'high');
+ // Grab the card itself; its centre may contain an action button after text wraps.
+ await page.locator('[data-task-id="t2"]').dragTo(page.locator('[data-priority="normal"]'),{sourcePosition:{x:16,y:16},targetPosition:{x:20,y:20}});
+ assert.equal((await data()).tasks.find(t=>t.id==='t2').priority,'normal');
+ const count=(await data()).tasks.length;
+ await page.locator('[data-task-id="t1"]').getByRole('button',{name:'Terminé'}).click();
+ await page.getByRole('button',{name:'Annuler',exact:true}).waitFor();
+ assert.equal((await data()).tasks.length,count-1);
+ await page.getByRole('button',{name:'Annuler',exact:true}).click();
+ assert.equal((await data()).tasks.length,count);
+ await screenshot('03-actions');
+ await go('Rapports');
+ await page.getByLabel('État des structures').selectOption('active');
+ assert.equal(await page.locator('.qa-report-bar').count(),4);
+ assert.equal(await page.locator('.qa-stat').first().getAttribute('aria-label'),'70 élèves inscrits');
+ await screenshot('04-rapports');
+ const downloadPromise=page.waitForEvent('download');
+ await page.getByRole('button',{name:'Exporter CSV'}).click();
+ const dl=await downloadPromise;await dl.saveAs(path.join(out,'rapport-test.csv'));
+ const csv=fs.readFileSync(path.join(out,'rapport-test.csv'),'utf8');
+ assert.ok(csv.includes('Institut Démo Les Oliviers'));assert.ok(!csv.includes('Classe Démo Mimosas'));
+ await go('Réglages');
+ await page.getByLabel('Résumé hebdomadaire').uncheck();
+ assert.equal((await data()).settings.weeklyReport,false);
+ await page.reload();await page.getByRole('heading',{name:/Bonjour Meriem/}).waitFor();
+ await go('Réglages');assert.equal(await page.getByLabel('Résumé hebdomadaire').isChecked(),false);
+ for(const width of [820,390,320]){
+  await page.setViewportSize({width,height:900});
+  for(const name of pages){await go(name);await noOverflow();}
+  await go('Accueil');await page.evaluate(()=>window.scrollTo(0,0));await screenshot('accueil-'+width);
+  await go('Structures');await page.getByRole('button',{name:'Ouvrir',exact:true}).first().click();await noOverflow();
+  for(const tab of ['Équipe','Classes','Licence','Activité','Résumé']){await dialog().getByRole('button',{name:tab,exact:true}).click();await noOverflow()}
+  await screenshot('structure-'+width);await page.keyboard.press('Escape');
+ }
+ // Reduced motion cancels running effects and continues to support navigation.
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await go('Accueil');
+ assert.equal(await page.locator('#quranPlatformRoot').getAttribute('data-motion'),'off');
+ assert.equal(await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length),0);
+ await go('À traiter');await noOverflow();
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ await page.locator('[data-motion-toggle]').click();
+ assert.equal(await page.locator('#quranPlatformRoot').getAttribute('data-motion'),'off');
+ await page.reload();await page.getByRole('heading',{name:/Bonjour Meriem/}).waitFor();
+ assert.equal(await page.locator('#quranPlatformRoot').getAttribute('data-motion'),'off');
+ await page.goto(url+'&reset=1');await page.getByRole('heading',{name:/Bonjour Meriem/}).waitFor();
+ assert.ok(!new URL(page.url()).searchParams.has('reset'));
+ await go('Structures');await page.getByRole('button',{name:'Ouvrir',exact:true}).first().click();
+ await dialog().getByRole('button',{name:'Licence',exact:true}).click();await dialog().getByRole('button',{name:'+ 10 places',exact:true}).click();
+ const saved=(await data()).organizations[0].limit;
+ await page.reload();await page.getByRole('heading',{name:/Bonjour Meriem/}).waitFor();assert.equal((await data()).organizations[0].limit,saved);
+ assert.deepEqual(errors,[]);
+ console.log(JSON.stringify({result:'PASS',screens:7,widths:[1440,820,390,320],checks:['persistent navigation','search','modal keyboard / focus','licence update','single form submission','priority button / drag','completion / undo','filtered reports / CSV','settings persistence','responsive layouts','OS and manual reduced motion','reset consumed once'],screenshots:out},null,2));
+ await browser.close();
+})().catch(e=>{console.error(e);process.exit(1)});

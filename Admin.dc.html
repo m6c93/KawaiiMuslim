@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="./account.css?v=tablet-20260818">
   <link rel="stylesheet" href="./admin.css">
   <link rel="stylesheet" href="./applications/classroom/classroom.css">
+  <link rel="stylesheet" href="./applications/classroom/platform-admin.css?v=platform-admin-v5">
+  <link rel="stylesheet" href="./applications/classroom/platform-admin-premium.css?v=platform-admin-v5">
   <style>
     .admin-auth-pending .admin-shell { visibility: hidden; }
     .admin-auth-loader {
@@ -36,6 +38,7 @@
       </a>
       <nav class="admin-menu" aria-label="Rubriques administratives">
         <button class="admin-tab active" data-view="overview">✨ Vue générale</button>
+        <button class="admin-tab" data-view="quran-platform" data-permission="admin">🌿 Plateforme Coran</button>
         <button class="admin-tab" data-view="classroom" data-permission="admin">🌳 Classe Coran · Essai</button>
         <button class="admin-tab" data-view="families" data-permission="families">👨‍👩‍👧 Familles</button>
         <button class="admin-tab" data-view="content" data-permission="content">📚 Contenus</button>
@@ -100,6 +103,7 @@
           </article>
         </div>
       </section>
+      <section class="admin-view" id="view-quran-platform"><div id="quranPlatformRoot"></div></section>
       <section class="admin-view" id="view-classroom"><div id="classroomRoot"></div></section>
 
       <section class="admin-view" id="view-families">
@@ -314,7 +318,9 @@
       $("#viewTitle").textContent = button?.textContent.replace(/^[^\s]+\s/, "") || "Administration";
       $("#viewSubtitle").textContent = name === "overview"
         ? "Pilote ton univers sans accéder à la vie privée des familles."
-        : "Chaque action sensible est protégée et enregistrée.";
+        : name === "quran-platform"
+          ? "Gère les structures, licences, équipes et accès de la plateforme Coran."
+          : "Chaque action sensible est protégée et enregistrée.";
       history.replaceState(null, "", `#${name}`);
     };
 
@@ -507,6 +513,10 @@
       $$("[data-permission]").forEach(button => button.hidden = !access[button.dataset.permission]);
       if (access.admin) {
         try {
+          const { mountSuperAdmin } = await import('./applications/classroom/platform-admin-v2.mjs?v=platform-admin-v5');
+          mountSuperAdmin(document.querySelector('#quranPlatformRoot'), state.context.profile);
+        } catch (error) { document.querySelector('#quranPlatformRoot').textContent = 'Le pilotage de la plateforme ne peut pas se charger. Rechargez la page pour réessayer.'; console.error(error); }
+        try {
           const { mountClassroom } = await import('./applications/classroom/classroom.mjs');
           await mountClassroom(document.querySelector('#classroomRoot'), state.context.profile);
         } catch (error) { document.querySelector('#classroomRoot').textContent = 'Le mode essai ne peut pas se charger. Rechargez la page pour réessayer.'; console.error(error); }
@@ -514,7 +524,7 @@
       await refreshData();
       const initial = location.hash.slice(1);
       const initialButton = initial && $(`.admin-tab[data-view="${initial}"]:not([hidden])`);
-      switchView(initialButton ? initial : "overview");
+      switchView(initialButton ? initial : (access.admin ? "quran-platform" : "overview"));
       document.body.classList.remove("admin-auth-pending");
       $("#adminAuthLoader").remove();
     };

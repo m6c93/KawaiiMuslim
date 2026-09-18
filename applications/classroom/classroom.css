@@ -144,3 +144,102 @@
 @keyframes cc-envelope-travel{0%{transform:translateX(0) scale(.9);opacity:.6}75%{opacity:1}100%{transform:translateX(170px) scale(1)}}
 @keyframes cc-inbox-arrival{0%{background:#e2f6dc;box-shadow:0 0 0 5px #aed6a366}100%{background:#f5f9f1;box-shadow:none}}
 @media (prefers-reduced-motion:reduce){#classroomRoot *,#classroomRoot *::before,#classroomRoot *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Classroom motion: a stationary shell, decorative depth and meaningful feedback. */
+#classroomRoot{--gold:#b68b41;box-shadow:0 16px 60px #254a3810;border:1px solid #e2e7d8}
+#classroomRoot #cc-content,#classroomRoot .cc-hero img{animation:none}
+#classroomRoot .cc-hero{min-height:176px}
+#classroomRoot .cc-hero h2{line-height:1.2}
+#classroomRoot .cc-hero p{max-width:580px}
+#classroomRoot .cc-shell-actions{gap:10px}
+#classroomRoot .cc-motion-toggle{font-size:12px;padding:7px 12px;min-height:44px;background:#f3f4e9;font-weight:700}
+#classroomRoot .cc-motion-toggle[aria-pressed=true]::before{content:'◉';color:#4c8961;margin-right:7px}
+#classroomRoot .cc-motion-toggle[aria-pressed=false]::before{content:'Ⅱ';margin-right:7px}
+#classroomRoot .cc-student-nav{position:relative;background:#eeefe0;border-radius:20px;padding:5px;gap:5px;flex-wrap:nowrap}
+#classroomRoot .cc-student-nav button{flex:1 1 0;min-width:0;border:0;background:transparent;font-size:17px;white-space:nowrap;transition:background .22s,color .22s,box-shadow .22s}
+#classroomRoot .cc-student-nav button:hover{transform:none}
+#classroomRoot .cc-student-nav button{display:flex;align-items:center;justify-content:center;gap:7px}
+#classroomRoot .cc-status:empty{min-height:0;margin:12px 0}
+#classroomRoot .cc-validation-note{margin-top:18px}
+#classroomRoot .cc-student-nav button[aria-current=page]{background:#35765d;box-shadow:0 4px 12px #234c4222}
+#classroomRoot .cc-pupil-nav{padding:12px 0;border-block:1px solid #dbe4d5;margin-bottom:22px}
+#classroomRoot .cc-pupil-nav strong{font-size:16px}
+#classroomRoot .cc-board{isolation:isolate;background:#c4d89c;box-shadow:inset 0 0 0 1px #637e4830,0 16px 36px #2f523317}
+#classroomRoot .cc-garden-depth{position:absolute;inset:-15px;z-index:-1;pointer-events:none;background:url('../coran/art/garden-lawn.png') center/cover;transform:translate(var(--depth-x,0px),var(--depth-y,0px));transition:transform .45s ease-out}
+#classroomRoot .cc-planted{z-index:1;border-radius:16px;transition:background .2s}
+#classroomRoot[data-motion=on] .cc-planted{animation:cc-plant-arrive .45s var(--arrival-delay,0ms) ease-out both}
+@keyframes cc-plant-arrive{from{opacity:0}to{opacity:1}}
+#classroomRoot .cc-planted:focus-visible{outline-offset:6px;background:#fff8}
+#classroomRoot .cc-planted .cc-tree-crown{display:block;background:none;padding:0;border-radius:0;transform-origin:50% 96%;animation:cc-quiet-breeze 6s ease-in-out infinite;animation-delay:var(--tree-delay,0s);animation-play-state:paused}
+#classroomRoot[data-motion=on][data-garden-visible=true] .cc-tree-crown{animation-play-state:running}
+#classroomRoot .cc-planted .cc-art{animation:none;transform-origin:50% 96%}
+#classroomRoot .cc-planted.cc-selected-tree .cc-art{transform:translateY(-5px)}
+#classroomRoot .cc-planted .cc-pending-art{filter:grayscale(1) opacity(.72) drop-shadow(0 5px 5px #183d3233)}
+#classroomRoot .cc-tree-list{padding:14px 4px 16px;scroll-snap-type:x proximity;scrollbar-color:#9fb794 #f5f6e8}
+#classroomRoot .cc-tree-option{scroll-snap-align:start;box-shadow:0 4px 12px #234c4208}
+#classroomRoot .cc-tree-option .cc-art{transform-origin:bottom center}
+#classroomRoot .cc-tree-detail{animation:cc-carnet-open .28s ease-out}
+@keyframes cc-carnet-open{from{opacity:.35}to{opacity:1}}
+#classroomRoot .cc-unread{display:inline-block;font-size:13px;font-weight:400;animation:cc-message-nudge .8s ease-in-out 2}
+#classroomRoot .cc-leaf{position:absolute;width:9px;height:16px;border-radius:90% 0 90% 0;background:#adc878;box-shadow:inset 1px 0 #dce7b5;opacity:0;animation:cc-leaf-drift 15s linear infinite;animation-play-state:paused;pointer-events:none}
+#classroomRoot .cc-leaf-one{left:17%;top:12%;animation-delay:-2s}
+#classroomRoot .cc-leaf-two{left:68%;top:25%;animation-delay:-9s;width:6px;height:11px}
+#classroomRoot .cc-leaf-three{left:82%;top:8%;animation-delay:-6s;background:#d7c07f}
+#classroomRoot[data-motion=on][data-garden-visible=true] .cc-leaf{animation-play-state:running}
+#classroomRoot .cc-moment-card{position:relative;display:flex;gap:22px;align-items:center;padding:24px;margin:12px 0 24px;border:1px solid #c0d2ad;border-radius:24px;background:linear-gradient(120deg,#fffdf3,#edf5df);box-shadow:0 12px 38px #31513412;overflow:hidden}
+#classroomRoot .cc-moment-copy{flex:1;min-width:0}
+#classroomRoot .cc-moment-copy small{font-size:11px;letter-spacing:1.6px;color:#627c4c;font-weight:900}
+#classroomRoot .cc-moment-copy h3{font-family:'Baloo 2',sans-serif;font-size:27px;line-height:1.2}
+#classroomRoot .cc-moment-copy p{margin:10px 0}
+#classroomRoot .cc-moment-copy blockquote{font-size:14px;padding:9px 12px;margin:10px 0;background:#ffffff9c}
+#classroomRoot .cc-moment-art{position:relative;flex:0 0 110px;padding:12px 0}
+#classroomRoot .cc-moment-art .cc-art{width:110px;height:145px;animation:cc-moment-bloom 1.5s cubic-bezier(.2,.7,.25,1) both}
+#classroomRoot .cc-moment-petals{position:absolute;left:8%;right:8%;top:20px;text-align:center;color:#c69444;font-size:22px;animation:cc-petals 1.4s ease-out both;pointer-events:none}
+#classroomRoot .cc-mimi-cheer{display:block;flex:none;width:80px;height:106.3px;background:url('./mimi-encouragement-4f.png') 0 0/400% 100% no-repeat;animation:cc-mimi-wings .7s steps(4,end) 3}
+#classroomRoot .cc-record-live{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;margin-top:15px}
+#classroomRoot .cc-record-time{font-variant-numeric:tabular-nums;font-size:22px;font-weight:900;letter-spacing:1px;color:#275e43}
+#classroomRoot .cc-wave{height:48px;background:#dbece1}
+#classroomRoot .cc-record-level{color:#365d49}
+#classroomRoot .cc-inbox-tabs{display:flex;gap:6px;margin:16px 0;flex-wrap:wrap}
+#classroomRoot .cc-inbox-tabs button{font-size:14px;background:#f0f3e9;border-color:transparent}
+#classroomRoot .cc-inbox-tabs button[aria-pressed=true]{background:#35765d;color:white}
+#classroomRoot .cc-inbox-count{background:#edf3e3;padding:6px 12px;border-radius:30px;font-size:13px;font-weight:800}
+#classroomRoot .cc-inbox-empty{background:#f2f6eb;padding:18px;border-radius:16px;font-size:14px;color:#536c59}
+#classroomRoot .cc-submission{animation:cc-inbox-arrival .6s ease-out}
+#classroomRoot .cc-send-motion{max-width:230px}
+#classroomRoot .cc-arrival{color:#287443;font-weight:900;border:2px solid #67a47b;width:32px;height:32px;line-height:27px;text-align:center;border-radius:50%;animation:cc-sent-check .5s .7s both}
+@keyframes cc-quiet-breeze{0%,100%{transform:rotate(-.7deg)}50%{transform:rotate(.9deg)}}
+@keyframes cc-leaf-drift{0%{opacity:0;transform:translate(0,0) rotate(0)}12%,75%{opacity:.65}100%{opacity:0;transform:translate(-35px,180px) rotate(220deg)}}
+@keyframes cc-message-nudge{0%,100%{transform:rotate(0)}30%{transform:rotate(-10deg)}60%{transform:rotate(8deg)}}
+@keyframes cc-moment-bloom{0%{transform:scale(.7);filter:grayscale(1) drop-shadow(0 4px 6px #234c4222)}65%{transform:scale(1.05);filter:grayscale(.1) drop-shadow(0 8px 6px #234c4222)}100%{transform:scale(1);filter:drop-shadow(0 6px 6px #234c4222)}}
+@keyframes cc-mimi-wings{from{background-position:0 0}to{background-position:-320px 0}}
+@keyframes cc-sent-check{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+@media(hover:hover){#classroomRoot[data-motion=on] .cc-tree-option:hover .cc-art{animation:cc-tree-sway .55s ease}#classroomRoot[data-motion=on] .cc-planted:hover .cc-tree-crown{transform:translateY(-4px);animation-play-state:paused}}
+@media(max-width:600px){
+ #classroomRoot .cc-hero{min-height:164px;gap:8px}
+ #classroomRoot .cc-hero h2{font-size:25px}
+ #classroomRoot .cc-hero p{font-size:14px;line-height:1.5}
+ #classroomRoot .cc-student-nav button{font-size:14px;padding:10px 4px;min-height:50px}
+ #classroomRoot .cc-student-nav button{flex-direction:column;gap:3px}
+ #classroomRoot .cc-planted{width:24%;max-width:88px}
+ #classroomRoot .cc-planted .cc-art{max-width:100%;height:85px}
+ #classroomRoot .cc-planted>span:not(.cc-tree-crown){font-size:11px;padding:3px 5px;max-width:100%}
+ #classroomRoot .cc-shell-actions{align-items:flex-start}
+ #classroomRoot .cc-back-actions{gap:7px}
+ #classroomRoot .cc-back-actions button{font-size:12px;padding:8px 10px}
+ #classroomRoot .cc-pupil-nav{gap:8px;justify-content:center}
+ #classroomRoot .cc-pupil-nav strong{order:-1;width:100%;text-align:center}
+ #classroomRoot .cc-pupil-nav button{flex:1;padding:9px;font-size:12px}
+ #classroomRoot .cc-moment-card{gap:10px;padding:17px 14px;align-items:flex-start;flex-wrap:wrap}
+ #classroomRoot .cc-moment-art{flex-basis:68px;padding:0}
+ #classroomRoot .cc-moment-art .cc-art{width:68px;height:100px}
+ #classroomRoot .cc-moment-copy{flex-basis:calc(100% - 80px)}
+ #classroomRoot .cc-moment-copy h3{font-size:23px}
+ #classroomRoot .cc-moment-copy p{font-size:14px}
+ #classroomRoot .cc-moment-copy button{font-size:13px}
+ #classroomRoot .cc-mimi-cheer{position:absolute;left:8px;top:124px;transform:scale(.72);transform-origin:top center}
+}
+#classroomRoot[data-motion=off] *,#classroomRoot[data-motion=off] *::before,#classroomRoot[data-motion=off] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+#classroomRoot[data-motion=off] .cc-leaf{display:none}
+#classroomRoot[data-motion=off] .cc-moment-petals{opacity:0}
+@media(prefers-reduced-motion:reduce){#classroomRoot *,#classroomRoot *::before,#classroomRoot *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

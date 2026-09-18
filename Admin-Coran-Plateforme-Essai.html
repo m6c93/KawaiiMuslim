@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#edf5e9">
+  <title>Pilotage Coran · Aperçu local</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./applications/classroom/platform-admin.css?v=platform-admin-v5">
+  <link rel="stylesheet" href="./applications/classroom/platform-admin-premium.css?v=platform-admin-v5">
+  <style>
+    body{margin:0;background:radial-gradient(ellipse at top left,#ecf0df,transparent 55%),#f6f5ea;font-family:Nunito,sans-serif;color:#183f36}.preview-shell{max-width:1240px;margin:auto;padding:18px 22px 70px}.preview-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:7px 2px 18px}.preview-head strong{font:700 23px "Baloo 2",sans-serif;color:#1c4d3c}.preview-head>span{padding:7px 11px;border-radius:999px;background:#fff4d7;color:#806225;font-size:12px;font-weight:900}@media(max-width:600px){.preview-shell{padding:12px 12px 50px}.preview-head{align-items:flex-start}.preview-head strong{font-size:19px}}
+    .preview-brand{color:#7b9564;margin-left:4px;font-weight:600}.preview-head>span{background:#efecd9;color:#80754c}.preview-head{padding:9px 3px 22px}@media(max-width:600px){.preview-head{gap:10px}.preview-head>span{font-size:9px;padding:6px 9px;white-space:nowrap}.preview-head strong{font-size:19px}}
+  </style>
+</head>
+<body>
+  <main class="preview-shell">
+    <header class="preview-head"><strong>Kawaii Muslim <span class="preview-brand">Coran</span></strong><span>Démonstration locale</span></header>
+    <div id="quranPlatformRoot">Chargement…</div>
+  </main>
+  <script type="module">
+    const root=document.querySelector('#quranPlatformRoot');
+    const params=new URLSearchParams(location.search);
+
+    const local=['127.0.0.1','localhost','[::1]'].includes(location.hostname);
+    if(!local||new URLSearchParams(location.search).get('preview')!=='1') root.textContent='Cet aperçu est disponible uniquement sur votre ordinateur.';
+    else { if(params.get('reset')==='1'){localStorage.removeItem('km-quran-platform-admin-v1');localStorage.removeItem('km-quran-super-admin-v2');params.delete('reset');history.replaceState(null,'',location.pathname+'?'+params.toString()+location.hash)} const {mountSuperAdmin}=await import('./applications/classroom/platform-admin-v2.mjs?v=platform-admin-v5'); mountSuperAdmin(root,{full_name:'Meriem · Super-administratrice'}); }
+  </script>
+</body>
+</html>

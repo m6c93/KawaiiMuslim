@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="account.css?v=classe-complete-1">
-  <link rel="stylesheet" href="../applications/classroom/classroom.css?v=classe-complete-1">
+  <link rel="stylesheet" href="../applications/classroom/classroom.css?v=classroom-motion-v1">
   <style>
     body{margin:0;background:#f2f4e9;font-family:Nunito,sans-serif;color:#234c42}
     .teacher-shell{max-width:1180px;margin:0 auto;padding:16px 20px 64px}
@@ -49,7 +49,7 @@
     document.querySelector('#accountPlan').textContent=`${account.organization||'Organisation pilote'} · ${account.plan||'Enseignant'}`;
     const root=document.querySelector('#classroomRoot');
     try{
-      const {mountClassroom}=await import('../applications/classroom/classroom.mjs?v=verse-comments-v2');
+      const {mountClassroom}=await import('../applications/classroom/classroom.mjs?v=classroom-motion-v1');
       root.classList.remove('teacher-loading');
       await mountClassroom(root,{id:`teacher-${account.id}`,role:'admin',full_name:fullName},{studentId:params.get('student-id'),classId:params.get('class-id'),studentName:params.get('student'),className:params.get('class')});
     }catch(error){root.textContent=`Votre espace ne peut pas se charger : ${error?.message||'erreur inconnue'}`;console.error(error)}

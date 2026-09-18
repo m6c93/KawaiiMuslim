@@ -350,15 +350,15 @@ footer > a { font-weight: 900; text-decoration: none; }
 
 .reveal.visible { opacity: 1; transform: none; }
 
-@keyframes slow-spin { 
+@keyframes slow-spin {
   100% { transform: rotate(360deg); }
 }
 
-@keyframes note-float { 
+@keyframes note-float {
   50% { transform: translateY(-7px); }
 }
 
-@keyframes tree-breathe { 
+@keyframes tree-breathe {
   50% { transform: translateY(-4px) rotate(1deg); }
 }
 
@@ -496,7 +496,7 @@ footer > a { font-weight: 900; text-decoration: none; }
 
 .bulb-three .bulb-art { animation-delay: -2.1s; }
 
-@keyframes sprout-sway { 
+@keyframes sprout-sway {
   50% { transform: rotate(4deg) scale(1.05); }
 }
 
@@ -761,37 +761,37 @@ footer > a { font-weight: 900; text-decoration: none; }
 
 .hero-visual.motion .orbit-one, .hero-visual.motion .orbit-two { translate: var(--hero-x,0) var(--hero-y,0); transition: translate 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
 
-@keyframes journey-light { 
+@keyframes journey-light {
   100% { background-position: -220% 0px; }
 }
 
-@keyframes icon-breathe { 
+@keyframes icon-breathe {
   50% { transform: translateZ(18px) translateY(-5px) rotate(2deg); }
 }
 
-@keyframes audio-progress { 
+@keyframes audio-progress {
   0% { width: 0px; }
   65%, 100% { width: 100%; }
 }
 
-@keyframes voice-wave { 
+@keyframes voice-wave {
   100% { scale: 1 1.35; }
 }
 
-@keyframes check-pop { 
+@keyframes check-pop {
   0%, 65% { transform: scale(0.7); opacity: 0.45; }
   78%, 100% { transform: scale(1); opacity: 1; }
 }
 
-@keyframes stage-sway { 
+@keyframes stage-sway {
   50% { transform: translateY(-3px) rotate(1.5deg); }
 }
 
-@keyframes arrow-flow { 
+@keyframes arrow-flow {
   50% { transform: translateX(3px); opacity: 0.55; }
 }
 
-@keyframes ambient-bloom { 
+@keyframes ambient-bloom {
   50% { transform: scale(1.04); opacity: 0.95; }
 }
 

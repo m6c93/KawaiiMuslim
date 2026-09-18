@@ -16,6 +16,7 @@ design-reference-*.png
 today-v2*.png
 .codex-preview-server.cjs
 .qa/
+.tmp/admin-design-qa/
 .qa-inline-*.mjs
 .tree-stages-*
 .visual-check.cjs
