@@ -5,7 +5,7 @@ const recovery=params.get('recovery')==='1';
 function mode(name){$('#loginForm').hidden=name!=='login';$('#signupForm').hidden=name!=='signup';$('#recoveryForm').hidden=name!=='recovery';$('#loginTab').setAttribute('aria-selected',String(name==='login'));$('#signupTab').setAttribute('aria-selected',String(name==='signup'))}
 $('#loginTab').onclick=()=>mode('login');$('#signupTab').onclick=()=>mode('signup');
 $('#organizationField').hidden=Boolean(invitation);$('#signupForm [name="organization"]').required=!invitation;
-mode(recovery?'recovery':params.get('mode')==='signup'?'signup':'login');
+mode(recovery?'recovery':params.get('mode')==='login'?'login':'signup');
 async function enter(){location.href=page(invitation?'invitation.html':'interface.html')}
 async function submit(form,work){const button=form.querySelector('button');button.disabled=true;status.textContent='Un instant…';try{await work()}catch(e){status.textContent=message(e)}finally{button.disabled=false}}
 $('#loginForm').onsubmit=e=>{e.preventDefault();submit(e.currentTarget,async()=>{const f=Object.fromEntries(new FormData(e.target));const {error}=await client().auth.signInWithPassword({email:f.email.trim(),password:f.password});if(error)throw error;await enter()})};

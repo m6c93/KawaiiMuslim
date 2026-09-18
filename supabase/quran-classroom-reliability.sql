@@ -1,58 +1,8 @@
--- Real Coran accounts and licences. Apply after quran-platform-admin.sql.
--- Additive migration: never imports or deletes demonstration/family data.
 begin;
-alter table public.quran_platform_classes add column if not exists program jsonb not null default '{"juz":[],"surahs":[]}';
-alter table public.quran_platform_classes add column if not exists revision bigint not null default 0;
-alter table public.quran_platform_students add column if not exists learning jsonb not null default '{"trees":{},"submissions":[]}';
-alter table public.quran_access_invitations add column if not exists student_id uuid references public.quran_platform_students(id);
-create table if not exists public.quran_audit (
- id uuid primary key default gen_random_uuid(), organization_id uuid references public.quran_organizations(id),
- actor_id uuid references public.profiles(id), action text not null, detail jsonb not null default '{}', created_at timestamptz not null default now()
-);
-alter table public.quran_audit enable row level security;
-
-create or replace function public.quran_admin() returns boolean language sql stable security definer set search_path='' as $$
- select coalesce(auth.jwt()->>'aal'='aal2',false) and exists(select 1 from public.profiles where id=auth.uid() and role='admin' and is_active);
-$$;
-create or replace function public.quran_user_active() returns boolean language sql stable security definer set search_path='' as $$
- select exists(select 1 from public.profiles where id=auth.uid() and is_active);
-$$;
-create or replace function public.quran_license_active(org uuid) returns boolean language sql stable security definer set search_path='' as $$
- select exists(select 1 from public.quran_licenses l join public.quran_organizations o on o.id=l.organization_id
- where o.id=org and o.status in ('active','trial') and l.status in ('active','trial') and current_date between l.starts_at and l.expires_at);
-$$;
-create or replace function public.quran_manage(org uuid) returns boolean language sql stable security definer set search_path='' as $$
- select public.quran_admin() or (public.quran_user_active() and exists(select 1 from public.quran_organization_members
- where organization_id=org and profile_id=auth.uid() and role in ('owner','manager') and is_active));
-$$;
-create or replace function public.quran_teach(cls uuid) returns boolean language sql stable security definer set search_path='' as $$
- select public.quran_admin() or (public.quran_user_active() and exists(select 1 from public.quran_platform_classes c
- join public.quran_organization_members m on m.organization_id=c.organization_id and m.profile_id=auth.uid() and m.is_active
- where c.id=cls and c.is_active and (m.role in ('owner','manager') or c.teacher_id=auth.uid()) and public.quran_license_active(c.organization_id)));
-$$;
-create or replace function public.quran_student_access(pupil uuid) returns boolean language sql stable security definer set search_path='' as $$
- select exists(select 1 from public.quran_platform_students s join public.quran_platform_classes c on c.id=s.class_id
- where s.id=pupil and s.is_active and c.is_active and (public.quran_teach(c.id) or
- (s.profile_id=auth.uid() and public.quran_user_active() and public.quran_license_active(s.organization_id))));
-$$;
-create or replace function public.quran_class_document(cls uuid) returns jsonb language sql stable security definer set search_path='' as $$
- select jsonb_build_object('id',c.id,'name',c.name,'organization',c.organization_id,'revision',c.revision,
- 'juz',c.program->'juz','surahs',c.program->'surahs','students',coalesce((select jsonb_agg(s.learning||jsonb_build_object('id',s.id,'name',s.display_name,'profileId',s.profile_id) order by s.created_at)
- from public.quran_platform_students s where s.class_id=c.id and s.is_active and public.quran_student_access(s.id)),'[]'::jsonb))
- from public.quran_platform_classes c where c.id=cls and c.is_active and
- (public.quran_teach(c.id) or exists(select 1 from public.quran_platform_students s where s.class_id=c.id and public.quran_student_access(s.id)));
-$$;
-
--- All business writes go through the checked, transactional RPC below.
-revoke insert,update,delete on public.quran_organizations,public.quran_licenses,public.quran_organization_members,
- public.quran_platform_classes,public.quran_platform_students,public.quran_access_invitations from authenticated,anon;
-revoke all on public.quran_audit from anon,authenticated;
--- Private reads also go through the RPC; no broad member/class exports.
-revoke select on public.quran_organizations,public.quran_licenses,public.quran_organization_members,
- public.quran_platform_classes,public.quran_platform_students,public.quran_access_invitations from anon,authenticated;
+-- Retire broad table grants left by the original administration migration.
+-- All classroom reads/writes now pass through the checked portal function.
 revoke all on public.quran_organizations,public.quran_licenses,public.quran_organization_members,
  public.quran_platform_classes,public.quran_platform_students,public.quran_access_invitations,public.quran_audit from public,anon,authenticated;
-
 -- Chapter lengths come from the bundled, verified Quran catalogue.
 create or replace function public.quran_verse_count(surah integer) returns integer language sql immutable set search_path='' as $$
  select (array[7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,60,34,30,73,54,45,83,182,88,75,85,54,53,89,59,37,35,38,29,18,45,60,49,62,55,78,96,29,22,24,13,14,11,11,18,12,12,30,52,52,44,28,28,20,56,40,31,50,40,46,42,29,19,36,25,22,17,19,26,30,20,15,21,11,8,8,19,5,8,8,11,11,8,3,9,5,4,7,3,6,3,5,4,5,6])[surah];
@@ -253,27 +203,6 @@ begin
 end;
 $$;
 
--- Audio is private, restricted to this learner and the assigned teaching team.
-insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types) values
- ('quran-classroom-audio','quran-classroom-audio',false,26214400,array['audio/webm','audio/ogg','audio/mp4','audio/mpeg','audio/wav','audio/x-wav'])
- on conflict(id) do update set public=false,file_size_limit=excluded.file_size_limit,allowed_mime_types=excluded.allowed_mime_types;
-create or replace function public.quran_audio_allowed(object_name text, writing boolean default false) returns boolean language plpgsql stable security definer set search_path='' as $$
-declare parts text[]:=string_to_array(object_name,'/'); sid uuid; cls uuid;
-begin
- if array_length(parts,1)<>3 then return false; end if;
- begin cls:=parts[1]::uuid; sid:=parts[2]::uuid; exception when invalid_text_representation then return false; end;
- if not exists(select 1 from public.quran_platform_students where id=sid and class_id=cls) or not public.quran_student_access(sid) then return false; end if;
- if writing and parts[3] like 'verse-comment-%' and not public.quran_teach(cls) then return false; end if;
- return parts[3] ~ '^(verse-comment-)?[0-9a-f-]{36}$';
-end;
-$$;
-drop policy if exists quran_audio_read on storage.objects;
-create policy quran_audio_read on storage.objects for select to authenticated using(bucket_id='quran-classroom-audio' and public.quran_audio_allowed(name));
-drop policy if exists quran_audio_insert on storage.objects;
-create policy quran_audio_insert on storage.objects for insert to authenticated with check(bucket_id='quran-classroom-audio' and public.quran_audio_allowed(name,true));
--- No overwrite or delete permission for recordings submitted by students.
-revoke all on function public.quran_portal(text,jsonb),public.quran_class_document(uuid),public.quran_admin(),public.quran_user_active(),
- public.quran_license_active(uuid),public.quran_manage(uuid),public.quran_teach(uuid),public.quran_student_access(uuid),public.quran_audio_allowed(text,boolean) from public,anon;
-grant execute on function public.quran_portal(text,jsonb),public.quran_audio_allowed(text,boolean) to authenticated;
+
 notify pgrst,'reload schema';
 commit;

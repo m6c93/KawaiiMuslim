@@ -5,6 +5,7 @@ const plans={class:'Classe',school:'École',association:'Association'};
 const date=v=>v?new Date(v.slice(0,10)+'T12:00:00').toLocaleDateString('fr-FR'):'—';
 const tomorrow=days=>new Date(Date.now()+days*86400000).toISOString().slice(0,10);
 export async function mountLiveAdmin(root,profile={}){
+ root.id='quranPlatformRoot';
  let data,tab='home',selection='',busy=false,motion,query='';
  const org=id=>data.organizations.find(o=>o.id===id),license=id=>data.licenses.find(l=>l.organization_id===id);
  const classes=id=>data.classes.filter(c=>c.organization_id===id&&c.is_active),students=id=>data.students.filter(s=>s.organization_id===id&&s.is_active);

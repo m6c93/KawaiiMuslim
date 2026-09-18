@@ -242,4 +242,60 @@
 #classroomRoot[data-motion=off] *,#classroomRoot[data-motion=off] *::before,#classroomRoot[data-motion=off] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 #classroomRoot[data-motion=off] .cc-leaf{display:none}
 #classroomRoot[data-motion=off] .cc-moment-petals{opacity:0}
+/* One next step for the learner, one inbox for the teaching team. */
+#classroomRoot .cc-sync{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:#527161;margin:6px 0 12px;min-height:18px}
+#classroomRoot .cc-sync:empty{display:none}
+#classroomRoot .cc-sync[data-state=error]{padding:14px 18px;background:#fff1e6;border:1px solid #e9c7a6;border-radius:16px;color:#794525;font-size:14px}
+#classroomRoot .cc-sync button{font-size:13px}
+#classroomRoot .cc-demo-note{font-size:12px;margin:0 0 12px;border:0;background:#f6f0dd;padding:8px 12px;border-radius:10px}
+#classroomRoot .cc-today,#classroomRoot .cc-teacher-hub{position:relative;display:flex;align-items:center;gap:24px;flex-wrap:wrap;padding:28px 32px;margin:20px 0 26px;background:linear-gradient(115deg,#eef4e3,#fffdf4);border:1px solid #d4dfc5;border-radius:26px;box-shadow:0 10px 28px #254c3810}
+#classroomRoot .cc-today>div,#classroomRoot .cc-teacher-hub>div:first-child{flex:1;min-width:0}
+#classroomRoot .cc-today small,#classroomRoot .cc-teacher-hub small{font-size:11px;font-weight:900;letter-spacing:1.3px;color:#60754c}
+#classroomRoot .cc-today h3,#classroomRoot .cc-teacher-hub h3{font-family:'Baloo 2',system-ui,sans-serif;font-size:27px;line-height:1.2;margin:8px 0;color:#244e3f}
+#classroomRoot .cc-today p,#classroomRoot .cc-teacher-hub p{font-size:15px;line-height:1.6;margin:8px 0 16px}
+#classroomRoot .cc-today-icon{display:grid;place-items:center;flex:0 0 68px;height:68px;font-size:30px;border:1px solid #dce5cc;border-radius:22px;background:#fffdf7;box-shadow:0 6px 14px #2756380b;transform:rotate(-5deg)}
+#classroomRoot .cc-class-inbox{width:100%;display:grid;gap:8px}
+#classroomRoot .cc-class-inbox:empty{display:none}
+#classroomRoot .cc-class-inbox button{display:grid;grid-template-columns:1fr 2fr auto;gap:16px;text-align:left;align-items:center;border-radius:14px;background:#fffdf8;border:1px solid #d9e2cd;padding:14px 18px;font-size:14px}
+#classroomRoot .cc-class-inbox button span{font-weight:500}
+#classroomRoot .cc-work-details{margin:0 0 26px;border:1px solid #d7e0cc;border-radius:22px;background:#fffdf6;overflow:hidden}
+#classroomRoot .cc-work-details>summary{cursor:pointer;padding:20px 24px;font-size:17px;font-weight:800;min-height:24px;color:#2d634c}
+#classroomRoot .cc-work-details[open]>summary{border-bottom:1px solid #e3e9d9;background:#f3f6ea}
+#classroomRoot .cc-work-details>.cc-card{margin:18px;border-radius:18px;box-shadow:none}
+#classroomRoot .cc-group-review{display:grid;gap:16px}
+#classroomRoot .cc-group-review h3,#classroomRoot .cc-group-review p{margin:0}
+#classroomRoot .cc-group-review fieldset{border:1px solid #d4dfc9;border-radius:16px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 22px}
+#classroomRoot .cc-group-review legend{font-weight:800;padding:0 5px;font-size:14px}
+#classroomRoot label.cc-check{display:flex;align-items:center;gap:8px;min-height:44px;font-size:15px;font-weight:600;margin:0;flex:0 1 auto}
+#classroomRoot .cc-check input{width:20px;height:20px;min-height:20px;accent-color:#35765d;flex:none;padding:0}
+#classroomRoot .cc-practice-next{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:16px 20px;margin:16px 0;background:#edf3e3;border:1px solid #d3e0c3;border-radius:18px}
+#classroomRoot .cc-practice-next p{margin:0;font-size:14px}
+#classroomRoot .cc-invite-dialog{width:min(480px,calc(100% - 48px));max-height:85dvh;overflow:auto;padding:28px;background:#fffdf5;border:1px solid #cad9be;border-radius:24px;color:#244e3f;box-shadow:0 30px 100px #153d4344}
+#classroomRoot .cc-invite-dialog::backdrop{background:#143b3459;backdrop-filter:blur(4px)}
+#classroomRoot .cc-invite-dialog form{display:grid;gap:16px}
+#classroomRoot .cc-invite-dialog input{box-sizing:border-box;width:100%}
+#classroomRoot .cc-invite-dialog p{line-height:1.6;font-size:15px}
+#classroomRoot form[aria-busy=true]{opacity:.7;pointer-events:none}
+#classroomRoot :is(button,a,input,select,textarea,summary):focus-visible{outline:3px solid #b08833;outline-offset:4px}
+#classroomRoot[data-motion=on] :is(.cc-today,.cc-teacher-hub){animation:cc-focus-arrive .45s ease-out both}
+@keyframes cc-focus-arrive{from{opacity:.5;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(hover:hover){#classroomRoot .cc-class-inbox button:hover{border-color:#91b08b;box-shadow:0 5px 15px #2a513d0f}#classroomRoot .cc-work-details>summary:hover{background:#f0f4e6}}
+@media(max-width:600px){
+ #classroomRoot .cc-today,#classroomRoot .cc-teacher-hub{padding:20px 18px;gap:14px;border-radius:22px;margin:16px 0 20px}
+ #classroomRoot .cc-today-icon{flex-basis:42px;height:46px;font-size:23px;border-radius:14px;align-self:flex-start}
+ #classroomRoot .cc-today h3,#classroomRoot .cc-teacher-hub h3{font-size:23px}
+ #classroomRoot .cc-today small,#classroomRoot .cc-teacher-hub small{font-size:10px;letter-spacing:.8px}
+ #classroomRoot .cc-today button,#classroomRoot .cc-teacher-hub>button{width:100%;font-size:14px}
+ #classroomRoot .cc-class-inbox button{grid-template-columns:1fr auto;gap:4px 8px;padding:12px}
+ #classroomRoot .cc-class-inbox button span:nth-child(2){grid-row:2;font-size:12px}
+ #classroomRoot .cc-class-inbox button span:last-child{grid-column:2;grid-row:1/3}
+ #classroomRoot .cc-work-details>summary{padding:17px 14px;font-size:15px}
+ #classroomRoot .cc-work-details>.cc-card{margin:10px;padding:15px}
+ #classroomRoot .cc-group-review fieldset{padding:8px 10px}
+ #classroomRoot .cc-practice-next{padding:14px}
+ #classroomRoot .cc-practice-next button{width:100%}
+ #classroomRoot[data-live=true] .cc-back-actions:empty{display:none}
+ #classroomRoot[data-live=true] .cc-shell-actions{justify-content:flex-end}
+ #classroomRoot .cc-invite-dialog{padding:20px}
+}
 @media(prefers-reduced-motion:reduce){#classroomRoot *,#classroomRoot *::before,#classroomRoot *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
