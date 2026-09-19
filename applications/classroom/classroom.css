@@ -167,6 +167,18 @@
 #classroomRoot .cc-board{isolation:isolate;background:#c4d89c;box-shadow:inset 0 0 0 1px #637e4830,0 16px 36px #2f523317}
 #classroomRoot .cc-garden-depth{position:absolute;inset:-15px;z-index:-1;pointer-events:none;background:url('../coran/art/garden-lawn.png') center/cover;transform:translate(var(--depth-x,0px),var(--depth-y,0px));transition:transform .45s ease-out}
 #classroomRoot .cc-planted{z-index:1;border-radius:16px;transition:background .2s}
+#classroomRoot .cc-garden-birds{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;user-select:none}
+#classroomRoot .cc-garden-birds *{pointer-events:none}
+#classroomRoot .cc-garden-bird{position:absolute;left:0;top:0;display:block;width:37px;height:35px;--bird-body:#e8dfc3;--bird-belly:#f8efd6;--bird-wing:#719386;--bird-tail:#688477;will-change:transform}
+#classroomRoot .cc-garden-bird-2{width:33px;height:31px;--bird-body:#c1b9a0;--bird-belly:#d9a181;--bird-wing:#899078;--bird-tail:#7d866b}
+#classroomRoot .cc-garden-bird-3{width:30px;height:29px;--bird-body:#b3c6ba;--bird-belly:#f0e5c5;--bird-wing:#759fa0;--bird-tail:#678c8a}
+#classroomRoot .cc-bird-face,#classroomRoot .cc-bird-hop{display:block;width:100%;height:100%;transform-origin:50% 80%}
+#classroomRoot .cc-garden-bird svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 1px 1px #394d2b26)}
+#classroomRoot .cc-bird-wing{transform-origin:31px 24px}
+#classroomRoot .cc-bird-head{transform-origin:33px 24px}
+#classroomRoot .cc-bird-feet{transform-origin:29px 35px}
+#classroomRoot .cc-bird-shadow{position:absolute;left:16%;bottom:0;width:74%;height:5px;border-radius:50%;background:#38522c;opacity:.16;filter:blur(1px)}
+@media(max-width:520px){#classroomRoot .cc-garden-bird{width:31px;height:29px}#classroomRoot .cc-garden-bird-2{width:28px;height:27px}#classroomRoot .cc-garden-bird-3{display:none}}
 #classroomRoot[data-motion=on] .cc-planted{animation:cc-plant-arrive .45s var(--arrival-delay,0ms) ease-out both}
 @keyframes cc-plant-arrive{from{opacity:0}to{opacity:1}}
 #classroomRoot .cc-planted:focus-visible{outline-offset:6px;background:#fff8}
