@@ -1,17 +1,18 @@
 {
   "rewrites": [
     {
-      "source": "/",
-      "has": [{ "type": "host", "value": "presentation.coran.kawaiimuslimworld.com" }],
-      "destination": "/presentation-coran/index.html"
-    },
-    {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "coran.kawaiimuslimworld.com" }],
       "destination": "/coran-licence/:path*"
     }
   ],
   "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "presentation.coran.kawaiimuslimworld.com" }],
+      "destination": "/presentation-coran/",
+      "permanent": false
+    },
     {
       "source": "/",
       "has": [{ "type": "host", "value": "coran.kawaiimuslimworld.com" }],
