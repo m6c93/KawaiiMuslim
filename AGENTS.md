@@ -4,16 +4,19 @@
 Keep teacher/student improvements shared through `applications/classroom` so the
 real Quran app and `presentation-coran` demonstration stay aligned. The user
 explicitly requested parallel updates, not demo-only changes. The public demo at
-presentation.coran.kawaiimuslimworld.com must retain fictional, browser-local data
-and must never be connected to real classroom accounts.
+presentation.coran.kawaiimuslimworld.com must retain fictional data and must never be connected to real classroom accounts.
+Since 19 September, the user explicitly requires shareable cross-device demo
+links for client presentations. An explicit share action copies local test classes
+into isolated quran_demo_* tables, with expiring teacher/student capabilities.
+Keep existing local trials intact; never reuse real account, licence, or chat data.
 
 Classroom messaging is optional for every class, regardless of pupil age. Only a
 teacher/authorized class manager enables it, during creation or from class settings.
 Enabled pupils get a fourth tab, Messagerie, beside Mon jardin, Coran and Réciter.
 Each conversation is private to one pupil and the teaching team; never a class chat.
 Disabling preserves history. Tree appreciations remain separate and unchanged.
-Real messages use quran_messaging and private audio storage; demo messages use a
-separate local-only key. Never put private conversations inside garden snapshots.
+Real messages use quran_messaging and private audio storage; local demo messages use a separate local-only key; shared demo messages use
+the isolated, expiring quran_demo session. Never put private conversations inside garden snapshots.
 
 ## Interactive garden
 Mon jardin uses one evolving tree per surah. Each verse joins that tree only after

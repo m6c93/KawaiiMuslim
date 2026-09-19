@@ -1,0 +1,54 @@
+-- Run after migration inside the SAME transaction, then roll back.
+set local role anon;
+do $$
+declare owner text:=repeat('a',64); other_owner text:=repeat('b',64); pupil text; pupil2 text; outsider text; r jsonb; c jsonb; s jsonb; x jsonb;
+begin
+ c:='{"id":"test-class","name":"Test temporaire","juz":[30],"surahs":[1],"students":[{"id":"hakim","name":"Hakim test","trees":{},"submissions":[]},{"id":"other","name":"Autre test","trees":{},"submissions":[]}]}';
+ perform public.quran_demo('create',jsonb_build_object('owner',owner,'data',jsonb_build_object('classes',jsonb_build_array(c))));
+ perform public.quran_demo('create',jsonb_build_object('owner',other_owner,'data',jsonb_build_object('classes',jsonb_build_array(c))));
+ pupil:=public.quran_demo('invite','{"class":"test-class","student":"hakim"}',owner)->>'token';
+ pupil2:=public.quran_demo('invite','{"class":"test-class","student":"other"}',owner)->>'token';
+ outsider:=public.quran_demo('invite','{"class":"test-class","student":"hakim"}',other_owner)->>'token';
+ if pupil=outsider or pupil=pupil2 then raise exception 'Capability isolation failed';end if;
+ if public.quran_demo('invite','{"class":"test-class","student":"hakim"}',owner)->>'token'<>pupil then raise exception 'Link unstable';end if;
+ r:=public.quran_demo('classes','{}',pupil);
+ if jsonb_array_length(r#>'{classes,0,students}')<>1 or r#>>'{classes,0,students,0,id}'<>'hakim' then raise exception 'Pupil list leaked';end if;
+ begin perform public.quran_demo('classes','{}',repeat('c',64));raise exception 'Invalid token allowed';exception when insufficient_privilege then null;end;
+ begin perform public.quran_demo('invite','{"class":"test-class","student":"other"}',pupil);raise exception 'Pupil can invite';exception when insufficient_privilege then null;end;
+ begin perform public.quran_demo('save_class',jsonb_build_object('class',c,'revision',1),pupil);raise exception 'Pupil can teach';exception when insufficient_privilege then null;end;
+ begin perform public.quran_demo('chat_configure','{"class":"test-class","enabled":true}',pupil);raise exception 'Pupil can enable chat';exception when insufficient_privilege then null;end;
+ perform public.quran_demo('chat_configure','{"class":"test-class","enabled":true}',owner);
+ r:=public.quran_demo('chat_send','{"student":"hakim","id":"10000000-0000-0000-0000-000000000001","text":"Question test","role":"teacher"}',pupil);
+ if r->>'role'<>'student' then raise exception 'Sender spoofing';end if;
+ perform public.quran_demo('chat_send','{"student":"hakim","id":"10000000-0000-0000-0000-000000000001","text":"Retry"}',pupil);
+ if jsonb_array_length(public.quran_demo('chat_thread','{"student":"hakim"}',owner)->'messages')<>1 then raise exception 'Duplicate send';end if;
+ begin perform public.quran_demo('chat_thread','{"student":"hakim"}',pupil2);raise exception 'Conversation leaked';exception when insufficient_privilege then null;end;
+ if (public.quran_demo('chat_status','{}',owner)#>>'{classes,0,unread}')::integer<>1 then raise exception 'Unread badge wrong';end if;
+ perform public.quran_demo('chat_read','{"student":"hakim","sequence":9999999}',owner);
+ if (public.quran_demo('chat_status','{}',owner)#>>'{classes,0,unread}')::integer<>0 then raise exception 'Read failed';end if;
+ perform public.quran_demo('audio_save','{"class":"test-class","student":"hakim","id":"20000000-0000-0000-0000-000000000001","mime":"audio/webm","data":"dGVzdA=="}',pupil);
+ if public.quran_demo('audio_load','{"class":"test-class","student":"hakim","id":"20000000-0000-0000-0000-000000000001"}',owner)->>'data'<>'dGVzdA==' then raise exception 'Audio not shared';end if;
+ begin perform public.quran_demo('audio_load','{"class":"test-class","student":"hakim","id":"20000000-0000-0000-0000-000000000001"}',pupil2);raise exception 'Audio leaked';exception when insufficient_privilege then null;end;
+ s:=r; s:='{"id":"hakim","name":"HACK","trees":{"112":{"verses":[1,2,3,4],"completedAt":"2026-09-19","positions":{"30":{"x":50,"y":70}},"requested":true}},"submissions":[{"id":"20000000-0000-0000-0000-000000000001","surah":112,"from":1,"to":4}]}';
+ r:=public.quran_demo('save_student',jsonb_build_object('revision',1,'studentData',s),pupil);
+ if r#>>'{students,0,name}'<>'Hakim test' or jsonb_array_length(r#>'{students,0,trees,112,verses}')<>0 or r#>'{students,0,trees,112,completedAt}'<>'null'::jsonb then raise exception 'Validation/identity spoof';end if;
+ if jsonb_array_length(r#>'{students,0,submissions}')<>1 then raise exception 'Recitation not received';end if;
+ begin perform public.quran_demo('save_student',jsonb_build_object('revision',1,'studentData',s),pupil);raise exception 'Stale overwrite allowed';exception when serialization_failure then null;end;
+ c:=public.quran_demo('classes','{}',owner)#>'{classes,0}';
+ c:=jsonb_set(c,'{students,0,trees,112,verses}','[1,2,3,4]');
+ perform public.quran_demo('save_class',jsonb_build_object('class',c,'revision',2),owner);
+ if jsonb_array_length(public.quran_demo('classes','{}',pupil)#>'{classes,0,students,0,trees,112,verses}')<>4 then raise exception 'Teacher change not shared';end if;
+ if jsonb_array_length(public.quran_demo('classes','{}',outsider)#>'{classes,0,students,0,submissions}')<>0 then raise exception 'Session isolation failed';end if;
+ perform public.quran_demo('chat_configure','{"class":"test-class","enabled":false}',owner);
+ begin perform public.quran_demo('chat_send','{"student":"hakim","id":"10000000-0000-0000-0000-000000000002","text":"Blocked"}',pupil);raise exception 'Disabled send allowed';exception when raise_exception then if sqlerrm='Disabled send allowed' then raise;end if;end;
+ begin perform 1 from public.quran_demo_sessions;raise exception 'Direct table access allowed';exception when insufficient_privilege then null;end;
+end;
+$$;
+reset role;
+update public.quran_demo_sessions set expires_at=now()-interval '1 second' where teacher_hash=encode(extensions.digest(repeat('a',64),'sha256'),'hex');
+set local role anon;
+do $$ begin
+ begin perform public.quran_demo('classes','{}',repeat('a',64));raise exception 'Expired session allowed';exception when insufficient_privilege then null;end;
+end $$;
+reset role;
+select 'PASS: shared demo isolation, permissions, synchronization, audio, messaging, expiry' as result;

@@ -28,3 +28,5 @@ body { background:#f4f5eb; }
   .demo-intro h1 { font-size:27px; }
 }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation:none!important; transition:none!important; } }
+
+.demo-switch[hidden]{display:none}.demo-owner-link,.demo-open{font:inherit;display:inline-block;border:1px solid #bacfbc;border-radius:12px;padding:10px 14px;color:#245a45;background:#f2f8ed;text-decoration:none;cursor:pointer}.demo-share-dialog{max-width:min(600px,calc(100vw - 32px));box-sizing:border-box}.demo-share-dialog input{width:100%;box-sizing:border-box}.demo-share-dialog .cc-row{flex-wrap:wrap}
