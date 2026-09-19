@@ -3,6 +3,7 @@ export const page=name=>new URL(name,portalHome).href;
 export const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function client(){if(!window.KMAuth)throw Error('Le service de connexion ne peut pas se charger.');return window.KMAuth.client()}
 export async function portal(action,payload={}){const {data,error}=await client().rpc('quran_portal',{action,payload});if(error)throw error;return data}
+export async function messaging(action,payload={}){const {data,error}=await client().rpc('quran_messaging',{action,payload});if(error)throw error;return data}
 export function message(error){const text=String(error?.message||error);if(/fetch|network/i.test(text))return 'Connexion interrompue. Vérifiez votre réseau puis réessayez. Rien n’a été confirmé.';if(/quran_portal|schema cache/i.test(text))return 'L’espace réel est en cours de préparation. Les données de démonstration restent dans leur espace séparé.';return window.KMAuth?.friendlyError(error)||text}
 export async function requireContext(){
  const {data,error}=await client().auth.getUser();

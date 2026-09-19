@@ -324,3 +324,51 @@
  #classroomRoot .cc-message-panel{padding:14px}
  #classroomRoot .cc-message-panel h4{font-size:18px}
 }
+
+/* Optional private conversations, shared by the real portal and the demo. */
+#classroomRoot .cc-chat-choice{display:flex;align-items:center;gap:12px;max-width:380px;font-weight:400}
+#classroomRoot .cc-chat-choice input{width:23px;height:23px;flex:none;accent-color:#35765d}
+#classroomRoot .cc-chat-choice small{font-weight:400;line-height:1.4;margin:3px 0}
+#classroomRoot .cc-chat-settings{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:18px 0;background:#edf3e8}
+#classroomRoot .cc-chat-settings h3{font-size:19px}
+#classroomRoot .cc-chat-settings p{margin:6px 0}
+#classroomRoot .cc-chat-settings button{flex-shrink:0}
+#classroomRoot .cc-chat-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 5px;border-radius:20px;background:#a24c32;color:white;font-size:12px;line-height:1;font-weight:900;vertical-align:middle}
+#classroomRoot .cc-chat-panel{max-width:820px;margin:10px auto;padding:0;overflow:hidden;box-shadow:0 14px 45px #244c4210}
+#classroomRoot .cc-chat-header{display:flex;align-items:center;gap:14px;padding:20px 24px;border-bottom:1px solid #d9e3d3;background:#edf3e8}
+#classroomRoot .cc-chat-header h3{margin:0;font-size:23px}
+#classroomRoot .cc-chat-header p{margin:3px 0 0;font-size:14px}
+#classroomRoot .cc-chat-header>button{margin-left:auto;flex:none}
+#classroomRoot .cc-chat-avatar{display:grid;place-items:center;width:48px;height:48px;border-radius:17px;background:#fffdf4;font-size:24px;flex:none}
+#classroomRoot .cc-chat-log{height:clamp(250px,45vh,520px);overflow-y:auto;overscroll-behavior:contain;padding:24px;display:flex;flex-direction:column;gap:16px;background:radial-gradient(ellipse at top left,#eef4e5,transparent 70%),#fcfbf5;scrollbar-color:#a1b89d #f7f8f0}
+#classroomRoot .cc-chat-bubble{flex-shrink:0;max-width:86%;align-self:flex-start;overflow-wrap:anywhere;padding:13px 17px;border:1px solid #dbe5d4;border-radius:18px 18px 18px 4px;background:#fff;box-shadow:0 3px 10px #244c4206}
+#classroomRoot .cc-chat-own{align-self:flex-end;border-color:#c1d6bf;border-radius:18px 18px 4px 18px;background:#e4efdc}
+#classroomRoot .cc-chat-bubble p{white-space:pre-wrap;margin:7px 0 0;font-size:17px;line-height:1.6}
+#classroomRoot .cc-chat-bubble small{font-size:12px;margin:0;color:#4c6358}
+#classroomRoot .cc-chat-bubble button{margin-top:10px}
+#classroomRoot .cc-chat-bubble audio{display:block;max-width:100%;min-width:0}
+#classroomRoot .cc-chat-empty{margin:auto;text-align:center;max-width:320px;color:#607667;font-size:16px}
+#classroomRoot .cc-chat-compose{padding:20px 24px;border-top:1px solid #d9e3d3;background:#fffef9}
+#classroomRoot .cc-chat-compose textarea{min-height:90px;resize:vertical;font-size:17px;font-weight:400;margin-bottom:12px}
+#classroomRoot .cc-chat-status{font-size:14px;margin:12px 0 0;color:#376343}
+#classroomRoot .cc-chat-status:empty{display:none}
+#classroomRoot .cc-chat-status[data-error=true]{color:#903d2c}
+#classroomRoot .cc-chat-panel>[data-chat=older]{display:block;margin:10px auto}
+#classroomRoot .cc-chat-panel [hidden]{display:none!important}
+#classroomRoot .cc-chat-draft-audio:empty{display:none}
+#classroomRoot .cc-chat-draft-audio{padding:8px 0 15px}
+@media(max-width:600px){
+ #classroomRoot .cc-chat-settings{align-items:stretch;flex-direction:column}
+ #classroomRoot .cc-student-nav button{position:relative;flex-direction:column;gap:4px;font-size:12px;padding:10px 3px;white-space:normal}
+ #classroomRoot .cc-student-nav button>span[aria-hidden]{font-size:21px}
+ #classroomRoot .cc-student-nav [data-chat-count]:not(:empty){position:absolute;right:3px;top:2px}
+ #classroomRoot .cc-chat-header{padding:15px 12px;gap:9px}
+ #classroomRoot .cc-chat-header h3{font-size:19px}
+ #classroomRoot .cc-chat-header p{font-size:12px}
+ #classroomRoot .cc-chat-avatar{display:none}
+ #classroomRoot .cc-chat-log{padding:15px 12px;height:40vh;min-height:230px}
+ #classroomRoot .cc-chat-bubble{max-width:94%;padding:11px 13px}
+ #classroomRoot .cc-chat-compose{padding:15px 12px}
+ #classroomRoot .cc-chat-compose .cc-row{gap:8px}
+ #classroomRoot .cc-chat-compose button{font-size:14px;padding:10px 12px}
+}

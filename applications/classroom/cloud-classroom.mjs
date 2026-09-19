@@ -1,6 +1,6 @@
-import {client,portal} from './live-client.mjs';
+import {client,portal,messaging} from './live-client.mjs';
 // No localStorage fallback: server acknowledgement is required for every write.
-export function createCloudClassroom(organization,{studentId=null,rpc=portal,storage=()=>client().storage.from('quran-classroom-audio')}={}){
+export function createCloudClassroom(organization,{studentId=null,rpc=portal,messagingRpc=messaging,storage=()=>client().storage.from('quran-classroom-audio')}={}){
  let confirmed={classes:[]},tail=Promise.resolve(),blocked=false,pending=0;
  const plain=c=>JSON.stringify({...c,revision:undefined});
  async function load(){await tail;const next=await rpc('classes',{organization});confirmed=next;blocked=false;return structuredClone(confirmed)}
@@ -25,6 +25,7 @@ export function createCloudClassroom(organization,{studentId=null,rpc=portal,sto
  }
  const path=(classId,pupil,id)=>`${classId}/${pupil}/${id}`;
  return {load,save,studentId,get pending(){return pending},
+  message:(action,payload={})=>messagingRpc(action,{...payload,organization}),
   check:()=>rpc('classes',{organization}),
   accept(next){confirmed=structuredClone(next)},
   async invite(student,email,name){return rpc('invite',{organization,student,email,name,role:'student'})},

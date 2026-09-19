@@ -1,0 +1,70 @@
+-- Run inside a transaction, and ROLLBACK: these fixtures never become real accounts.
+do $$
+declare
+ teacher uuid:=gen_random_uuid(); learner uuid:=gen_random_uuid(); stranger uuid:=gen_random_uuid();
+ org uuid:=gen_random_uuid(); cls uuid:=gen_random_uuid(); pupil uuid:=gen_random_uuid(); other uuid:=gen_random_uuid();
+ mid uuid:=gen_random_uuid(); audio uuid:=gen_random_uuid(); result jsonb; seq bigint; failed boolean;
+begin
+ insert into auth.users(id,email,email_confirmed_at,raw_user_meta_data)
+ select id,'qa-'||id::text||'@example.invalid',now(),'{"full_name":"QA transaction"}'::jsonb from unnest(array[teacher,learner,stranger]) id;
+ insert into public.profiles(id,email,full_name) select id,'qa-'||id::text||'@example.invalid','QA transaction' from unnest(array[teacher,learner,stranger]) id on conflict(id) do nothing;
+ insert into public.quran_organizations(id,name,status) values(org,'QA messaging rollback','active');
+ insert into public.quran_licenses(organization_id,student_limit,starts_at,expires_at,status) values(org,3,current_date,current_date+30,'active');
+ insert into public.quran_organization_members(organization_id,profile_id,role) values(org,teacher,'teacher');
+ insert into public.quran_platform_classes(id,organization_id,teacher_id,name) values(cls,org,teacher,'QA messages');
+ insert into public.quran_platform_students(id,organization_id,class_id,profile_id,display_name)
+ values(pupil,org,cls,learner,'QA élève'),(other,org,cls,stranger,'QA autre');
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',teacher,'role','authenticated','aal','aal1')::text,true);
+ result:=public.quran_messaging('status',jsonb_build_object('organization',org));
+ assert result#>>'{classes,0,enabled}'='false','Existing classes opt out by default';
+ perform public.quran_messaging('configure',jsonb_build_object('class',cls,'enabled',true));
+ result:=public.quran_messaging('send',jsonb_build_object('student',pupil,'id',mid,'text','Bonjour','role','student'));
+ assert result->>'role'='teacher','Sender role is server derived';seq:=(result->>'sequence')::bigint;
+ perform public.quran_messaging('send',jsonb_build_object('student',pupil,'id',mid,'text','Bonjour'));
+ assert (select count(*) from public.quran_direct_messages where student_id=pupil)=1,'Retries do not duplicate sends';
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',learner,'role','authenticated','aal','aal1')::text,true);
+ result:=public.quran_messaging('status',jsonb_build_object('organization',org));
+ assert jsonb_array_length(result#>'{classes,0,students}')=1,'Student never lists classmates';
+ assert result#>>'{classes,0,unread}'='1','Teacher message is unread';
+ result:=public.quran_messaging('thread',jsonb_build_object('student',pupil));
+ assert jsonb_array_length(result->'messages')=1,'Student sees own thread';
+ failed:=false;begin perform public.quran_messaging('thread',jsonb_build_object('student',other));exception when insufficient_privilege then failed:=true;end;
+ assert failed,'Other student thread denied';
+ failed:=false;begin perform public.quran_messaging('send',jsonb_build_object('student',other,'id',gen_random_uuid(),'text','Forbidden'));exception when insufficient_privilege then failed:=true;end;
+ assert failed,'Sending to another student denied';
+ failed:=false;begin perform public.quran_messaging('configure',jsonb_build_object('class',cls,'enabled',false));exception when insufficient_privilege then failed:=true;end;
+ assert failed,'Student cannot change class setting';
+ perform public.quran_messaging('read',jsonb_build_object('student',pupil,'sequence',9223372036854775807));
+ assert (select last_sequence from public.quran_message_reads where student_id=pupil and reader_role='student')=seq,'Read cursor cannot skip future messages';
+ result:=public.quran_messaging('send',jsonb_build_object('student',pupil,'id',gen_random_uuid(),'text','Merci','role','teacher'));
+ assert result->>'role'='student','Student cannot impersonate teacher';
+ failed:=false;begin perform public.quran_messaging('send',jsonb_build_object('student',pupil,'id',gen_random_uuid(),'text','  '));exception when raise_exception then failed:=true;end;
+ assert failed,'Empty messages rejected';
+ failed:=false;begin perform public.quran_messaging('send',jsonb_build_object('student',pupil,'id',gen_random_uuid(),'text',repeat('a',3001)));exception when raise_exception then failed:=true;end;
+ assert failed,'Oversized messages rejected';
+ assert public.quran_audio_allowed(cls::text||'/'||pupil::text||'/chat-student-'||audio::text,true),'Own chat audio allowed';
+ assert not public.quran_audio_allowed(cls::text||'/'||pupil::text||'/chat-teacher-'||audio::text,true),'Cannot forge teacher audio';
+ assert not public.quran_audio_allowed(cls::text||'/'||other::text||'/chat-student-'||audio::text),'Other student audio denied';
+ insert into storage.objects(bucket_id,name) values('quran-classroom-audio',cls::text||'/'||pupil::text||'/chat-student-'||audio::text);
+ result:=public.quran_messaging('send',jsonb_build_object('student',pupil,'id',gen_random_uuid(),'audioId','chat-student-'||audio::text));
+ assert result->>'audioId'='chat-student-'||audio::text,'Private vocal attached';
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',teacher,'role','authenticated','aal','aal1')::text,true);
+ result:=public.quran_messaging('status',jsonb_build_object('organization',org));
+ assert result#>>'{classes,0,unread}'='2','Teacher sees new student messages';
+ assert not has_table_privilege('authenticated','public.quran_direct_messages','select'),'No direct message exports';
+ assert not has_table_privilege('authenticated','public.quran_class_messaging','update'),'No direct settings mutation';
+ perform public.quran_messaging('configure',jsonb_build_object('class',cls,'enabled',false));
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',learner,'role','authenticated','aal','aal1')::text,true);
+ failed:=false;begin perform public.quran_messaging('send',jsonb_build_object('student',pupil,'id',gen_random_uuid(),'text','Disabled'));exception when insufficient_privilege then failed:=true;end;
+ assert failed,'Disabled classes cannot send';
+ assert not public.quran_audio_allowed(cls::text||'/'||pupil::text||'/chat-student-'||audio::text,true),'Disabled audio uploads blocked';
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',teacher,'role','authenticated','aal','aal1')::text,true);
+ perform public.quran_messaging('configure',jsonb_build_object('class',cls,'enabled',true));
+ result:=public.quran_messaging('thread',jsonb_build_object('student',pupil));
+ assert jsonb_array_length(result->'messages')=3,'Re-enabling preserves history';
+ update public.quran_licenses set expires_at=current_date-1 where organization_id=org;
+ failed:=false;begin perform public.quran_messaging('thread',jsonb_build_object('student',pupil));exception when insufficient_privilege then failed:=true;end;
+ assert failed,'Expired licence blocks messaging';
+end;
+$$;
+select 'PASS: messaging opt-in, roles, privacy, retries, unread cursors, private audio, disabling, licence checks' as result;
