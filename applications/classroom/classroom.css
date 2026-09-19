@@ -440,3 +440,13 @@
  #classroomRoot .cc-chat-compose .cc-row{gap:8px}
  #classroomRoot .cc-chat-compose button{font-size:14px;padding:10px 12px}
 }
+#classroomRoot .cc-phonetics-controls{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:18px 0}
+#classroomRoot .cc-reading-options{display:flex;flex-wrap:wrap;gap:10px;width:100%}
+#classroomRoot .cc-reading-options label{display:flex;align-items:center;gap:9px;width:auto;min-height:46px;padding:10px 14px;background:#fff;border:1px solid #c8d9ca;border-radius:14px;cursor:pointer;font-weight:800}
+#classroomRoot .cc-reading-options label:has(input:checked){background:#e4efdf;border-color:#35765d}
+#classroomRoot .cc-reading-options input{width:20px;height:20px;min-height:0;padding:0;margin:0;accent-color:#35765d;flex:none}
+#classroomRoot .cc-phonetics-controls small{flex:1 1 220px;color:#52665c;line-height:1.5}
+#classroomRoot .cc-phonetic{display:block;font-size:17px;line-height:1.8;font-weight:600;color:#425d51;background:#f0f5e9;border-radius:10px;padding:10px 12px;margin:10px 0;white-space:normal;overflow-wrap:anywhere;text-align:start}
+#classroomRoot .cc-phonetic[hidden],#classroomRoot .cc-translation[hidden],#classroomRoot .cc-phonetics-controls [hidden]{display:none}
+#classroomRoot .cc-verse .cc-phonetic{font-family:Nunito,sans-serif;font-size:17px;font-weight:600;line-height:1.8;direction:ltr;text-align:start}
+#classroomRoot .cc-phonetics-controls>a{font-size:12px;color:#52665c}

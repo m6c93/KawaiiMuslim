@@ -1,0 +1,15 @@
+{
+  "source": "https://api.alquran.cloud/v1/quran/en.transliteration",
+  "edition": {
+    "identifier": "en.transliteration",
+    "language": "en",
+    "name": "Transliteration",
+    "englishName": "English Transliteration",
+    "format": "text",
+    "type": "transliteration"
+  },
+  "retrieved": "2026-09-19T23:31:20.931Z",
+  "sourceSha256": "11d5e099c6e946e66d6012152f3596aa06eb98d699725d8d9d9ca391a91604cc",
+  "verses": 6236,
+  "note": "Source transliteration preserved verbatim; English transliteration conventions. Reading aid, not a substitute for listening to the reciter."
+}
