@@ -8,6 +8,41 @@
   ],
   "redirects": [
     {
+      "source": "/coran-licence/demonstration.html",
+      "destination": "/presentation-coran/",
+      "permanent": false
+    },
+    {
+      "source": "/demonstration.html",
+      "has": [{ "type": "host", "value": "coran.kawaiimuslimworld.com" }],
+      "destination": "/presentation-coran/",
+      "permanent": false
+    },
+    {
+      "source": "/coran-licence/administration.html",
+      "has": [{ "type": "host", "value": "presentation.coran.kawaiimuslimworld.com" }],
+      "destination": "/presentation-coran/",
+      "permanent": false
+    },
+    {
+      "source": "/administration.html",
+      "has": [{ "type": "host", "value": "presentation.coran.kawaiimuslimworld.com" }],
+      "destination": "/presentation-coran/",
+      "permanent": false
+    },
+    {
+      "source": "/Admin.dc.html",
+      "has": [{ "type": "host", "value": "presentation.coran.kawaiimuslimworld.com" }],
+      "destination": "/presentation-coran/",
+      "permanent": false
+    },
+    {
+      "source": "/Admin-Coran-Plateforme-Essai.html",
+      "has": [{ "type": "host", "value": "presentation.coran.kawaiimuslimworld.com" }],
+      "destination": "/presentation-coran/",
+      "permanent": false
+    },
+    {
       "source": "/",
       "has": [{ "type": "host", "value": "presentation.coran.kawaiimuslimworld.com" }],
       "destination": "/presentation-coran/",

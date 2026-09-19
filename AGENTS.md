@@ -1,6 +1,11 @@
 # Mon Coran integration (11 September 2026)
 
 ## Quran classroom and presentation
+The user explicitly reserves the entire platform administration, licences and
+administrative reports to their own authenticated administrator account. Public
+demos must expose teacher and pupil learning workflows only. Never reintroduce
+an admin demo switch, including through legacy URLs or view=admin parameters.
+Keep the real admin RPC authorization and MFA checks; hiding links is not access control.
 Keep teacher/student improvements shared through `applications/classroom` so the
 real Quran app and `presentation-coran` demonstration stay aligned. The user
 explicitly requested parallel updates, not demo-only changes. The public demo at

@@ -1,3 +1,11 @@
-const root=document.querySelector('#demoRoot'),params=new URLSearchParams(location.search);
-if(params.get('view')==='admin'){root.id='quranPlatformRoot';const {mountSuperAdmin}=await import('../applications/classroom/platform-admin-v2.mjs');mountSuperAdmin(root,{full_name:'Meriem · Démonstration'})}
-else{const {mountClassroom}=await import('../applications/classroom/classroom.mjs');await mountClassroom(root,{id:'public-demonstration-v1',role:'admin',full_name:'Professeur · Démonstration'},{studentName:params.get('student'),className:'Les oliviers',studentId:params.get('student-id'),classId:params.get('class-id')})}
+// Legacy public links lead only to the teacher/pupil demonstration.
+// Never mount private platform administration from a demo URL.
+export function publicDemoUrl(source) {
+ const current=new URL(source),target=new URL('/presentation-coran/',current);
+ for(const key of ['student','class','class-id','student-id']){
+  if(current.searchParams.has(key))target.searchParams.set(key,current.searchParams.get(key));
+ }
+ if(!target.searchParams.has('student')&&!target.searchParams.has('student-id'))target.searchParams.set('view','teacher');
+ return target.href;
+}
+if(typeof window!=='undefined')window.location.replace(publicDemoUrl(window.location.href));
