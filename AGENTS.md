@@ -9,6 +9,11 @@ Since 19 September, the user explicitly requires shareable cross-device demo
 links for client presentations. An explicit share action copies local test classes
 into isolated quran_demo_* tables, with expiring teacher/student capabilities.
 Keep existing local trials intact; never reuse real account, licence, or chat data.
+Shared demo pupils must now expire and be deleted after 48 hours. The user explicitly
+chose this for ALL current pupils, including Hakim, and every future pupil. Keep
+classes/teacher access separate. Re-copying a link must not reset the deadline.
+Run server-side cleanup of gardens, chat threads, links and audio even when browsers
+are closed; only isolated quran_demo_* data may be deleted by this job.
 
 Classroom messaging is optional for every class, regardless of pupil age. Only a
 teacher/authorized class manager enables it, during creation or from class settings.

@@ -11,6 +11,10 @@ const read=(key,store=localStorage)=>{try{return JSON.parse(store.getItem(key))}
 let owner=params.has('local')?null:read(DEMO_KEY);
 if(!token&&owner)token=owner.token;
 const note=document.querySelector('.demo-note');
+const expiryDate=value=>new Date(value).toLocaleString('fr-FR',{dateStyle:'long',timeStyle:'short'});
+let expired=false;
+function showExpired(error){if(expired)return;expired=true;root.dispatchEvent(new Event('classroom-expired'));root.innerHTML=`<section class="demo-error" role="alert"><h2>Ce compte de démonstration a expiré.</h2><p>${esc(error.message)}</p><p>Le professeur peut créer un nouvel élève d’essai, avec un nouveau lien valable 48 heures.</p></section>`;note.textContent='Essai terminé · les vrais comptes ne sont pas concernés.';document.querySelector('.demo-switch').hidden=true}
+
 document.querySelector('.demo-skip').onclick=e=>{e.preventDefault();root.scrollIntoView({block:'start'});root.focus()};
 function updatePresentation(view){
  currentView=view;const {studentView,classId,studentId,studentName}=view;
@@ -25,7 +29,7 @@ function updatePresentation(view){
 }
 function linkDialog(result,name,teacher=false){
  const dialog=document.createElement('dialog');dialog.className='cc-invite-dialog demo-share-dialog';
- dialog.innerHTML=`<h2>${teacher?'Retrouver mon espace professeur':`Le lien de ${esc(name)} est prêt`}</h2><p>${teacher?'Gardez ce lien pour retrouver votre session sur un autre ordinateur. Il donne accès au côté professeur.':'Transmettez ce lien à votre participant. Il ouvrira directement ce compte élève sur son téléphone ou ordinateur, sans inscription.'}</p><label>${teacher?'Mon lien professeur':'Lien élève'}<input readonly value="${esc(result.url)}"></label><p class="demo-note">Démo partagée jusqu’au ${new Date(result.expiresAt).toLocaleDateString('fr-FR')}. Les vrais comptes restent séparés.</p><div class="cc-row"><button type="button" data-copy class="cc-primary">Copier le lien</button>${teacher?'':`<a class="demo-open" href="${esc(result.url)}" target="_blank" rel="noopener">Ouvrir le compte élève ↗</a>`}<button type="button" data-close>Fermer</button></div><p role="status"></p>`;
+ dialog.innerHTML=`<h2>${teacher?'Retrouver mon espace professeur':`Le lien de ${esc(name)} est prêt`}</h2><p>${teacher?'Gardez ce lien pour retrouver votre session sur un autre ordinateur. Il donne accès au côté professeur.':'Transmettez ce lien à votre participant. Il ouvrira directement ce compte élève sur son téléphone ou ordinateur, sans inscription.'}</p><label>${teacher?'Mon lien professeur':'Lien élève'}<input readonly value="${esc(result.url)}"></label><p class="demo-note">${teacher?`Espace professeur disponible jusqu’au ${expiryDate(result.expiresAt)}.`:`Compte et données d’essai supprimés le ${expiryDate(result.expiresAt)}. Copier le lien ne prolonge pas les 48 heures.`} Les vrais comptes restent séparés.</p><div class="cc-row"><button type="button" data-copy class="cc-primary">Copier le lien</button>${teacher?'':`<a class="demo-open" href="${esc(result.url)}" target="_blank" rel="noopener">Ouvrir le compte élève ↗</a>`}<button type="button" data-close>Fermer</button></div><p role="status"></p>`;
  document.body.append(dialog);dialog.showModal();dialog.querySelector('[data-close]').onclick=()=>dialog.close();dialog.onclose=()=>dialog.remove();
  dialog.querySelector('input').onclick=e=>e.target.select();
  dialog.querySelector('[data-copy]').onclick=async()=>{try{await navigator.clipboard.writeText(result.url);dialog.querySelector('[role="status"]').textContent='Lien copié. Vous pouvez le coller dans votre message.'}catch{dialog.querySelector('input').select();dialog.querySelector('[role="status"]').textContent='Sélectionnez puis copiez ce lien.'}};
@@ -49,7 +53,7 @@ async function startSharing(db,classId,studentId){
  return result;
 }
 async function showDemoLink({db,classId,studentId,name,cloud:active}){
- const dialog=document.createElement('dialog');dialog.className='cc-invite-dialog';dialog.innerHTML='<h2>Préparation du lien élève…</h2><p role="status">La session de démonstration sera accessible sur plusieurs appareils pendant 14 jours. Utilisez des profils d’essai.</p>';document.body.append(dialog);dialog.showModal();
+ const dialog=document.createElement('dialog');dialog.className='cc-invite-dialog';dialog.innerHTML='<h2>Préparation du lien élève…</h2><p role="status">Le compte élève sera accessible sur plusieurs appareils pendant 48 heures, puis ses données seront supprimées automatiquement. Utilisez des profils d’essai.</p>';document.body.append(dialog);dialog.showModal();
  try{
   const result=active?await active.share(classId,studentId):await startSharing(db,classId,studentId);
   dialog.close();dialog.remove();
@@ -59,9 +63,9 @@ async function showDemoLink({db,classId,studentId,name,cloud:active}){
 }
 try{
  if(token){
-  context=await demoRequest('context',{},token);cloud=createSharedDemo(token,context);
+  context=await demoRequest('context',{},token);cloud=createSharedDemo(token,context,{onExpired:showExpired});
   if(!context.studentId){localStorage.setItem(DEMO_KEY,JSON.stringify({token,expiresAt:context.expiresAt}));if(fragment.has('demo'))history.replaceState(null,'','?view=teacher')}
-  note.textContent=`Démo partagée · Synchronisation entre appareils · Disponible jusqu’au ${new Date(context.expiresAt).toLocaleDateString('fr-FR')} · Comptes d’essai uniquement.`;
+  note.textContent=context.studentId?`Compte d’essai · Suppression automatique le ${expiryDate(context.expiresAt)} · Jardin, messages et enregistrements inclus.`:'Démo partagée · Chaque nouveau compte élève dure 48 heures, puis son jardin, ses messages et ses enregistrements sont supprimés. Vos classes restent disponibles.';
   if(!context.studentId){const btn=document.createElement('button');btn.className='demo-owner-link';btn.textContent='Retrouver mon espace professeur';btn.onclick=()=>linkDialog({url:demoLink(token),expiresAt:context.expiresAt},'',true);note.after(btn)}
  }
  await mountClassroom(root,{id:'standalone-presentation-demo-v1',role:'admin',full_name:'Professeur · Démonstration'},{

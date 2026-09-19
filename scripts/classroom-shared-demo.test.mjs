@@ -26,3 +26,9 @@ test('demo calls carry no real authentication and surface server errors',async()
   assert.match(url,/quran_demo$/);assert.equal(options.headers.Authorization,undefined);assert.equal(JSON.parse(options.body).token,'demo-token');return {ok:false,json:async()=>({message:'Lien expiré'})};
  }),/Lien expiré/);
 });
+
+test('expired capabilities stop the active demo without renewing the pupil link',async()=>{
+ let expired=0;const error=Object.assign(Error('Compte expiré'),{code:'42501'});
+ const cloud=createSharedDemo('expired',{studentId:'s'},{rpc:async()=>{throw error},onExpired:()=>expired++});
+ await assert.rejects(cloud.check(),/expiré/);assert.equal(expired,1);
+});

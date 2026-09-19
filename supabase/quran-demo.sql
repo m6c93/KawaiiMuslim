@@ -37,6 +37,48 @@ end;
 $$;
 revoke all on function public.quran_demo_class_check(jsonb) from public,anon,authenticated;
 
+-- The scheduler and RPC both use this narrow cleanup; it never touches real tables.
+create or replace function public.quran_demo_purge(target uuid default null) returns integer
+language plpgsql security definer set search_path='' as $$
+declare d public.quran_demo_sessions; c jsonb; p jsonb; classes jsonb; pupils jsonb; threads jsonb; item record; removed integer:=0;
+begin
+ for d in select * from public.quran_demo_sessions where target is null or id=target for update skip locked loop
+  if d.expires_at<=now() then delete from public.quran_demo_sessions where id=d.id;continue;end if;
+  classes:='[]';threads:=d.chat->'threads';
+  for c in select value from jsonb_array_elements(d.data->'classes') loop
+   pupils:='[]';
+   for p in select value from jsonb_array_elements(c->'students') loop
+    if coalesce((p->>'demoExpiresAt')::timestamptz,d.created_at+interval '48 hours')<=now() then
+     removed:=removed+1;threads:=threads-(p->>'id');
+    else pupils:=pupils||jsonb_build_array(p);end if;
+   end loop;
+   if pupils<>c->'students' then c:=c||jsonb_build_object('students',pupils,'revision',coalesce((c->>'revision')::bigint,0)+1);end if;
+   classes:=classes||jsonb_build_array(c);
+  end loop;
+  -- Also remove orphan data when the teacher removed a trial pupil.
+  delete from public.quran_demo_links l where l.session_id=d.id and not exists(select 1 from jsonb_array_elements(classes) c cross join lateral jsonb_array_elements(c.value->'students') p where p.value->>'id'=l.student_id);
+  delete from public.quran_demo_audio a where a.session_id=d.id and not exists(select 1 from jsonb_array_elements(classes) c cross join lateral jsonb_array_elements(c.value->'students') p where p.value->>'id'=a.student_id);
+  for item in select * from jsonb_each(threads) loop
+   if not exists(select 1 from jsonb_array_elements(classes) c cross join lateral jsonb_array_elements(c.value->'students') p where p.value->>'id'=item.key) then threads:=threads-item.key;end if;
+  end loop;
+  if classes<>d.data->'classes' or threads<>d.chat->'threads' then
+   update public.quran_demo_sessions set data=jsonb_set(d.data,'{classes}',classes),chat=jsonb_set(d.chat,'{threads}',threads) where id=d.id;
+  end if;
+ end loop;
+ return removed;
+end;
+$$;
+revoke all on function public.quran_demo_purge(uuid) from public,anon,authenticated;
+
+-- One-time backfill: existing trial pupils receive 48 hours from this deployment.
+-- Reapplying the migration cannot renew an existing pupil's deadline.
+update public.quran_demo_sessions d set data=jsonb_set(d.data,'{classes}',(
+ select coalesce(jsonb_agg(c.value||jsonb_build_object('students',(
+  select coalesce(jsonb_agg(p.value||jsonb_build_object('demoExpiresAt',coalesce(p.value->'demoExpiresAt',to_jsonb(now()+interval '48 hours')))),'[]'::jsonb)
+  from jsonb_array_elements(c.value->'students') p
+ ))),'[]'::jsonb) from jsonb_array_elements(d.data->'classes') c
+)) where exists(select 1 from jsonb_array_elements(d.data->'classes') c cross join lateral jsonb_array_elements(c.value->'students') p where p.value->>'demoExpiresAt' is null);
+
 create or replace function public.quran_demo(action text,payload jsonb default '{}',token text default '') returns jsonb
 language plpgsql security definer set search_path='' as $$
 declare
@@ -45,7 +87,7 @@ declare
  classes jsonb; output jsonb:='[]'; pupils jsonb; trees jsonb; oldtree jsonb; newtree jsonb; submissions jsonb;
  cid text; sid text; newtoken text; h text; ci integer; si integer; version bigint;
  config jsonb; threads jsonb; thread jsonb; msg jsonb; messages jsonb; seq bigint; seen bigint; count_unread integer; students_json jsonb;
- bytes bytea; mime text; audio_id text; body text; mid text; existing jsonb;
+ bytes bytea; mime text; audio_id text; body text; mid text; existing jsonb; pupil_expiry timestamptz; new_pupil boolean:=false;
 begin
  if length(payload::text)>9000000 then raise exception 'Données trop volumineuses.'; end if;
  if action='create' then
@@ -57,10 +99,14 @@ begin
   select * into d from public.quran_demo_sessions where teacher_hash=h;
   if found and d.expires_at>now() then return jsonb_build_object('expiresAt',d.expires_at); end if;
   delete from public.quran_demo_sessions where expires_at<now();
-  if (select count(*) from public.quran_demo_sessions)>100 or (select count(*) from public.quran_demo_sessions where created_at>now()-interval '1 hour')>=20 then raise exception 'Trop de nouvelles démonstrations. Réessayez plus tard.'; end if;
+  if (select count(*) from public.quran_demo_sessions)>=100 or (select count(*) from public.quran_demo_sessions where created_at>now()-interval '1 hour')>=20 then raise exception 'Trop de nouvelles démonstrations. Réessayez plus tard.'; end if;
   classes:=payload#>'{data,classes}';
   if jsonb_typeof(classes) is distinct from 'array' or jsonb_array_length(classes) not between 1 and 10 or length(classes::text)>2000000 then raise exception 'Choisissez de 1 à 10 classes de démonstration.'; end if;
-  for c in select value from jsonb_array_elements(classes) loop perform public.quran_demo_class_check(c);output:=output||jsonb_build_array(c||jsonb_build_object('revision',1));end loop;
+  for c in select value from jsonb_array_elements(classes) loop
+   perform public.quran_demo_class_check(c);pupils:='[]';
+   for s in select value from jsonb_array_elements(c->'students') loop pupils:=pupils||jsonb_build_array(s||jsonb_build_object('demoExpiresAt',now()+interval '48 hours'));end loop;
+   output:=output||jsonb_build_array(c||jsonb_build_object('revision',1,'students',pupils));
+  end loop;
   if (select count(*)<>count(distinct value->>'id') from jsonb_array_elements(classes)) or (select count(*)<>count(distinct p.value->>'id') from jsonb_array_elements(classes) c cross join lateral jsonb_array_elements(c.value->'students') p) then raise exception 'Identifiants en double.'; end if;
   config:=coalesce(payload->'settings','{}');if jsonb_typeof(config)<>'object' then raise exception 'Réglages invalides.';end if;
   insert into public.quran_demo_sessions(teacher_hash,data,chat) values(h,jsonb_build_object('classes',output),jsonb_build_object('settings',config,'threads','{}'::jsonb,'sequence',0)) returning * into d;
@@ -76,9 +122,15 @@ begin
   select * into d from public.quran_demo_sessions where id=link.session_id for update;
  end if;
  if d.id is null or d.expires_at<=now() then raise exception 'Cette démonstration a expiré. Demandez un nouveau lien au professeur.' using errcode='42501'; end if;
+ perform public.quran_demo_purge(d.id);
+ select * into d from public.quran_demo_sessions where id=d.id;
  role_name:=case when teacher then 'teacher' else 'student' end;
+ if not teacher then
+  select (b.value->>'demoExpiresAt')::timestamptz into pupil_expiry from jsonb_array_elements(d.data->'classes') a cross join lateral jsonb_array_elements(a.value->'students') b where a.value->>'id'=link.class_id and b.value->>'id'=link.student_id;
+  if pupil_expiry is null or pupil_expiry<=now() then raise exception 'Ce compte de démonstration a expiré après 48 heures. Demandez un nouveau compte au professeur.' using errcode='42501';end if;
+ end if;
  if not teacher and not exists(select 1 from jsonb_array_elements(d.data->'classes') a cross join lateral jsonb_array_elements(a.value->'students') b where a.value->>'id'=link.class_id and b.value->>'id'=link.student_id) then raise exception 'Cet élève n’est plus dans la démonstration.' using errcode='42501';end if;
- if action='context' then return jsonb_build_object('studentId',case when teacher then null else link.student_id end,'classId',case when teacher then null else link.class_id end,'expiresAt',d.expires_at);end if;
+ if action='context' then return jsonb_build_object('studentId',case when teacher then null else link.student_id end,'classId',case when teacher then null else link.class_id end,'expiresAt',case when teacher then d.expires_at else least(d.expires_at,pupil_expiry) end);end if;
  if action='classes' then
   if teacher then return d.data; end if;
   select value into c from jsonb_array_elements(d.data->'classes') where value->>'id'=link.class_id;
@@ -91,13 +143,19 @@ begin
   select value,ordinality::integer-1 into oldc,ci from jsonb_array_elements(d.data->'classes') with ordinality where value->>'id'=c->>'id';
   if coalesce((oldc->>'revision')::bigint,0)<>coalesce((payload->>'revision')::bigint,-1) then raise exception 'La classe a changé. Actualisez avant de réessayer.' using errcode='40001';end if;
   if exists(select 1 from jsonb_array_elements(d.data->'classes') a cross join lateral jsonb_array_elements(a.value->'students') b join jsonb_array_elements(c->'students') p on p.value->>'id'=b.value->>'id' where a.value->>'id'<>c->>'id') then raise exception 'Identifiant élève déjà utilisé.';end if;
-  c:=c||jsonb_build_object('revision',coalesce((oldc->>'revision')::bigint,0)+1);
+  pupils:='[]';
+  for s in select value from jsonb_array_elements(c->'students') loop
+   select value into old_s from jsonb_array_elements(coalesce(oldc->'students','[]')) where value->>'id'=s->>'id';
+   if old_s is null then new_pupil:=true;end if;
+   pupils:=pupils||jsonb_build_array(s||jsonb_build_object('demoExpiresAt',coalesce((old_s->>'demoExpiresAt')::timestamptz,now()+interval '48 hours')));
+  end loop;
+  c:=c||jsonb_build_object('revision',coalesce((oldc->>'revision')::bigint,0)+1,'students',pupils);
   if ci is null then
    if jsonb_array_length(d.data->'classes')>=10 then raise exception 'Cette démonstration contient déjà 10 classes.';end if;
    d.data:=jsonb_set(d.data,'{classes}',d.data->'classes'||jsonb_build_array(c));
   else d.data:=jsonb_set(d.data,array['classes',ci::text],c);end if;
   if length(d.data::text)>2000000 then raise exception 'Démonstration trop volumineuse.';end if;
-  update public.quran_demo_sessions set data=d.data where id=d.id;return c;
+  update public.quran_demo_sessions set data=d.data,expires_at=case when new_pupil then greatest(expires_at,now()+interval '14 days') else expires_at end where id=d.id;return c;
  end if;
  if action='invite' then
   if not teacher then raise exception 'Seul le professeur peut partager un accès.' using errcode='42501';end if;
@@ -106,7 +164,8 @@ begin
   -- Stable links are derived from the teacher capability, never returned by reads.
   newtoken:=encode(extensions.hmac(d.id::text||':'||cid||':'||sid,token,'sha256'),'hex');
   insert into public.quran_demo_links values(d.id,cid,sid,encode(extensions.digest(newtoken,'sha256'),'hex')) on conflict(session_id,student_id) do update set token_hash=excluded.token_hash,class_id=excluded.class_id;
-  return jsonb_build_object('token',newtoken,'expiresAt',d.expires_at);
+  select (b.value->>'demoExpiresAt')::timestamptz into pupil_expiry from jsonb_array_elements(d.data->'classes') a cross join lateral jsonb_array_elements(a.value->'students') b where a.value->>'id'=cid and b.value->>'id'=sid;
+  return jsonb_build_object('token',newtoken,'expiresAt',least(d.expires_at,pupil_expiry));
  end if;
  if action='save_student' then
   if teacher then raise exception 'Lien élève requis.' using errcode='42501';end if;

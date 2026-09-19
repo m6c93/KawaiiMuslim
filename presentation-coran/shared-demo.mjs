@@ -5,13 +5,13 @@ const publicKey='sb_publishable_JfiHxlqfI8pXr4Emho4vOw_QBePfSHm';
 export async function demoRequest(action,payload={},token='',fetcher=fetch){
  const response=await fetcher(endpoint,{method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json'},body:JSON.stringify({action,payload,token}),cache:'no-store'});
  const data=await response.json();
- if(!response.ok)throw Error(data.message||'La démo partagée ne répond pas. Réessayez.');
+ if(!response.ok){const error=Error(data.message||'La démo partagée ne répond pas. Réessayez.');error.code=data.code;throw error;}
  return data;
 }
 export function demoLink(token,base=location.href){const url=new URL(base);url.search='';url.hash='demo='+token;return url.href}
-export function createSharedDemo(token,context,{rpc=demoRequest}={}){
+export function createSharedDemo(token,context,{rpc=demoRequest,onExpired=()=>{}}={}){
  let confirmed={classes:[]},tail=Promise.resolve(),blocked=false;
- const request=(action,payload={})=>rpc(action,payload,token);
+ const request=async(action,payload={})=>{try{return await rpc(action,payload,token)}catch(error){if(error.code==='42501')onExpired(error);throw error}};
  const plain=c=>JSON.stringify({...c,revision:undefined});
  return {demo:true,studentId:context.studentId||null,pollInterval:5000,
   async load(){await tail;confirmed=await request('classes');blocked=false;return structuredClone(confirmed)},
