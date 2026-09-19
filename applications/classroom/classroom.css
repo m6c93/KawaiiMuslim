@@ -316,7 +316,8 @@
 #classroomRoot .cc-planted.cc-has-message .cc-tree-crown{animation:cc-message-breeze 5.8s ease-in-out infinite;animation-delay:var(--tree-delay,0s);animation-play-state:paused}
 #classroomRoot[data-motion=on][data-garden-visible=true] .cc-planted.cc-has-message .cc-tree-crown{animation-play-state:running}
 #classroomRoot .cc-unread{animation:none}
-#classroomRoot .cc-planted .cc-message-seal{position:absolute;right:-5px;bottom:-8px;z-index:3;display:grid;place-items:center;width:32px;height:32px;padding:4px;border:1.5px solid #d5ad5a;border-radius:50%;background:linear-gradient(145deg,#fffdf2,#f6e7b8);color:#8a6023;box-shadow:0 5px 12px #4f4b2633,0 0 0 3px #fffbeb88;pointer-events:none}
+#classroomRoot .cc-planted .cc-message-seal{position:absolute;right:-5px;bottom:-8px;z-index:3;display:grid;place-items:center;width:32px;height:32px;padding:4px;border:1.5px solid #d5ad5a;border-radius:50%;background:linear-gradient(145deg,#fffdf2,#f6e7b8);color:#8a6023;box-shadow:0 5px 12px #4f4b2633,0 0 0 3px #fffbeb88;pointer-events:auto}
+#classroomRoot .cc-planted .cc-message-seal .cc-message-icon{width:23px;height:23px;pointer-events:none}
 #classroomRoot .cc-message-icon{display:block;width:31px;height:31px;flex:none;transform-origin:50% 70%;animation:cc-envelope-whisper 7s ease-in-out infinite;animation-delay:var(--tree-delay,0s);animation-play-state:paused}
 #classroomRoot[data-motion=on][data-garden-visible=true] .cc-message-seal .cc-message-icon{animation-play-state:running}
 #classroomRoot .cc-message-tag{display:flex;align-items:center;justify-content:center;gap:4px;margin:8px -5px 0;padding:4px;border:1px solid #e5cf9c;border-radius:10px;background:#fff5d6;color:#79511d;font-size:10px;font-weight:900;line-height:1.3}

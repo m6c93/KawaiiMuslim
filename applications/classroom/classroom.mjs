@@ -8,7 +8,7 @@ import {JUZ_RANGES,JUZ_NAMES} from '../coran/juz-data.mjs';
 import {QuranPlayer} from '../coran/audio.mjs';
 import {splitBasmala} from '../coran/model.mjs';
 import {createClassroomMotion} from './classroom-motion.mjs';
-import {queueTreeMoment,nextTreeMoment,hasUnreadTreeMessage,markTreeMessagesSeen,treeMessages} from './moments.mjs';
+import {queueTreeMoment,nextTreeMoment,hasUnreadTreeMessage as pupilHasUnreadTreeMessage,markTreeMessagesSeen,treeMessages} from './moments.mjs';
 export async function mountClassroom(root,profile,options={}){
  root.id='classroomRoot';
  if(profile?.role!=='admin')throw new Error('Accès administrateur requis');
@@ -54,6 +54,13 @@ export async function mountClassroom(root,profile,options={}){
  function initialParcel(c){return c.juz[0]||JUZ_RANGES.find(entry=>entry.surah===c.surahs[0])?.ranges[0]?.juz||30}
  const previewUrl=(c,s)=>{const url=options.previewPath?new URL(options.previewPath,location.href):location.pathname.endsWith('/demonstration.html')?new URL('demonstration.html',location.href):new URL('../../Admin-Classe-Coran-Essai.html',import.meta.url);url.search='';url.hash='';url.searchParams.set('preview','1');if(new URLSearchParams(location.search).get('qa')==='motion')url.searchParams.set('qa','motion');url.searchParams.set('class-id',c.id);url.searchParams.set('student-id',s.id);return url.href};
  const tree=id=>pupil().trees[id]||(pupil().trees[id]=emptyTree());
+ // A teacher opening feedback must not consume the pupil's notification.
+ const teacherReadKey=key+':teacher-tree-reads';
+ let teacherReads={};
+ try{teacherReads=JSON.parse(localStorage.getItem(teacherReadKey))||{}}catch{}
+ function teacherTreeKey(t){return JSON.stringify([classId,studentId,Object.keys(pupil()?.trees||{}).find(id=>pupil().trees[id]===t)])}
+ function messageSeenAt(t){return studentView?t.messagesSeenAt:teacherReads[teacherTreeKey(t)]}
+ function hasUnreadTreeMessage(t){return pupilHasUnreadTreeMessage({...t,messagesSeenAt:messageSeenAt(t)})}
  const nameDate=d=>new Date(d).toLocaleString('fr-FR',{dateStyle:'long',timeStyle:'short'});
  const button=(text,action,id='',primary=false)=>`<button data-action="${action}" data-id="${id}" class="${primary?'cc-primary':''}">${text}</button>`;
  const messaging=createClassMessaging({root,key,cloud,getContext:()=>({classes:db.classes,classId,studentId,studentName:pupil()?.name||'',studentView,teacher}),onStatus:()=>{
@@ -308,11 +315,13 @@ export async function mountClassroom(root,profile,options={}){
   target.scrollIntoView({block:'start',behavior:'instant'});
  }
  function detail(){const s=chapter(selected),t=tree(selected),host=root.querySelector('#cc-detail');if(!host)return;
-  const messages=treeMessages(t),unread=messages.filter(message=>message.at>(t.messagesSeenAt||''));
-  if(studentView&&unread.length){
-   markTreeMessagesSeen(t);save();
+  const messages=treeMessages(t),seen=Date.parse(messageSeenAt(t)||'')||0,unread=messages.filter(message=>(Date.parse(message.at)||0)>seen);
+  if(unread.length){
+   if(studentView){markTreeMessagesSeen(t);save()}
+   else{const receipt={messages,verseComments:[]};markTreeMessagesSeen(receipt);teacherReads[teacherTreeKey(t)]=receipt.messagesSeenAt;try{localStorage.setItem(teacherReadKey,JSON.stringify(teacherReads))}catch{}}
    root.querySelectorAll(`[data-action="tree"][data-id="${selected}"]`).forEach(button=>{
     button.classList.remove('cc-has-message');button.querySelectorAll('.cc-unread').forEach(badge=>badge.remove());
+    button.removeAttribute('aria-label');
    });
   }
   const next=Array.from({length:s.count},(_,i)=>i+1).find(v=>!t.verses.includes(v));
