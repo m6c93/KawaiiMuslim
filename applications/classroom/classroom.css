@@ -338,6 +338,15 @@
  #classroomRoot .cc-message-panel h4{font-size:18px}
 }
 
+#classroomRoot .cc-arrange-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:20px 0 0}
+#classroomRoot .cc-arrange-status{flex:1;min-width:180px;font-size:13px;color:#49634f;margin:0}
+#classroomRoot [data-arrange-toggle][aria-pressed=true]{background:#35765d;color:white}
+#classroomRoot .cc-arranging{outline:2px dashed #729d61;outline-offset:4px;cursor:crosshair}
+#classroomRoot .cc-arranging .cc-planted{touch-action:none;user-select:none;cursor:grab;animation:none!important}
+#classroomRoot .cc-arranging .cc-tree-crown,#classroomRoot .cc-arranging .cc-art{animation:none!important;transform:none!important}
+#classroomRoot .cc-arranging .cc-planted.cc-arrange-selected{outline:2px solid #fff7d0;background:#fff4;z-index:3}
+#classroomRoot .cc-arranging .cc-planted.cc-dragging{cursor:grabbing;z-index:4;filter:drop-shadow(0 8px 6px #264a3340)}
+#classroomRoot[data-garden-position-saving=true] .cc-arranging{cursor:progress}
 /* Invitation cards live in the top layer, outside #classroomRoot. */
 .cc-access-dialog{box-sizing:border-box;width:min(490px,calc(100vw - 28px));max-width:none;max-height:calc(100dvh - 32px);padding:0;border:1px solid #d8e3d1;border-radius:28px;background:#fffdf7;color:#234c42;box-shadow:0 30px 100px #102e3650;overflow:auto;font-family:Nunito,sans-serif}
 .cc-access-dialog *{box-sizing:border-box}

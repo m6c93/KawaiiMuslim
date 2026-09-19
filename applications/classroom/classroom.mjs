@@ -8,6 +8,7 @@ import {JUZ_RANGES,JUZ_NAMES} from '../coran/juz-data.mjs';
 import {QuranPlayer} from '../coran/audio.mjs';
 import {splitBasmala} from '../coran/model.mjs';
 import {createClassroomMotion} from './classroom-motion.mjs';
+import {createGardenArrange} from './garden-arrange.mjs';
 import {queueTreeMoment,nextTreeMoment,hasUnreadTreeMessage as pupilHasUnreadTreeMessage,markTreeMessagesSeen,treeMessages} from './moments.mjs';
 export async function mountClassroom(root,profile,options={}){
  root.id='classroomRoot';
@@ -46,6 +47,10 @@ export async function mountClassroom(root,profile,options={}){
  if(cloud?.studentId&&!studentView)throw Error('Ce compte élève n’est plus accessible. Revenez à votre espace.');
  root.dataset.live=String(Boolean(cloud&&!cloud.demo));
  const motion=createClassroomMotion(root);
+ const gardenArrange=createGardenArrange(root,{
+  canMove:()=>Boolean(studentId)&&!pendingWrites&&!formBusy&&!saveFailure&&root.dataset.expired!=='true',
+  async savePosition(id,pos){const t=tree(id),juz=parcel,previous=t.positions[juz];t.positions[juz]=pos;const saved=await save();if(!saved)t.positions[juz]=previous;return saved}
+ });
  let shellIdentity='',inboxTab='pending',activeMoment=null,incomingDb=null,transitionBusy=false;
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const basmalaMarkup=v=>{const {preface}=splitBasmala(v);return preface?`<div class="cc-opening cc-basmala"><small>Basmala · avant la sourate</small><span lang="ar" dir="rtl">${esc(preface)}</span></div>`:''};
@@ -83,7 +88,7 @@ export async function mountClassroom(root,profile,options={}){
  async function refreshCloud(manual=false){
   if(root.dataset.expired==='true'||!cloud||polling||pendingWrites||formBusy||(!manual&&saveFailure)||document.hidden)return;
   if(recordingSession||verseNoteSession||['opening','sending'].includes(recitationState.phase))return;
-  if(!manual&&(selected||activePlayer||draftBlob||verseNoteBlob||root.querySelector('form :focus')))return;
+  if(!manual&&(selected||activePlayer||draftBlob||verseNoteBlob||root.dataset.gardenArrange==='true'||root.querySelector('form :focus')))return;
   const before=JSON.stringify(db);polling=true;
   try{const next=await (manual?cloud.load():cloud.check());
    if(!manual&&(pendingWrites||formBusy||before!==JSON.stringify(db)))return;
@@ -268,7 +273,7 @@ export async function mountClassroom(root,profile,options={}){
   host.innerHTML=`<aside class="cc-moment-card" aria-label="Nouveau progrès validé"><div class="cc-moment-art" aria-hidden="true">${art(s.id)}<span class="cc-moment-petals">✿ · ✿</span></div><div class="cc-moment-copy"><small>UN MESSAGE POUR TOI</small><h3>${activeMoment.complete?'Ton arbre a fleuri !':'Ton arbre a grandi !'}</h3><p><strong>${esc(s.name)} · ${activeMoment.from} % → ${activeMoment.to} % validés</strong><br>${esc(t.teacher)} a validé tes progrès.</p>${message?`<blockquote>${esc(message.text)}</blockquote>`:''}<div class="cc-row">${button('Voir mon arbre','moment-tree',s.id,true)}${button('Merci, je continue','moment-close')}</div></div><span class="cc-mimi-cheer" role="img" aria-label="Mimi t’encourage"></span></aside>`;
   motion.enter(host.firstElementChild);
  }
- function draw(direction=0){stop();moving=false;if(incomingDb){db=incomingDb;cloud?.accept(db);incomingDb=null}if(cloud?.demo&&!cloud.studentId&&studentId&&!pupil()){studentId='';selected=0;studentSection='garden';notice='Ce compte d’essai a été supprimé automatiquement après 48 heures.'}renderScreen();motion.refresh();showMoment();if(studentView&&studentSection==='coran')return;motion.enter(direction?root.querySelector('.cc-board'):root.querySelector('#cc-content'),direction);}
+ function draw(direction=0){stop();moving=false;if(incomingDb){db=incomingDb;cloud?.accept(db);incomingDb=null}if(cloud?.demo&&!cloud.studentId&&studentId&&!pupil()){studentId='';selected=0;studentSection='garden';notice='Ce compte d’essai a été supprimé automatiquement après 48 heures.'}renderScreen();motion.refresh();gardenArrange.refresh();showMoment();if(studentView&&studentSection==='coran')return;motion.enter(direction?root.querySelector('.cc-board'):root.querySelector('#cc-content'),direction);}
  function renderScreen(){
  messaging.leave();
  if(studentSection==='messages'&&!messaging.enabled(classId))studentSection='garden';
@@ -407,7 +412,7 @@ export async function mountClassroom(root,profile,options={}){
  switch(a){case'play-submission':if(studentView)return;playSubmission(id);return;case'mark-listened':if(studentView)return;{markListened(id,b);return}case'open-submission-tree':if(studentView)return;selected=Number(id);detail();root.querySelector("#cc-detail")?.scrollIntoView({block:"nearest"});return;case'classes':studentSection='garden';classId=studentId='';selected=0;studentView=false;break;case'class':studentSection='garden';classId=id;break;case'roster':studentSection='garden';studentId='';selected=0;studentView=false;break;case'student':studentId=id;selected=0;studentSection='garden';parcel=initialParcel(cls());break;case'toggle':studentView=!studentView;studentSection='garden';break;case'tab-garden':if(!studentView)return;studentSection='garden';draw();return;case'tab-coran':if(!studentView)return;studentSection='coran';draw();return;case'tab-recite':if(!studentView)return;studentSection='recite';draw();return;case'recite-request':if(!studentView||!allowed().some(s=>s.id===Number(id)))return;tree(id).requested=true;notice='Le professeur retrouvera ta demande de récitation.';if(await save())draw();return;case'demo':{if(cloud)return;const c={id:crypto.randomUUID(),name:'Les petits oliviers · Démonstration',juz:[30],surahs:[1],students:['Adam','Maryam','Youssef'].map(name=>({id:crypto.randomUUID(),name,trees:{}}))};db.classes.push(c);classId=c.id;await save();break}case'tree':stop();selected=Number(id);detail();focusTreeDetail();return;case'close':selected=0;break;case'validate-pending':if(studentView)return;{const previous=progressSnapshot(id);validatePending(tree(Number(id)),chapter(id).count,teacher);cueGrowth(id,previous);notice='Les versets vérifiés par le professeur ont rendu leurs couleurs à l’arbre 🌳';await save()}break;case'complete':if(studentView)return;{const previous=progressSnapshot(selected);validate(tree(selected),1,chapter(selected).count,chapter(selected).count,teacher);cueGrowth(selected,previous);notice='Sourate validée : l’arbre est complet 🌸';await save()}break;case'reviewed':if(!studentView)return;markReviewed(tree(selected));notice='Tu as noté ta révision. Ton professeur peut toujours valider les versets.';await save();break;case'request':if(!studentView)return;tree(selected).requested=true;notice='Le professeur retrouvera votre demande dans la liste de classe.';await save();break;case'move':if(!studentView)return;moving=true;root.querySelector('.cc-status').textContent='Touchez un endroit dans la parcelle pour y placer votre arbre.';root.querySelector('.cc-board').scrollIntoView({block:'center'});return;case'practice-assigned':{const assignment=tree(id).assignment;practice(Number(id),assignment?.from||1,assignment?.to||assignment?.from||1);return}case'practice':{const c=chapter(id),next=Array.from({length:c.count},(_,i)=>i+1).find(v=>!tree(id).verses.includes(v))||1;practice(Number(id),next);return}}draw()});
  const adminView=root.closest('.admin-view');if(adminView)new MutationObserver(()=>{if(!adminView.classList.contains('active'))stop()}).observe(adminView,{attributes:true,attributeFilter:['class']});
  function receiveUpdates(){
-  if(!incomingDb||selected||activePlayer||recordingSession||draftBlob||verseNoteSession||verseNoteBlob||['opening','sending'].includes(recitationState.phase)||root.querySelector('form :focus'))return;
+  if(!incomingDb||selected||activePlayer||recordingSession||draftBlob||verseNoteSession||verseNoteBlob||root.dataset.gardenArrange==='true'||['opening','sending'].includes(recitationState.phase)||root.querySelector('form :focus'))return;
   if(studentView&&studentSection!=='garden')return;
   if(!studentView){db=incomingDb;cloud?.accept(db);incomingDb=null;draw();return}
   const next=incomingDb.classes.find(c=>c.id===classId)?.students.find(s=>s.id===studentId);if(!next)return;db=incomingDb;cloud?.accept(db);incomingDb=null;notice='Ton jardin est à jour avec les nouvelles indications du professeur.';draw();
@@ -424,5 +429,5 @@ export async function mountClassroom(root,profile,options={}){
   if(e.target.name==='surah')for(const field of form.querySelectorAll('input[type="number"]')){field.max=chapter(e.target.value).count;field.value=Math.max(1,Math.min(Number(field.value)||1,Number(field.max)))}
  });
  window.addEventListener('beforeunload',e=>{if(messaging.busy||pendingWrites||formBusy||recordingSession||draftBlob||verseNoteSession||verseNoteBlob){e.preventDefault();e.returnValue=''}});
- window.addEventListener('pagehide',()=>{clearInterval(refreshTimer);messaging.destroy();stop();motion.destroy()},{once:true});await messaging.refresh();draw();
+ window.addEventListener('pagehide',()=>{clearInterval(refreshTimer);messaging.destroy();stop();motion.destroy();gardenArrange.destroy()},{once:true});await messaging.refresh();draw();
 }
