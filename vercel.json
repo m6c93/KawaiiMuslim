@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/",
-      "has": [{ "type": "host", "value": "presentation.coran.kawaiimuslim.com" }],
+      "has": [{ "type": "host", "value": "presentation.coran.kawaiimuslimworld.com" }],
       "destination": "/presentation-coran/index.html"
     },
     {
