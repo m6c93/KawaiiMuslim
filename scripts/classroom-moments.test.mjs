@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {emptyTree,validate,propose} from '../applications/classroom/model.mjs';
-import {queueTreeMoment,nextTreeMoment,hasUnreadTreeMessage,treeMessages} from '../applications/classroom/moments.mjs';
+import {queueTreeMoment,nextTreeMoment,hasUnreadTreeMessage,markTreeMessagesSeen,treeMessages} from '../applications/classroom/moments.mjs';
 
 test('only new teacher validations create a discovery; repeating a validation never replays it',()=>{
  const tree=emptyTree(),student={trees:{112:tree}};
@@ -24,6 +24,15 @@ test('written and audio verse notes are unread until the pupil opens the tree',(
  assert.equal(hasUnreadTreeMessage(tree),true);
  tree.messagesSeenAt='2026-09-18T10:01:00Z';assert.equal(hasUnreadTreeMessage(tree),false);
  tree.messages.push({at:'2026-09-18T10:02:00Z',text:'Bravo'});assert.equal(hasUnreadTreeMessage(tree),true);
+});
+
+test('opening a tree dismisses its envelope using the newest message time, not the device clock',()=>{
+ const tree=emptyTree();
+ tree.messages=[{at:'2026-09-19T14:00:00+02:00',text:'Bravo'}];
+ tree.verseComments=[{at:'2026-09-19T12:30:00Z',verse:2,text:'Reprends doucement'}];
+ assert.equal(markTreeMessagesSeen(tree),true);
+ assert.equal(tree.messagesSeenAt,'2026-09-19T12:30:00.000Z');
+ assert.equal(hasUnreadTreeMessage(tree),false);
 });
 
 test('the message panel keeps audio references and verse context alongside global feedback',()=>{

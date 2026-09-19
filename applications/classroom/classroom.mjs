@@ -8,7 +8,7 @@ import {JUZ_RANGES,JUZ_NAMES} from '../coran/juz-data.mjs';
 import {QuranPlayer} from '../coran/audio.mjs';
 import {splitBasmala} from '../coran/model.mjs';
 import {createClassroomMotion} from './classroom-motion.mjs';
-import {queueTreeMoment,nextTreeMoment,hasUnreadTreeMessage,treeMessages} from './moments.mjs';
+import {queueTreeMoment,nextTreeMoment,hasUnreadTreeMessage,markTreeMessagesSeen,treeMessages} from './moments.mjs';
 export async function mountClassroom(root,profile,options={}){
  root.id='classroomRoot';
  if(profile?.role!=='admin')throw new Error('Accès administrateur requis');
@@ -276,7 +276,7 @@ export async function mountClassroom(root,profile,options={}){
  const priority=s=>Number(Boolean(tree(s.id).assignment))*4+Number(hasUnreadTreeMessage(tree(s.id)))*2+Number(visibleGrowth(tree(s.id),s.count)>0);
  const all=allowed(),visible=all.filter(s=>JUZ_RANGES.find(r=>r.surah===s.id).ranges.some(r=>r.juz===parcel)).sort((a,b)=>priority(b)-priority(a));
  const ranges=JUZ_RANGES.flatMap(s=>s.ranges.filter(r=>r.juz===parcel).map(r=>({...r,surah:s.surah}))),total=ranges.reduce((n,r)=>n+r.to-r.from+1,0),done=ranges.reduce((n,r)=>n+(pupil().trees[r.surah]?.verses||[]).filter(v=>v>=r.from&&v<=r.to).length,0);
- host.innerHTML+=`${!studentView?teacherInbox():nextStep()}<p class="cc-note">${studentView?'Touche un arbre pour retrouver ton passage et les messages de ton professeur.':'Vue professeur : touchez un arbre pour valider et écrire votre appréciation.'}</p><div class="cc-row"><label>Ma parcelle<select id="cc-parcel">${JUZ_NAMES.slice(1).map((n,i)=>`<option value="${i+1}" ${parcel===i+1?'selected':''}>Juz’ ${i+1} · ${esc(n)}</option>`).join('')}</select></label></div><p>${done} / ${total} versets validés dans ce Juz’</p><progress value="${done}" max="${total}" aria-label="Avancement du Juz’"></progress><div class="cc-tree-list">${visible.map(s=>`<button class="cc-tree-option ${hasUnreadTreeMessage(tree(s.id))?'cc-has-message':''}" data-action="tree" data-id="${s.id}">${art(s.id)}<strong>${esc(s.name)}</strong><small>${tree(s.id).verses.length}/${s.count} validés ${(tree(s.id).pendingVerses||[]).length?` · ${(tree(s.id).pendingVerses||[]).length} en attente`:``} ${due(tree(s.id))?'💧':''} ${messageBadge(s.id)}</small></button>`).join('')||'<p>Cette parcelle attend ses premières sourates. Tu peux toujours explorer le Coran.</p>'}</div><div class="cc-board" aria-label="Jardin personnel">${visible.filter(s=>tree(s.id).positions[parcel]).map(s=>{const pos=tree(s.id).positions[parcel];return `<button class="cc-planted ${hasUnreadTreeMessage(tree(s.id))?'cc-has-message':''} ${growthMotion(s.id)&&(bloom.colorReveal||bloom.complete)?'cc-celebrate':''}" style="left:${pos.x}%;top:${pos.y}%" data-action="tree" data-id="${s.id}"><span class="cc-tree-crown">${art(s.id)}</span><span>${esc(s.name)} ${due(tree(s.id))?'💧':''} </span>${messageBadge(s.id,true)}</button>`}).join('')}</div><div id="cc-detail"></div>`;
+ host.innerHTML+=`${!studentView?teacherInbox():nextStep()}<p class="cc-note">${studentView?'Touche un arbre pour retrouver ton passage et les messages de ton professeur.':'Vue professeur : touchez un arbre pour valider et écrire votre appréciation.'}</p><div class="cc-row"><label>Ma parcelle<select id="cc-parcel">${JUZ_NAMES.slice(1).map((n,i)=>`<option value="${i+1}" ${parcel===i+1?'selected':''}>Juz’ ${i+1} · ${esc(n)}</option>`).join('')}</select></label></div><p>${done} / ${total} versets validés dans ce Juz’</p><progress value="${done}" max="${total}" aria-label="Avancement du Juz’"></progress><div class="cc-tree-list">${visible.map(s=>`<button class="cc-tree-option ${hasUnreadTreeMessage(tree(s.id))?'cc-has-message':''}" data-action="tree" data-id="${s.id}">${art(s.id)}<strong>${esc(s.name)}</strong><small>${tree(s.id).verses.length}/${s.count} validés ${(tree(s.id).pendingVerses||[]).length?` · ${(tree(s.id).pendingVerses||[]).length} en attente`:``} ${due(tree(s.id))?'💧':''} ${messageBadge(s.id)}</small></button>`).join('')||'<p>Cette parcelle attend ses premières sourates. Tu peux toujours explorer le Coran.</p>'}</div><div class="cc-board" aria-label="Jardin personnel">${visible.filter(s=>tree(s.id).positions[parcel]).map(s=>{const pos=tree(s.id).positions[parcel],unread=hasUnreadTreeMessage(tree(s.id));return `<button class="cc-planted ${unread?'cc-has-message':''} ${growthMotion(s.id)&&(bloom.colorReveal||bloom.complete)?'cc-celebrate':''}" style="left:${pos.x}%;top:${pos.y}%" data-action="tree" data-id="${s.id}" ${unread?`aria-label="${esc(s.name)}, nouveau message du professeur"`:''}><span class="cc-tree-crown">${art(s.id)}</span><span>${esc(s.name)} ${due(tree(s.id))?'💧':''} </span>${messageBadge(s.id,true)}</button>`}).join('')}</div><div id="cc-detail"></div>`;
  if(growthMotion(bloom?.surahId))animateProgress(root.querySelector('progress[aria-label="Avancement du Juz’"]'),done);
  root.querySelector('#cc-parcel').onchange=e=>{const previous=parcel;parcel=Number(e.target.value);selected=0;draw(parcel>previous?1:-1);root.querySelector('#cc-parcel')?.focus({preventScroll:true})};
  if(selected&&all.some(s=>s.id===selected))detail();
@@ -296,7 +296,7 @@ export async function mountClassroom(root,profile,options={}){
  function messageBadge(id,planted=false){
   if(!hasUnreadTreeMessage(tree(id)))return '';
   const envelope='<svg class="cc-message-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect x="4" y="8" width="24" height="18" rx="4" fill="#fffdf3" stroke="currentColor" stroke-width="1.8"/><path d="m5 10 9 7a3 3 0 0 0 4 0l9-7M5 24l7-7m8 0 7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="26" cy="7" r="5" fill="#347359" stroke="#fff9e7" stroke-width="2"/></svg>';
-  return planted?`<span class="cc-unread cc-message-seal" aria-hidden="true">${envelope}</span><span class="cc-unread cc-message-caption">Nouveau message</span>`:`<span class="cc-unread cc-message-tag">${envelope}<span>Nouveau message</span></span>`;
+  return planted?`<span class="cc-unread cc-message-seal" aria-hidden="true">${envelope}</span>`:`<span class="cc-unread cc-message-tag">${envelope}<span>Nouveau message</span></span>`;
  }
  function messagePanel(messages){
   if(!messages.length)return '';
@@ -310,7 +310,7 @@ export async function mountClassroom(root,profile,options={}){
  function detail(){const s=chapter(selected),t=tree(selected),host=root.querySelector('#cc-detail');if(!host)return;
   const messages=treeMessages(t),unread=messages.filter(message=>message.at>(t.messagesSeenAt||''));
   if(studentView&&unread.length){
-   t.messagesSeenAt=new Date().toISOString();save();
+   markTreeMessagesSeen(t);save();
    root.querySelectorAll(`[data-action="tree"][data-id="${selected}"]`).forEach(button=>{
     button.classList.remove('cc-has-message');button.querySelectorAll('.cc-unread').forEach(badge=>badge.remove());
    });

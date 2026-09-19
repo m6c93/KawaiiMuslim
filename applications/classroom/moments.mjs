@@ -15,8 +15,19 @@ export function nextTreeMoment(student) {
 }
 
 export function hasUnreadTreeMessage(tree) {
-  const seen = tree.messagesSeenAt || '';
-  return [...(tree.messages || []), ...(tree.verseComments || [])].some(message => message.at > seen);
+  const seen = Date.parse(tree.messagesSeenAt || '') || 0;
+  return [...(tree.messages || []), ...(tree.verseComments || [])]
+    .some(message => (Date.parse(message.at || '') || 0) > seen);
+}
+
+// Use the newest message timestamp instead of the device clock. This keeps the
+// envelope dismissed even when a phone and the server are a few minutes apart.
+export function markTreeMessagesSeen(tree) {
+  const newest = [...(tree.messages || []), ...(tree.verseComments || [])]
+    .reduce((latest, message) => Math.max(latest, Date.parse(message.at || '') || 0), 0);
+  if (!newest) return false;
+  tree.messagesSeenAt = new Date(newest).toISOString();
+  return true;
 }
 
 // Present global encouragements and verse feedback together, newest first.
