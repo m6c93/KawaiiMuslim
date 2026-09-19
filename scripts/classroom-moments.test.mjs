@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {emptyTree,validate,propose} from '../applications/classroom/model.mjs';
-import {queueTreeMoment,nextTreeMoment,hasUnreadTreeMessage} from '../applications/classroom/moments.mjs';
+import {queueTreeMoment,nextTreeMoment,hasUnreadTreeMessage,treeMessages} from '../applications/classroom/moments.mjs';
 
 test('only new teacher validations create a discovery; repeating a validation never replays it',()=>{
  const tree=emptyTree(),student={trees:{112:tree}};
@@ -24,4 +24,18 @@ test('written and audio verse notes are unread until the pupil opens the tree',(
  assert.equal(hasUnreadTreeMessage(tree),true);
  tree.messagesSeenAt='2026-09-18T10:01:00Z';assert.equal(hasUnreadTreeMessage(tree),false);
  tree.messages.push({at:'2026-09-18T10:02:00Z',text:'Bravo'});assert.equal(hasUnreadTreeMessage(tree),true);
+});
+
+test('the message panel keeps audio references and verse context alongside global feedback',()=>{
+ const tree=emptyTree();
+ tree.messages=[{text:'Bravo pour tes efforts',at:'2026-09-18T12:00:00Z',author:'Professeur'}];
+ tree.verseComments=[
+  {verse:5,audioId:'verse-audio',at:'2026-09-18T15:00:00+02:00'},
+  {verse:4,text:'Prends ton temps',at:'2026-09-18T11:00:00Z'}
+ ];
+ const before=JSON.stringify(tree),messages=treeMessages(tree);
+ assert.deepEqual(messages.map(m=>m.kind),['verse','global','verse']);
+ assert.equal(messages[0].audioId,'verse-audio');assert.equal(messages[0].verse,5);
+ assert.equal(messages[1].text,'Bravo pour tes efforts');
+ assert.equal(JSON.stringify(tree),before,'Displaying feedback must not change validation or history');
 });

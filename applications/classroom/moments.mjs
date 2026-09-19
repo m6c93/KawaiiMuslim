@@ -18,3 +18,11 @@ export function hasUnreadTreeMessage(tree) {
   const seen = tree.messagesSeenAt || '';
   return [...(tree.messages || []), ...(tree.verseComments || [])].some(message => message.at > seen);
 }
+
+// Present global encouragements and verse feedback together, newest first.
+export function treeMessages(tree) {
+  return [
+    ...(tree.messages || []).map(message => ({...message, kind: 'global'})),
+    ...(tree.verseComments || []).map(message => ({...message, kind: 'verse'}))
+  ].sort((a, b) => new Date(b.at) - new Date(a.at));
+}

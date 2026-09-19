@@ -1,5 +1,12 @@
 # Mon Coran integration (11 September 2026)
 
+## Quran classroom and presentation
+Keep teacher/student improvements shared through `applications/classroom` so the
+real Quran app and `presentation-coran` demonstration stay aligned. The user
+explicitly requested parallel updates, not demo-only changes. The public demo at
+presentation.coran.kawaiimuslimworld.com must retain fictional, browser-local data
+and must never be connected to real classroom accounts.
+
 ## Interactive garden
 Mon jardin uses one evolving tree per surah. Each verse joins that tree only after
 a 10-repeat sequence finishes in Coran; progress is the number of earned verses
