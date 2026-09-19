@@ -1,6 +1,11 @@
 {
   "rewrites": [
     {
+      "source": "/",
+      "has": [{ "type": "host", "value": "presentation.coran.kawaiimuslim.com" }],
+      "destination": "/presentation-coran/index.html"
+    },
+    {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "coran.kawaiimuslimworld.com" }],
       "destination": "/coran-licence/:path*"
