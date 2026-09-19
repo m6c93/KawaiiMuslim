@@ -1,7 +1,8 @@
 import {createClassMessaging} from './messaging.mjs';
 import {emptyTree,propose,validate,validatePending,visibleGrowth,assignReview,markReviewed,growth,due} from './model.mjs';
 import {saveRecording,loadRecording} from './recordings.mjs';
-import {copyInvitation,esc as escapeText,message as portalMessage} from './live-client.mjs';
+import {invitationLink,message as portalMessage} from './live-client.mjs';
+import {showInviteLink} from './invite-dialog.mjs';
 import {demoClasses} from './demo.mjs';
 import {JUZ_RANGES,JUZ_NAMES} from '../coran/juz-data.mjs';
 import {QuranPlayer} from '../coran/audio.mjs';
@@ -246,7 +247,7 @@ export async function mountClassroom(root,profile,options={}){
   const dialog=document.createElement('dialog');dialog.className='cc-invite-dialog';
   dialog.innerHTML=`<form><h2>L’accès de ${esc(s.name)}</h2><p>Indiquez l’adresse de l’élève ou de son parent. Le lien sera réservé à cette adresse.</p><label>E-mail<input type="email" name="email" required autocomplete="off"></label><p role="status"></p><div class="cc-row"><button class="cc-primary">Créer le lien personnel</button><button type="button" data-close>Fermer</button></div><div class="cc-invite-result"></div></form>`;
   root.append(dialog);dialog.showModal();dialog.querySelector('[data-close]').onclick=()=>dialog.close();dialog.onclose=()=>dialog.remove();
-  dialog.querySelector('form').onsubmit=async event=>{event.preventDefault();event.stopPropagation();const form=event.target,btn=form.querySelector('button'),status=form.querySelector('[role="status"]');btn.disabled=true;try{const r=await cloud.invite(id,new FormData(form).get('email'),s.name);const link=await copyInvitation(r.token);dialog.querySelector('.cc-invite-result').innerHTML=`<label>Lien à transmettre<input readonly value="${escapeText(link)}"></label><small>Valable 7 jours. Copiez ce lien et transmettez-le à la personne. Aucun message n’est envoyé automatiquement.</small>`;status.textContent='Le lien personnel est prêt.'}catch(error){status.textContent=error.message}finally{btn.disabled=false}};
+  dialog.querySelector('form').onsubmit=async event=>{event.preventDefault();event.stopPropagation();const form=event.target,btn=form.querySelector('button'),status=form.querySelector('[role="status"]');btn.disabled=true;try{const r=await cloud.invite(id,new FormData(form).get('email'),s.name);dialog.close();showInviteLink({url:invitationLink(r.token),name:s.name,expiresAt:r.expires})}catch(error){status.textContent=error.message}finally{btn.disabled=false}};
  }
  function showMoment(){
   const host=root.querySelector('#cc-moment');

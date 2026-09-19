@@ -2,6 +2,7 @@ import {mountClassroom} from '../applications/classroom/classroom.mjs';
 import {DEMO_KEY,demoRequest,demoLink,createSharedDemo} from './shared-demo.mjs';
 import {loadRecording} from '../applications/classroom/recordings.mjs';
 import {esc} from '../applications/classroom/live-client.mjs';
+import {showInviteLink} from '../applications/classroom/invite-dialog.mjs';
 
 const root=document.querySelector('#demoRoot'),params=new URLSearchParams(location.search);
 const LOCAL_KEY='km-classroom-preview-v1:standalone-presentation-demo-v1';
@@ -28,11 +29,7 @@ function updatePresentation(view){
  document.querySelector('[data-space="student"]').href='?'+studentParams;
 }
 function linkDialog(result,name,teacher=false){
- const dialog=document.createElement('dialog');dialog.className='cc-invite-dialog demo-share-dialog';
- dialog.innerHTML=`<h2>${teacher?'Retrouver mon espace professeur':`Le lien de ${esc(name)} est prêt`}</h2><p>${teacher?'Gardez ce lien pour retrouver votre session sur un autre ordinateur. Il donne accès au côté professeur.':'Transmettez ce lien à votre participant. Il ouvrira directement ce compte élève sur son téléphone ou ordinateur, sans inscription.'}</p><label>${teacher?'Mon lien professeur':'Lien élève'}<input readonly value="${esc(result.url)}"></label><p class="demo-note">${teacher?`Espace professeur disponible jusqu’au ${expiryDate(result.expiresAt)}.`:`Compte et données d’essai supprimés le ${expiryDate(result.expiresAt)}. Copier le lien ne prolonge pas les 48 heures.`} Les vrais comptes restent séparés.</p><div class="cc-row"><button type="button" data-copy class="cc-primary">Copier le lien</button>${teacher?'':`<a class="demo-open" href="${esc(result.url)}" target="_blank" rel="noopener">Ouvrir le compte élève ↗</a>`}<button type="button" data-close>Fermer</button></div><p role="status"></p>`;
- document.body.append(dialog);dialog.showModal();dialog.querySelector('[data-close]').onclick=()=>dialog.close();dialog.onclose=()=>dialog.remove();
- dialog.querySelector('input').onclick=e=>e.target.select();
- dialog.querySelector('[data-copy]').onclick=async()=>{try{await navigator.clipboard.writeText(result.url);dialog.querySelector('[role="status"]').textContent='Lien copié. Vous pouvez le coller dans votre message.'}catch{dialog.querySelector('input').select();dialog.querySelector('[role="status"]').textContent='Sélectionnez puis copiez ce lien.'}};
+ return showInviteLink({...result,name,teacher,demo:true});
 }
 async function startSharing(db,classId,studentId){
  // Preserve the complete local demo. Only an explicit share action starts a remote copy.
@@ -53,7 +50,7 @@ async function startSharing(db,classId,studentId){
  return result;
 }
 async function showDemoLink({db,classId,studentId,name,cloud:active}){
- const dialog=document.createElement('dialog');dialog.className='cc-invite-dialog';dialog.innerHTML='<h2>Préparation du lien élève…</h2><p role="status">Le compte élève sera accessible sur plusieurs appareils pendant 48 heures, puis ses données seront supprimées automatiquement. Utilisez des profils d’essai.</p>';document.body.append(dialog);dialog.showModal();
+ const dialog=document.createElement('dialog');dialog.className='cc-access-dialog cc-access-loading';dialog.setAttribute('aria-label','Préparation du lien élève');dialog.innerHTML='<div class="cc-access-body"><span class="cc-access-eyebrow">UN INSTANT…</span><h2>Son jardin se prépare.</h2><p role="status">Nous préparons son lien personnel. Ce compte d’essai est disponible pendant 48 heures après sa création.</p></div>';document.body.append(dialog);dialog.showModal();
  try{
   const result=active?await active.share(classId,studentId):await startSharing(db,classId,studentId);
   dialog.close();dialog.remove();
