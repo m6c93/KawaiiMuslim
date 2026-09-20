@@ -1,3 +1,4 @@
+import {remoteAttendance} from '../applications/classroom/attendance.mjs';
 // Temporary demonstration capabilities. Never uses the real account/session API.
 export const DEMO_KEY='km-presentation-shared-v1';
 const endpoint='https://pasgxojzybmvbjhuokkk.supabase.co/rest/v1/rpc/quran_demo';
@@ -13,7 +14,7 @@ export function createSharedDemo(token,context,{rpc=demoRequest,onExpired=()=>{}
  let confirmed={classes:[]},tail=Promise.resolve(),blocked=false;
  const request=async(action,payload={})=>{try{return await rpc(action,payload,token)}catch(error){if(error.code==='42501')onExpired(error);throw error}};
  const plain=c=>JSON.stringify({...c,revision:undefined});
- return {demo:true,studentId:context.studentId||null,pollInterval:5000,
+ return {demo:true,attendance:remoteAttendance({token}),studentId:context.studentId||null,pollInterval:5000,
   async load(){await tail;confirmed=await request('classes');blocked=false;return structuredClone(confirmed)},
   check:()=>request('classes'),accept(next){confirmed=structuredClone(next)},
   save(db){const snapshot=structuredClone(db);const operation=tail.then(async()=>{

@@ -1,3 +1,4 @@
+import {remoteAttendance} from './attendance.mjs';
 import {client,portal,messaging} from './live-client.mjs';
 // No localStorage fallback: server acknowledgement is required for every write.
 export function createCloudClassroom(organization,{studentId=null,rpc=portal,messagingRpc=messaging,storage=()=>client().storage.from('quran-classroom-audio')}={}){
@@ -24,7 +25,7 @@ export function createCloudClassroom(organization,{studentId=null,rpc=portal,mes
   return operation;
  }
  const path=(classId,pupil,id)=>`${classId}/${pupil}/${id}`;
- return {load,save,studentId,get pending(){return pending},
+ return {load,save,studentId,attendance:remoteAttendance({organization}),get pending(){return pending},
   message:(action,payload={})=>messagingRpc(action,{...payload,organization}),
   check:()=>rpc('classes',{organization}),
   accept(next){confirmed=structuredClone(next)},

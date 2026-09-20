@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import {randomBytes,randomUUID} from 'node:crypto';
+const base='https://pasgxojzybmvbjhuokkk.supabase.co/rest/v1/rpc/';
+async function rpc(name,action,payload={},token=''){const r=await fetch(base+name,{method:'POST',headers:{apikey:'sb_publishable_JfiHxlqfI8pXr4Emho4vOw_QBePfSHm','Content-Type':'application/json'},body:JSON.stringify({action,payload,token})});const data=await r.json();return {ok:r.ok,data}}
+const owner=randomBytes(32).toString('hex'),other=randomBytes(32).toString('hex'),cid=randomUUID(),sid=randomUUID(),date=new Date().toISOString().slice(0,10);
+assert.ok((await rpc('quran_demo','create',{owner,data:{classes:[{id:cid,name:'Test appel fictif',juz:[30],surahs:[],students:[{id:sid,name:'Élève fictif',trees:{}}]}]}})).ok);
+assert.ok((await rpc('quran_demo','create',{owner:other,data:{classes:[]}})).ok);
+const payload={classId:cid,date,revision:0,rows:{[sid]:{status:'absent',justified:true,note:'Note de test fictive'}}};
+let r=await rpc('quran_attendance','save',payload,owner);assert.ok(r.ok,JSON.stringify(r.data));assert.equal(r.data.revision,1);
+r=await rpc('quran_attendance','load',{},owner);assert.equal(r.data[cid+'/'+date].rows[sid].status,'absent');
+assert.equal((await rpc('quran_attendance','save',payload,owner)).data.code,'40001');
+assert.equal((await rpc('quran_attendance','save',payload,other)).data.code,'42501');
+assert.deepEqual((await rpc('quran_attendance','load',{},other)).data,{});
+const invite=await rpc('quran_demo','invite',{class:cid,student:sid},owner);assert.ok(invite.ok);
+assert.equal((await rpc('quran_attendance','load',{},invite.data.token)).data.code,'42501');
+assert.equal((await rpc('quran_attendance','save',payload,invite.data.token)).data.code,'42501');
+assert.equal((await rpc('quran_attendance','load',{})).data.code,'42501');
+const pupil=await rpc('quran_demo','classes',{},invite.data.token);assert.ok(!JSON.stringify(pupil.data).includes('Note de test fictive'));
+payload.revision=1;payload.rows[sid]={status:'late',justified:false,note:''};assert.ok((await rpc('quran_attendance','save',payload,owner)).ok);
+console.log('PASS: shared save/read/correction, revision conflicts, foreign teacher denied, pupil denied, anonymous denied, no attendance in pupil data.');
