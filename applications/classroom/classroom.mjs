@@ -43,7 +43,8 @@ export async function mountClassroom(root,profile,options={}){
    .find(({classroom,student})=>options.studentId
     ?classroom.id===options.classId&&student.id===options.studentId
     :student.name===options.studentName&&(!options.className||classroom.name.includes(options.className)));
- if(match){classId=match.classroom.id;studentId=match.student.id;studentView=true;parcel=initialParcel(match.classroom);}
+ if(!match)throw Error('Ce compte élève est introuvable ou a expiré. Ouvrez un lien actuel depuis sa classe.');
+ classId=match.classroom.id;studentId=match.student.id;studentView=true;parcel=initialParcel(match.classroom);
  }
  if(!studentView&&options.classId&&db.classes.some(c=>c.id===options.classId))classId=options.classId;
  if(cloud?.studentId&&!studentView)throw Error('Ce compte élève n’est plus accessible. Revenez à votre espace.');

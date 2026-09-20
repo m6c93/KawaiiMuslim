@@ -1,16 +1,17 @@
-import {mountClassroom} from '../applications/classroom/classroom.mjs?v=attendance-v1';
+import {mountClassroom} from '../applications/classroom/classroom.mjs?v=audit-v1';
 import {DEMO_KEY,demoRequest,demoLink,createSharedDemo} from './shared-demo.mjs';
 import {loadRecording} from '../applications/classroom/recordings.mjs';
 import {esc} from '../applications/classroom/live-client.mjs';
 import {showInviteLink} from '../applications/classroom/invite-dialog.mjs';
 import {mountSchool,schoolDemo} from '../applications/classroom/school.mjs';
+import {useSavedTeacher,requestedPupil} from './routing.mjs';
 
 const root=document.querySelector('#demoRoot'),params=new URLSearchParams(location.search);
 const LOCAL_KEY='km-classroom-preview-v1:standalone-presentation-demo-v1';
 const fragment=new URLSearchParams(location.hash.slice(1));
 let token=fragment.get('demo'),context=null,cloud=null,currentView={};
 const read=(key,store=localStorage)=>{try{return JSON.parse(store.getItem(key))}catch{return null}};
-let owner=params.has('local')?null:read(DEMO_KEY);
+let owner=useSavedTeacher(params)?read(DEMO_KEY):null;
 if(!token&&owner)token=owner.token;
 const note=document.querySelector('.demo-note');
 const expiryDate=value=>new Date(value).toLocaleString('fr-FR',{dateStyle:'long',timeStyle:'short'});
@@ -24,9 +25,9 @@ function updatePresentation(view){
  document.querySelector('#demo-title').textContent=studentView?'Découvrez le côté élève.':'Découvrez le côté professeur.';
  document.querySelector('#demo-hint').textContent=studentView?`Explorez le jardin de ${studentName}, retrouvez les consignes et essayez Coran, Réciter et la messagerie si elle est activée.`:'Créez une classe, ajoutez vos élèves d’essai et partagez leur lien pour essayer ensemble, même sur un autre appareil.';
  if(context?.studentId){document.querySelector('.demo-switch').hidden=true;document.querySelector('.demo-help').hidden=true;document.querySelector('.brand').href=demoLink(token);return}
- const teacherParams=new URLSearchParams({view:'teacher'});if(classId)teacherParams.set('class-id',classId);if(params.has('local'))teacherParams.set('local','1');
+ const teacherParams=new URLSearchParams({view:'teacher'});if(classId)teacherParams.set('class-id',classId);if(!cloud)teacherParams.set('local','1');
  if(params.has('school-teacher'))teacherParams.set('school-teacher',params.get('school-teacher'));document.querySelector('[data-space="teacher"]').href='?'+teacherParams;
- const studentParams=studentId&&classId?new URLSearchParams({'class-id':classId,'student-id':studentId}):new URLSearchParams({student:'Maryam'});if(params.has('local'))studentParams.set('local','1');
+ const studentParams=studentId&&classId?new URLSearchParams({'class-id':classId,'student-id':studentId}):new URLSearchParams({student:'Maryam'});if(!cloud)studentParams.set('local','1');
  if(params.has('school-teacher'))studentParams.set('school-teacher',params.get('school-teacher'));document.querySelector('[data-space="student"]').href='?'+studentParams;
 }
 function linkDialog(result,name,teacher=false){
@@ -62,7 +63,13 @@ async function showDemoLink({db,classId,studentId,name,cloud:active}){
 try{
  if(token){
   context=await demoRequest('context',{},token);cloud=createSharedDemo(token,context,{onExpired:showExpired});
-  if(!context.studentId){localStorage.setItem(DEMO_KEY,JSON.stringify({token,expiresAt:context.expiresAt}));if(fragment.has('demo'))history.replaceState(null,'','?view=teacher')}
+  if(!context.studentId&&params.has('student-id')){
+   const target=requestedPupil((await cloud.check()).classes,params),link=await cloud.share(target.classId,target.studentId);
+   // Switch adapters as well as the URL: a pupil view must use only its capability.
+   token=new URL(link.url).hash.slice(6);context=await demoRequest('context',{},token);
+   cloud=createSharedDemo(token,context,{onExpired:showExpired});history.replaceState(null,'',link.url);
+  }
+  if(!context.studentId){localStorage.setItem(DEMO_KEY,JSON.stringify({token,expiresAt:context.expiresAt}));if(fragment.has('demo')){const query=new URLSearchParams({view:'teacher'});if(params.has('class-id'))query.set('class-id',params.get('class-id'));history.replaceState(null,'','?'+query)}}
   note.textContent=context.studentId?`Compte d’essai · Suppression automatique le ${expiryDate(context.expiresAt)} · Jardin, messages et enregistrements inclus.`:'Démo partagée · Chaque nouveau compte élève dure 48 heures, puis son jardin, ses messages et ses enregistrements sont supprimés. Vos classes restent disponibles.';
   if(!context.studentId){const btn=document.createElement('button');btn.className='demo-owner-link';btn.textContent='Retrouver mon espace professeur';btn.onclick=()=>linkDialog({url:demoLink(token),expiresAt:context.expiresAt},'',true);note.after(btn)}
  }
@@ -75,7 +82,8 @@ try{
  }else if(!context?.studentId&&params.get('school-teacher')){
   const adapter=await schoolDemo(),school=await adapter.load(),teacher=school.teachers.find(t=>t.id===params.get('school-teacher'));
   if(!teacher)throw Error('Professeur introuvable. Revenez côté école.');
-  if(teacher.shareExpiresAt){location.replace(demoLink(teacher.shareToken));throw Error('Ouverture de son espace partagé…')}
+  if(teacher.shareState==='expired')throw Error('Cet espace professeur d’essai a expiré. Revenez côté école pour créer un nouvel essai.');
+  if(teacher.shareExpiresAt){const target=new URL(demoLink(teacher.shareToken));for(const key of ['class-id','student-id'])if(params.has(key))target.searchParams.set(key,params.get(key));location.replace(target.href);throw Error('Ouverture de son espace partagé…')}
   note.textContent='Professeur de l’école · Essai sur cet appareil.';
   const back=document.createElement('a');back.href='?local=1&view=school';back.className='school-button';back.textContent='← Revenir à mon école';root.before(back);
   await mountClassroom(root,{id:'school-demo-'+teacher.id,role:'admin',full_name:teacher.name},{classId:params.get('class-id'),studentId:params.get('student-id'),previewPath:location.pathname,previewParams:{local:'1','school-teacher':teacher.id},onViewChange:updatePresentation});
