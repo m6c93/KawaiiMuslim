@@ -5,6 +5,8 @@ export function createClassroomMotion(root) {
   let preference = true, frame = 0, board = null, birds = null, inView = false, destroyed = false;
   let pointer = {x: 0, y: 0};
   const animations = new Set();
+  const entrances = new WeakMap();
+  let depth = {x: 0, y: 0};
   try { preference = localStorage.getItem('km-classroom-motion') !== 'off'; } catch {}
   const enabled = () => preference && !query.matches && !document.hidden;
   const observer = new IntersectionObserver(entries => {
@@ -13,6 +15,7 @@ export function createClassroomMotion(root) {
   }, {threshold: .05});
   function update() {
     root.dataset.motion = enabled() ? 'on' : 'off';
+    document.documentElement.dataset.classroomMotion = enabled() ? 'on' : 'off';
     root.dataset.gardenVisible = inView && enabled() ? 'true' : 'false';
     birds?.setActive(inView && enabled());
     const button = root.querySelector('[data-action="motion"]');
@@ -31,7 +34,7 @@ export function createClassroomMotion(root) {
     if (next !== board) {
       if (board) observer.unobserve(board);
       birds?.destroy(); birds = null;
-      board = next; pointer = {x: 0, y: 0}; inView = false;
+      board = next; pointer = {x: 0, y: 0}; depth = {x: 0, y: 0}; inView = false;
       if (board) {
         const decor = document.createElement('div');
         decor.className = 'cc-garden-depth'; decor.setAttribute('aria-hidden', 'true');
@@ -54,20 +57,28 @@ export function createClassroomMotion(root) {
     const rect = board.getBoundingClientRect();
     const scroll = Math.max(-1, Math.min(1, (innerHeight / 2 - rect.top - rect.height / 2) / innerHeight));
     const active = enabled() && inView;
-    board.style.setProperty('--depth-x', `${active ? pointer.x * 6 : 0}px`);
-    board.style.setProperty('--depth-y', `${active ? scroll * 10 + pointer.y * 4 : 0}px`);
+    const target = {x: active ? pointer.x * 6 : 0, y: active ? scroll * 10 + pointer.y * 4 : 0};
+    depth.x = active ? depth.x + (target.x - depth.x) * .18 : 0;
+    depth.y = active ? depth.y + (target.y - depth.y) * .18 : 0;
+    board.style.setProperty('--depth-x', `${depth.x.toFixed(2)}px`);
+    board.style.setProperty('--depth-y', `${depth.y.toFixed(2)}px`);
+    if (active && (Math.abs(target.x-depth.x)>.05 || Math.abs(target.y-depth.y)>.05)) schedule();
   }
   function move(event) {
-    if (!board || event.pointerType === 'touch' || !enabled() || !board.contains(event.target)) return;
+    if (!board || event.pointerType === 'touch' || !enabled()) return;
+    if (!board.contains(event.target)) {if(pointer.x||pointer.y){pointer={x:0,y:0};schedule()}return;}
     const r = board.getBoundingClientRect();
     pointer = {x: (event.clientX - r.left) / r.width - .5, y: (event.clientY - r.top) / r.height - .5}; schedule();
   }
   function enter(element, direction = 0) {
+    const previous = element && entrances.get(element);
+    if (previous) { previous.cancel(); animations.delete(previous); }
     if (!element || !enabled() || element.matches('.cc-coran-panel,.cc-reader')) return;
     const animation = element.animate([
-      {opacity: .2, transform: direction ? `translateX(${direction * 22}px)` : 'translateY(8px)'},
+      {opacity: .8, transform: direction ? `translateX(${direction * 12}px)` : 'translateY(4px)'},
       {opacity: 1, transform: 'translate(0,0)'}
-    ], {duration: direction ? 380 : 280, easing: 'cubic-bezier(.2,.75,.25,1)'});
+    ], {duration: direction ? 260 : 180, easing: 'cubic-bezier(.2,.75,.25,1)'});
+    entrances.set(element, animation);
     animations.add(animation); animation.finished.catch(() => {}).finally(() => animations.delete(animation));
   }
   function toggle() {
@@ -78,6 +89,8 @@ export function createClassroomMotion(root) {
   const mutation = new MutationObserver(refresh);
   mutation.observe(root, {childList: true, subtree: true});
   root.addEventListener('pointermove', move, {passive: true});
+  const leave = () => {pointer = {x:0,y:0};schedule();};
+  root.addEventListener('pointerleave', leave, {passive:true});
   window.addEventListener('scroll', schedule, {passive: true});
   window.addEventListener('resize', schedule, {passive: true});
   document.addEventListener('visibilitychange', update);
@@ -88,8 +101,10 @@ export function createClassroomMotion(root) {
     birds?.destroy(); birds = null;
     for (const animation of animations) animation.cancel();
     root.removeEventListener('pointermove', move); window.removeEventListener('scroll', schedule);
+    root.removeEventListener('pointerleave', leave);
     window.removeEventListener('resize', schedule); document.removeEventListener('visibilitychange', update);
     query.removeEventListener('change', update);
   }
   return {enabled, refresh, enter, toggle, destroy};
 }
+
