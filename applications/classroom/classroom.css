@@ -450,3 +450,7 @@
 #classroomRoot .cc-phonetic[hidden],#classroomRoot .cc-translation[hidden],#classroomRoot .cc-phonetics-controls [hidden]{display:none}
 #classroomRoot .cc-verse .cc-phonetic{font-family:Nunito,sans-serif;font-size:17px;font-weight:600;line-height:1.8;direction:ltr;text-align:start}
 #classroomRoot .cc-phonetics-controls>a{font-size:12px;color:#52665c}
+
+/* Separate teacher navigation from the class form and reading cards. */
+#classroomRoot #cc-navigation > nav[aria-label="Espaces du professeur"]{margin:16px 0 24px;gap:12px;padding:4px 0}
+@media(max-width:600px){#classroomRoot #cc-navigation > nav[aria-label="Espaces du professeur"]{margin:12px 0 20px}}
