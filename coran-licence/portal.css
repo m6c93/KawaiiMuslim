@@ -5,3 +5,6 @@ body{margin:0;background:#f4f5eb;color:#204c3f;font-family:Nunito,system-ui,sans
 .account-header nav .qa-button{cursor:pointer;min-height:44px;border:1px solid #cbd9c7;background:#fffef7;border-radius:12px;color:#315e4b;padding:9px 14px;font-weight:700}
 .portal-topline{font-size:14px;color:#53715f;padding:4px 10px 12px}
 @media(max-width:640px){.account-header{flex-wrap:wrap;align-items:center;padding:14px 16px;gap:14px}.account-header .brand strong{font-size:21px}.account-header nav{width:100%;justify-content:flex-end;border-top:1px solid #e1e8d9;padding-top:10px;gap:16px}.account-header nav a{min-height:44px;display:flex;align-items:center}.portal-topline{font-size:12px;gap:5px;margin-bottom:8px}}
+
+.auth-form>fieldset{display:grid;gap:15px;min-width:0;margin:0;padding:0;border:0}
+.auth-form>fieldset:disabled{opacity:.65}

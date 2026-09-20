@@ -14,3 +14,7 @@ $('#forgotPassword').onclick=()=>submit($('#loginForm'),async()=>{const email=$(
 $('#recoveryForm').onsubmit=e=>{e.preventDefault();submit(e.currentTarget,async()=>{const f=Object.fromEntries(new FormData(e.target));if(f.password!==f.confirm)throw Error('Les mots de passe ne correspondent pas.');const {error}=await client().auth.updateUser({password:f.password});if(error)throw error;await enter()})};
 client().auth.onAuthStateChange(event=>{if(event==='PASSWORD_RECOVERY')mode('recovery')});
 if(!recovery)client().auth.getUser().then(({data})=>{if(data.user)enter()}).catch(()=>{});
+
+// Enable credentials only after every submit handler is installed.
+document.querySelectorAll('.auth-form fieldset').forEach(fieldset=>{fieldset.disabled=false});
+status.textContent='';

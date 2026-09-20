@@ -22,7 +22,7 @@ Audit fonctionnel et corrections sur la plateforme professeur/élève/école et 
 
 ## Limites restant à vérifier
 
-- Le compte administrateur réel a été connecté avec sa double vérification et testé dans le navigateur (voir le complément ci-dessous). Le parcours complet avec des connexions distinctes directeur/professeur/élève, invitation acceptée et récupération d’accès reste à vérifier. Les permissions par rôle ont été testées sur le serveur avec des identités temporaires.
+- Le compte administrateur réel puis trois connexions distinctes directeur/professeur/élève ont été testés dans le navigateur avec le serveur de production (voir les compléments ci-dessous). Les comptes fictifs étaient préconfirmés : la réception des e-mails d’inscription et de récupération de mot de passe reste à vérifier dans une boîte e-mail réelle.
 - La qualité du microphone physique et une récitation humaine restent à essayer. Après autorisation de poursuivre les tests, les vrais enregistrements MediaRecorder, permissions du navigateur et échanges réseau ont été testés avec le périphérique audio simulé de Chrome. Cela ne certifie pas le matériel personnel ni Safari/iPhone.
 - La direction de la démonstration garde sa liste de professeurs sur le navigateur utilisé. Le transfert d’une classe déjà partagée entre professeurs reste réservé aux vrais comptes École. Ces limites de la démonstration ne sont pas présentées comme une synchronisation complète équivalente au produit réel.
 - Une erreur MutationObserver sans origine a été relevée uniquement au rechargement du banc d’essai à cadres. Les parcours continuaient à fonctionner et le test direct de l’application ne présentait pas cette erreur. Son origine n’est pas établie : elle n’est pas classée comme un bug produit corrigé.
@@ -79,3 +79,35 @@ Parcours effectué dans le navigateur connecté, avec les vrais services en lign
 Deux retouches de lisibilité : le lien de présentation ne mentionne plus de tableau de bord administrateur et ne contient plus view=admin ; les événements d’appel, d’attribution de professeur et de messagerie ont des libellés français dans l’historique. Les contrôles d’accès serveur restent inchangés.
 
 La structure fictive, ses invitations, sa licence, sa classe, son élève, son appel et ses lignes d’historique ont été retirés après vérification de leur identifiant exact, du nom de test et de l’absence de compte lié. Aucun profil utilisateur ni donnée de démonstration n’a été supprimé. Les tests du navigateur ont été menés avec le rôle administrateur : ils ne remplacent pas le cycle de connexion distinct de chaque rôle ni un essai avec le microphone physique.
+
+## Comptes directeur, professeur et élève distincts
+
+À la demande explicite du propriétaire, trois comptes d’authentification temporaires ont ensuite été créés via le gestionnaire d’utilisateurs, avec des adresses example.invalid, des mots de passe aléatoires et des e-mails préconfirmés. Aucun e-mail n’a été envoyé. Chaque rôle utilise un contexte Chrome indépendant, une vraie connexion par mot de passe et les services de production, sans imitation des réponses du serveur ni modification des jetons d’authentification.
+
+Parcours vérifiés :
+
+- Le directeur accepte son invitation personnelle et ouvre son école. Il invite le professeur, qui accepte avec sa propre adresse, crée sa classe, ouvre le Juz’ 30 et active la messagerie.
+- Le professeur ajoute un élève et prépare son lien. L’élève se connecte avec son propre compte, accepte l’invitation et ne voit que son jardin. La classe apparaît dans l’espace directeur.
+- La consigne An-Naas 5–6 est reçue par l’élève. Il enregistre, réécoute et envoie un audio avec le microphone simulé de Chrome. Le professeur reçoit un seul enregistrement et lit réellement le fichier privé. Le statut « écouté » ne valide pas la sourate.
+- Le professeur enregistre un commentaire vocal et écrit sous le verset 5. L’élève les reçoit et joue l’audio. Les messages privés écrits circulent dans les deux sens.
+- L’absence saisie par le professeur remonte au directeur. La validation professeur de 3/6 versets conserve un arbre incomplet ; la validation entière enregistre les six versets et la date de fin. Le jardin persiste au rechargement, sans débordement horizontal à 390 et 820 pixels.
+- Administration et RPC administrateur interdits aux trois rôles. Direction interdite au professeur et à l’élève. Présences non accessibles à l’élève. Deux fiches élèves dans la classe, mais une seule dans la réponse serveur de l’élève connecté ; conversation de l’autre élève refusée.
+- Une tentative directe de modification élève des versets validés, de la date de validation et des appréciations professeur est ignorée par le serveur : les valeurs autorisées sont conservées. La licence de deux places refuse un troisième élève. Déconnexion/reconnexion de l’élève : même jardin sauvegardé.
+
+Le script d’essai a rencontré deux problèmes de sélection/attente : un formulaire utilisé avant l’installation de son gestionnaire et deux boutons portant la même action de boîte de réception. Après correction du banc d’essai, les parcours ont été repris sans créer de deuxième enregistrement. La vérification du formulaire avant initialisation a révélé le vrai problème de chargement ci-dessous.
+
+### Correction de la connexion pendant le chargement
+
+Lorsque account.js n’était pas encore chargé, les formulaires HTML pouvaient être soumis nativement en GET. Reproduction isolée avec de faux identifiants non secrets : la requête contenant les champs de connexion dans l’URL a été détectée et bloquée avant envoi. Les formulaires sont désormais désactivés par un fieldset tant que les gestionnaires JavaScript ne sont pas installés ; leur méthode HTML est POST en défense supplémentaire. Un message indique le chargement sécurisé.
+
+Régression automatisée : script absent/retardé, champs et bouton inactifs, aucune soumission ; initialisation réussie, champs actifs avec gestionnaires ; pas de débordement téléphone/tablette. Les trois comptes temporaires ont aussi réussi une vraie connexion serveur avec les fichiers corrigés substitués dans leur navigateur isolé. Test reproductible : scripts/classroom-auth-loading.browser-check.cjs.
+
+### Nettoyage des essais
+
+Les fichiers audio de la classe fictive ont été supprimés par l’interface de stockage. La structure et ses dépendances ont été retirées dans une transaction limitée à son identifiant, avec vérification du nom de test, des deux élèves et des membres attendus. Les trois comptes ont été supprimés par le gestionnaire d’authentification, sélectionnés par leurs identifiants exacts.
+
+Vérification serveur après nettoyage : zéro compte, profil, session, école, classe, élève, message ou fichier audio correspondant à cet essai. Les comptes et données préexistants restent inchangés. Les mots de passe, invitations et sessions du banc d’essai ne font pas partie du dépôt Git.
+
+Les trois anciennes sessions de navigateur ont ensuite été réouvertes : retour imposé à la connexion. Une nouvelle tentative avec chacun des trois anciens mots de passe est refusée. Les fichiers locaux de mots de passe, invitations et sessions ont été retirés après cette vérification.
+
+Limites : microphone physique, Safari/iPhone et réception/récupération par e-mail non certifiés. Les comptes ont été préconfirmés pour éviter tout envoi à une personne réelle. Le Moushaf reste exclu de la publication.
