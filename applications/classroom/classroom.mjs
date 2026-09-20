@@ -1,3 +1,4 @@
+import {loadQuranJson} from './quran-cache.mjs';
 import {mountTeacherCoran} from './teacher-coran.mjs';
 import {openAttendance,localAttendance} from './attendance.mjs';
 import {mountPhonetics} from './phonetics.mjs';
@@ -16,9 +17,8 @@ import {queueTreeMoment,nextTreeMoment,hasUnreadTreeMessage as pupilHasUnreadTre
 export async function mountClassroom(root,profile,options={}){
  root.id='classroomRoot';
  if(profile?.role!=='admin')throw new Error('Accès administrateur requis');
- const base=new URL('../coran/',import.meta.url),response=await fetch(new URL('data/index.json',base));
- if(!response.ok)throw new Error('Catalogue indisponible');
- const index=await response.json(),key=`km-classroom-preview-v1:${profile.id}`,teacher=profile.full_name||'Professeur',cloud=options.cloud||null;
+ const base=new URL('../coran/',import.meta.url);
+ const index=await loadQuranJson(new URL('data/index.json',base)),key=`km-classroom-preview-v1:${profile.id}`,teacher=profile.full_name||'Professeur',cloud=options.cloud||null;
  let pendingWrites=0,saveFailure='',formBusy=false,practicePassage=null,polling=false,refreshTimer=0;
  const recordingIds=new WeakMap();
  let db={classes:[]},classId='',studentId='',selected=0,studentView=false,parcel=30,moving=false,notice='',activePlayer=null,requestVersion=0,studentSection='garden',librarySurah=1,reciteSurah=112,recordingSession=null,draftBlob=null,draftUrl=null,playedUrl=null,verseNoteSession=null,verseNoteBlob=null,verseNoteUrl=null,recitationData=null,recitationState={surah:112,from:1,to:1,message:'',phase:'idle',errorCode:''},bloom=null,latestSent=null,sendMotionUntil=0,progressFrame=0;
@@ -156,7 +156,7 @@ export async function mountClassroom(root,profile,options={}){
  async function loadRecitation(){
   const host=root.querySelector('#cc-recite-workspace');if(!host)return;
   const version=requestVersion;
-  try{const response=await fetch(new URL(`data/${reciteSurah}.json`,base));if(!response.ok)throw Error();const data=await response.json();if(version!==requestVersion||!host.isConnected)return;recitationData=data;renderRecitationWorkspace()}
+  try{const data=await loadQuranJson(new URL(`data/${reciteSurah}.json`,base));if(version!==requestVersion||!host.isConnected)return;recitationData=data;renderRecitationWorkspace()}
   catch{if(version===requestVersion&&host.isConnected)host.textContent='Cette sourate ne peut pas être chargée. Réessaie.'}
  }
  function renderRecitationWorkspace(){
@@ -233,7 +233,7 @@ export async function mountClassroom(root,profile,options={}){
   const session={stream,recorder,chunks:[]};verseNoteSession=session;recorder.ondataavailable=e=>{if(e.data?.size)session.chunks.push(e.data)};recorder.onstop=()=>{if(verseNoteSession!==session)return;stream.getTracks().forEach(track=>track.stop());verseNoteSession=null;verseNoteBlob=new Blob(session.chunks,{type:recorder.mimeType||'audio/webm'});if(verseNoteUrl)URL.revokeObjectURL(verseNoteUrl);verseNoteUrl=URL.createObjectURL(verseNoteBlob);verseNoteStatus('Message audio prêt.',true)};recorder.start();verseNoteStatus('🎙️ Enregistrement en cours… parlez puis appuyez sur Terminer.')
  }
  function stopVerseNote(){if(verseNoteSession&&verseNoteSession.recorder.state!=='inactive')verseNoteSession.recorder.stop()}
- function commentsForVerse(surahId,verse){if(!pupil())return [];return (tree(surahId).verseComments||[]).filter(note=>Number(note.verse)===Number(verse)).sort((a,b)=>new Date(b.at)-new Date(a.at))}
+ function commentsForVerse(surahId,verse){if(!pupil())return [];return (pupil()?.trees[surahId]?.verseComments||[]).filter(note=>Number(note.verse)===Number(verse)).sort((a,b)=>new Date(b.at)-new Date(a.at))}
  function verseCommentsMarkup(surahId,verse){
   const notes=commentsForVerse(surahId,verse);if(!notes.length)return '';
   return `<div class="cc-verse-comments">${notes.map(note=>`<article class="cc-verse-comment"><div><strong>💬 Message du professeur</strong><small>${esc(note.author)} · ${esc(nameDate(note.at))}</small></div>${note.text?`<p>${esc(note.text)}</p>`:''}${note.audioId?`<button type="button" data-action="play-verse-comment" data-id="${esc(note.audioId)}">▶ Écouter le message audio</button><div class="cc-verse-comment-audio"></div>`:''}</article>`).join('')}</div>`;
@@ -371,11 +371,10 @@ export async function mountClassroom(root,profile,options={}){
   root.querySelectorAll('[data-action="tree"]').forEach(button=>button.classList.toggle('cc-selected-tree',Number(button.dataset.id)===selected));
  }
  async function practice(id,startVerse=1,endVerse=startVerse){
-  stop();const version=requestVersion,host=root.querySelector('#cc-practice')||root.querySelector('#cc-detail');
+  stop();practicePassage=null;const version=requestVersion,host=root.querySelector('#cc-practice')||root.querySelector('#cc-detail');
   host.innerHTML='<p>Chargement de la sourate…</p>';
   try{
-   const r=await fetch(new URL(`data/${id}.json`,base));if(!r.ok)throw Error();
-   const data=await r.json();if(version!==requestVersion||!host.isConnected)return;
+   const data=await loadQuranJson(new URL(`data/${id}.json`,base));if(version!==requestVersion||!host.isConnected)return;
    let from=Math.max(1,Math.min(data.verses.length,startVerse)),to=Math.max(from,Math.min(data.verses.length,endVerse)),choosingEnd=false;
    host.innerHTML=`<section class="cc-reader"><h3>${esc(data.name)} · tous les versets</h3><p>Pour choisir un passage, touche son premier verset puis son dernier. Par exemple : 2 puis 3.</p><div class="cc-repeat-setting"><label for="cc-passage-repeat">🔁 Combien de fois répéter le passage ?</label><div class="cc-row"><input id="cc-passage-repeat" type="number" min="1" max="50" step="1" value="1" inputmode="numeric" aria-describedby="cc-repeat-hint"><div class="cc-row cc-repeat-presets" role="group" aria-label="Choix rapide du nombre de répétitions">${[1,3,5,10].map(n=>`<button type="button" data-reader="repeat" data-count="${n}" aria-pressed="${n===1}">×${n}</button>`).join('')}</div></div><small id="cc-repeat-hint">Choisis de 1 à 50 fois. Le récitateur répète tout le passage dans l’ordre.</small></div><div class="cc-row cc-reader-actions"><button type="button" data-reader="play" class="cc-primary">▶ Écouter le passage</button><button type="button" data-reader="whole">🎧 Écouter toute la sourate</button><button type="button" data-reader="pause">⏸ Pause</button><button type="button" data-reader="resume">▶ Reprendre</button><button type="button" data-reader="stop">■ Arrêter</button></div><p id="cc-passage" aria-live="polite"></p><p id="cc-player-status" role="status" aria-live="polite">Prêt à écouter. Tu peux mettre pause à tout moment.</p><audio preload="none" aria-label="Récitation par Ali Al-Hudhaify"></audio>${basmalaMarkup(data.verses[0])}<div class="cc-all-verses" role="group" aria-label="Tous les versets de la sourate">${data.verses.map(v=>`<button type="button" class="cc-verse" data-reader="verse" data-verse="${v.verse}" aria-pressed="false"><strong>Verset ${v.verse}</strong>${verseArabic(v)}<small>${esc(v.translation)}</small></button>`).join('')}</div>${studentView&&allowed().some(s=>s.id===Number(id))?`<div class="cc-practice-next"><span>Quand tu es prêt</span>${button('Enregistrer ce passage','record-passage',id,true)}</div>`:''}<small>Récitation : Ali Al-Hudhaify · Texte et traduction : <a href="${new URL('data/NOTICE.txt',base)}" target="_blank" rel="noopener">sources</a></small></section>`;
    host.querySelectorAll('.cc-verse').forEach(card=>{const markup=verseCommentsMarkup(id,card.dataset.verse);if(markup)card.insertAdjacentHTML('afterend',markup)});
@@ -462,7 +461,7 @@ export async function mountClassroom(root,profile,options={}){
   if(e.target.name==='surah')for(const field of form.querySelectorAll('input[type="number"]')){field.max=chapter(e.target.value).count;field.value=Math.max(1,Math.min(Number(field.value)||1,Number(field.max)))}
  });
  window.addEventListener('beforeunload',e=>{if(messaging.busy||pendingWrites||formBusy||recordingSession||draftBlob||verseNoteSession||verseNoteBlob){e.preventDefault();e.returnValue=''}});
- window.addEventListener('pagehide',()=>{clearInterval(refreshTimer);messaging.destroy();stop();motion.destroy();gardenArrange.destroy()},{once:true});await messaging.refresh();draw();
+ window.addEventListener('pagehide',()=>{clearInterval(refreshTimer);messaging.destroy();stop();motion.destroy();gardenArrange.destroy()},{once:true});draw();void messaging.refresh();
 }
 
 
