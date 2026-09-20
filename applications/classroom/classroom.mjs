@@ -3,7 +3,7 @@ import {mountPhonetics} from './phonetics.mjs';
 import {createClassMessaging} from './messaging.mjs';
 import {emptyTree,propose,validate,validatePending,visibleGrowth,assignReview,markReviewed,growth,due} from './model.mjs';
 import {saveRecording,loadRecording} from './recordings.mjs';
-import {invitationLink,message as portalMessage} from './live-client.mjs';
+import {invitationLink,sendInvitation,message as portalMessage} from './live-client.mjs';
 import {showInviteLink} from './invite-dialog.mjs';
 import {demoClasses} from './demo.mjs';
 import {JUZ_RANGES,JUZ_NAMES} from '../coran/juz-data.mjs';
@@ -260,9 +260,10 @@ export async function mountClassroom(root,profile,options={}){
   if(cloud?.share||options.shareDemo){if(cloud?.studentId)return;const s=cls().students.find(s=>s.id===id);if(!s)return;await options.showDemoLink({db,classId,studentId:id,name:s.name,cloud});return;}
   if(!cloud||cloud.studentId)return;const s=cls().students.find(s=>s.id===id);if(!s)return;
   const dialog=document.createElement('dialog');dialog.className='cc-invite-dialog';
-  dialog.innerHTML=`<form><h2>L’accès de ${esc(s.name)}</h2><p>Indiquez l’adresse de l’élève ou de son parent. Le lien sera réservé à cette adresse.</p><label>E-mail<input type="email" name="email" required autocomplete="off"></label><p role="status"></p><div class="cc-row"><button class="cc-primary">Créer le lien personnel</button><button type="button" data-close>Fermer</button></div><div class="cc-invite-result"></div></form>`;
+  dialog.innerHTML=`<form><h2>L’accès de ${esc(s.name)}</h2><p>Indiquez l’adresse de l’élève ou de son parent. Une invitation personnelle sera envoyée à cette adresse.</p><label>E-mail<input type="email" name="email" required autocomplete="off"></label><p role="status"></p><div class="cc-row"><button class="cc-primary">Envoyer l’invitation</button><button type="button" data-close>Fermer</button></div><div class="cc-invite-result"></div></form>`;
   root.append(dialog);dialog.showModal();dialog.querySelector('[data-close]').onclick=()=>dialog.close();dialog.onclose=()=>dialog.remove();
-  dialog.querySelector('form').onsubmit=async event=>{event.preventDefault();event.stopPropagation();const form=event.target,btn=form.querySelector('button'),status=form.querySelector('[role="status"]');btn.disabled=true;try{const r=await cloud.invite(id,new FormData(form).get('email'),s.name);dialog.close();showInviteLink({url:invitationLink(r.token),name:s.name,expiresAt:r.expires})}catch(error){status.textContent=error.message}finally{btn.disabled=false}};
+  let pendingInvitation=null,pendingEmail='';
+  dialog.querySelector('form').onsubmit=async event=>{event.preventDefault();event.stopPropagation();const form=event.target,btn=form.querySelector('button'),status=form.querySelector('[role="status"]');btn.disabled=true;try{const email=String(new FormData(form).get('email')).trim().toLowerCase();if(!pendingInvitation||pendingEmail!==email){pendingInvitation=await cloud.invite(id,email,s.name);pendingEmail=email}await sendInvitation(pendingInvitation.token);status.textContent='Invitation envoyée au service e-mail. Le destinataire choisira son mot de passe depuis cet e-mail.';btn.hidden=true;form.querySelector('input').readOnly=true}catch(error){status.textContent=error.message}finally{btn.disabled=false}};
  }
  function showMoment(){
   const host=root.querySelector('#cc-moment');
@@ -436,3 +437,4 @@ export async function mountClassroom(root,profile,options={}){
  window.addEventListener('beforeunload',e=>{if(messaging.busy||pendingWrites||formBusy||recordingSession||draftBlob||verseNoteSession||verseNoteBlob){e.preventDefault();e.returnValue=''}});
  window.addEventListener('pagehide',()=>{clearInterval(refreshTimer);messaging.destroy();stop();motion.destroy();gardenArrange.destroy()},{once:true});await messaging.refresh();draw();
 }
+

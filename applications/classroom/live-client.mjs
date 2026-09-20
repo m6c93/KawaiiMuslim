@@ -15,3 +15,11 @@ export async function requireContext(){
 export function invitationLink(token){const url=new URL('invitation.html',portalHome);url.hash=token;return url.href}
 export async function copyInvitation(token){const link=invitationLink(token);try{await navigator.clipboard.writeText(link)}catch{}return link}
 export function downloadCsv(filename,rows){const csv=rows.map(row=>row.map(value=>{let s=String(value??'');if(/^[=+@\-\t\r]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"'}).join(';')).join('\r\n');const url=URL.createObjectURL(new Blob(['\ufeff',csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+
+export async function sendInvitation(token){
+ const {data}=await client().auth.getSession();
+ const response=await fetch('/api/quran-invitation',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${data.session?.access_token||''}`},body:JSON.stringify({token})});
+ const result=await response.json().catch(()=>({}));
+ if(!response.ok||!result.sent)throw Error(result.error||'Aucun envoi confirmé. Réessayez depuis cet accès.');
+ return result;
+}

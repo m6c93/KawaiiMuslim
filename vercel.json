@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/quran-invitation",
+      "destination": "/api/quran-invitation"
+    },
+    {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "coran.kawaiimuslimworld.com" }],
       "destination": "/coran-licence/:path*"
