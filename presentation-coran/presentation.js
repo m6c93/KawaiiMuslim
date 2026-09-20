@@ -1,4 +1,4 @@
-import {mountClassroom} from '../applications/classroom/classroom.mjs?v=audit-v1';
+import {mountClassroom} from '../applications/classroom/classroom.mjs?v=audio-audit-v1';
 import {DEMO_KEY,demoRequest,demoLink,createSharedDemo} from './shared-demo.mjs';
 import {loadRecording} from '../applications/classroom/recordings.mjs';
 import {esc} from '../applications/classroom/live-client.mjs';
