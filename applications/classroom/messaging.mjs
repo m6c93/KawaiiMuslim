@@ -1,3 +1,4 @@
+import {startLiveRefresh} from './live-refresh.mjs';
 import {esc} from './live-client.mjs';
 import {saveRecording,loadRecording} from './recordings.mjs';
 import {createDemoMessaging} from './messaging-data.mjs';
@@ -18,7 +19,7 @@ export function createClassMessaging({root,key,cloud,getContext,onStatus}){
   if(refreshBusy||document.hidden)return;refreshBusy=true;const version=statusVersion;
   try{const next=await request('status');if(version!==statusVersion)return;const changed=JSON.stringify(statuses)!==JSON.stringify(next.classes);statuses=next.classes||[];statusError='';if(changed)onStatus?.();syncBadges();
    if(pane?.host.isConnected&&!sending){if(!enabled(pane.classId)){say('Le professeur a désactivé la messagerie. Les anciens échanges sont conservés.');setControls(true)}else await loadThread(false)}
-  }catch(error){statusError=error.message||'La messagerie est momentanément indisponible.';if(pane?.host.isConnected)say('Connexion indisponible. Ton brouillon est conservé. Tu peux réessayer.',true)}finally{refreshBusy=false}
+  }catch(error){statusError=error.message||'La messagerie est momentanément indisponible.';if(pane?.host.isConnected)say('Connexion indisponible. Ton brouillon est conservé. Tu peux réessayer.',true);return false}finally{refreshBusy=false}
  }
  const creationHtml=()=>`<label class="cc-chat-choice"><input type="checkbox" name="messaging"><span><strong>Activer la messagerie</strong><small>Chaque élève pourra échanger en privé avec vous.</small></span></label>`;
  function settingsHtml(){const id=context().classId;return `<section class="cc-card cc-chat-settings"><div><h3>💬 Messagerie de la classe</h3><p>${enabled(id)?'Activée · chaque élève peut vous écrire en privé.':'Désactivée · aucun bouton Messagerie dans l’espace élève.'}</p><small>Vous pouvez changer ce choix à tout moment. Les échanges sont conservés.</small></div><button type="button" data-action="chat-configure" aria-pressed="${enabled(id)}">${enabled(id)?'Désactiver':'Activer la messagerie'}</button></section>`}
@@ -66,6 +67,6 @@ export function createClassMessaging({root,key,cloud,getContext,onStatus}){
   };
   if(!enabled(c.classId)){say(statusError||'Le professeur n’a pas activé la messagerie.');setControls(true)}else loadThread();
  }
- const tick=()=>{if(root.isConnected)refresh()};timer=setInterval(tick,8000);window.addEventListener('focus',tick);const storageListener=e=>{if(e.key===key+':messaging-v1')refresh()};if(!cloud)window.addEventListener('storage',storageListener);
- return {enabled,badge,creationHtml,settingsHtml,configure,refresh,mount,leave:disposePane,get busy(){return sending||opening||!!session||!!draftAudio},destroy(){clearInterval(timer);window.removeEventListener('focus',tick);window.removeEventListener('storage',storageListener);if(session){clearTimeout(session.limit);session.stream.getTracks().forEach(t=>t.stop());session=null}clearAudio();disposePane()}};
+ const tick=()=>{if(root.isConnected)return refresh()};timer=startLiveRefresh(tick,{interval:5000});const storageListener=e=>{if(e.key===key+':messaging-v1')refresh()};if(!cloud)window.addEventListener('storage',storageListener);
+ return {enabled,badge,creationHtml,settingsHtml,configure,refresh,mount,leave:disposePane,get busy(){return sending||opening||!!session||!!draftAudio},destroy(){timer?.();window.removeEventListener('storage',storageListener);if(session){clearTimeout(session.limit);session.stream.getTracks().forEach(t=>t.stop());session=null}clearAudio();disposePane()}};
 }

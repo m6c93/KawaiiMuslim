@@ -1,3 +1,4 @@
+import {startLiveRefresh} from './live-refresh.mjs';
 import {loadQuranJson} from './quran-cache.mjs';
 import {mountTeacherCoran} from './teacher-coran.mjs';
 import {openAttendance,localAttendance} from './attendance.mjs';
@@ -19,7 +20,7 @@ export async function mountClassroom(root,profile,options={}){
  if(profile?.role!=='admin')throw new Error('Accès administrateur requis');
  const base=new URL('../coran/',import.meta.url);
  const index=await loadQuranJson(new URL('data/index.json',base)),key=`km-classroom-preview-v1:${profile.id}`,teacher=profile.full_name||'Professeur',cloud=options.cloud||null;
- let pendingWrites=0,saveFailure='',formBusy=false,practicePassage=null,polling=false,refreshTimer=0;
+ let pendingWrites=0,saveFailure='',formBusy=false,practicePassage=null,polling=false,refreshTimer=null;
  const recordingIds=new WeakMap();
  let db={classes:[]},classId='',studentId='',selected=0,studentView=false,parcel=30,moving=false,notice='',activePlayer=null,requestVersion=0,studentSection='garden',librarySurah=1,reciteSurah=112,recordingSession=null,draftBlob=null,draftUrl=null,playedUrl=null,verseNoteSession=null,verseNoteBlob=null,verseNoteUrl=null,recitationData=null,recitationState={surah:112,from:1,to:1,message:'',phase:'idle',errorCode:''},bloom=null,latestSent=null,sendMotionUntil=0,progressFrame=0;
  if(cloud){db=await cloud.load()}
@@ -89,10 +90,14 @@ export async function mountClassroom(root,profile,options={}){
    saveFailure=portalMessage(error)||'La sauvegarde n’a pas été confirmée. Actualisez les données avant de continuer.';bloom=null;notice='';root.querySelector('.cc-status')?.replaceChildren();return false;
   }).finally(()=>{pendingWrites--;syncStatus()});
  }
+ const dirtyForms=new WeakSet();
+ root.addEventListener('input',e=>{const form=e.target.closest('form');if(form)dirtyForms.add(form)});
+ root.addEventListener('change',e=>{const form=e.target.closest('form');if(form)dirtyForms.add(form)});
+ const hasDraftForm=()=>[...root.querySelectorAll('form')].some(form=>dirtyForms.has(form));
  async function refreshCloud(manual=false){
   if(root.dataset.expired==='true'||!cloud||polling||pendingWrites||formBusy||(!manual&&saveFailure)||document.hidden)return;
   if(recordingSession||verseNoteSession||['opening','sending'].includes(recitationState.phase))return;
-  if(!manual&&(selected||activePlayer||draftBlob||verseNoteBlob||root.dataset.gardenArrange==='true'||root.querySelector('form :focus')))return;
+  if(!manual&&(activePlayer||draftBlob||verseNoteBlob||messaging.busy||hasDraftForm()||root.dataset.gardenArrange==='true'||root.querySelector('form :focus')))return;
   const before=JSON.stringify(db);polling=true;
   try{const next=await (manual?cloud.load():cloud.check());
    if(!manual&&(pendingWrites||formBusy||before!==JSON.stringify(db)))return;
@@ -108,7 +113,7 @@ export async function mountClassroom(root,profile,options={}){
     return;
    }
    if(JSON.stringify(next)!==JSON.stringify(db)){incomingDb=next;receiveUpdates()}
-  }catch(error){if(manual){saveFailure=error.message;syncStatus()}}
+  }catch(error){if(manual){saveFailure=error.message;syncStatus()}return false}
   finally{polling=false}
  }
 
@@ -444,15 +449,14 @@ export async function mountClassroom(root,profile,options={}){
  switch(a){case'play-submission':if(studentView)return;playSubmission(id);return;case'mark-listened':if(studentView)return;{markListened(id,b);return}case'open-submission-tree':if(studentView)return;selected=Number(id);detail();root.querySelector("#cc-detail")?.scrollIntoView({block:"nearest"});return;case'classes':studentSection='garden';classId=studentId='';selected=0;studentView=false;break;case'class':studentSection='garden';classId=id;break;case'roster':studentSection='garden';studentId='';selected=0;studentView=false;break;case'student':studentId=id;selected=0;studentSection='garden';parcel=initialParcel(cls());break;case'toggle':studentView=!studentView;studentSection='garden';break;case'tab-garden':if(!studentView)return;studentSection='garden';draw();return;case'tab-coran':if(!studentView)return;studentSection='coran';draw();return;case'tab-recite':if(!studentView)return;studentSection='recite';draw();return;case'recite-request':if(!studentView||!allowed().some(s=>s.id===Number(id)))return;tree(id).requested=true;notice='Le professeur retrouvera ta demande de récitation.';if(await save())draw();return;case'demo':{if(cloud)return;const c={id:crypto.randomUUID(),name:'Les petits oliviers · Démonstration',juz:[30],surahs:[1],students:['Adam','Maryam','Youssef'].map(name=>({id:crypto.randomUUID(),name,trees:{}}))};db.classes.push(c);classId=c.id;await save();break}case'tree':stop();selected=Number(id);detail();focusTreeDetail();return;case'close':selected=0;break;case'validate-pending':if(studentView)return;{const previous=progressSnapshot(id);validatePending(tree(Number(id)),chapter(id).count,teacher);cueGrowth(id,previous);notice='Les versets vérifiés par le professeur ont rendu leurs couleurs à l’arbre 🌳';await save()}break;case'complete':if(studentView)return;{const previous=progressSnapshot(selected);validate(tree(selected),1,chapter(selected).count,chapter(selected).count,teacher);cueGrowth(selected,previous);notice='Sourate validée : l’arbre est complet 🌸';await save()}break;case'reviewed':if(!studentView)return;markReviewed(tree(selected));notice='Tu as noté ta révision. Ton professeur peut toujours valider les versets.';await save();break;case'request':if(!studentView)return;tree(selected).requested=true;notice='Le professeur retrouvera votre demande dans la liste de classe.';await save();break;case'move':if(!studentView)return;moving=true;root.querySelector('.cc-status').textContent='Touchez un endroit dans la parcelle pour y placer votre arbre.';root.querySelector('.cc-board').scrollIntoView({block:'center'});return;case'practice-assigned':{const assignment=tree(id).assignment;practice(Number(id),assignment?.from||1,assignment?.to||assignment?.from||1);return}case'practice':{const c=chapter(id),next=Array.from({length:c.count},(_,i)=>i+1).find(v=>!tree(id).verses.includes(v))||1;practice(Number(id),next);return}}draw()});
  const adminView=root.closest('.admin-view');if(adminView)new MutationObserver(()=>{if(!adminView.classList.contains('active'))stop()}).observe(adminView,{attributes:true,attributeFilter:['class']});
  function receiveUpdates(){
-  if(!incomingDb||selected||activePlayer||recordingSession||draftBlob||verseNoteSession||verseNoteBlob||root.dataset.gardenArrange==='true'||['opening','sending'].includes(recitationState.phase)||root.querySelector('form :focus'))return;
-  if(studentView&&studentSection!=='garden')return;
+  if(!incomingDb||pendingWrites||formBusy||saveFailure||messaging.busy||hasDraftForm()||(!studentView&&selected)||activePlayer||recordingSession||draftBlob||verseNoteSession||verseNoteBlob||root.dataset.gardenArrange==='true'||['opening','sending'].includes(recitationState.phase)||root.querySelector('form :focus'))return;
+  if(studentSection!=='garden')return;
   if(!studentView){db=incomingDb;cloud?.accept(db);incomingDb=null;draw();return}
   const next=incomingDb.classes.find(c=>c.id===classId)?.students.find(s=>s.id===studentId);if(!next)return;db=incomingDb;cloud?.accept(db);incomingDb=null;notice='Ton jardin est à jour avec les nouvelles indications du professeur.';draw();
  }
  window.addEventListener('storage',event=>{if(!cloud&&event.key===key&&event.newValue){try{const next=JSON.parse(event.newValue);if(next.classes){incomingDb=next;receiveUpdates()}}catch{}}});
- window.addEventListener('focus',()=>{receiveUpdates();refreshCloud()});
- if(cloud)refreshTimer=setInterval(()=>refreshCloud(),cloud.pollInterval||20000);
- root.addEventListener('classroom-expired',()=>{stop();messaging.destroy();clearInterval(refreshTimer);incomingDb=null;root.dataset.expired='true'});
+ if(cloud)refreshTimer=startLiveRefresh(()=>{receiveUpdates();return refreshCloud()}, {interval:cloud.pollInterval||5000});
+ root.addEventListener('classroom-expired',()=>{stop();messaging.destroy();refreshTimer?.();incomingDb=null;root.dataset.expired='true'});
  root.addEventListener('change',e=>{
   const form=e.target.closest('[data-form="group-review"]');if(!form)return;
   const boxes=[...form.querySelectorAll('[name="students"]')],all=form.querySelector('[data-group-all]');
@@ -461,7 +465,7 @@ export async function mountClassroom(root,profile,options={}){
   if(e.target.name==='surah')for(const field of form.querySelectorAll('input[type="number"]')){field.max=chapter(e.target.value).count;field.value=Math.max(1,Math.min(Number(field.value)||1,Number(field.max)))}
  });
  window.addEventListener('beforeunload',e=>{if(messaging.busy||pendingWrites||formBusy||recordingSession||draftBlob||verseNoteSession||verseNoteBlob){e.preventDefault();e.returnValue=''}});
- window.addEventListener('pagehide',()=>{clearInterval(refreshTimer);messaging.destroy();stop();motion.destroy();gardenArrange.destroy()},{once:true});draw();void messaging.refresh();
+ window.addEventListener('pagehide',()=>{refreshTimer?.();messaging.destroy();stop();motion.destroy();gardenArrange.destroy()},{once:true});draw();void messaging.refresh();
 }
 
 
