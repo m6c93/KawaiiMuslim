@@ -22,7 +22,7 @@ Audit fonctionnel et corrections sur la plateforme professeur/élève/école et 
 
 ## Limites restant à vérifier
 
-- Le navigateur est déconnecté de l’application réelle. Le parcours complet avec une véritable connexion directeur/professeur/élève, invitation acceptée et récupération d’accès n’a pas été effectué pendant cet audit. Les permissions et sauvegardes ont été vérifiées directement sur le serveur avec des identités temporaires.
+- Le compte administrateur réel a été connecté avec sa double vérification et testé dans le navigateur (voir le complément ci-dessous). Le parcours complet avec des connexions distinctes directeur/professeur/élève, invitation acceptée et récupération d’accès reste à vérifier. Les permissions par rôle ont été testées sur le serveur avec des identités temporaires.
 - La qualité du microphone physique et une récitation humaine restent à essayer. Après autorisation de poursuivre les tests, les vrais enregistrements MediaRecorder, permissions du navigateur et échanges réseau ont été testés avec le périphérique audio simulé de Chrome. Cela ne certifie pas le matériel personnel ni Safari/iPhone.
 - La direction de la démonstration garde sa liste de professeurs sur le navigateur utilisé. Le transfert d’une classe déjà partagée entre professeurs reste réservé aux vrais comptes École. Ces limites de la démonstration ne sont pas présentées comme une synchronisation complète équivalente au produit réel.
 - Une erreur MutationObserver sans origine a été relevée uniquement au rechargement du banc d’essai à cadres. Les parcours continuaient à fonctionner et le test direct de l’application ne présentait pas cette erreur. Son origine n’est pas établie : elle n’est pas classée comme un bug produit corrigé.
@@ -45,7 +45,7 @@ Régressions ajoutées dans `scripts/classroom-audit.test.mjs` : navigation des 
 
 Scripts : `classroom-live.browser-check.cjs`, `classroom-recording-online.browser-check.cjs`, `classroom-microphone.browser-check.cjs`, `classroom-anonymous.browser-check.cjs`. Les essais en ligne ciblent uniquement les tables isolées de démonstration. Le rapport JSON détaillé du parcours réussi est conservé dans `../audit-recording-online-fixed/results.json`.
 
-**Toujours en attente :** vérification Authenticator du vrai compte administrateur et cycle complet d’invitations de production. La connexion personnelle a révélé le problème serveur décrit ci-dessous. Après correction, elle atteint la vérification de sécurité.
+**État à cette étape de l’audit :** vérification Authenticator encore attendue (effectuée depuis, voir le dernier complément) et cycle complet d’invitations de production non vérifié. La connexion personnelle a révélé le problème serveur décrit ci-dessous. Après correction, elle atteint la vérification de sécurité.
 
 ## Publication
 Correctifs publiés sur main : 26504f6568bdf853cce6f15a29644cb9353101d1. Déploiement Vercel réussi. Le lien public ?student=Maryam a été rouvert après déploiement avec la session professeur précédemment présente : il ouvre bien le jardin de Maryam, et la navigation garde le contexte de présentation. Capture finale du jardin inspectée : arbres entiers, légendes lisibles, oiseaux visibles. Aucun changement de schéma serveur pendant cet audit.
@@ -61,3 +61,21 @@ Correction ciblée appliquée en production via `supabase/quran-context-aliases.
 Test transactionnel réussi puis annulé : contexte professeur limité à son organisation, contexte élève limité à son compte, licence active, interdiction d’administration pour le professeur, MFA obligatoire pour l’administrateur, lecture correcte des organisations/licences/classes/élèves après MFA. Les identités temporaires n’avaient aucun mot de passe et aucune donnée d’essai n’a été conservée. Régression : `scripts/classroom-context-security.sql`.
 
 Après application, rechargement du vrai compte : l’erreur a disparu, l’écran « Votre accès administrateur » demande correctement le code Authenticator. L’administration réelle reste en attente de cette action personnelle ; aucune double vérification n’a été contournée.
+
+## Compte administrateur réel après double vérification
+
+Le propriétaire a terminé personnellement la vérification Authenticator. L’administration s’est chargée sans erreur. Les structures, professeurs, classes, élèves et licences étaient initialement à zéro ; les exemples de démonstration ne sont pas importés dans cet espace.
+
+Parcours effectué dans le navigateur connecté, avec les vrais services en ligne :
+
+- Création d’une structure explicitement fictive, initialement suspendue.
+- Activation d’une licence d’essai de deux places, du 20 au 22 septembre ; valeurs retrouvées après navigation.
+- Préparation d’une invitation responsable sur une adresse example.invalid, puis révocation visible dans Accès. Aucun e-mail envoyé.
+- Création d’une classe et d’un élève fictifs. Retour à l’administration : une structure, une classe, un élève et une licence active, conformément aux données enregistrées.
+- Appel du 20 septembre enregistré avec une absence fictive. Passage de la licence en formule École : classe et élève retrouvés ; vue Présences indiquant 1/1 appel complet et l’absence attendue.
+- Invitation nominative d’un professeur depuis l’interface école : lien affiché et invitation en attente. Aucune invitation acceptée, aucun compte supplémentaire connecté.
+- Historique consulté : création, licence, invitation, révocation, classe et appel correctement remontés.
+
+Deux retouches de lisibilité : le lien de présentation ne mentionne plus de tableau de bord administrateur et ne contient plus view=admin ; les événements d’appel, d’attribution de professeur et de messagerie ont des libellés français dans l’historique. Les contrôles d’accès serveur restent inchangés.
+
+La structure fictive, ses invitations, sa licence, sa classe, son élève, son appel et ses lignes d’historique ont été retirés après vérification de leur identifiant exact, du nom de test et de l’absence de compte lié. Aucun profil utilisateur ni donnée de démonstration n’a été supprimé. Les tests du navigateur ont été menés avec le rôle administrateur : ils ne remplacent pas le cycle de connexion distinct de chaque rôle ni un essai avec le microphone physique.
