@@ -1,7 +1,7 @@
 import {portal,esc,page,message,copyInvitation,downloadCsv} from './live-client.mjs';
 import {createAdminMotion,icon} from './platform-admin-motion.mjs';
 const names={active:'Active',trial:'Essai actif',suspended:'Suspendue / à activer',expired:'Expirée',pending:'En attente',accepted:'Acceptée',revoked:'Révoquée',owner:'Responsable',manager:'Gestionnaire',teacher:'Professeur'};
-const plans={class:'Classe',school:'École',association:'Association'};
+const plans={class:'Professeur indépendant',school:'École',association:'Association'};
 const date=v=>v?new Date(v.slice(0,10)+'T12:00:00').toLocaleDateString('fr-FR'):'—';
 const tomorrow=days=>new Date(Date.now()+days*86400000).toISOString().slice(0,10);
 export async function mountLiveAdmin(root,profile={}){
@@ -36,7 +36,7 @@ export async function mountLiveAdmin(root,profile={}){
  root.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b||busy)return;if(b.dataset.tab){tab=b.dataset.tab;query='';render();return}const a=b.dataset.action,id=b.dataset.id;
   if(a==='close'){selection='';root.querySelector('.qa-modal-host').innerHTML='';motion.syncModal(false,true);return}
   if(a==='open')return open(id);
-  if(a==='create'){selection='new';modal(`<form data-live-form="organization"><div class="qa-form">${Object.entries(fields).map(([k,label])=>`<label>${label}<input class="qa-input" name="${k}" ${k==='email'?'type="email"':''} maxlength="160" ${k!=='city'?'required':''}></label>`).join('')}</div><p>La structure commence sans licence active. Vous choisirez sa capacité et sa durée.</p><button class="qa-button">Créer la structure</button></form>`);return}
+  if(a==='create'){selection='new';modal(`<form data-live-form="organization"><label>Type de compte<select class="qa-select" name="plan" required><option value="class">Professeur — il gère ses classes</option><option value="school">École — le directeur gère ses professeurs</option></select></label><div class="qa-form">${Object.entries(fields).map(([k,label])=>`<label>${label}<input class="qa-input" name="${k}" ${k==='email'?'type="email"':''} maxlength="160" ${k!=='city'?'required':''}></label>`).join('')}</div><p>La structure commence sans licence active. Vous choisirez sa capacité et sa durée.</p><button class="qa-button">Créer la structure</button></form>`);return}
   if(a==='refresh')return run(refresh);
   if(a==='member'){const [organization,profileId]=id.split(':'),m=data.members.find(x=>x.organization_id===organization&&x.profile_id===profileId);if(m.is_active&&!confirm('Suspendre cet accès à la structure ?'))return;return run(async()=>{await portal('set_member',{organization,profile:profileId,role:m.role,active:!m.is_active});await refresh()})}
   if(a==='revoke')return run(async()=>{await portal('revoke_invite',{id});await refresh()});

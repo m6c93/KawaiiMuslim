@@ -58,7 +58,7 @@ export async function mountClassroom(root,profile,options={}){
  const verseArabic=v=>`<span class="cc-verse-arabic" lang="ar" dir="rtl">${esc(splitBasmala(v).text)}</span>`;
  const cls=()=>db.classes.find(c=>c.id===classId),pupil=()=>cls()?.students.find(s=>s.id===studentId),chapter=id=>index.find(s=>s.id===Number(id));
  function initialParcel(c){return c.juz[0]||JUZ_RANGES.find(entry=>entry.surah===c.surahs[0])?.ranges[0]?.juz||30}
- const previewUrl=(c,s)=>{const url=options.previewPath?new URL(options.previewPath,location.href):location.pathname.endsWith('/demonstration.html')?new URL('demonstration.html',location.href):new URL('../../Admin-Classe-Coran-Essai.html',import.meta.url);url.search='';url.hash='';url.searchParams.set('preview','1');if(new URLSearchParams(location.search).get('qa')==='motion')url.searchParams.set('qa','motion');url.searchParams.set('class-id',c.id);url.searchParams.set('student-id',s.id);return url.href};
+ const previewUrl=(c,s)=>{const url=options.previewPath?new URL(options.previewPath,location.href):location.pathname.endsWith('/demonstration.html')?new URL('demonstration.html',location.href):new URL('../../Admin-Classe-Coran-Essai.html',import.meta.url);url.search='';url.hash='';url.searchParams.set('preview','1');for(const [k,v]of Object.entries(options.previewParams||{}))url.searchParams.set(k,v);if(new URLSearchParams(location.search).get('qa')==='motion')url.searchParams.set('qa','motion');url.searchParams.set('class-id',c.id);url.searchParams.set('student-id',s.id);return url.href};
  const tree=id=>pupil().trees[id]||(pupil().trees[id]=emptyTree());
  // A teacher opening feedback must not consume the pupil's notification.
  const teacherReadKey=key+':teacher-tree-reads';

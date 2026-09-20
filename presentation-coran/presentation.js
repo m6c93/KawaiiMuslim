@@ -1,8 +1,9 @@
-import {mountClassroom} from '../applications/classroom/classroom.mjs?v=reading-options-v1';
+import {mountClassroom} from '../applications/classroom/classroom.mjs?v=school-v1';
 import {DEMO_KEY,demoRequest,demoLink,createSharedDemo} from './shared-demo.mjs';
 import {loadRecording} from '../applications/classroom/recordings.mjs';
 import {esc} from '../applications/classroom/live-client.mjs';
 import {showInviteLink} from '../applications/classroom/invite-dialog.mjs';
+import {mountSchool,schoolDemo} from '../applications/classroom/school.mjs';
 
 const root=document.querySelector('#demoRoot'),params=new URLSearchParams(location.search);
 const LOCAL_KEY='km-classroom-preview-v1:standalone-presentation-demo-v1';
@@ -24,9 +25,9 @@ function updatePresentation(view){
  document.querySelector('#demo-hint').textContent=studentView?`Explorez le jardin de ${studentName}, retrouvez les consignes et essayez Coran, Réciter et la messagerie si elle est activée.`:'Créez une classe, ajoutez vos élèves d’essai et partagez leur lien pour essayer ensemble, même sur un autre appareil.';
  if(context?.studentId){document.querySelector('.demo-switch').hidden=true;document.querySelector('.demo-help').hidden=true;document.querySelector('.brand').href=demoLink(token);return}
  const teacherParams=new URLSearchParams({view:'teacher'});if(classId)teacherParams.set('class-id',classId);if(params.has('local'))teacherParams.set('local','1');
- document.querySelector('[data-space="teacher"]').href='?'+teacherParams;
+ if(params.has('school-teacher'))teacherParams.set('school-teacher',params.get('school-teacher'));document.querySelector('[data-space="teacher"]').href='?'+teacherParams;
  const studentParams=studentId&&classId?new URLSearchParams({'class-id':classId,'student-id':studentId}):new URLSearchParams({student:'Maryam'});if(params.has('local'))studentParams.set('local','1');
- document.querySelector('[data-space="student"]').href='?'+studentParams;
+ if(params.has('school-teacher'))studentParams.set('school-teacher',params.get('school-teacher'));document.querySelector('[data-space="student"]').href='?'+studentParams;
 }
 function linkDialog(result,name,teacher=false){
  return showInviteLink({...result,name,teacher,demo:true});
@@ -65,12 +66,27 @@ try{
   note.textContent=context.studentId?`Compte d’essai · Suppression automatique le ${expiryDate(context.expiresAt)} · Jardin, messages et enregistrements inclus.`:'Démo partagée · Chaque nouveau compte élève dure 48 heures, puis son jardin, ses messages et ses enregistrements sont supprimés. Vos classes restent disponibles.';
   if(!context.studentId){const btn=document.createElement('button');btn.className='demo-owner-link';btn.textContent='Retrouver mon espace professeur';btn.onclick=()=>linkDialog({url:demoLink(token),expiresAt:context.expiresAt},'',true);note.after(btn)}
  }
+ if(!context?.studentId&&params.get('view')==='school'){
+  document.querySelector('#demo-title').textContent='Découvrez le côté école.';
+  document.querySelector('#demo-hint').textContent='Ajoutez vos professeurs. Chacun crée ses classes ; vous suivez toute l’école.';
+  document.querySelectorAll('[data-space]').forEach(a=>a.setAttribute('aria-current',a.dataset.space==='school'?'page':'false'));
+  note.textContent='École fictive · Les professeurs invités travaillent dans leurs espaces partagés. Revenez ici pour actualiser le suivi.';
+  await mountSchool(root,{adapter:await schoolDemo(),demo:true});
+ }else if(!context?.studentId&&params.get('school-teacher')){
+  const adapter=await schoolDemo(),school=await adapter.load(),teacher=school.teachers.find(t=>t.id===params.get('school-teacher'));
+  if(!teacher)throw Error('Professeur introuvable. Revenez côté école.');
+  if(teacher.shareExpiresAt){location.replace(demoLink(teacher.shareToken));throw Error('Ouverture de son espace partagé…')}
+  note.textContent='Professeur de l’école · Essai sur cet appareil.';
+  const back=document.createElement('a');back.href='?local=1&view=school';back.className='school-button';back.textContent='← Revenir à mon école';root.before(back);
+  await mountClassroom(root,{id:'school-demo-'+teacher.id,role:'admin',full_name:teacher.name},{classId:params.get('class-id'),studentId:params.get('student-id'),previewPath:location.pathname,previewParams:{local:'1','school-teacher':teacher.id},onViewChange:updatePresentation});
+ }else{
  await mountClassroom(root,{id:'standalone-presentation-demo-v1',role:'admin',full_name:'Professeur · Démonstration'},{
   cloud,studentName:cloud?null:params.get('student'),className:'Les oliviers',studentId:context?.studentId||(cloud?null:params.get('student-id')),classId:context?.classId||params.get('class-id'),previewPath:location.pathname,onViewChange:updatePresentation,shareDemo:true,showDemoLink
  });
  const studentLink=document.querySelector('[data-space="student"]');
  if(cloud&&!context.studentId)studentLink.onclick=async e=>{e.preventDefault();try{const db=await cloud.check(),c=db.classes.find(c=>c.id===currentView.classId)||db.classes[0],s=c?.students.find(s=>s.id===currentView.studentId)||c?.students[0];if(!s){note.textContent='Ajoutez un élève dans cette classe pour essayer son compte.';return}const link=await cloud.share(c.id,s.id);const target=new URL(link.url);if(location.search===target.search){location.hash=target.hash;location.reload()}else location.assign(link.url)}catch(error){note.textContent=error.message}};
  const pending=read(DEMO_KEY+'-result',sessionStorage);if(pending&&!context?.studentId){sessionStorage.removeItem(DEMO_KEY+'-result');linkDialog(pending.result,pending.name)}
+ }
 }catch(error){
  console.error('Démonstration indisponible',error);
  root.innerHTML=`<section class="demo-error" role="alert"><h2>La démonstration n’a pas pu se charger.</h2><p>${esc(error.message)}</p><a href="">Réessayer</a> <a href="?local=1&view=teacher">Revenir à ma démo locale</a></section>`;

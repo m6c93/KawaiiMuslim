@@ -16,7 +16,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/coran-licence/account.css">
-  <link rel="stylesheet" href="/applications/classroom/classroom.css?v=reading-options-v1">
+  <link rel="stylesheet" href="/applications/classroom/school.css">
+  <link rel="stylesheet" href="/applications/classroom/classroom.css?v=garden-arrange-v1">
   <link rel="stylesheet" href="/presentation-coran/presentation.css?v=garden-birds-v1">
 </head>
 <body>
@@ -24,6 +25,7 @@
   <header class="demo-header">
     <a class="brand" href="?view=teacher"><span class="brand-mark" aria-hidden="true">🌳</span><span><strong>Kawaii Muslim</strong><small>CORAN · DÉMONSTRATION</small></span></a>
     <nav class="demo-switch" aria-label="Choisir un espace à découvrir">
+      <a data-space="school" href="?local=1&amp;view=school">Côté école</a>
       <a data-space="teacher" href="?view=teacher">Côté professeur</a>
       <a data-space="student" href="?student=Maryam">Côté élève</a>
     </nav>
@@ -34,8 +36,9 @@
       <h1 id="demo-title">Découvrez le côté professeur.</h1>
       <p id="demo-hint">Ouvrez une classe, choisissez un élève et découvrez son jardin, ses consignes et ses progrès.</p>
       <details class="demo-help">
-        <summary>Comment essayer les deux côtés ?</summary>
+        <summary>Comment essayer les trois espaces ?</summary>
         <ol>
+          <li><strong>École :</strong> ajoutez un professeur, ouvrez son espace pour créer une classe, puis retrouvez les effectifs et la progression côté direction.</li>
           <li><strong>Professeur :</strong> ouvrez « Les oliviers », puis le jardin de Maryam. Choisissez un arbre pour lui donner une consigne, laisser un commentaire ou valider des versets.</li>
           <li><strong>Élève :</strong> passez du côté de Maryam pour retrouver son jardin, vos messages et les passages à travailler.</li>
           <li><strong>Coran et récitation :</strong> écoutez un passage, choisissez ses répétitions ou essayez l’enregistrement. Revenez côté professeur pour retrouver l’essai envoyé.</li>
@@ -46,6 +49,6 @@
     <div id="demoRoot" tabindex="-1" aria-busy="true"><p role="status">Préparation de vos classes de démonstration…</p></div>
     <noscript>Activez JavaScript pour essayer les espaces professeur et élève.</noscript>
   </main>
-  <script type="module" src="/presentation-coran/presentation.js?v=reading-options-v1"></script>
+  <script type="module" src="/presentation-coran/presentation.js?v=school-v1"></script>
 </body>
 </html>
