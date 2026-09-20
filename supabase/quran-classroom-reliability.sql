@@ -24,18 +24,18 @@ begin
  if action='context' then
   return jsonb_build_object('admin',admin,'needsMfa',exists(select 1 from public.profiles where id=uid and role='admin') and not admin,
    'profile',jsonb_build_object('id',uid,'name',who,'email',authenticated_email),
-   'organizations',coalesce((select jsonb_agg(to_jsonb(x)) from (select o.id,o.name,o.status,m.role,l.plan,l.student_limit,l.starts_at,l.expires_at,l.status as license_status,public.quran_license_active(o.id) as enabled
-    from public.quran_organization_members m join public.quran_organizations o on o.id=m.organization_id left join public.quran_licenses l on l.organization_id=o.id where m.profile_id=uid and m.is_active order by o.created_at) x),'[]'::jsonb),
-   'students',coalesce((select jsonb_agg(jsonb_build_object('id',s.id,'name',s.display_name,'classId',s.class_id,'className',c.name,'organization',s.organization_id,'enabled',public.quran_student_access(s.id)))
-    from public.quran_platform_students s join public.quran_platform_classes c on c.id=s.class_id where s.profile_id=uid and s.is_active),'[]'::jsonb));
+   'organizations',coalesce((select jsonb_agg(to_jsonb(x)) from (select context_org.id,context_org.name,context_org.status,m.role,context_license.plan,context_license.student_limit,context_license.starts_at,context_license.expires_at,context_license.status as license_status,public.quran_license_active(context_org.id) as enabled
+    from public.quran_organization_members m join public.quran_organizations context_org on context_org.id=m.organization_id left join public.quran_licenses context_license on context_license.organization_id=context_org.id where m.profile_id=uid and m.is_active order by context_org.created_at) x),'[]'::jsonb),
+   'students',coalesce((select jsonb_agg(jsonb_build_object('id',context_student.id,'name',context_student.display_name,'classId',context_student.class_id,'className',context_class.name,'organization',context_student.organization_id,'enabled',public.quran_student_access(context_student.id)))
+    from public.quran_platform_students context_student join public.quran_platform_classes context_class on context_class.id=context_student.class_id where context_student.profile_id=uid and context_student.is_active),'[]'::jsonb));
  end if;
  if action='admin_snapshot' then
   if not admin then raise exception 'Accès administrateur et double vérification requis.' using errcode='42501'; end if;
-  return jsonb_build_object('organizations',coalesce((select jsonb_agg(to_jsonb(o) order by o.created_at desc) from public.quran_organizations o),'[]'::jsonb),
-   'licenses',coalesce((select jsonb_agg(to_jsonb(l)) from public.quran_licenses l),'[]'::jsonb),
+  return jsonb_build_object('organizations',coalesce((select jsonb_agg(to_jsonb(context_org) order by context_org.created_at desc) from public.quran_organizations context_org),'[]'::jsonb),
+   'licenses',coalesce((select jsonb_agg(to_jsonb(context_license)) from public.quran_licenses context_license),'[]'::jsonb),
    'members',coalesce((select jsonb_agg(to_jsonb(x)) from (select m.*,p.full_name,p.email from public.quran_organization_members m join public.profiles p on p.id=m.profile_id) x),'[]'::jsonb),
-   'classes',coalesce((select jsonb_agg(to_jsonb(c)-'program') from public.quran_platform_classes c),'[]'::jsonb),
-   'students',coalesce((select jsonb_agg(to_jsonb(s)-'learning') from public.quran_platform_students s),'[]'::jsonb),
+   'classes',coalesce((select jsonb_agg(to_jsonb(context_class)-'program') from public.quran_platform_classes context_class),'[]'::jsonb),
+   'students',coalesce((select jsonb_agg(to_jsonb(context_student)-'learning') from public.quran_platform_students context_student),'[]'::jsonb),
    'invites',coalesce((select jsonb_agg(to_jsonb(i)-'token_hash') from public.quran_access_invitations i),'[]'::jsonb),
    'activity',coalesce((select jsonb_agg(to_jsonb(x)) from (select * from public.quran_audit order by created_at desc limit 60) x),'[]'::jsonb));
  end if;

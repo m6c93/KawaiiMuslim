@@ -45,7 +45,19 @@ Régressions ajoutées dans `scripts/classroom-audit.test.mjs` : navigation des 
 
 Scripts : `classroom-live.browser-check.cjs`, `classroom-recording-online.browser-check.cjs`, `classroom-microphone.browser-check.cjs`, `classroom-anonymous.browser-check.cjs`. Les essais en ligne ciblent uniquement les tables isolées de démonstration. Le rapport JSON détaillé du parcours réussi est conservé dans `../audit-recording-online-fixed/results.json`.
 
-**Toujours en attente :** connexion effective avec un vrai compte et cycle complet d’invitations de production. La page de connexion est ouverte et l’utilisateur a été invité à se connecter lui-même, sans transmettre de mot de passe.
+**Toujours en attente :** vérification Authenticator du vrai compte administrateur et cycle complet d’invitations de production. La connexion personnelle a révélé le problème serveur décrit ci-dessous. Après correction, elle atteint la vérification de sécurité.
 
 ## Publication
 Correctifs publiés sur main : 26504f6568bdf853cce6f15a29644cb9353101d1. Déploiement Vercel réussi. Le lien public ?student=Maryam a été rouvert après déploiement avec la session professeur précédemment présente : il ouvre bien le jardin de Maryam, et la navigation garde le contexte de présentation. Capture finale du jardin inspectée : arbres entiers, légendes lisibles, oiseaux visibles. Aucun changement de schéma serveur pendant cet audit.
+
+Complément publié : 725cc9d218bd913300314ff02af98a3cb7f017d2. Déploiement Vercel réussi. Les dix étapes du parcours audio ont ensuite été rejouées avec succès sur https://presentation.coran.kawaiimuslimworld.com, serveur réel de démonstration et microphone Chrome simulé. Résultat : ../audit-recording-published/results.json. Le vrai compte reste déconnecté et le microphone physique n’a pas été testé.
+
+## Connexion personnelle : erreur serveur corrigée
+
+La connexion réelle a ensuite été effectuée. L’espace affichait `column reference "o.id" is ambiguous` : les alias SQL des tables dans `context` et `admin_snapshot` partageaient les noms des variables de ligne PL/pgSQL. Les essais avec connexion simulée ne couvraient pas cette requête serveur.
+
+Correction ciblée appliquée en production via `supabase/quran-context-aliases.sql`. Elle remplace uniquement les alias de ces deux lectures et conserve le reste de la fonction, les permissions et les contrôles MFA. Les sources des migrations initiales ont également été corrigées pour les futures installations.
+
+Test transactionnel réussi puis annulé : contexte professeur limité à son organisation, contexte élève limité à son compte, licence active, interdiction d’administration pour le professeur, MFA obligatoire pour l’administrateur, lecture correcte des organisations/licences/classes/élèves après MFA. Les identités temporaires n’avaient aucun mot de passe et aucune donnée d’essai n’a été conservée. Régression : `scripts/classroom-context-security.sql`.
+
+Après application, rechargement du vrai compte : l’erreur a disparu, l’écran « Votre accès administrateur » demande correctement le code Authenticator. L’administration réelle reste en attente de cette action personnelle ; aucune double vérification n’a été contournée.
