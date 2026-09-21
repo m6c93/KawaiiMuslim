@@ -67,6 +67,8 @@ export function createClassMessaging({root,key,cloud,getContext,onStatus}){
   };
   if(!enabled(c.classId)){say(statusError||'Le professeur n’a pas activé la messagerie.');setControls(true)}else loadThread();
  }
- const tick=()=>{if(root.isConnected)return refresh()};timer=startLiveRefresh(tick,{interval:5000});const storageListener=e=>{if(e.key===key+':messaging-v1')refresh()};if(!cloud)window.addEventListener('storage',storageListener);
+ // Messaging stays responsive while avoiding a status query (and an optional thread query)
+ // every five seconds for every open classroom session.
+ const tick=()=>{if(root.isConnected)return refresh()};timer=startLiveRefresh(tick,{interval:20000});const storageListener=e=>{if(e.key===key+':messaging-v1')refresh()};if(!cloud)window.addEventListener('storage',storageListener);
  return {enabled,badge,creationHtml,settingsHtml,configure,refresh,mount,leave:disposePane,get busy(){return sending||opening||!!session||!!draftAudio},destroy(){timer?.();window.removeEventListener('storage',storageListener);if(session){clearTimeout(session.limit);session.stream.getTracks().forEach(t=>t.stop());session=null}clearAudio();disposePane()}};
 }
