@@ -455,7 +455,8 @@ export async function mountClassroom(root,profile,options={}){
   const next=incomingDb.classes.find(c=>c.id===classId)?.students.find(s=>s.id===studentId);if(!next)return;db=incomingDb;cloud?.accept(db);incomingDb=null;notice='Ton jardin est à jour avec les nouvelles indications du professeur.';draw();
  }
  window.addEventListener('storage',event=>{if(!cloud&&event.key===key&&event.newValue){try{const next=JSON.parse(event.newValue);if(next.classes){incomingDb=next;receiveUpdates()}}catch{}}});
- if(cloud)refreshTimer=startLiveRefresh(()=>{receiveUpdates();return refreshCloud()}, {interval:cloud.pollInterval||5000});
+ // Full classroom snapshots are expensive: keep them fresh without polling Supabase every few seconds.
+ if(cloud)refreshTimer=startLiveRefresh(()=>{receiveUpdates();return refreshCloud()}, {interval:cloud.pollInterval||60000});
  root.addEventListener('classroom-expired',()=>{stop();messaging.destroy();refreshTimer?.();incomingDb=null;root.dataset.expired='true'});
  root.addEventListener('change',e=>{
   const form=e.target.closest('[data-form="group-review"]');if(!form)return;
