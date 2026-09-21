@@ -13,6 +13,7 @@ create table if not exists public.quran_direct_messages (
  created_at timestamptz not null default now(), check(length(trim(body))>0 or length(audio_id)>0)
 );
 create index if not exists quran_direct_messages_thread on public.quran_direct_messages(student_id,sequence desc);
+create index if not exists quran_direct_messages_unread on public.quran_direct_messages(student_id,sender_role,sequence);
 create table if not exists public.quran_message_reads (
  student_id uuid references public.quran_platform_students(id) on delete cascade,
  reader_role text check(reader_role in ('teacher','student')), last_sequence bigint not null default 0,
@@ -37,14 +38,18 @@ begin
   return jsonb_build_object('classes',coalesce((select jsonb_agg(jsonb_build_object(
    'id',c.id,'enabled',coalesce(config.enabled,false),'students',students.doc,'unread',students.unread))
    from public.quran_platform_classes c left join public.quran_class_messaging config on config.class_id=c.id
-   cross join lateral (select coalesce(jsonb_agg(jsonb_build_object('id',p.id,'unread',unread.n)),'[]'::jsonb) doc,coalesce(sum(unread.n),0) unread
+   cross join lateral (select public.quran_teach(c.id) teacher) actor
+   cross join lateral (select coalesce(jsonb_agg(jsonb_build_object('id',p.id,'unread',unread.n)),'[]'::jsonb) doc,
+    coalesce(sum(unread.n),0) unread,count(*) visible
     from public.quran_platform_students p
-    cross join lateral (select count(*) n from public.quran_direct_messages dm
-     where dm.student_id=p.id and dm.sender_role<>case when public.quran_teach(c.id) then 'teacher' else 'student' end
-     and dm.sequence>coalesce((select last_sequence from public.quran_message_reads r where r.student_id=p.id and r.reader_role=case when public.quran_teach(c.id) then 'teacher' else 'student' end),0)) unread
-    where p.class_id=c.id and p.is_active and public.quran_student_access(p.id)) students
+    left join public.quran_message_reads reads on reads.student_id=p.id and reads.reader_role=case when actor.teacher then 'teacher' else 'student' end
+    cross join lateral (select case when coalesce(config.enabled,false) then (select count(*) from public.quran_direct_messages dm
+     where dm.student_id=p.id and dm.sender_role<>case when actor.teacher then 'teacher' else 'student' end
+     and dm.sequence>coalesce(reads.last_sequence,0)) else 0 end n) unread
+    where p.class_id=c.id and p.is_active and (actor.teacher or
+     (p.profile_id=uid and public.quran_license_active(p.organization_id)))) students
    where c.is_active and (org is null or c.organization_id=org) and
-   (public.quran_teach(c.id) or exists(select 1 from public.quran_platform_students p where p.class_id=c.id and public.quran_student_access(p.id)))),'[]'::jsonb));
+   (actor.teacher or students.visible>0)),'[]'::jsonb));
  end if;
  if action='configure' then
   cid:=(payload->>'class')::uuid;
