@@ -8,7 +8,7 @@ import {emptyTree,propose,validate,validatePending,visibleGrowth,assignReview,ma
 import {saveRecording,loadRecording} from './recordings.mjs';
 import {invitationLink,sendInvitation,message as portalMessage} from './live-client.mjs';
 import {showInviteLink} from './invite-dialog.mjs';
-import {demoClasses} from './demo.mjs';
+import {demoClasses,enrichDemoJuzAmmaShowcase} from './demo.mjs';
 import {JUZ_RANGES,JUZ_NAMES} from '../coran/juz-data.mjs';
 import {QuranPlayer} from '../coran/audio.mjs';
 import {splitBasmala} from '../coran/model.mjs';
@@ -39,6 +39,10 @@ export async function mountClassroom(root,profile,options={}){
   const t=maryam?.trees?.[114];
   if(t){t.verseComments||=[];t.verseComments.push({id:'demo-verse-note-114-5',verse:5,text:'Reprends ce verset doucement et fais une petite pause à la fin. Ta récitation progresse très bien.',author:'Mme Sarah · Démonstration',at:new Date(Date.now()-43200000).toISOString()});}
   db.demoVerseCommentsV1=true;save();
+ }
+ if(!cloud&&!db.demoGardenShowcaseV4){
+  enrichDemoJuzAmmaShowcase(db,index);
+  db.demoGardenShowcaseV4=true;save();
  }
  if(options.studentId||options.studentName){
   const match=db.classes.flatMap(c=>c.students.map(s=>({classroom:c,student:s})))
