@@ -1,4 +1,4 @@
-import {emptyTree,validate} from './model.mjs';
+import {assignReview,emptyTree,validate} from './model.mjs';
 import {JUZ_RANGES} from '../coran/juz-data.mjs';
 
 // Entirely fictional fixtures; never imported into student or family accounts.
@@ -24,4 +24,33 @@ export function demoClasses(index,now=Date.now()){
   });
   return student;
  })}));
+}
+
+// Keep the default presentation pupil visually rich without touching real accounts.
+// Existing fictional data is preserved; only missing showcase trees are added.
+export function enrichDemoJuzAmmaShowcase(db,index,now=Date.now()){
+ const student=db.classes?.find(c=>c.id==='demo-v2-class-1')?.students?.find(s=>s.name==='Maryam');
+ if(!student)return false;
+ const teacher='Mme Sarah · Démonstration';
+ const fixtures=[
+  {id:108,count:'complete',message:'Maryam, cette sourate est très bien installée. Bravo pour ta régularité !'},
+  {id:110,count:'complete',message:'Maryam, ta récitation est fluide et soignée. Continue ainsi.'},
+  {id:109,count:.67,message:'Tu avances très bien. Continue avec les derniers versets à ton rythme.'},
+  {id:111,count:.4,review:[3,4],message:'Les premiers versets sont acquis. Reprends doucement les versets 3 et 4.'},
+  {id:107,count:.43,message:'Tes premiers versets sont bien installés. Nous poursuivrons ensemble.'}
+ ];
+ let changed=false;
+ for(const [offset,fixture] of fixtures.entries()){
+  if(student.trees[fixture.id])continue;
+  const chapter=index.find(s=>s.id===fixture.id);if(!chapter)continue;
+  const tree=emptyTree(),validated=fixture.count==='complete'?chapter.count:Math.max(1,Math.min(chapter.count-1,Math.round(chapter.count*fixture.count)));
+  const at=new Date(now-(offset+2)*86400000).toISOString();
+  validate(tree,1,validated,chapter.count,teacher,at);
+  if(fixture.review)assignReview(tree,fixture.review[0],fixture.review[1],chapter.count,teacher,fixture.message,new Date(now-86400000).toISOString());
+  tree.messages=[{text:fixture.message,author:teacher,at}];
+  const positionIndex=Object.values(student.trees).filter(t=>t.positions?.[30]).length;
+  tree.positions[30]={x:22+(positionIndex%3)*28,y:38+Math.floor(positionIndex/3)*18};
+  student.trees[fixture.id]=tree;changed=true;
+ }
+ return changed;
 }
