@@ -11,9 +11,6 @@
   <link rel="stylesheet" href="./responsive.css?v=tablet-20260818">
   <link rel="stylesheet" href="./account.css?v=tablet-20260818">
   <link rel="stylesheet" href="./admin.css">
-  <link rel="stylesheet" href="./applications/classroom/classroom.css">
-  <link rel="stylesheet" href="./applications/classroom/platform-admin.css?v=platform-admin-v5">
-  <link rel="stylesheet" href="./applications/classroom/platform-admin-premium.css?v=platform-admin-v5">
   <style>
     .admin-auth-pending .admin-shell { visibility: hidden; }
     .admin-auth-loader {
@@ -38,8 +35,6 @@
       </a>
       <nav class="admin-menu" aria-label="Rubriques administratives">
         <button class="admin-tab active" data-view="overview">✨ Vue générale</button>
-        <button class="admin-tab" data-view="quran-platform" data-permission="admin">🌿 Plateforme Coran</button>
-        <button class="admin-tab" data-view="classroom" data-permission="admin">🌳 Classe Coran · Essai</button>
         <button class="admin-tab" data-view="families" data-permission="families">👨‍👩‍👧 Familles</button>
         <button class="admin-tab" data-view="content" data-permission="content">📚 Contenus</button>
         <button class="admin-tab" data-view="subscriptions" data-permission="families">💳 Abonnements</button>
@@ -50,6 +45,7 @@
         <a href="/newsletter/#contacts" target="_blank" rel="noopener" data-permission="admin" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:14px;background:linear-gradient(135deg,#ffd76a,#ffae4d);color:#2b2440;text-decoration:none;font-weight:900;white-space:nowrap;box-shadow:0 8px 20px rgba(255,184,76,.28)">📮 Newsletters</a>
       </nav>
       <div class="admin-side-footer">
+        <a href="Choisir-administration.dc.html">↔ Choisir une autre administration</a>
         <a href="Profils.dc.html">⇄ Changer de profil</a>
         <a href="Compte.dc.html">🌸 Mon compte familial</a>
         <a href="Support.dc.html">❔ Centre d’aide</a>
@@ -103,9 +99,6 @@
           </article>
         </div>
       </section>
-      <section class="admin-view" id="view-quran-platform"><div id="quranPlatformRoot"></div></section>
-      <section class="admin-view" id="view-classroom"><div id="classroomRoot"></div></section>
-
       <section class="admin-view" id="view-families">
         <div class="admin-section-head">
           <div><h2>Familles inscrites</h2><p>Les informations privées du Planner ne sont jamais chargées ici.</p></div>
@@ -318,9 +311,7 @@
       $("#viewTitle").textContent = button?.textContent.replace(/^[^\s]+\s/, "") || "Administration";
       $("#viewSubtitle").textContent = name === "overview"
         ? "Pilote ton univers sans accéder à la vie privée des familles."
-        : name === "quran-platform"
-          ? "Gère les structures, licences, équipes et accès de la plateforme Coran."
-          : "Chaque action sensible est protégée et enregistrée.";
+        : "Chaque action sensible est protégée et enregistrée.";
       history.replaceState(null, "", `#${name}`);
     };
 
@@ -511,20 +502,10 @@
       $("#adminRole").textContent = roleLabels[state.context.profile.role];
       const access = permissions();
       $$("[data-permission]").forEach(button => button.hidden = !access[button.dataset.permission]);
-      if (access.admin) {
-        try {
-          const { mountSuperAdmin } = await import('./applications/classroom/platform-admin-v2.mjs?v=platform-admin-v5');
-          mountSuperAdmin(document.querySelector('#quranPlatformRoot'), state.context.profile);
-        } catch (error) { document.querySelector('#quranPlatformRoot').textContent = 'Le pilotage de la plateforme ne peut pas se charger. Rechargez la page pour réessayer.'; console.error(error); }
-        try {
-          const { mountClassroom } = await import('./applications/classroom/classroom.mjs');
-          await mountClassroom(document.querySelector('#classroomRoot'), state.context.profile);
-        } catch (error) { document.querySelector('#classroomRoot').textContent = 'Le mode essai ne peut pas se charger. Rechargez la page pour réessayer.'; console.error(error); }
-      }
       await refreshData();
       const initial = location.hash.slice(1);
       const initialButton = initial && $(`.admin-tab[data-view="${initial}"]:not([hidden])`);
-      switchView(initialButton ? initial : (access.admin ? "quran-platform" : "overview"));
+      switchView(initialButton ? initial : "overview");
       document.body.classList.remove("admin-auth-pending");
       $("#adminAuthLoader").remove();
     };

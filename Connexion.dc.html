@@ -77,8 +77,8 @@
     const continueAfterAuthentication = async () => {
       const context = await KMAuth.getContext();
       if (context && staffRoles.includes(context.profile.role)) {
-        const adminDestination = requestedDestination.includes("Admin.dc.html")
-          ? requestedDestination
+        const adminDestination = context.profile.role === "admin"
+          ? "/Choisir-administration.dc.html"
           : "/Admin.dc.html";
         window.location.href = `MFA.dc.html?next=${encodeURIComponent(adminDestination)}`;
         return;
