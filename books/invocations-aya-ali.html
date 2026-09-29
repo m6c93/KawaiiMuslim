@@ -78,6 +78,20 @@ body{background:radial-gradient(ellipse at 50% 10%,#587b70 0,#284c45 55%,#19382f
   .rotate-notice button{border:0;border-radius:12px;padding:9px 10px;color:#fff;background:#342557;font-weight:900;cursor:pointer}
 }
 
+/* Phone landscape: give almost the whole screen to the two-page spread. */
+@media(max-height:560px) and (orientation:landscape) and (max-width:1024px),
+       (max-height:560px) and (orientation:landscape) and (pointer:coarse){
+  .topbar{height:42px;padding-inline:8px}
+  .home,.icon{width:34px;height:34px}.title strong{font-size:13px}.title small{display:none}
+  .reader{height:calc(100dvh - 42px);padding:2px 4px calc(3px + env(safe-area-inset-bottom))}
+  .book-shell{flex:1 1 auto;width:100%;min-height:0;gap:0}
+  .book{width:min(calc(100vw - 12px),calc((100dvh - 54px)*2));max-height:calc(100dvh - 54px)}
+  .progress-wrap,.hint{display:none}
+  .mobile-page-controls{position:fixed;z-index:20;left:max(7px,env(safe-area-inset-left));right:max(7px,env(safe-area-inset-right));bottom:max(7px,env(safe-area-inset-bottom));width:auto;margin:0;justify-content:space-between;pointer-events:none}
+  .mobile-page-controls button{flex:0 0 48px;width:48px;min-height:48px;height:48px;padding:0;border-radius:50%;font-size:0;pointer-events:auto;background:rgba(255,253,248,.94);box-shadow:0 8px 22px rgba(4,2,35,.38)}
+  .mobile-page-controls button span{width:38px;height:38px;font-size:29px}
+}
+
 </style>
 </head>
 <body>
@@ -166,7 +180,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#587b70 0,#284c45 55%,#19382f
       els.progress.max=maxPosition();els.progress.value=position;els.prev.disabled=position===0;els.next.disabled=position>=maxPosition();els.mobilePrev.disabled=els.prev.disabled;els.mobileNext.disabled=els.next.disabled;els.cover.hidden=position!==0;els.spread.hidden=position===0;els.book.style.aspectRatio=mobile?"1/1":"2/1";
       if(!position)els.label.textContent="Couverture";else{setEmbedPage(els.left,a);setEmbedPage(els.right,b);els.leftPaper.style.visibility="visible";els.rightPaper.style.visibility="visible";els.leftPaper.classList.toggle("mobile-visible",mobile);els.rightPaper.classList.remove("mobile-visible");els.label.textContent=a&&b?`Pages ${a}–${b}`:`Page ${a||b}`}
     }
-    $("zoomBtn").onclick=()=>{if(!position){go(1);return}$("zoomPages").innerHTML=pagesFor(position).filter(n=>n>0&&n<=TOTAL).map(n=>`<img src="${pageSrc(n)}" alt="Page ${n}">`).join("");$("zoomDialog").showModal()};$("zoomClose").onclick=()=>$("zoomDialog").close();
+    function openPageZoom(selectedPages=pagesFor(position)){if(!position){go(1);return}$("zoomPages").innerHTML=selectedPages.filter(n=>n>0&&n<=TOTAL).map(n=>`<img src="${pageSrc(n)}" alt="Page ${n}">`).join("");$("zoomDialog").showModal()}$("zoomBtn").onclick=()=>openPageZoom();$("zoomClose").onclick=()=>$("zoomDialog").close();
     function pageSound(){if(!soundOn)return;try{const ctx=new(window.AudioContext||window.webkitAudioContext)(),buffer=ctx.createBuffer(1,ctx.sampleRate*.06,ctx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length)*.025;const src=ctx.createBufferSource();src.buffer=buffer;src.connect(ctx.destination);src.start()}catch{}}
     function flipImage(page){if(page<1||page>TOTAL)return "";return `<img class="pg-img" src="${pageSrc(page)}" alt="Page ${page}" draggable="false">`}
     function go(next){
@@ -233,7 +247,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#587b70 0,#284c45 55%,#19382f
     function buildThumbs(){if(els.thumbs.children.length)return;const fragment=document.createDocumentFragment();for(let n=1;n<=TOTAL;n++){const btn=document.createElement("button");btn.className="thumb";btn.type="button";btn.innerHTML=`<img loading="lazy" src="${pageSrc(n)}" alt="Page ${n}"><span>${n}</span>`;btn.addEventListener("click",()=>{go(isBookSinglePage()?n:Math.ceil(n/2));closeDrawer()});fragment.appendChild(btn)}els.thumbs.appendChild(fragment)}
     document.querySelectorAll(".topic").forEach(b=>b.onclick=()=>{const n=Number(b.dataset.page);go(isBookSinglePage()?n:Math.ceil(n/2));closeDrawer()});
     function openDrawer(){buildThumbs();els.drawer.classList.add("open");els.drawer.setAttribute("aria-hidden","false");els.scrim.hidden=false}function closeDrawer(){els.drawer.classList.remove("open");els.drawer.setAttribute("aria-hidden","true");els.scrim.hidden=true}
-    $("openBtn").addEventListener("click",()=>go(1));els.prev.addEventListener("click",()=>go(position-1));els.next.addEventListener("click",()=>go(position+1));els.mobilePrev.addEventListener("click",()=>go(position-1));els.mobileNext.addEventListener("click",()=>go(position+1));els.leftPaper.addEventListener("click",()=>go(position-1));els.rightPaper.addEventListener("click",()=>go(position+1));els.progress.addEventListener("input",event=>go(Number(event.target.value)));$("gridBtn").addEventListener("click",openDrawer);$("closeDrawer").addEventListener("click",closeDrawer);els.scrim.addEventListener("click",closeDrawer);els.sound.addEventListener("click",()=>{soundOn=!soundOn;els.sound.textContent=soundOn?"♪":"×"});$("fullscreenBtn").addEventListener("click",()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());
+    $("openBtn").addEventListener("click",()=>go(1));els.prev.addEventListener("click",()=>go(position-1));els.next.addEventListener("click",()=>go(position+1));els.mobilePrev.addEventListener("click",()=>go(position-1));els.mobileNext.addEventListener("click",()=>go(position+1));els.leftPaper.addEventListener("click",()=>isMobile()?openPageZoom([pagesFor(position)[0]]):go(position-1));els.rightPaper.addEventListener("click",()=>isMobile()?openPageZoom([pagesFor(position)[1]]):go(position+1));els.progress.addEventListener("input",event=>go(Number(event.target.value)));$("gridBtn").addEventListener("click",openDrawer);$("closeDrawer").addEventListener("click",closeDrawer);els.scrim.addEventListener("click",closeDrawer);els.sound.addEventListener("click",()=>{soundOn=!soundOn;els.sound.textContent=soundOn?"♪":"×"});$("fullscreenBtn").addEventListener("click",()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());
     document.addEventListener("keydown",event=>{if(event.target.matches("input,button,textarea,select"))return;if(event.key==="ArrowRight"||event.key===" ")go(position+1);if(event.key==="ArrowLeft")go(position-1);if(event.key==="Escape")closeDrawer()});
     els.book.addEventListener("touchstart",event=>{if(event.touches.length!==1){touchGestureBlocked=true;return}if(touchGestureBlocked)return;touchX=event.touches[0].clientX;touchY=event.touches[0].clientY},{passive:true});
     els.book.addEventListener("touchmove",event=>{if(event.touches.length>1)touchGestureBlocked=true},{passive:true});
