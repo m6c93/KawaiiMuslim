@@ -2,13 +2,13 @@
   'use strict';
   const params = new URLSearchParams(location.search);
   const guest = params.get('guest') === '1' || sessionStorage.getItem('km-guest-mode') === '1';
-  const library = '/Bibliotheque%20Kawaii%20Muslim.dc.html?guest=1';
+  const library = '/Decouverte.dc.html';
   const routes = {
     '/books/tawakkul.html':'/books/tawakkul-decouverte.html',
     '/books/miracles-du-coran.html':'/books/miracles-decouverte.html',
     '/books/hijabi-girls.html':'/books/hijabi-decouverte.html'
   };
-  function openUnlock() {
+  function openUnlock(context) {
     let sheet = document.getElementById('km-discovery-unlock');
     if (!sheet) {
       sheet = document.createElement('dialog'); sheet.id = 'km-discovery-unlock';
@@ -18,6 +18,7 @@
       sheet.querySelector('.km-unlock-close').onclick = sheet.querySelector('.km-unlock-continue').onclick = () => sheet.close();
       sheet.addEventListener('click', e => { if(e.target === sheet){const r=sheet.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)sheet.close();} });
     }
+    sheet.querySelector('#km-unlock-title').textContent=context==='letters'?'Bravo pour ces premières lettres !':context==='quran'?'Fais grandir ton jardin':'La découverte continue…';
     if(!sheet.open) sheet.showModal();
   }
   window.KMDiscovery = {openUnlock};
@@ -38,11 +39,13 @@
     if(decodeURIComponent(location.pathname)==='/Connexion.dc.html'){
       const form=document.getElementById('loginForm');
       if(form&&!document.getElementById('km-discovery-entry')){
-        const link=document.createElement('a');link.id='km-discovery-entry';link.className='km-discovery-entry';link.href=library;link.textContent='Découvrir gratuitement';form.appendChild(link);
-        const note=document.createElement('p');note.className='km-discovery-note';note.textContent='Sans compte · quelques livres, coloriages et invocations offerts';link.after(note);
+        const link=document.createElement('a');link.id='km-discovery-entry';link.className='km-discovery-entry';link.href=library+'?guest=1';link.textContent='Découvrir gratuitement';form.appendChild(link);
+        const note=document.createElement('p');note.className='km-discovery-note';note.textContent='Sans compte · livres, coloriages et activités offerts';link.after(note);
       }
     }
     if(!guest)return;
+    sessionStorage.setItem('km-guest-mode','1');
+    for(const [selector,label] of [['.coran .badge','3 sourates offertes'],['.arabic .badge','3 lettres offertes']]){const badge=document.querySelector(selector);if(badge)badge.textContent=label;}
     if(decodeURIComponent(location.pathname)==='/Coloriage.dc.html'){
       document.body.classList.add('discovery-coloring');
       const editorStyle=document.createElement('style');editorStyle.textContent=`
@@ -57,7 +60,7 @@
       if(routes[path]){e.preventDefault();e.stopImmediatePropagation();location.href=routes[path]+'?guest=1';}
       else if(path==='/LivreColoriage.dc.html'){e.preventDefault();e.stopImmediatePropagation();if(u.searchParams.get('book')==='hijabi-girls')location.href='/books/hijabi-decouverte.html?guest=1';else openUnlock();}
       else if(u.hash==='#tarifs'||link.classList.contains('km-guest-pill')){e.preventDefault();e.stopImmediatePropagation();openUnlock();}
-      else if(path==='/books/colorie-ecris-apprends.html'||path.startsWith('/applications/coran')){e.preventDefault();e.stopImmediatePropagation();openUnlock();}
+      else if(path==='/books/colorie-ecris-apprends.html'||path==='/applications/coran/'||path==='/applications/coran/index.html'){if(u.searchParams.get('guest')!=='1'){e.preventDefault();e.stopImmediatePropagation();u.searchParams.set('guest','1');location.href=u.href;}}
     },true);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();

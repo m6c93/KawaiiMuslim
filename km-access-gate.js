@@ -23,6 +23,9 @@
     "/Atelier.dc.html",
     "/Safe Place.dc.html",
     "/Applications.dc.html",
+    "/applications/coran/",
+    "/applications/coran/index.html",
+    "/books/colorie-ecris-apprends.html",
     "/LivreColoriage.dc.html",
     "/Coloriage.dc.html"
   ]);
