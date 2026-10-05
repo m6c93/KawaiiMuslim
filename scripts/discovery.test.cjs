@@ -3,7 +3,7 @@ const root=path.resolve(__dirname,'..');
 for(const [id,count] of [['tawakkul',5],['miracles',5],['hijabi',3]]){
  const html=fs.readFileSync(path.join(root,'books/'+id+'-decouverte.html'),'utf8');
  const config=JSON.parse(html.match(/id="discovery-data">([^<]+)<\/script>/)[1]);
- assert.equal(config.pages.length,count);assert(!html.includes('data:image'));for(const asset of config.pages)assert(fs.existsSync(path.join(root,asset)));
+ assert.equal(config.pages.length,count);assert(html.includes('leaf-cast'));assert(html.includes('rotateY('));assert(!html.includes('/discovery-reader.js'));assert(!html.includes('data:image'));for(const asset of config.pages)assert(fs.existsSync(path.join(root,asset)));
 }
 function gate(url){
  let redirected=null,guest=false,hidden=false;
