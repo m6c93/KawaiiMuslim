@@ -18,7 +18,7 @@ export function cleanProgress(raw,index){
  return next;
 }
 export function nextRef(progress,index){
- const order=[...STARTER,...index.map(s=>s.id).filter(id=>!STARTER.includes(id))];
+ const order=[...STARTER.filter(id=>index.some(s=>s.id===id)),...index.map(s=>s.id).filter(id=>!STARTER.includes(id))];
  for(const surah of order){const c=index.find(s=>s.id===surah);for(let verse=1;verse<=c.count;verse++)if(!progress.completed[`${surah}:${verse}`])return{surah,verse}}
  return progress.lastRead;
 }
