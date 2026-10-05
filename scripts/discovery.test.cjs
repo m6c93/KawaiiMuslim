@@ -17,3 +17,13 @@ assert.equal(gate('https://example.com/books/tawakkul.html?guest=1&previewPages=
 assert.equal(gate('https://example.com/books/vers-allah.html?guest=1').hidden,true);
 assert.equal(gate('https://example.com/Admin.dc.html?guest=1').hidden,true);
 console.log('PASS: 5/5/3 fixed excerpts; asset files exist; arbitrary guest limits do not open full books; no guest admin access.');
+
+// An odd final spread must keep a blank paper leaf instead of hiding the book's right half.
+const excerpt=fs.readFileSync(path.join(root,'books/miracles-decouverte.html'),'utf8');
+const renderBase=excerpt.slice(excerpt.indexOf('    function renderBase(){'),excerpt.indexOf('    function setEmbedPage'));
+const node=()=>({style:{},classList:{toggle(name,value){this[name]=value},remove(name){delete this[name]}},removeAttribute(name){delete this[name]}});
+const els={progress:node(),prev:node(),next:node(),cover:node(),spread:node(),book:node(),label:node(),left:node(),right:node(),leftPaper:node(),rightPaper:node()};
+const ctx={els,position:3,TOTAL:5,maxPosition:()=>3,pagesFor:()=>[5,6],isBookSinglePage:()=>false,pageSrc:n=>n<=5?'page-'+n:'',localStorage:{setItem(){}},progressKey:'test',document:{querySelectorAll:()=>[]},Image:function(){}};
+vm.runInNewContext(renderBase+';renderBase()',ctx);
+assert.equal(els.rightPaper.style.visibility,'visible');assert.equal(els.rightPaper.classList['discovery-blank'],true);assert.equal(els.right.hidden,true);assert.equal(els.right.src,undefined);
+console.log('PASS: odd final spread retains a visible blank right leaf and requests no sixth image.');

@@ -37,8 +37,8 @@
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
     .embed-book .topbar,.embed-book .progress-wrap,.embed-book .hint,.embed-book .drawer,.embed-book .scrim{display:none!important}.embed-book .reader{height:100dvh;padding:8px}.embed-book .book-shell{gap:8px}.embed-book .book{width:min(calc(100vw - 88px),calc((100dvh - 20px)*2),1200px);aspect-ratio:2/1!important}.embed-book .cover-stage{inset:0 0 0 50%;width:auto}.embed-book .spread{grid-template-columns:1fr 1fr}.embed-book .paper{display:block}.embed-book .left-paper{border-radius:13px 2px 2px 13px}.embed-book .right-paper{border-radius:2px 13px 13px 2px}.embed-book .binding{display:block}.embed-book body{background:radial-gradient(circle at 50% 0,#343d94,#12194c 72%)}
   </style>
-<script src="/km-discovery.js?v=discovery-1" defer></script>
-</head>
+<script src="/km-discovery.js?v=discovery-2" defer></script>
+<style>.discovery-blank{background:#fff!important}.discovery-blank::before,.discovery-blank::after{display:none!important}.discovery-blank img,.discovery-blank button,.discovery-blank figcaption,#rightPage[hidden]{display:none!important}</style></head>
 <body>
   <div class="sky" aria-hidden="true"></div>
   <header class="topbar">
@@ -99,7 +99,7 @@
     function renderBase(){
       position=Math.min(position,maxPosition());const[a,b]=pagesFor(position),mobile=isBookSinglePage();
       els.progress.max=maxPosition();els.progress.value=position;els.prev.disabled=position===0;els.next.disabled=false;els.cover.hidden=position!==0;els.spread.hidden=position===0;els.book.style.aspectRatio=mobile?"1/1":"2/1";
-      if(!position)els.label.textContent="Couverture";else{els.left.src=pageSrc(a);els.left.alt=`Page ${a} du livre`;els.right.src=b<=TOTAL?pageSrc(b):"";els.right.alt=b<=TOTAL?`Page ${b} du livre`:"";els.rightPaper.style.visibility=b<=TOTAL?"visible":"hidden";els.leftPaper.classList.toggle("mobile-visible",mobile);els.rightPaper.classList.remove("mobile-visible");els.label.textContent=b&&b<=TOTAL?`Pages ${a}–${b}`:`Page ${a}`}
+      if(!position)els.label.textContent="Couverture";else{els.left.src=pageSrc(a);els.left.alt=`Page ${a} du livre`;els.right.hidden=b>TOTAL;if(b<=TOTAL)els.right.src=pageSrc(b);else els.right.removeAttribute("src");els.right.alt=b<=TOTAL?`Page ${b} du livre`:"";els.rightPaper.style.visibility="visible";els.rightPaper.classList.toggle("discovery-blank",b>TOTAL);els.leftPaper.classList.toggle("mobile-visible",mobile);els.rightPaper.classList.remove("mobile-visible");els.label.textContent=b&&b<=TOTAL?`Pages ${a}–${b}`:`Page ${a}`}
       try{localStorage.setItem(progressKey,String(position))}catch{}
       document.querySelectorAll(".thumb").forEach((thumb,index)=>thumb.classList.toggle("active",index+1===a));
       const next=Math.min(maxPosition(),Math.max(1,position+1));pagesFor(next).forEach(n=>{if(n&&n<=TOTAL){const image=new Image();image.src=pageSrc(n)}});
@@ -112,7 +112,7 @@
       if(!position)els.label.textContent="Couverture";else{setEmbedPage(els.left,a);setEmbedPage(els.right,b);els.leftPaper.style.visibility="visible";els.rightPaper.style.visibility="visible";els.leftPaper.classList.toggle("mobile-visible",mobile);els.rightPaper.classList.remove("mobile-visible");els.label.textContent=a&&b?`Pages ${a}–${b}`:`Page ${a||b}`}
     }
     function pageSound(){if(!soundOn)return;try{const ctx=new(window.AudioContext||window.webkitAudioContext)(),buffer=ctx.createBuffer(1,ctx.sampleRate*.06,ctx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length)*.025;const src=ctx.createBufferSource();src.buffer=buffer;src.connect(ctx.destination);src.start()}catch{}}
-    function flipImage(page){return `<img class="pg-img" src="${pageSrc(page)}" alt="Page ${page}" draggable="false">`}
+    function flipImage(page){if(page<1||page>TOTAL)return `<div class="discovery-blank" style="width:100%;height:100%"></div>`;return `<img class="pg-img" src="${pageSrc(page)}" alt="Page ${page}" draggable="false">`}
     function go(next){
       if(document.querySelector("dialog[open]"))return;
       if(next>maxPosition()){window.KMDiscovery.openUnlock();return;}
@@ -137,7 +137,7 @@
       const leaf=document.createElement("div");
       leaf.className=`flip ${forward?"fromRight":"fromLeft"}`;
       const frontPage=forward?currentRight:currentLeft,backPage=forward?targetLeft:targetRight;
-      if(window.KM_BOOK_EMBED){if(forward)setEmbedPage(els.right,targetRight);else setEmbedPage(els.left,targetLeft)}else if(forward)els.right.src=pageSrc(targetRight);else els.left.src=pageSrc(targetLeft);
+      if(window.KM_BOOK_EMBED){if(forward)setEmbedPage(els.right,targetRight);else setEmbedPage(els.left,targetLeft)}else if(forward)setEmbedPage(els.right,targetRight<=TOTAL?targetRight:0);else els.left.src=pageSrc(targetLeft);
       leaf.innerHTML=`<div class="face front">${flipImage(frontPage)}<div class="shade"></div><div class="gloss"></div></div><div class="face back">${flipImage(backPage)}<div class="bshade"></div></div>`;
       els.book.appendChild(leaf);
       const shade=leaf.querySelector(".shade"),gloss=leaf.querySelector(".gloss"),bshade=leaf.querySelector(".bshade"),cast=document.createElement("div");
