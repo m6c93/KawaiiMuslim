@@ -175,6 +175,8 @@
     const localDesignPreview = (/^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
       && new URLSearchParams(window.location.search).get("preview") === "1") || guestMode;
     if (guestMode) {
+      const freeColoring=document.querySelector('a.big-action[data-guest-lock]');
+      if(freeColoring){freeColoring.removeAttribute('data-guest-lock');freeColoring.href='/books/hijabi-decouverte.html?guest=1';freeColoring.querySelector('small').textContent='3 coloriages Hijabi Girls offerts';}
       document.querySelectorAll("[data-guest-lock]").forEach(action => {
         action.classList.add("preview-locked");
         action.setAttribute("aria-label",`${action.querySelector("strong").textContent} — réservé aux abonnés`);
@@ -182,7 +184,7 @@
         action.addEventListener("click", event => {
           event.preventDefault();
           event.stopImmediatePropagation();
-          window.location.href = "index.html#tarifs";
+          window.KMDiscovery.openUnlock();
         },true);
       });
     }
@@ -284,6 +286,18 @@
     };
 
     const loadGallery = async () => {
+      if (guestMode) {
+        const filters = document.querySelector(".filters"); if (filters) filters.style.display = "none";
+        document.getElementById("heroTitle").textContent = "Mon atelier découverte 🎨";
+        document.getElementById("gallerySubtitle").textContent = "Tes coloriages sont sauvegardés sur cet appareil.";
+        gallery.innerHTML = [1,2,3].map(page => {
+          let saved = null;
+          try { saved = JSON.parse(localStorage.getItem(`km-guest-coloring:discovery-coloring:hijabi:${page}`) || "null"); } catch (_) {}
+          const params = new URLSearchParams({guest:"1",src:`discovery-coloring:hijabi:${page}`,title:`Hijabi Girls · Coloriage ${page}`,format:"image"});
+          return `<article class="art-card"><div class="art-preview"><img src="/brand/discovery/hijabi-${page}.jpg" alt="Coloriage Hijabi Girls ${page}"><span class="art-badge draft">${saved ? "À continuer" : "Offert"}</span></div><div class="art-copy"><strong>Hijabi Girls · ${page}/3</strong><small>${saved ? "Ton dessin est conservé sur cet appareil" : "Un coloriage pour découvrir"}</small><div class="art-buttons"><a class="art-button" href="/Coloriage.dc.html?${params}">${saved ? "Continuer mon coloriage" : "Colorier"}</a></div></div></article>`;
+        }).join("");
+        return;
+      }
       if (!selectedChildId) {
         gallery.innerHTML = '<div class="empty"><span>🐤</span><strong>Ajoute d’abord un profil enfant depuis ton compte.</strong></div>';
         return;
