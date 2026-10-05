@@ -76,8 +76,8 @@ button,input{font:inherit}.stars{position:fixed;inset:0;pointer-events:none;opac
 }
 
 </style>
-<script src="/km-discovery.js?v=discovery-1" defer></script>
-</head>
+<script src="/km-discovery.js?v=discovery-2" defer></script>
+<style>.discovery-blank{background:#fff!important}.discovery-blank::before,.discovery-blank::after{display:none!important}.discovery-blank img,.discovery-blank button,.discovery-blank figcaption,#rightPage[hidden]{display:none!important}</style></head>
 <body>
   <div class="stars" aria-hidden="true"></div>
   <header class="topbar">
@@ -184,10 +184,10 @@ function render() {
     els.left.src = pageSrc(a);
     els.left.alt = `Page ${a} du livre`;
     els.leftNo.textContent = a;
-    els.right.src = b <= TOTAL ? pageSrc(b) : "";
+    els.right.hidden = b > TOTAL; if(b <= TOTAL) els.right.src = pageSrc(b); else els.right.removeAttribute("src");
     els.right.alt = b <= TOTAL ? `Page ${b} du livre` : "";
     els.rightNo.textContent = b <= TOTAL ? b : "";
-    els.rightPaper.style.visibility = b <= TOTAL ? "visible" : "hidden";
+    els.rightPaper.style.visibility = "visible"; els.rightPaper.classList.toggle("discovery-blank", b > TOTAL);
     els.leftPaper.classList.toggle("mobile-visible", isMobile());
     els.rightPaper.classList.remove("mobile-visible");
     els.label.textContent = b && b <= TOTAL ? `Coloriages ${a}–${b} / 3 offerts` : `Coloriage ${a} / 3 offert`;
@@ -249,8 +249,8 @@ function go(next) {
   const frontPage = direction > 0 ? curRight : curLeft;
   const backPage = direction > 0 ? nextLeft : nextRight;
   if (direction > 0) {
-    els.right.src = nextRight <= TOTAL ? pageSrc(nextRight) : "";
-    els.rightPaper.style.visibility = nextRight <= TOTAL ? "visible" : "hidden";
+    els.right.hidden = nextRight > TOTAL; if(nextRight <= TOTAL) els.right.src = pageSrc(nextRight); else els.right.removeAttribute("src");
+    els.rightPaper.style.visibility = "visible"; els.rightPaper.classList.toggle("discovery-blank", nextRight > TOTAL);
   } else {
     els.left.src = pageSrc(nextLeft);
   }
