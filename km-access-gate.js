@@ -13,10 +13,10 @@
   var storedGuestMode = sessionStorage.getItem("km-guest-mode") === "1";
   var currentPath = decodeURIComponent(window.location.pathname);
   var previewPages = new URLSearchParams(window.location.search).get("previewPages");
-  var guestBookPreview = explicitGuestMode && (
-    (window.self !== window.top && previewPages === "4" && currentPath === "/books/aya-armure-de-lumiere.html")
-    || (previewPages === "5" && currentPath === "/books/tawakkul.html")
-  );
+  var guestBookPreview = false;
+  if (explicitGuestMode && currentPath === '/books/tawakkul.html') {
+    window.location.replace('/books/tawakkul-decouverte.html?guest=1'); return;
+  }
   var guestPages = new Set([
     "/Aujourd'hui.dc.html",
     "/Bibliotheque Kawaii Muslim.dc.html",

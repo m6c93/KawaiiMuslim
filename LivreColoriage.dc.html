@@ -42,6 +42,7 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
 .direct-resume-screen strong{font:800 24px "Baloo 2",cursive}
 .direct-resume-screen small{display:block;margin-top:6px;color:#ddd9f4;font-weight:700}
 </style>
+<script src="/km-discovery.js?v=discovery-1" defer></script>
 </head>
 <body>
 <div class="direct-resume-screen" aria-live="polite"><div><span>🖍️</span><strong>Ton coloriage revient…</strong><small>Nous retrouvons tes couleurs.</small></div></div>
@@ -72,7 +73,8 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   const slug=params.get("book")||"";
   const title=(params.get("title")||"Livre à colorier").slice(0,160);
   const guestMode=params.get("guest")==="1";
-  const previewPageLimit=guestMode?4:Math.max(0,Number(params.get("previewPages"))||0);
+  if(guestMode){location.replace("/books/hijabi-decouverte.html?guest=1");return;}
+  const previewPageLimit=guestMode?3:Math.max(0,Number(params.get("previewPages"))||0);
   const restorePosition=String(params.get("position")||"");
   const resumePage=String(params.get("resumePage")||"");
   const resumeDraft=String(params.get("resumeDraft")||"");

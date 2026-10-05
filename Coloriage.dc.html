@@ -9,7 +9,7 @@
   <script>
     (() => {
       const startupParams = new URLSearchParams(location.search);
-      if (startupParams.get("bookColoring") === "1" || startupParams.has("draft") || String(startupParams.get("src") || "").startsWith("builtin-drawing:blank") || startupParams.get("embed") === "1") {
+      if (String(startupParams.get("src") || "").startsWith("discovery-coloring:hijabi:") || startupParams.get("bookColoring") === "1" || startupParams.has("draft") || String(startupParams.get("src") || "").startsWith("builtin-drawing:blank") || startupParams.get("embed") === "1") {
         document.documentElement.classList.add("direct-coloring");
       }
       if (startupParams.get("embed") === "1") document.documentElement.classList.add("embedded-coloring-demo");
@@ -153,6 +153,7 @@ html.embedded-coloring-demo .palette{grid-template-columns:repeat(2,29px);gap:6p
 html.embedded-coloring-demo .color,html.embedded-coloring-demo .custom-color{width:29px;height:29px}
 html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px}
 </style>
+<script src="/km-discovery.js?v=discovery-1" defer></script>
 </head>
 <body>
   <main class="app" id="editorApp" hidden>
@@ -349,6 +350,7 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
       toast.timer = setTimeout(() => element.hidden = true,2200);
     };
     const validateSource = () => {
+      if(guestMode && !/^discovery-coloring:hijabi:[123]$/.test(source))throw new Error("Choisis un des trois coloriages offerts dans Hijabi Girls.");
       const savedBookMatch = !bookColoring ? source.match(/^book-coloring:([a-z0-9-]+):page:(\d+)$/) : null;
       const savedBookTitles = {
         "bubble-tea-time-hijabi":"Bubble Tea Time Hijabi",
@@ -397,6 +399,9 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
         document.getElementById("finishButton").innerHTML = "⭐<br>J’ai terminé";
       } else {
         const builtInColorings = {
+          "discovery-coloring:hijabi:1":"./brand/discovery/hijabi-1.jpg",
+          "discovery-coloring:hijabi:2":"./brand/discovery/hijabi-2.jpg",
+          "discovery-coloring:hijabi:3":"./brand/discovery/hijabi-3.jpg",
           "builtin-coloring:lune-ramadan":"./brand/assets/coloring-lune-ramadan.png",
           "builtin-coloring:abeille-coran":"./brand/assets/coloring-abeille-coran.png",
           "builtin-coloring:tapis-priere":"./brand/assets/coloring-tapis-priere.png"
@@ -412,6 +417,7 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
           format = "image";
           imageSource = new URL(builtInColorings[source],location.href).href;
           artworkSourceKey = source;
+          if(guestMode){bookReturnUrl='/books/hijabi-decouverte.html?guest=1';document.getElementById('backAction').href=bookReturnUrl;document.getElementById('backLabel').textContent='Livre';}
         } else {
           sourceUrl = new URL(source);
           const valid = sourceUrl.protocol === "https:" && sourceUrl.hostname === allowedHost
@@ -1036,7 +1042,7 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
           document.getElementById("quickChild").hidden = false;
           document.getElementById("choiceMessage").textContent = "Une seule fois : indique son prénom pour créer sa galerie privée.";
         }
-        if ((requestedDraft || bookColoring || source.startsWith("builtin-drawing:blank") || params.get("embed") === "1") && childSelect.value) await startEditor();
+        if ((source.startsWith("discovery-coloring:hijabi:") || requestedDraft || bookColoring || source.startsWith("builtin-drawing:blank") || params.get("embed") === "1") && childSelect.value) await startEditor();
       }
     } catch (error) {
       if (error?.message !== "book_redirect") {

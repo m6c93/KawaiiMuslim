@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  var discoveryScript=document.createElement("script");discoveryScript.src="/km-discovery.js?v=discovery-1";document.head.appendChild(discoveryScript);
 
   var shellChild = new URLSearchParams(window.location.search).get("kmShell") === "1";
   var localPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
