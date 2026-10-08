@@ -182,6 +182,12 @@
         <div class="admin-section-head"><div><h2>Support client</h2><p>Classe les demandes, note le suivi et ferme les dossiers résolus.</p></div></div>
         <div class="admin-toolbar"><select class="admin-select" id="ticketFilter"><option value="">Toutes les demandes</option><option value="open">Nouvelles</option><option value="in_progress">En cours</option><option value="waiting_user">En attente de la famille</option><option value="resolved">Résolues</option><option value="closed">Fermées</option></select></div>
         <div class="admin-list" id="ticketsList"></div>
+        <article class="admin-card" id="adminDeletions" hidden>
+          <h3>Demandes de suppression du compte</h3>
+          <p>Traitement manuel sous 30 jours. Suivre le protocole docs/account-deletion-operations.md du dépôt. Ne pas fermer un simple ticket à la place d’une suppression effective.</p>
+          <button class="admin-button" id="refreshDeletions" type="button">Actualiser les demandes</button>
+          <div id="deletionQueue" role="status" aria-live="polite"></div>
+        </article>
       </section>
 
       <section class="admin-view" id="view-security">
@@ -264,6 +270,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
   <script src="./km-auth.js"></script>
+  <script src="./admin-deletion.js?v=1" defer></script>
   <script>
     const $ = selector => document.querySelector(selector);
     const $$ = selector => [...document.querySelectorAll(selector)];

@@ -4,5 +4,11 @@
   "version": "1.0.0",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.125.0"
+  },
+  "scripts": {
+    "test:account-deletion": "node --test scripts/account-deletion.test.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8"
   }
 }
