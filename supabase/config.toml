@@ -8,3 +8,8 @@ verify_jwt = true
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.delete-account]
+# The function validates the current Auth user, password and enrolled MFA.
+# The gateway legacy-secret check rejects this project's ECC-signed sessions.
+verify_jwt = false

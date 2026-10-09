@@ -112,35 +112,36 @@
         </section>
 
       </div>
-      <section class="dash-card full" id="suppression-compte" aria-labelledby="deletionTitle">
-        <h2 id="deletionTitle">Supprimer mon compte</h2>
-        <p>Tu peux demander ici la suppression définitive de ton compte parent, de tous les profils enfants, de leurs progrès, plannings et créations. Le traitement est manuel, sous 30 jours. Tu recevras une confirmation à l’adresse de ton compte une fois terminé.</p>
-        <details id="deletionDetails">
-          <summary>Demander la suppression de mon compte</summary>
-          <p>L’accès sera perdu une fois la suppression effectuée, même si une période payée reste disponible. Les factures et les seules données légalement nécessaires seront conservées à part, avec accès restreint. <a href="Confidentialite.dc.html#suppression">En savoir plus</a>.</p>
-          <p><strong>Abonnements :</strong> pour un achat Apple, <a href="https://apps.apple.com/account/subscriptions/">annule le renouvellement dans tes abonnements Apple</a> : la suppression du compte ne l’annule pas. Pour Stripe, utilise « Gérer mon abonnement » ci-dessus ; l’équipe arrêtera les abonnements Stripe lors du traitement. Tu peux demander la suppression dès maintenant, sans attendre la fin d’un abonnement. Elle ne déclenche pas automatiquement un remboursement.</p>
-          <form id="deletionForm">
-            <label class="field-label" for="deletionPassword">Mot de passe du compte parent</label>
-            <input class="field-input" id="deletionPassword" type="password" autocomplete="current-password" required>
-            <p><a href="Connexion.dc.html">Mot de passe oublié ?</a></p>
-            <div id="deletionMFA" hidden>
-              <label class="field-label" for="deletionCode">Code de double authentification</label>
-              <input class="field-input" id="deletionCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6">
+      <section class="dash-card full" id="accountDeletion" hidden>
+        <h2>Mes données et mon compte</h2>
+        <p>Tu peux supprimer définitivement ton compte familial depuis cet espace parent.</p>
+        <button class="small-button danger" id="openAccountDeletion" type="button">Supprimer mon compte</button>
+        <dialog id="deleteAccountDialog" aria-labelledby="deleteAccountTitle" style="width:min(440px,calc(100vw - 32px));max-height:85dvh;overflow:auto;box-sizing:border-box;border:1px solid #e8d7df;border-radius:24px;padding:24px;background:#fff8ed;color:#48385c">
+          <h2 id="deleteAccountTitle">Supprimer mon compte ?</h2>
+          <p>Cette action est définitive. Tes profils enfants, progrès, planning et créations seront supprimés. Ton accès prendra fin immédiatement.</p>
+          <p>Les renouvellements de ton abonnement Stripe seront arrêtés. Cette action ne déclenche pas de remboursement. Les factures restent conservées selon les obligations légales.</p>
+          <form id="deleteAccountForm">
+            <label class="field-label" for="deleteAccountPassword">Ton mot de passe parent</label>
+            <input class="field-input" id="deleteAccountPassword" type="password" autocomplete="current-password" required>
+            <div id="deleteAccountMFA" hidden>
+              <label class="field-label" for="deleteAccountCode">Code de double authentification</label>
+              <input class="field-input" id="deleteAccountCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6">
             </div>
-            <label><input type="checkbox" id="deletionConfirm" required> Je confirme la suppression définitive du compte et de tous les profils enfants, et j’ai pris connaissance des informations sur les abonnements.</label>
-            <p><button class="primary-button pink" id="deletionSubmit" type="submit" disabled>Confirmer ma demande de suppression</button></p>
-            <button class="ghost-button" id="deletionCancel" type="button">Annuler</button>
+            <label style="display:flex;gap:10px;margin:18px 0;align-items:flex-start"><input id="deleteAccountConfirm" type="checkbox" required><span>Je confirme la suppression définitive et la fin de mon accès.</span></label>
+            <p id="deleteAccountMessage" class="form-message" role="alert"></p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <button class="ghost-button" id="cancelAccountDeletion" type="button">Garder mon compte</button>
+              <button class="small-button danger" id="confirmAccountDeletion" type="submit">Supprimer définitivement</button>
+            </div>
           </form>
-        </details>
-        <p id="deletionMessage" class="form-message" role="status" aria-live="polite"></p>
+        </dialog>
       </section>
     </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=child-gender-1"></script>
-  <script src="./account-deletion.js?v=1" defer></script>
+  <script src="./km-auth.js?v=account-delete-1"></script>
   <script>
     let context = null;
     const children = document.getElementById("children");
@@ -240,6 +241,7 @@
       document.getElementById("roleBadge").textContent = roleLabels[context.profile.role] || "Compte parent";
       document.getElementById("parentName").value = context.profile.full_name || "";
       document.getElementById("parentAvatar").value = context.profile.avatar || "🌸";
+      document.getElementById("accountDeletion").hidden = context.profile.role !== "parent";
       context.subscription = await KMAuth.getSubscription();
       const subscribed = activeBillingStatuses.has(context.subscription?.status);
       memberOnlyElements.forEach(element => { element.hidden = !subscribed; });
@@ -437,6 +439,63 @@
     document.getElementById("logout").addEventListener("click", async () => {
       await KMAuth.logout();
       window.location.href = "Connexion.dc.html";
+    });
+
+    const deletionDialog = document.getElementById("deleteAccountDialog");
+    const deletionForm = document.getElementById("deleteAccountForm");
+    let deletingAccount = false;
+    document.getElementById("openAccountDeletion").addEventListener("click", () => {
+      deletionForm.reset();
+      document.getElementById("deleteAccountMFA").hidden = true;
+      document.getElementById("deleteAccountCode").required = false;
+      document.getElementById("deleteAccountMessage").textContent = "";
+      deletionDialog.showModal();
+    });
+    document.getElementById("cancelAccountDeletion").addEventListener("click", () => {
+      if (!deletingAccount) deletionDialog.close();
+    });
+    deletionDialog.addEventListener("cancel", event => { if (deletingAccount) event.preventDefault(); });
+    deletionForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      if (deletingAccount || !deletionForm.reportValidity()) return;
+      deletingAccount = true;
+      const confirm = document.getElementById("confirmAccountDeletion");
+      const cancel = document.getElementById("cancelAccountDeletion");
+      const status = document.getElementById("deleteAccountMessage");
+      confirm.disabled = cancel.disabled = true;
+      status.textContent = "Suppression en cours. Garde cet écran ouvert…";
+      try {
+        const mfa = await KMAuth.getMFAStatus();
+        if (mfa.nextLevel === "aal2" && mfa.currentLevel !== "aal2") {
+          const code = document.getElementById("deleteAccountCode");
+          document.getElementById("deleteAccountMFA").hidden = false;
+          code.required = true;
+          if (!code.value) {
+            status.textContent = "Saisis ton code de double authentification, puis confirme.";
+            code.focus();
+            return;
+          }
+          if (!mfa.factors[0]) throw new Error("Reconnecte-toi pour vérifier ta double authentification.");
+          await KMAuth.verifyMFACode({ factorId: mfa.factors[0].id, code: code.value });
+          code.value = "";
+        }
+        await KMAuth.deleteAccount({ password: document.getElementById("deleteAccountPassword").value, confirmation: "SUPPRIMER" });
+        document.getElementById("deleteAccountPassword").value = "";
+        deletionForm.hidden = true;
+        for (const paragraph of deletionDialog.querySelectorAll(":scope > p")) paragraph.hidden = true;
+        document.getElementById("deleteAccountTitle").textContent = "Ton compte est supprimé";
+        const returnLink = document.createElement("a");
+        returnLink.className = "primary-button";
+        returnLink.href = "Connexion.dc.html";
+        returnLink.textContent = "Revenir à l’accueil";
+        deletionDialog.appendChild(returnLink);
+      } catch (error) {
+        document.getElementById("deleteAccountPassword").value = "";
+        status.textContent = error.message;
+      } finally {
+        deletingAccount = false;
+        confirm.disabled = cancel.disabled = false;
+      }
     });
 
     load().catch(error => {
