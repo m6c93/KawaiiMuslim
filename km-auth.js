@@ -582,6 +582,28 @@ window.KMAuth = (() => {
       return requireSuccess(await client().from("child_profiles").delete().eq("id", id));
     },
 
+    deleteAccount: async ({ password, confirmation }) => {
+      if (!await getSession()) throw new Error("Connexion requise.");
+      const result = await client().functions.invoke("delete-account", {
+        body: { password, confirmation }
+      });
+      if (result.error) {
+        let detail = "La suppression n’a pas pu être confirmée. Réessaie ou contacte l’assistance.";
+        try { detail = (await result.error.context.json()).error || detail; } catch {}
+        throw new Error(detail);
+      }
+      if (result.data?.deleted !== true) throw new Error("La suppression n’a pas été confirmée.");
+      await client().auth.signOut({ scope: "local" }).catch(() => {});
+      // Local storage may be unavailable; it must not hide confirmed server deletion.
+      try {
+        clearActiveProfile();
+        for (const key of Object.keys(localStorage)) {
+          if (key.startsWith("km-") || key.startsWith("kmw-")) localStorage.removeItem(key);
+        }
+      } catch {}
+      return result.data;
+    },
+
     getSubscription: async () => {
       const session = await getSession();
       if (!session) throw new Error("Connexion requise.");
