@@ -10,4 +10,6 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.delete-account]
-verify_jwt = true
+# The function validates the current Auth user, password and enrolled MFA.
+# The gateway legacy-secret check rejects this project's ECC-signed sessions.
+verify_jwt = false
