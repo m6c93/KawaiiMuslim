@@ -99,6 +99,7 @@ window.KMAuth = (() => {
       clearTimeout(inactivityTimer);
       inactivityTimer = setTimeout(async () => {
         localStorage.removeItem(ACTIVE_PROFILE_KEY);
+        if (window.KMApple) await window.KMApple.clear().catch(() => {});
         await client().auth.signOut().catch(() => {});
         window.location.href = "Connexion.dc.html?expired=1";
       }, INACTIVITY_LIMIT);
@@ -538,6 +539,7 @@ window.KMAuth = (() => {
     },
 
     logout: async () => {
+      if (window.KMApple) await window.KMApple.clear();
       localStorage.removeItem(ACTIVE_PROFILE_KEY);
       requireSuccess(await client().auth.signOut());
     },
@@ -585,15 +587,25 @@ window.KMAuth = (() => {
     getSubscription: async () => {
       const session = await getSession();
       if (!session) throw new Error("Connexion requise.");
-      return requireSuccess(await client().from("subscriptions")
-        .select("plan_code,child_limit,status,cancel_at_period_end,current_period_end,price_id")
-        .eq("user_id", session.user.id)
-        .maybeSingle());
+      return requireSuccess(await client().rpc("get_family_subscription").maybeSingle());
     },
 
     startCheckout: async planCode => {
       const session = await getSession();
       if (!session) throw new Error("Connexion requise.");
+      if (window.KMApple) {
+        const ids = { family_1_child: "com.kawaiimuslimworld.family1.monthly", family_2_children: "com.kawaiimuslimworld.family2.monthly", family_3_children: "com.kawaiimuslimworld.family3.monthly" };
+        if (!ids[planCode]) throw new Error("Choisis une formule familiale.");
+        const existing = await window.KMAuth.getSubscription();
+        if (existing) throw new Error("Un abonnement est déjà actif. Gère-le avant de choisir une autre formule pour éviter un double paiement.");
+        const result = await window.KMApple.purchase({productID: ids[planCode], userID: session.user.id, accessToken: session.access_token});
+        if (result.cancelled) throw new Error("Achat annulé. Tu peux continuer la découverte gratuite.");
+        if (result.pending) throw new Error("L’achat attend la confirmation Apple. Ton accès s’activera après sa validation.");
+        if (!result.verified || !result.active) throw new Error("Aucun abonnement actif confirmé. Essaie Restaurer mes achats.");
+        await window.KMAuth.clearPendingPlan();
+        window.location.assign("Profils.dc.html");
+        return;
+      }
       const result = await client().functions.invoke("create-checkout-session", {
         body: { planCode }
       });
@@ -602,9 +614,20 @@ window.KMAuth = (() => {
       window.location.assign(data.url);
     },
 
+    restoreApplePurchases: async () => {
+      const session = await getSession();
+      if (!session || !window.KMApple) throw new Error("Connecte-toi dans l’application iPhone ou iPad pour restaurer tes achats Apple.");
+      return window.KMApple.restore({userID: session.user.id, accessToken: session.access_token});
+    },
+
     openBillingPortal: async () => {
       const session = await getSession();
       if (!session) throw new Error("Connexion requise.");
+      if (window.KMApple) {
+        const existing = await window.KMAuth.getSubscription();
+        if (existing?.provider === "apple") return window.KMApple.manage();
+        throw new Error("Ton abonnement a été souscrit sur le site. Gère-le depuis ton espace parent sur kawaiimuslimworld.com.");
+      }
       const data = requireSuccess(await client().functions.invoke("create-portal-session", {
         body: {}
       }));

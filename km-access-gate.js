@@ -92,7 +92,7 @@
 
     var results = await Promise.all([
       client.from("profiles").select("role,is_active").eq("id", session.user.id).single(),
-      client.from("subscriptions").select("status").eq("user_id", session.user.id).maybeSingle()
+      client.rpc("get_family_subscription").maybeSingle()
     ]);
     var profile = results[0].data;
     var subscription = results[1].data;

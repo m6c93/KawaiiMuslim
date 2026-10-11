@@ -18,6 +18,14 @@
       sheet.querySelector('.km-unlock-close').onclick = sheet.querySelector('.km-unlock-continue').onclick = () => sheet.close();
       sheet.addEventListener('click', e => { if(e.target === sheet){const r=sheet.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)sheet.close();} });
     }
+    if (window.KMApple) {
+      const price = sheet.querySelector('.km-unlock-price');
+      price.textContent = "Accès complet avec un abonnement famille Apple.";
+      window.KMApple.products().then(({products})=>{
+        const product=products.find(item=>item.id==='com.kawaiimuslimworld.family1.monthly');
+        if(product) price.textContent = `À partir de ${product.price} / mois · Pour 1 enfant`;
+      }).catch(()=>{});
+    }
     sheet.querySelector('#km-unlock-title').textContent=context==='letters'?'Bravo pour ces premières lettres !':context==='quran'?'Fais grandir ton jardin':'La découverte continue…';
     if(!sheet.open) sheet.showModal();
   }

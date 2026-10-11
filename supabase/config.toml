@@ -8,3 +8,9 @@ verify_jwt = true
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.apple-purchase]
+verify_jwt = true
+
+[functions.apple-notifications]
+verify_jwt = false

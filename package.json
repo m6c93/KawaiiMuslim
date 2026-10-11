@@ -6,7 +6,8 @@
     "@anthropic-ai/sdk": "^0.125.0"
   },
   "scripts": {
-    "test:account-deletion": "node --test scripts/account-deletion.test.mjs"
+    "test:account-deletion": "node --test scripts/account-deletion.test.mjs",
+    "test:apple-purchase": "node --test scripts/apple-purchase.test.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8"
