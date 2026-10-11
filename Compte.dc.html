@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./responsive.css?v=tablet-20260818">
-  <link rel="stylesheet" href="./account.css?v=gender-theme-1">
+  <link rel="stylesheet" href="./account.css?v=public-parent-2">
 </head>
 <body>
   <div class="account-shell">
@@ -69,6 +69,11 @@
             <p class="subscription-breakdown" id="familyBreakdown">Choisis le nombre de profils enfants</p>
           </div>
           <p class="subscription-intro" id="subscriptionIntro">Reprends ton inscription : choisis simplement le nombre d’enfants pour commencer tes 7 jours gratuits.</p>
+          <div class="parent-welcome" id="parentWelcome" hidden>
+            <p>Des histoires, des coloriages et des activités pour grandir dans la douceur de l’islam.</p>
+            <a class="primary-button pink" id="createParentAccount" href="Inscription.dc.html">Créer mon compte</a>
+            <a class="parent-signin" href="Connexion.dc.html?reason=parent&amp;next=%2FCompte.dc.html">J’ai déjà un compte · Se connecter</a>
+          </div>
           <div class="plan-options" id="planOptions" aria-label="Choisir une offre">
             <button class="plan-option" type="button" data-plan="family_1_child" data-limit="1">
               <span class="plan-children">1 enfant</span><strong>4,99€</strong><small>par mois après 7 jours gratuits</small>
@@ -114,7 +119,7 @@
         </section>
 
       </div>
-      <section class="dash-card full" id="suppression-compte" aria-labelledby="deletionTitle">
+      <section class="dash-card full" data-auth-only hidden id="suppression-compte" aria-labelledby="deletionTitle">
         <h2 id="deletionTitle">Supprimer mon compte</h2>
         <p>Tu peux demander ici la suppression définitive de ton compte parent, de tous les profils enfants, de leurs progrès, plannings et créations. Le traitement est manuel, sous 30 jours. Tu recevras une confirmation à l’adresse de ton compte une fois terminé.</p>
         <details id="deletionDetails">
@@ -225,13 +230,56 @@
       }).join("");
     };
 
+    const renderSignedOutOffer = async () => {
+      document.getElementById("hello").textContent = "L’espace des parents";
+      document.getElementById("email").textContent = "Un écran qui vous veut du bien, à partager en famille.";
+      document.getElementById("roleBadge").hidden = true;
+      document.getElementById("logout").hidden = true;
+      document.getElementById("parentWelcome").hidden = false;
+      memberOnlyElements.forEach(element => { element.hidden = true; });
+      subscriptionCard.classList.add("signup-only");
+      subscriptionCard.querySelector("h2").textContent = "Tout l’univers KMW pour ta famille";
+      document.getElementById("subscriptionStatus").textContent = "Les formules famille";
+      document.getElementById("familyBreakdown").textContent = "Les livres complets, les coloriages et les activités éducatives.";
+      billingMessage.textContent = "";
+      if (!window.KMApple) {
+        subscriptionIntro.textContent = "Choisis une formule pour découvrir les conditions de l’essai et créer ton compte.";
+        return;
+      }
+      document.getElementById("createParentAccount").textContent = "Créer mon compte gratuitement";
+      subscriptionIntro.textContent = "Crée ton compte gratuitement, puis choisis un abonnement Apple. La découverte gratuite reste accessible depuis l’accueil.";
+      document.getElementById("familyPrice").textContent = "Choisis le nombre d’enfants";
+      document.getElementById("appleTerms").hidden = false;
+      billingNote.textContent = "Créer un compte ne déclenche aucun paiement. L’achat se confirme ensuite avec Apple.";
+      const options = [...document.querySelectorAll(".plan-option")];
+      options.forEach(option => {
+        option.disabled = true;
+        option.querySelector("strong").textContent = "Chargement…";
+        option.querySelector("small").textContent = "par mois";
+      });
+      try {
+        const {products} = await window.KMApple.products();
+        options.forEach(option => {
+          const product = products.find(item => item.id === `com.kawaiimuslimworld.family${option.dataset.limit}.monthly`);
+          option.disabled = !product;
+          option.querySelector("strong").textContent = product?.price || "Indisponible";
+        });
+        if (!products.length) billingMessage.textContent = "Les formules Apple sont momentanément indisponibles. Tu peux quand même créer ton compte gratuitement.";
+      } catch (error) {
+        options.forEach(option => { option.querySelector("strong").textContent = "Indisponible"; });
+        billingMessage.textContent = "Impossible de charger les prix Apple pour le moment. Tu peux quand même créer ton compte gratuitement.";
+      }
+    };
+
     const load = async () => {
       context = await KMAuth.getContext();
       if (!context) {
-        const destination = window.location.pathname + window.location.search;
-        window.location.replace(`Connexion.dc.html?reason=parent&next=${encodeURIComponent(destination)}`);
+        await renderSignedOutOffer();
         return;
       }
+      document.querySelectorAll("[data-auth-only]").forEach(element => { element.hidden = false; });
+      document.getElementById("parentWelcome").hidden = true;
+      document.getElementById("logout").hidden = false;
       document.getElementById("hello").textContent = `Assalamou alaykoum${context.profile.full_name ? `, ${context.profile.full_name}` : ""} 🌸`;
       document.getElementById("email").textContent = context.profile.email;
       const roleLabels = {
@@ -345,7 +393,11 @@
 
     document.getElementById("planOptions").addEventListener("click", async event => {
       const option = event.target.closest("[data-plan]");
-      if (!option) return;
+      if (!option || option.disabled) return;
+      if (!context) {
+        window.location.assign(`Inscription.dc.html?plan=${encodeURIComponent(option.dataset.plan)}`);
+        return;
+      }
       const buttons = [...document.querySelectorAll(".plan-option")];
       buttons.forEach(button => button.disabled = true);
       option.classList.add("selected");
