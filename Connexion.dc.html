@@ -70,20 +70,36 @@
     const message = document.getElementById("message");
     const submitButton = document.getElementById("submitButton");
     const password = document.getElementById("password");
-    const requestedPage = new URLSearchParams(window.location.search).get("next");
-    const requestedDestination = requestedPage?.startsWith("/") && !requestedPage.startsWith("//")
-      ? requestedPage
-      : "Aujourd%27hui.dc.html";
+    const loginParams = new URLSearchParams(window.location.search);
+    const requestedPage = loginParams.get("next");
+    let requestedDestination = "Aujourd%27hui.dc.html";
+    let parentDestination = false;
+    try {
+      const target = new URL(requestedPage || "", window.location.origin);
+      if (requestedPage?.startsWith("/") && target.origin === window.location.origin) {
+        requestedDestination = target.pathname + target.search + target.hash;
+        parentDestination = ["/compte.dc.html", "/abonnement.dc.html", "/parametres.dc.html"].includes(target.pathname.toLowerCase());
+      }
+    } catch {}
+    if (loginParams.get("reason") === "parent") {
+      message.textContent = "Connecte-toi à ton compte parent pour voir les formules Apple et gérer ton abonnement.";
+    }
     const staffRoles = ["admin", "support", "content_admin"];
 
     const continueAfterAuthentication = async () => {
       const context = await KMAuth.getContext();
+      if (!context) throw new Error("Connecte-toi pour continuer vers ton espace parent.");
       sessionStorage.removeItem("km-guest-mode");
       if (context && staffRoles.includes(context.profile.role)) {
         const adminDestination = context.profile.role === "admin"
           ? "/Choisir-administration.dc.html"
           : "/Admin.dc.html";
         window.location.href = `MFA.dc.html?next=${encodeURIComponent(adminDestination)}`;
+        return;
+      }
+      if (parentDestination) {
+        sessionStorage.removeItem("km-after-profile");
+        window.location.replace(requestedDestination);
         return;
       }
       sessionStorage.setItem("km-after-profile", requestedDestination);
