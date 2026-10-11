@@ -218,7 +218,7 @@
           ? context.session.user.user_metadata.pending_plan_code
           : "";
       const active = await refreshSubscription(paymentReturn);
-      if (checkoutPlan && !active && subscription?.status !== "incomplete") {
+      if (!window.KMApple && checkoutPlan && !active && subscription?.status !== "incomplete") {
         profiles.innerHTML = "";
         familyOffer.textContent = "Paiement sécurisé";
         message.className = "form-message success";

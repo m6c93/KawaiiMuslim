@@ -543,7 +543,7 @@ class Component extends DCLogic {
         profile: active.type === 'child' ? 'enfant' : 'maman',
         profileName: active.name || (active.type === 'child' ? 'Mon enfant' : 'Maman'),
         profileEmoji: active.avatar || (active.type === 'child' ? '🐤' : '🌸'),
-        subscribed: staffAccess || ['mensuel', 'annuel'].includes(context.profile.plan),
+        subscribed: staffAccess || ['active', 'trialing', 'past_due'].includes((await window.KMAuth.getSubscription())?.status),
         catalog,
         announcement: settings.find((item) => item.key === 'announcement')?.value || '',
         requestedChildren: Math.min(3, Math.max(1, context.children.length || 1)),

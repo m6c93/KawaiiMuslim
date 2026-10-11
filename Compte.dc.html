@@ -80,6 +80,8 @@
               <span class="plan-children">3 enfants</span><strong>6,97€</strong><small>par mois après 7 jours gratuits</small>
             </button>
           </div>
+          <button class="secondary-button" id="restoreApple" type="button" hidden>Restaurer mes achats Apple</button>
+          <p id="appleTerms" hidden>L’abonnement se renouvelle automatiquement chaque mois, sauf annulation dans les réglages Apple au moins 24 heures avant le renouvellement. Le paiement est débité sur ton compte Apple. <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Conditions d’utilisation</a> · <a href="Confidentialite.dc.html">Confidentialité</a></p>
           <button class="primary-button pink" id="subscriptionAction" type="button" hidden>Gérer mon abonnement</button>
           <p class="billing-note" id="billingNote">0 € aujourd’hui · Paiement sécurisé par Stripe · Annulation à tout moment</p>
           <p class="form-message" id="billingMessage" role="status"></p>
@@ -267,6 +269,26 @@
       });
       const subscriptionAction = document.getElementById("subscriptionAction");
       subscriptionAction.hidden = !subscribed;
+      if (window.KMApple) {
+        document.getElementById("restoreApple").hidden = false;
+        document.getElementById("appleTerms").hidden = false;
+        subscriptionIntro.textContent = subscribed ? "Ton accès famille est actif. Retrouve tes livres et activités avec tes profils enfants." : "Débloque les histoires complètes, les coloriages et les activités pour tes enfants.";
+        billingNote.textContent = context.subscription?.provider === "stripe" ? "Abonnement souscrit sur le site · Gestion depuis ton espace parent sur le site" : "Paiement Apple · Renouvellement mensuel · Annulation dans tes réglages Apple";
+        document.getElementById("familyPrice").textContent = subscribed ? "Accès famille actif" : "Choisis ta formule Apple";
+        const options = [...document.querySelectorAll(".plan-option")];
+        options.forEach(option => { option.disabled = true; option.querySelector("strong").textContent = "Chargement…"; option.querySelector("small").textContent = "par mois"; });
+        try {
+          const {products} = await window.KMApple.products();
+          options.forEach(option => {
+            const product = products.find(item => item.id === `com.kawaiimuslimworld.family${option.dataset.limit}.monthly`);
+            option.disabled = !product;
+            option.querySelector("strong").textContent = product?.price || "Indisponible";
+          });
+          const current = products.find(item => item.id === context.subscription?.price_id);
+          if (current) document.getElementById("familyPrice").textContent = `${current.price} / mois`;
+          if (!subscribed && !products.length) billingMessage.textContent = "Les abonnements Apple arrivent bientôt. La découverte gratuite reste disponible.";
+        } catch (error) { billingMessage.textContent = KMAuth.friendlyError(error); }
+      }
       if (!subscribed) return;
 
       context.readingProgress = await KMAuth.listReadingProgress();
@@ -339,18 +361,32 @@
     });
 
     document.getElementById("subscriptionAction").addEventListener("click", async event => {
-      event.currentTarget.disabled = true;
+      const actionButton = event.currentTarget;
+      actionButton.disabled = true;
       billingMessage.className = "form-message success";
       billingMessage.textContent = "Ouverture de ton espace sécurisé…";
       try {
         await KMAuth.openBillingPortal();
+        actionButton.disabled = false;
+        billingMessage.textContent = "";
       } catch (error) {
-        event.currentTarget.disabled = false;
+        actionButton.disabled = false;
         billingMessage.className = "form-message";
         billingMessage.textContent = KMAuth.friendlyError(error);
       }
     });
 
+    document.getElementById("restoreApple").addEventListener("click", async event => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      billingMessage.textContent = "Recherche de tes achats Apple…";
+      try {
+        const result = await KMAuth.restoreApplePurchases();
+        if (result.active) window.location.reload();
+        else billingMessage.textContent = "Aucun abonnement Apple actif associé à ce compte parent. Vérifie que tu utilises le compte KMW de l’achat.";
+      } catch (error) { billingMessage.textContent = KMAuth.friendlyError(error); }
+      finally { button.disabled = false; }
+    });
     const billingResult = new URLSearchParams(window.location.search).get("abonnement");
     if (billingResult === "confirme") {
       billingMessage.className = "form-message success";
