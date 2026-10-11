@@ -228,7 +228,8 @@
     const load = async () => {
       context = await KMAuth.getContext();
       if (!context) {
-        window.location.href = "Connexion.dc.html";
+        const destination = window.location.pathname + window.location.search;
+        window.location.replace(`Connexion.dc.html?reason=parent&next=${encodeURIComponent(destination)}`);
         return;
       }
       document.getElementById("hello").textContent = `Assalamou alaykoum${context.profile.full_name ? `, ${context.profile.full_name}` : ""} 🌸`;
