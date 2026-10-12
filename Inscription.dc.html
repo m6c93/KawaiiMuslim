@@ -88,8 +88,16 @@
       : legacyPlan || "family_1_child";
     selectedPlan.innerHTML = `<span>Offre choisie</span><strong>${planOptions[planCode].label}</strong><small>0 € aujourd’hui · puis ${planOptions[planCode].price} après 7 jours · annulable avant la fin de l’essai</small>`;
 
+    if (window.KMApple) {
+      document.querySelector('h2').textContent = "Créer mon espace famille";
+      submitButton.textContent = "Créer mon compte";
+      document.querySelector('.privacy-note').textContent = "La création du compte est gratuite. Tu pourras ensuite choisir un abonnement avec le paiement Apple. En créant ton compte, tu acceptes les conditions d’utilisation et la politique de confidentialité.";
+      document.querySelector('.nav-link').href = "Compte.dc.html";
+      selectedPlan.innerHTML = "<span>Bienvenue dans KMW</span><strong>Ton compte parent</strong><small>Création gratuite · Tu pourras choisir un abonnement Apple ensuite.</small>";
+    }
     KMAuth.getSession().then(session => {
       if (!session) return;
+      if (window.KMApple) { window.location.assign("Compte.dc.html"); return; }
       message.className = "form-message success";
       message.textContent = "Ton compte est déjà connecté. Ouverture du paiement sécurisé…";
       submitButton.disabled = true;
@@ -122,6 +130,7 @@
           planCode
         });
         if (data.session) {
+          if (window.KMApple) { await KMAuth.clearPendingPlan(); window.location.assign("Compte.dc.html"); return; }
           message.className = "form-message success";
           message.textContent = "Compte créé. Ouverture du paiement sécurisé…";
           await KMAuth.clearPendingPlan();
@@ -129,7 +138,7 @@
           return;
         }
         message.className = "form-message success";
-        message.textContent = "Ton compte est créé. Confirme ton adresse dans l’e-mail reçu : le paiement sécurisé s’ouvrira ensuite automatiquement.";
+        message.textContent = window.KMApple ? "Ton compte est créé. Confirme ton adresse dans l’e-mail reçu, puis connecte-toi dans l’application." : "Ton compte est créé. Confirme ton adresse dans l’e-mail reçu : le paiement sécurisé s’ouvrira ensuite automatiquement.";
         submitButton.textContent = "E-mail envoyé ✓";
       } catch (error) {
         message.textContent = KMAuth.friendlyError(error);

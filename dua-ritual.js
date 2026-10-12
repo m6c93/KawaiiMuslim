@@ -1,0 +1,13 @@
+(()=>{'use strict';
+const root=document.querySelector('#duaRitual');if(!root)return;
+const key='kmw-dua-sleep-ritual-v1',check=root.querySelector('input'),label=root.querySelector('[data-ritual-label]'),progress=root.querySelector('[data-ritual-progress]'),stars=root.querySelector('[data-ritual-stars]'),message=root.querySelector('[role="status"]');
+function dayKey(date){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);return ['year','month','day'].map(t=>parts.find(p=>p.type===t).value).join('-')}
+function updateDays(days,today,checked){return [...new Set(days.filter(d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&d!==today).concat(checked?[today]:[]))].sort()}
+let days=[],timer;
+function read(){try{const value=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(value))days=[...new Set(value.filter(d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)))]}catch{}}
+function render(){const done=days.includes(dayKey(new Date())),count=days.length;check.checked=done;label.textContent=done?'Je l’ai récitée ce soir ✓':'Je l’ai récitée ce soir';progress.textContent=Math.min(count,7)+' soirées sur 7';stars.replaceChildren();for(let i=0;i<7;i++){const star=document.createElement('span');star.textContent=i<count?'★':'☆';star.className=i<count?'filled':'';star.setAttribute('aria-hidden','true');stars.append(star)}stars.setAttribute('aria-label',Math.min(count,7)+' étoiles sur 7');root.querySelector('[data-ritual-note]').textContent=count>=7?'Bravo, tu as pratiqué 7 fois ! Tu peux continuer chaque soir.':'Pas besoin de 7 soirs à la suite. Tes étoiles restent acquises.'}
+check.addEventListener('change',()=>{const checked=check.checked;read();days=updateDays(days,dayKey(new Date()),checked);let saved=true;try{localStorage.setItem(key,JSON.stringify(days))}catch{saved=false}render();message.textContent=saved?(checked?(days.length===7?'🌟 Sept soirs de pratique, bravo !':days.length>7?'Ton rituel continue, bravo !':'★ Une étoile pour ce soir. À ton rythme !'):'La case de ce soir est décochée.'):'La progression reste visible ici, mais sa sauvegarde est indisponible.'});
+function refresh(){read();render()}
+function schedule(){clearTimeout(timer);timer=setTimeout(()=>{if(!document.hidden)refresh();schedule()},60000)}
+window.addEventListener('storage',e=>{if(e.key===key||e.key===null)refresh()});document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});window.addEventListener('pagehide',()=>clearTimeout(timer));window.addEventListener('pageshow',()=>{refresh();schedule()});refresh();schedule();
+})();

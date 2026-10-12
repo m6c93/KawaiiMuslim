@@ -20,6 +20,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
   <script src="./km-config.js"></script>
   <script src="./km-auth.js?v=child-gender-1"></script>
+  <link rel="stylesheet" href="./weekly-invocation.css?v=weekly-20261011">
 </head>
 <body data-km-section="today">
   <div class="today-loading" id="todayLoading" role="status" aria-live="polite">
@@ -52,6 +53,7 @@
         <img class="child-hero-art" src="brand/assets/aya-mimi-welcome.png" data-boy-src="brand/assets/adam-mimi-welcome.webp?v=2" data-boy-alt="Adam et Mimi t’accueillent dans Kawaii Muslim World" alt="Aya et Mimi t’accueillent dans Kawaii Muslim World">
       </section>
 
+<section class="weekly-dua" id="weeklyDua" aria-labelledby="duaWeeklyHeading"><h2 id="duaWeeklyHeading" class="dua-weekly-heading">Invocation de la semaine</h2><div class="dua-intro"><figure class="dua-illustration"><img src="./brand/assets/invocation-aya-mimi.webp" width="1536" height="1024" alt="Aya s’étire dans son lit rose, avec Mimi à ses côtés et le soleil à la fenêtre." loading="lazy" decoding="async"></figure><h3 id="duaTitle">Avant de dormir</h3><p id="duaWeek" class="dua-note"></p><p>La même invocation toute la semaine.<br>Un petit pas chaque soir, à ton rythme.</p><p class="dua-note">Source : <a href="https://sunnah.com/bukhari:6324" target="_blank" rel="noopener">Sahih al-Bukhari · 6324</a></p></div><div class="dua-sheet"><p class="dua-arabic" lang="ar" dir="rtl">بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا</p><p class="dua-phonetic">Bismika Allâhoumma amoutou wa ahyâ</p><p class="dua-translation">En Ton nom, ô Allah, je meurs et je vis.</p><audio preload="none" src="./audio/safe-place/sleep.mp3"></audio><div class="dua-actions"><button type="button" class="main" data-listen>▶ Écouter et répéter</button><button type="button" data-train>J’apprends →</button></div><div class="dua-options"><label><input type="checkbox" id="duaSlow" checked> Écoute lente</label><a href="./audio/safe-place/sleep.mp3" target="_blank" rel="noopener">Ouvrir l’audio ↗</a></div><div class="dua-status" role="status" aria-live="polite"></div><button type="button" class="known">☆ Je la connais !</button><div class="dua-ritual" id="duaRitual" aria-labelledby="duaRitualTitle"><div class="dua-ritual-heading"><h3 id="duaRitualTitle">🌙 Mon petit rituel</h3><span data-ritual-progress>0 soirées sur 7</span></div><div class="dua-ritual-stars" data-ritual-stars role="img" aria-label="0 étoiles sur 7"></div><label class="dua-ritual-check"><input type="checkbox" aria-describedby="duaRitualHint"><span data-ritual-label>Je l’ai récitée ce soir</span></label><p data-ritual-note>Pas besoin de 7 soirs à la suite. Tes étoiles restent acquises.</p><p id="duaRitualHint" class="dua-ritual-hint">Une case par jour après l’avoir récitée, même avec l’audio. Ce n’est pas un test de mémorisation.</p><p class="dua-ritual-hint">Progression enregistrée sur cet appareil.</p><p role="status" aria-live="polite"></p></div></div></section>
       <section class="world-destinations" id="worldDestinations" aria-labelledby="worldTitle">
         <div class="child-section-title">
           <p>OÙ VEUX-TU ALLER ?</p>
@@ -100,5 +102,8 @@
   </div>
 
   <script src="./today-v2.js?v=child-home-1"></script>
+<dialog class="dua-dialog" id="duaPractice" aria-labelledby="duaPracticeTitle"><button type="button" class="close" aria-label="Fermer">×</button><p class="part"></p><h2 id="duaPracticeTitle">Écoute l’invocation</h2><p class="dua-coach"></p><div class="dua-words"><p class="dua-arabic" lang="ar" dir="rtl">بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا</p><p class="dua-phonetic">Bismika Allâhoumma amoutou wa ahyâ</p><p class="dua-translation">En Ton nom, ô Allah, je meurs et je vis.</p></div><button type="button" data-reveal aria-pressed="false">Sans les mots</button><div class="actions"><button type="button" id="duaPrevious" hidden>Précédent</button><button type="button" data-listen>▶ Écouter et répéter</button><button type="button" class="main">Continuer</button></div><p class="dua-status" role="status" aria-live="polite"></p></dialog>
+<script src="./weekly-invocation.js?v=weekly-20261011" defer></script>
+<script src="./dua-ritual.js?v=weekly-20261011" defer></script>
 </body>
 </html>

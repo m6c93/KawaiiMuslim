@@ -13,7 +13,7 @@
   const showReceipt = request => {
     form.hidden = true;
     document.getElementById('deletionDetails').open = true;
-    message.textContent = `Demande enregistrée le ${new Date(request.requested_at).toLocaleDateString('fr-FR')}. Référence : ${request.id}. Suppression définitive du compte et des données familiales au plus tard le ${new Date(request.due_at).toLocaleDateString('fr-FR')}. Une confirmation sera envoyée à l’adresse de ton compte une fois la suppression terminée. Tu n’as pas besoin d’écrire à l’assistance.`;
+    message.textContent = `Demande enregistrée le ${new Date(request.requested_at).toLocaleDateString('fr-FR')}. Référence : ${request.id}. Suppression définitive du compte et des données familiales au plus tard le ${new Date(request.due_at).toLocaleDateString('fr-FR')}. Une confirmation sera envoyée à l’adresse de ton compte une fois la suppression terminée. Tu n’as pas besoin d’écrire à l’assistance. La suppression de ton compte ne résilie pas un abonnement Apple : annule son renouvellement dans tes abonnements Apple.`;
   };
   const loadRequest = async () => {
     const context = await KMAuth.getContext();

@@ -26,7 +26,7 @@ function fixture(result, { session = true, storageBlocked = false } = {}) {
   vm.runInNewContext(source, { window, localStorage: storage, URLSearchParams, URL, console });
   return { api: window.KMAuth, calls, storage };
 }
-const input = { password: 'fake-test-password', confirmation: 'SUPPRIMER' };
+const input = { password: 'fake-test-password', confirmation: 'SUPPRIMER', appleSubscriptionAcknowledged: true };
 test('server failure preserves local session and progress and presents server error', async () => {
   const f = fixture({ error: { context: { json: async () => ({ error: 'Mot de passe incorrect.' }) } } });
   await assert.rejects(f.api.deleteAccount(input), /Mot de passe incorrect/);
@@ -55,4 +55,10 @@ test('anonymous caller cannot invoke deletion endpoint', async () => {
   const f = fixture({ data: { deleted: true } }, { session: false });
   await assert.rejects(f.api.deleteAccount(input), /Connexion requise/);
   assert.equal(f.calls.length, 0);
+});
+
+test('Apple acknowledgement is forwarded to the authenticated endpoint', async () => {
+  const f = fixture({ data: { deleted: true } });
+  await f.api.deleteAccount(input);
+  assert.equal(f.calls[0][1].body.appleSubscriptionAcknowledged, true);
 });

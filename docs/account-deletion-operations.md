@@ -1,3 +1,11 @@
+> Correction du 12 octobre 2026 : le formulaire manuel est conservé et reste le
+> parcours actif. L’automatisation proposée est bloquée dans `release.mjs` côté
+> serveur, sans variable permettant de la réactiver. Voir
+> `account-deletion-corrections-2026-10-12.md` pour les fichiers, tests et limites.
+> La migration `20261012102000_account_deletion_safety.sql` doit précéder les
+> fonctions de notifications corrigées, d’abord en staging. Elle ne supprime
+> aucune donnée ni demande. Les délais historiques sont inchangés.
+
 # Account deletion: deployment and manual processing
 
 This is a request for permanent erasure, not deactivation. No production account

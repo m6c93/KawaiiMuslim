@@ -1,7 +1,10 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { immediateDeletionAvailable } from './release.mjs';
 import Stripe from 'npm:stripe@22.5.0';
-import { corsHeaders, jsonResponse } from '../_shared/cors.ts';
+import { corsHeaders as sharedCorsHeaders, jsonResponse } from '../_shared/cors.ts';
 import { deleteFamilyAccount, DeletionError, requireMFA } from './core.mjs';
+
+const corsHeaders = { ...sharedCorsHeaders, "Access-Control-Allow-Methods": "GET, POST, OPTIONS" };
 
 const checked = (result: any) => {
   if (result.error) throw new Error('Service unavailable');
@@ -10,7 +13,7 @@ const checked = (result: any) => {
 
 Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  if (request.method !== 'POST') return jsonResponse({ error: 'Méthode non autorisée.' }, 405);
+  if (!['GET', 'POST'].includes(request.method)) return jsonResponse({ error: 'Méthode non autorisée.' }, 405);
   try {
     const authorization = request.headers.get('Authorization') || '';
     const url = Deno.env.get('SUPABASE_URL')!;
@@ -19,6 +22,15 @@ Deno.serve(async request => {
       global: { headers: { Authorization: authorization } },
       auth: { persistSession: false, autoRefreshToken: false },
     });
+    // Authenticate the capability query too. Do not instantiate Stripe, read a
+    // password or invoke the destructive core while the release gate is closed.
+    const { data: current, error: currentError } = await sessionClient.auth.getUser();
+    if (currentError || !current.user) return jsonResponse({ error: 'Connexion requise.' }, 401);
+    if (request.method === 'GET') return jsonResponse({ immediateDeletion: immediateDeletionAvailable() });
+    if (!immediateDeletionAvailable()) return jsonResponse({
+      error: 'La suppression immédiate n’est pas disponible. Utilise la demande de suppression dans Mon compte ; les demandes déjà enregistrées conservent leur échéance.',
+      code: 'IMMEDIATE_DELETION_NOT_RELEASED',
+    }, 409);
     const admin = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
@@ -56,6 +68,8 @@ Deno.serve(async request => {
         }
         return false;
       },
+      existingRequest: async (id: string) => checked(await admin.from('account_deletion_requests')
+        .select('id,status,requested_at,due_at').eq('user_id', id).maybeSingle()),
       billing: async (id: string) => checked(await admin.from('subscriptions')
         .select('stripe_customer_id,stripe_subscription_id,status').eq('user_id', id).maybeSingle()),
       files: async (id: string) => {

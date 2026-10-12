@@ -9,6 +9,7 @@ function fixture(overrides = {}) {
     verifyPassword: async user => { calls.push(['password', user.id]); },
     profile: async () => ({ role: 'parent' }),
     hasProfessionalData: async () => false,
+    existingRequest: async () => null,
     billing: async () => ({ stripe_customer_id: 'customer-A' }),
     files: async () => ['parent-A/child/drawing.png'],
     cancelSubscriptions: async () => { calls.push(['cancel']); },
@@ -18,7 +19,7 @@ function fixture(overrides = {}) {
   };
   return { calls, services };
 }
-const input = { confirmation: 'SUPPRIMER', password: 'fake-test-password' };
+const input = { confirmation: 'SUPPRIMER', appleSubscriptionAcknowledged: true, password: 'fake-test-password' };
 test('only the authenticated parent is deleted, regardless of supplied target', async () => {
   const f = fixture();
   assert.deepEqual(await deleteFamilyAccount({ ...input, userId: 'victim-B' }, f.services), { deleted: true });
@@ -76,4 +77,28 @@ test('verified MFA factor requires an AAL2 session', () => {
 test('family without enrolled MFA can use password confirmation', () => {
   assert.doesNotThrow(() => requireMFA({}, 'aal1'));
   assert.doesNotThrow(() => requireMFA({ factors: [{ status: 'unverified' }] }, 'aal1'));
+});
+
+for (const value of [undefined, false, 'true']) {
+  test(`Apple acknowledgement must be boolean true: ${value}`, async () => {
+    const f = fixture();
+    await assert.rejects(deleteFamilyAccount({ ...input, appleSubscriptionAcknowledged: value }, f.services), /Apple/);
+    assert.deepEqual(f.calls, []);
+  });
+}
+for (const status of ['pending', 'processing']) {
+  test(`legacy ${status} request is preserved without destructive effects`, async () => {
+    const f = fixture({ existingRequest: async () => ({ id: 'old-request', status }) });
+    await assert.rejects(deleteFamilyAccount(input, f.services), /déjà suivie/);
+    assert.deepEqual(f.calls.map(c => c[0]), ['password']);
+  });
+}
+test('unavailable request registry fails before cancellation or deletion', async () => {
+  const f = fixture({ existingRequest: async () => { throw new Error('unavailable'); } });
+  await assert.rejects(deleteFamilyAccount(input, f.services));
+  assert.deepEqual(f.calls.map(c => c[0]), ['password']);
+});
+test('Apple-only parent can delete without cancelling an Apple subscription', async () => {
+  const f = fixture({ billing: async () => null });
+  assert.deepEqual(await deleteFamilyAccount(input, f.services), { deleted: true });
 });

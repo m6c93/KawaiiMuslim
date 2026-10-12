@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./responsive.css?v=tablet-20260818">
-  <link rel="stylesheet" href="./account.css?v=gender-theme-1">
+  <link rel="stylesheet" href="./account.css?v=public-parent-2">
 </head>
 <body>
   <div class="account-shell">
@@ -69,6 +69,11 @@
             <p class="subscription-breakdown" id="familyBreakdown">Choisis le nombre de profils enfants</p>
           </div>
           <p class="subscription-intro" id="subscriptionIntro">Reprends ton inscription : choisis simplement le nombre d’enfants pour commencer tes 7 jours gratuits.</p>
+          <div class="parent-welcome" id="parentWelcome" hidden>
+            <p>Des histoires, des coloriages et des activités pour grandir dans la douceur de l’islam.</p>
+            <a class="primary-button pink" id="createParentAccount" href="Inscription.dc.html">Créer mon compte</a>
+            <a class="parent-signin" href="Connexion.dc.html?reason=parent&amp;next=%2FCompte.dc.html">J’ai déjà un compte · Se connecter</a>
+          </div>
           <div class="plan-options" id="planOptions" aria-label="Choisir une offre">
             <button class="plan-option" type="button" data-plan="family_1_child" data-limit="1">
               <span class="plan-children">1 enfant</span><strong>4,99€</strong><small>par mois après 7 jours gratuits</small>
@@ -80,7 +85,11 @@
               <span class="plan-children">3 enfants</span><strong>6,97€</strong><small>par mois après 7 jours gratuits</small>
             </button>
           </div>
+          <button class="secondary-button" id="restoreApple" type="button" hidden>Restaurer mes achats Apple</button>
+          <p id="appleTerms" hidden>L’abonnement se renouvelle automatiquement chaque mois, sauf annulation dans les réglages Apple au moins 24 heures avant le renouvellement. Le paiement est débité sur ton compte Apple. <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Conditions d’utilisation</a> · <a href="Confidentialite.dc.html">Confidentialité</a></p>
           <button class="primary-button pink" id="subscriptionAction" type="button" hidden>Gérer mon abonnement</button>
+          <p><a href="https://apps.apple.com/account/subscriptions/" target="_blank" rel="noopener noreferrer">Gérer mes abonnements Apple</a></p>
+          <button class="secondary-button" id="manageStripeSeparately" type="button" hidden>Gérer mon abonnement Stripe</button>
           <p class="billing-note" id="billingNote">0 € aujourd’hui · Paiement sécurisé par Stripe · Annulation à tout moment</p>
           <p class="form-message" id="billingMessage" role="status"></p>
         </section>
@@ -112,14 +121,40 @@
         </section>
 
       </div>
+      <section class="dash-card full" data-auth-only hidden id="suppression-compte" aria-labelledby="deletionTitle">
+        <h2 id="deletionTitle">Supprimer mon compte</h2>
+        <p>Tu peux demander ici la suppression définitive de ton compte parent, de tous les profils enfants, de leurs progrès, plannings et créations. Le traitement est manuel, sous 30 jours. Tu recevras une confirmation à l’adresse de ton compte une fois terminé.</p>
+        <details id="deletionDetails">
+          <summary>Demander la suppression de mon compte</summary>
+          <p>L’accès sera perdu une fois la suppression effectuée, même si une période payée reste disponible. Les factures et les seules données légalement nécessaires seront conservées à part, avec accès restreint. <a href="Confidentialite.dc.html#suppression">En savoir plus</a>.</p>
+          <p><strong>Abonnements :</strong> pour un achat Apple, <a href="https://apps.apple.com/account/subscriptions/">annule le renouvellement dans tes abonnements Apple</a> : la suppression du compte ne l’annule pas. Pour Stripe, utilise « Gérer mon abonnement » ci-dessus ; l’équipe arrêtera les abonnements Stripe lors du traitement. Tu peux demander la suppression dès maintenant, sans attendre la fin d’un abonnement. Elle ne déclenche pas automatiquement un remboursement.</p>
+          <form id="deletionForm">
+            <label class="field-label" for="deletionPassword">Mot de passe du compte parent</label>
+            <input class="field-input" id="deletionPassword" type="password" autocomplete="current-password" required>
+            <p><a href="Connexion.dc.html">Mot de passe oublié ?</a></p>
+            <div id="deletionMFA" hidden>
+              <label class="field-label" for="deletionCode">Code de double authentification</label>
+              <input class="field-input" id="deletionCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6">
+            </div>
+            <label><input type="checkbox" id="deletionConfirm" required> Je confirme la suppression définitive du compte et de tous les profils enfants, et je comprends que cette suppression ne résilie pas un abonnement Apple.</label>
+            <p><button class="primary-button pink" id="deletionSubmit" type="submit" disabled>Confirmer ma demande de suppression</button></p>
+            <button class="ghost-button" id="deletionCancel" type="button">Annuler</button>
+          </form>
+        </details>
+        <p id="deletionMessage" class="form-message" role="status" aria-live="polite"></p>
+      </section>
       <section class="dash-card full" id="accountDeletion" hidden>
+        <p id="existingDeletionRequest" role="status"></p>
+        <p>Pour gérer un abonnement Apple, ouvre <a href="https://apps.apple.com/account/subscriptions/" target="_blank" rel="noopener noreferrer">tes abonnements Apple</a>.</p>
         <h2>Mes données et mon compte</h2>
         <p>Tu peux supprimer définitivement ton compte familial depuis cet espace parent.</p>
-        <button class="small-button danger" id="openAccountDeletion" type="button">Supprimer mon compte</button>
+        <button class="small-button danger" id="openAccountDeletion" type="button" disabled>Supprimer mon compte</button>
         <dialog id="deleteAccountDialog" aria-labelledby="deleteAccountTitle" style="width:min(440px,calc(100vw - 32px));max-height:85dvh;overflow:auto;box-sizing:border-box;border:1px solid #e8d7df;border-radius:24px;padding:24px;background:#fff8ed;color:#48385c">
           <h2 id="deleteAccountTitle">Supprimer mon compte ?</h2>
           <p>Cette action est définitive. Tes profils enfants, progrès, planning et créations seront supprimés. Ton accès prendra fin immédiatement.</p>
           <p>Les renouvellements de ton abonnement Stripe seront arrêtés. Cette action ne déclenche pas de remboursement. Les factures restent conservées selon les obligations légales.</p>
+          <p id="deleteAccountAppleNotice"><strong>Abonnement Apple : supprimer ton compte KMW ne résilie pas ton abonnement Apple.</strong> La facturation Apple continue tant que le renouvellement reste actif. Pour l’arrêter, annule-le dans <a href="https://apps.apple.com/account/subscriptions/" target="_blank" rel="noopener noreferrer">tes abonnements Apple</a>. Tu peux supprimer ton compte sans attendre cette annulation ou la fin de la période payée.</p>
+          <p><button class="ghost-button" id="deleteAccountManageApple" type="button" hidden>Gérer mes abonnements Apple dans l’application</button></p>
           <form id="deleteAccountForm">
             <label class="field-label" for="deleteAccountPassword">Ton mot de passe parent</label>
             <input class="field-input" id="deleteAccountPassword" type="password" autocomplete="current-password" required>
@@ -127,7 +162,8 @@
               <label class="field-label" for="deleteAccountCode">Code de double authentification</label>
               <input class="field-input" id="deleteAccountCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6">
             </div>
-            <label style="display:flex;gap:10px;margin:18px 0;align-items:flex-start"><input id="deleteAccountConfirm" type="checkbox" required><span>Je confirme la suppression définitive et la fin de mon accès.</span></label>
+            <label style="display:flex;gap:10px;margin:18px 0;align-items:flex-start"><input id="deleteAccountConfirm" type="checkbox" required><span>Je confirme la suppression définitive de mon compte et de tous les profils enfants, ainsi que la fin de mon accès.</span></label>
+            <label style="display:flex;gap:10px;margin:18px 0"><input id="deleteAccountAppleAcknowledged" type="checkbox" required><span>J’ai compris que la suppression du compte ne résilie pas un abonnement Apple et que je dois gérer son renouvellement auprès d’Apple.</span></label>
             <p id="deleteAccountMessage" class="form-message" role="alert"></p>
             <div style="display:flex;gap:12px;flex-wrap:wrap">
               <button class="ghost-button" id="cancelAccountDeletion" type="button">Garder mon compte</button>
@@ -141,7 +177,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=account-delete-1"></script>
+  <script src="./km-auth.js?v=account-delete-apple-3"></script>
+  <script src="./account-deletion.js?v=2" defer></script>
   <script>
     let context = null;
     const children = document.getElementById("children");
@@ -224,12 +261,56 @@
       }).join("");
     };
 
+    const renderSignedOutOffer = async () => {
+      document.getElementById("hello").textContent = "L’espace des parents";
+      document.getElementById("email").textContent = "Un écran qui vous veut du bien, à partager en famille.";
+      document.getElementById("roleBadge").hidden = true;
+      document.getElementById("logout").hidden = true;
+      document.getElementById("parentWelcome").hidden = false;
+      memberOnlyElements.forEach(element => { element.hidden = true; });
+      subscriptionCard.classList.add("signup-only");
+      subscriptionCard.querySelector("h2").textContent = "Tout l’univers KMW pour ta famille";
+      document.getElementById("subscriptionStatus").textContent = "Les formules famille";
+      document.getElementById("familyBreakdown").textContent = "Les livres complets, les coloriages et les activités éducatives.";
+      billingMessage.textContent = "";
+      if (!window.KMApple) {
+        subscriptionIntro.textContent = "Choisis une formule pour découvrir les conditions de l’essai et créer ton compte.";
+        return;
+      }
+      document.getElementById("createParentAccount").textContent = "Créer mon compte gratuitement";
+      subscriptionIntro.textContent = "Crée ton compte gratuitement, puis choisis un abonnement Apple. La découverte gratuite reste accessible depuis l’accueil.";
+      document.getElementById("familyPrice").textContent = "Choisis le nombre d’enfants";
+      document.getElementById("appleTerms").hidden = false;
+      billingNote.textContent = "Créer un compte ne déclenche aucun paiement. L’achat se confirme ensuite avec Apple.";
+      const options = [...document.querySelectorAll(".plan-option")];
+      options.forEach(option => {
+        option.disabled = true;
+        option.querySelector("strong").textContent = "Chargement…";
+        option.querySelector("small").textContent = "par mois";
+      });
+      try {
+        const {products} = await window.KMApple.products();
+        options.forEach(option => {
+          const product = products.find(item => item.id === `com.kawaiimuslimworld.family${option.dataset.limit}.monthly`);
+          option.disabled = !product;
+          option.querySelector("strong").textContent = product?.price || "Indisponible";
+        });
+        if (!products.length) billingMessage.textContent = "Les formules Apple sont momentanément indisponibles. Tu peux quand même créer ton compte gratuitement.";
+      } catch (error) {
+        options.forEach(option => { option.querySelector("strong").textContent = "Indisponible"; });
+        billingMessage.textContent = "Impossible de charger les prix Apple pour le moment. Tu peux quand même créer ton compte gratuitement.";
+      }
+    };
+
     const load = async () => {
       context = await KMAuth.getContext();
       if (!context) {
-        window.location.href = "Connexion.dc.html";
+        await renderSignedOutOffer();
         return;
       }
+      document.querySelectorAll("[data-auth-only]").forEach(element => { element.hidden = false; });
+      document.getElementById("parentWelcome").hidden = true;
+      document.getElementById("logout").hidden = false;
       document.getElementById("hello").textContent = `Assalamou alaykoum${context.profile.full_name ? `, ${context.profile.full_name}` : ""} 🌸`;
       document.getElementById("email").textContent = context.profile.email;
       const roleLabels = {
@@ -241,7 +322,23 @@
       document.getElementById("roleBadge").textContent = roleLabels[context.profile.role] || "Compte parent";
       document.getElementById("parentName").value = context.profile.full_name || "";
       document.getElementById("parentAvatar").value = context.profile.avatar || "🌸";
-      document.getElementById("accountDeletion").hidden = context.profile.role !== "parent";
+      const automaticAvailable = context.profile.role === "parent" && await KMAuth.isImmediateDeletionAvailable();
+      document.getElementById("accountDeletion").hidden = !automaticAvailable;
+      if (automaticAvailable) {
+        const receipt = document.getElementById("existingDeletionRequest");
+        try {
+          const request = await KMAuth.getAccountDeletionRequest();
+          if (request) {
+            receipt.textContent = `Ta demande ${request.id}, enregistrée le ${new Date(request.requested_at).toLocaleDateString("fr-FR")}, reste suivie par l’équipe. Échéance initiale : ${new Date(request.due_at).toLocaleDateString("fr-FR")}. Aucune nouvelle demande n’est nécessaire. La suppression du compte ne résilie pas un abonnement Apple.`;
+          } else document.getElementById("openAccountDeletion").disabled = false;
+        } catch {
+          receipt.textContent = "Impossible de vérifier le suivi de suppression. Réessaie plus tard : une demande déjà enregistrée conserve sa référence et son échéance.";
+        }
+      }
+      try {
+        const billing = await KMAuth.getStripeBilling();
+        document.getElementById("manageStripeSeparately").hidden = !billing?.stripe_customer_id;
+      } catch { /* The main subscription panel retains its existing error handling. */ }
       context.subscription = await KMAuth.getSubscription();
       const subscribed = activeBillingStatuses.has(context.subscription?.status);
       memberOnlyElements.forEach(element => { element.hidden = !subscribed; });
@@ -269,6 +366,31 @@
       });
       const subscriptionAction = document.getElementById("subscriptionAction");
       subscriptionAction.hidden = !subscribed;
+      if (context.subscription?.provider === "apple") {
+        billingNote.textContent = "Abonnement Apple · Renouvellement géré dans tes abonnements Apple";
+        subscriptionAction.textContent = "Gérer mon abonnement Apple";
+        document.getElementById("familyPrice").textContent = "Accès famille actif";
+      }
+      if (window.KMApple) {
+        document.getElementById("restoreApple").hidden = false;
+        document.getElementById("appleTerms").hidden = false;
+        subscriptionIntro.textContent = subscribed ? "Ton accès famille est actif. Retrouve tes livres et activités avec tes profils enfants." : "Débloque les histoires complètes, les coloriages et les activités pour tes enfants.";
+        billingNote.textContent = context.subscription?.provider === "stripe" ? "Abonnement souscrit sur le site · Gestion depuis ton espace parent sur le site" : "Paiement Apple · Renouvellement mensuel · Annulation dans tes réglages Apple";
+        document.getElementById("familyPrice").textContent = subscribed ? "Accès famille actif" : "Choisis ta formule Apple";
+        const options = [...document.querySelectorAll(".plan-option")];
+        options.forEach(option => { option.disabled = true; option.querySelector("strong").textContent = "Chargement…"; option.querySelector("small").textContent = "par mois"; });
+        try {
+          const {products} = await window.KMApple.products();
+          options.forEach(option => {
+            const product = products.find(item => item.id === `com.kawaiimuslimworld.family${option.dataset.limit}.monthly`);
+            option.disabled = !product;
+            option.querySelector("strong").textContent = product?.price || "Indisponible";
+          });
+          const current = products.find(item => item.id === context.subscription?.price_id);
+          if (current) document.getElementById("familyPrice").textContent = `${current.price} / mois`;
+          if (!subscribed && !products.length) billingMessage.textContent = "Les abonnements Apple arrivent bientôt. La découverte gratuite reste disponible.";
+        } catch (error) { billingMessage.textContent = KMAuth.friendlyError(error); }
+      }
       if (!subscribed) return;
 
       context.readingProgress = await KMAuth.listReadingProgress();
@@ -324,7 +446,11 @@
 
     document.getElementById("planOptions").addEventListener("click", async event => {
       const option = event.target.closest("[data-plan]");
-      if (!option) return;
+      if (!option || option.disabled) return;
+      if (!context) {
+        window.location.assign(`Inscription.dc.html?plan=${encodeURIComponent(option.dataset.plan)}`);
+        return;
+      }
       const buttons = [...document.querySelectorAll(".plan-option")];
       buttons.forEach(button => button.disabled = true);
       option.classList.add("selected");
@@ -341,18 +467,32 @@
     });
 
     document.getElementById("subscriptionAction").addEventListener("click", async event => {
-      event.currentTarget.disabled = true;
+      const actionButton = event.currentTarget;
+      actionButton.disabled = true;
       billingMessage.className = "form-message success";
       billingMessage.textContent = "Ouverture de ton espace sécurisé…";
       try {
         await KMAuth.openBillingPortal();
+        actionButton.disabled = false;
+        billingMessage.textContent = "";
       } catch (error) {
-        event.currentTarget.disabled = false;
+        actionButton.disabled = false;
         billingMessage.className = "form-message";
         billingMessage.textContent = KMAuth.friendlyError(error);
       }
     });
 
+    document.getElementById("restoreApple").addEventListener("click", async event => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      billingMessage.textContent = "Recherche de tes achats Apple…";
+      try {
+        const result = await KMAuth.restoreApplePurchases();
+        if (result.active) window.location.reload();
+        else billingMessage.textContent = "Aucun abonnement Apple actif associé à ce compte parent. Vérifie que tu utilises le compte KMW de l’achat.";
+      } catch (error) { billingMessage.textContent = KMAuth.friendlyError(error); }
+      finally { button.disabled = false; }
+    });
     const billingResult = new URLSearchParams(window.location.search).get("abonnement");
     if (billingResult === "confirme") {
       billingMessage.className = "form-message success";
@@ -441,9 +581,20 @@
       window.location.href = "Connexion.dc.html";
     });
 
+    document.getElementById("manageStripeSeparately").addEventListener("click", async () => {
+      try { await KMAuth.openStripeBillingPortal(); }
+      catch (error) { billingMessage.textContent = KMAuth.friendlyError(error); }
+    });
+
     const deletionDialog = document.getElementById("deleteAccountDialog");
     const deletionForm = document.getElementById("deleteAccountForm");
     let deletingAccount = false;
+    const appleManagement = document.getElementById("deleteAccountManageApple");
+    appleManagement.hidden = typeof window.KMApple?.manage !== "function";
+    appleManagement.addEventListener("click", async () => {
+      try { await window.KMApple.manage(); }
+      catch { document.getElementById("deleteAccountMessage").textContent = "Utilise le lien vers tes abonnements Apple ci-dessus pour gérer le renouvellement."; }
+    });
     document.getElementById("openAccountDeletion").addEventListener("click", () => {
       deletionForm.reset();
       document.getElementById("deleteAccountMFA").hidden = true;
@@ -479,16 +630,17 @@
           await KMAuth.verifyMFACode({ factorId: mfa.factors[0].id, code: code.value });
           code.value = "";
         }
-        await KMAuth.deleteAccount({ password: document.getElementById("deleteAccountPassword").value, confirmation: "SUPPRIMER" });
+        await KMAuth.deleteAccount({ password: document.getElementById("deleteAccountPassword").value, confirmation: "SUPPRIMER", appleSubscriptionAcknowledged: document.getElementById("deleteAccountAppleAcknowledged").checked });
         document.getElementById("deleteAccountPassword").value = "";
         deletionForm.hidden = true;
-        for (const paragraph of deletionDialog.querySelectorAll(":scope > p")) paragraph.hidden = true;
+        for (const paragraph of deletionDialog.querySelectorAll(":scope > p")) if (paragraph.id !== "deleteAccountAppleNotice") paragraph.hidden = true;
         document.getElementById("deleteAccountTitle").textContent = "Ton compte est supprimé";
         const returnLink = document.createElement("a");
         returnLink.className = "primary-button";
         returnLink.href = "Connexion.dc.html";
         returnLink.textContent = "Revenir à l’accueil";
         deletionDialog.appendChild(returnLink);
+        document.getElementById("openAccountDeletion").disabled = true;
       } catch (error) {
         document.getElementById("deleteAccountPassword").value = "";
         status.textContent = error.message;
