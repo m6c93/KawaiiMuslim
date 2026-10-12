@@ -14,3 +14,7 @@ verify_jwt = true
 
 [functions.apple-notifications]
 verify_jwt = false
+
+[functions.delete-account]
+# Authentication, password and enrolled MFA are checked inside the function.
+verify_jwt = false

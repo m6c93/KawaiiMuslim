@@ -73,6 +73,11 @@ Deno.serve(async (request) => {
     }
     if (!userId) throw new Error("No Supabase user associated with this Stripe subscription");
 
+    const { data: ownerState, error: ownerError } = await admin.rpc("billing_owner_state", { p_user_id: userId });
+    if (ownerError) throw ownerError;
+    if (ownerState === "absent") return new Response("ok", { status: 200 });
+    if (!["active_parent", "restricted"].includes(ownerState)) throw new Error("Invalid owner state");
+
     const item = subscription.items.data[0];
     const priceId = item?.price?.id || "";
     const matchedPlan = planFromPrice(priceId);

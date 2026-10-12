@@ -584,6 +584,50 @@ window.KMAuth = (() => {
       return requireSuccess(await client().from("child_profiles").delete().eq("id", id));
     },
 
+    isImmediateDeletionAvailable: async () => {
+      if (!await getSession()) return false;
+      try {
+        const result = await client().functions.invoke("delete-account", { method: "GET" });
+        return !result.error && result.data?.immediateDeletion === true;
+      } catch { return false; }
+    },
+
+    getStripeBilling: async () => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      return requireSuccess(await client().from("subscriptions")
+        .select("stripe_customer_id,status").eq("user_id", session.user.id).maybeSingle());
+    },
+
+    getAccountDeletionRequest: async () => {
+      const session = await getSession();
+      if (!session) throw new Error("Connexion requise.");
+      return requireSuccess(await client().from("account_deletion_requests")
+        .select("id,status,requested_at,due_at").eq("user_id", session.user.id).maybeSingle());
+    },
+
+    deleteAccount: async ({ password, confirmation, appleSubscriptionAcknowledged }) => {
+      if (!await getSession()) throw new Error("Connexion requise.");
+      const result = await client().functions.invoke("delete-account", {
+        body: { password, confirmation, appleSubscriptionAcknowledged }
+      });
+      if (result.error) {
+        let detail = "La suppression n’a pas pu être confirmée. Réessaie ou contacte l’assistance.";
+        try { detail = (await result.error.context.json()).error || detail; } catch {}
+        throw new Error(detail);
+      }
+      if (result.data?.deleted !== true) throw new Error("La suppression n’a pas été confirmée.");
+      await client().auth.signOut({ scope: "local" }).catch(() => {});
+      // Local storage may be unavailable; it must not hide confirmed server deletion.
+      try {
+        clearActiveProfile();
+        for (const key of Object.keys(localStorage)) {
+          if (key.startsWith("km-") || key.startsWith("kmw-")) localStorage.removeItem(key);
+        }
+      } catch {}
+      return result.data;
+    },
+
     getSubscription: async () => {
       const session = await getSession();
       if (!session) throw new Error("Connexion requise.");
@@ -623,9 +667,18 @@ window.KMAuth = (() => {
     openBillingPortal: async () => {
       const session = await getSession();
       if (!session) throw new Error("Connexion requise.");
+      const existing = await window.KMAuth.getSubscription();
+      if (existing?.provider === "apple") {
+        if (window.KMApple) return window.KMApple.manage();
+        window.location.assign("https://apps.apple.com/account/subscriptions/");
+        return;
+      }
+      return window.KMAuth.openStripeBillingPortal();
+    },
+
+    openStripeBillingPortal: async () => {
+      if (!await getSession()) throw new Error("Connexion requise.");
       if (window.KMApple) {
-        const existing = await window.KMAuth.getSubscription();
-        if (existing?.provider === "apple") return window.KMApple.manage();
         throw new Error("Ton abonnement a été souscrit sur le site. Gère-le depuis ton espace parent sur kawaiimuslimworld.com.");
       }
       const data = requireSuccess(await client().functions.invoke("create-portal-session", {

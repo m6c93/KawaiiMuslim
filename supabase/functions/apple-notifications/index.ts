@@ -19,6 +19,10 @@ Deno.serve(async request => {
     const owner=transaction.appAccountToken;
     if(!owner || !transaction.originalTransactionId || (environment===Environment.SANDBOX && !permitsSandbox(owner))) throw new Error('Invalid owner');
     const admin=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+    const {data:ownerState,error:ownerError}=await admin.rpc('billing_owner_state',{p_user_id:owner});
+    if(ownerError) throw ownerError; // An unavailable DB must still cause a retry.
+    if(ownerState==='absent') return jsonResponse({received:true});
+    if(!['active_parent','restricted'].includes(ownerState)) throw new Error('Invalid owner state');
     const {data:profile,error:profileError}=await admin.from('profiles').select('role,is_active').eq('id',owner).single();
     if(profileError || profile?.role!=='parent') throw new Error('Parent not found');
     const entitlement=await currentAppleEntitlement(service,transaction.originalTransactionId,owner,environment);

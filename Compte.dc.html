@@ -88,6 +88,8 @@
           <button class="secondary-button" id="restoreApple" type="button" hidden>Restaurer mes achats Apple</button>
           <p id="appleTerms" hidden>L’abonnement se renouvelle automatiquement chaque mois, sauf annulation dans les réglages Apple au moins 24 heures avant le renouvellement. Le paiement est débité sur ton compte Apple. <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Conditions d’utilisation</a> · <a href="Confidentialite.dc.html">Confidentialité</a></p>
           <button class="primary-button pink" id="subscriptionAction" type="button" hidden>Gérer mon abonnement</button>
+          <p><a href="https://apps.apple.com/account/subscriptions/" target="_blank" rel="noopener noreferrer">Gérer mes abonnements Apple</a></p>
+          <button class="secondary-button" id="manageStripeSeparately" type="button" hidden>Gérer mon abonnement Stripe</button>
           <p class="billing-note" id="billingNote">0 € aujourd’hui · Paiement sécurisé par Stripe · Annulation à tout moment</p>
           <p class="form-message" id="billingMessage" role="status"></p>
         </section>
@@ -134,20 +136,49 @@
               <label class="field-label" for="deletionCode">Code de double authentification</label>
               <input class="field-input" id="deletionCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6">
             </div>
-            <label><input type="checkbox" id="deletionConfirm" required> Je confirme la suppression définitive du compte et de tous les profils enfants, et j’ai pris connaissance des informations sur les abonnements.</label>
+            <label><input type="checkbox" id="deletionConfirm" required> Je confirme la suppression définitive du compte et de tous les profils enfants, et je comprends que cette suppression ne résilie pas un abonnement Apple.</label>
             <p><button class="primary-button pink" id="deletionSubmit" type="submit" disabled>Confirmer ma demande de suppression</button></p>
             <button class="ghost-button" id="deletionCancel" type="button">Annuler</button>
           </form>
         </details>
         <p id="deletionMessage" class="form-message" role="status" aria-live="polite"></p>
       </section>
+      <section class="dash-card full" id="accountDeletion" hidden>
+        <p id="existingDeletionRequest" role="status"></p>
+        <p>Pour gérer un abonnement Apple, ouvre <a href="https://apps.apple.com/account/subscriptions/" target="_blank" rel="noopener noreferrer">tes abonnements Apple</a>.</p>
+        <h2>Mes données et mon compte</h2>
+        <p>Tu peux supprimer définitivement ton compte familial depuis cet espace parent.</p>
+        <button class="small-button danger" id="openAccountDeletion" type="button" disabled>Supprimer mon compte</button>
+        <dialog id="deleteAccountDialog" aria-labelledby="deleteAccountTitle" style="width:min(440px,calc(100vw - 32px));max-height:85dvh;overflow:auto;box-sizing:border-box;border:1px solid #e8d7df;border-radius:24px;padding:24px;background:#fff8ed;color:#48385c">
+          <h2 id="deleteAccountTitle">Supprimer mon compte ?</h2>
+          <p>Cette action est définitive. Tes profils enfants, progrès, planning et créations seront supprimés. Ton accès prendra fin immédiatement.</p>
+          <p>Les renouvellements de ton abonnement Stripe seront arrêtés. Cette action ne déclenche pas de remboursement. Les factures restent conservées selon les obligations légales.</p>
+          <p id="deleteAccountAppleNotice"><strong>Abonnement Apple : supprimer ton compte KMW ne résilie pas ton abonnement Apple.</strong> La facturation Apple continue tant que le renouvellement reste actif. Pour l’arrêter, annule-le dans <a href="https://apps.apple.com/account/subscriptions/" target="_blank" rel="noopener noreferrer">tes abonnements Apple</a>. Tu peux supprimer ton compte sans attendre cette annulation ou la fin de la période payée.</p>
+          <p><button class="ghost-button" id="deleteAccountManageApple" type="button" hidden>Gérer mes abonnements Apple dans l’application</button></p>
+          <form id="deleteAccountForm">
+            <label class="field-label" for="deleteAccountPassword">Ton mot de passe parent</label>
+            <input class="field-input" id="deleteAccountPassword" type="password" autocomplete="current-password" required>
+            <div id="deleteAccountMFA" hidden>
+              <label class="field-label" for="deleteAccountCode">Code de double authentification</label>
+              <input class="field-input" id="deleteAccountCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6">
+            </div>
+            <label style="display:flex;gap:10px;margin:18px 0;align-items:flex-start"><input id="deleteAccountConfirm" type="checkbox" required><span>Je confirme la suppression définitive de mon compte et de tous les profils enfants, ainsi que la fin de mon accès.</span></label>
+            <label style="display:flex;gap:10px;margin:18px 0"><input id="deleteAccountAppleAcknowledged" type="checkbox" required><span>J’ai compris que la suppression du compte ne résilie pas un abonnement Apple et que je dois gérer son renouvellement auprès d’Apple.</span></label>
+            <p id="deleteAccountMessage" class="form-message" role="alert"></p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <button class="ghost-button" id="cancelAccountDeletion" type="button">Garder mon compte</button>
+              <button class="small-button danger" id="confirmAccountDeletion" type="submit">Supprimer définitivement</button>
+            </div>
+          </form>
+        </dialog>
+      </section>
     </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=child-gender-1"></script>
-  <script src="./account-deletion.js?v=1" defer></script>
+  <script src="./km-auth.js?v=account-delete-apple-3"></script>
+  <script src="./account-deletion.js?v=2" defer></script>
   <script>
     let context = null;
     const children = document.getElementById("children");
@@ -291,6 +322,23 @@
       document.getElementById("roleBadge").textContent = roleLabels[context.profile.role] || "Compte parent";
       document.getElementById("parentName").value = context.profile.full_name || "";
       document.getElementById("parentAvatar").value = context.profile.avatar || "🌸";
+      const automaticAvailable = context.profile.role === "parent" && await KMAuth.isImmediateDeletionAvailable();
+      document.getElementById("accountDeletion").hidden = !automaticAvailable;
+      if (automaticAvailable) {
+        const receipt = document.getElementById("existingDeletionRequest");
+        try {
+          const request = await KMAuth.getAccountDeletionRequest();
+          if (request) {
+            receipt.textContent = `Ta demande ${request.id}, enregistrée le ${new Date(request.requested_at).toLocaleDateString("fr-FR")}, reste suivie par l’équipe. Échéance initiale : ${new Date(request.due_at).toLocaleDateString("fr-FR")}. Aucune nouvelle demande n’est nécessaire. La suppression du compte ne résilie pas un abonnement Apple.`;
+          } else document.getElementById("openAccountDeletion").disabled = false;
+        } catch {
+          receipt.textContent = "Impossible de vérifier le suivi de suppression. Réessaie plus tard : une demande déjà enregistrée conserve sa référence et son échéance.";
+        }
+      }
+      try {
+        const billing = await KMAuth.getStripeBilling();
+        document.getElementById("manageStripeSeparately").hidden = !billing?.stripe_customer_id;
+      } catch { /* The main subscription panel retains its existing error handling. */ }
       context.subscription = await KMAuth.getSubscription();
       const subscribed = activeBillingStatuses.has(context.subscription?.status);
       memberOnlyElements.forEach(element => { element.hidden = !subscribed; });
@@ -318,6 +366,11 @@
       });
       const subscriptionAction = document.getElementById("subscriptionAction");
       subscriptionAction.hidden = !subscribed;
+      if (context.subscription?.provider === "apple") {
+        billingNote.textContent = "Abonnement Apple · Renouvellement géré dans tes abonnements Apple";
+        subscriptionAction.textContent = "Gérer mon abonnement Apple";
+        document.getElementById("familyPrice").textContent = "Accès famille actif";
+      }
       if (window.KMApple) {
         document.getElementById("restoreApple").hidden = false;
         document.getElementById("appleTerms").hidden = false;
@@ -526,6 +579,75 @@
     document.getElementById("logout").addEventListener("click", async () => {
       await KMAuth.logout();
       window.location.href = "Connexion.dc.html";
+    });
+
+    document.getElementById("manageStripeSeparately").addEventListener("click", async () => {
+      try { await KMAuth.openStripeBillingPortal(); }
+      catch (error) { billingMessage.textContent = KMAuth.friendlyError(error); }
+    });
+
+    const deletionDialog = document.getElementById("deleteAccountDialog");
+    const deletionForm = document.getElementById("deleteAccountForm");
+    let deletingAccount = false;
+    const appleManagement = document.getElementById("deleteAccountManageApple");
+    appleManagement.hidden = typeof window.KMApple?.manage !== "function";
+    appleManagement.addEventListener("click", async () => {
+      try { await window.KMApple.manage(); }
+      catch { document.getElementById("deleteAccountMessage").textContent = "Utilise le lien vers tes abonnements Apple ci-dessus pour gérer le renouvellement."; }
+    });
+    document.getElementById("openAccountDeletion").addEventListener("click", () => {
+      deletionForm.reset();
+      document.getElementById("deleteAccountMFA").hidden = true;
+      document.getElementById("deleteAccountCode").required = false;
+      document.getElementById("deleteAccountMessage").textContent = "";
+      deletionDialog.showModal();
+    });
+    document.getElementById("cancelAccountDeletion").addEventListener("click", () => {
+      if (!deletingAccount) deletionDialog.close();
+    });
+    deletionDialog.addEventListener("cancel", event => { if (deletingAccount) event.preventDefault(); });
+    deletionForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      if (deletingAccount || !deletionForm.reportValidity()) return;
+      deletingAccount = true;
+      const confirm = document.getElementById("confirmAccountDeletion");
+      const cancel = document.getElementById("cancelAccountDeletion");
+      const status = document.getElementById("deleteAccountMessage");
+      confirm.disabled = cancel.disabled = true;
+      status.textContent = "Suppression en cours. Garde cet écran ouvert…";
+      try {
+        const mfa = await KMAuth.getMFAStatus();
+        if (mfa.nextLevel === "aal2" && mfa.currentLevel !== "aal2") {
+          const code = document.getElementById("deleteAccountCode");
+          document.getElementById("deleteAccountMFA").hidden = false;
+          code.required = true;
+          if (!code.value) {
+            status.textContent = "Saisis ton code de double authentification, puis confirme.";
+            code.focus();
+            return;
+          }
+          if (!mfa.factors[0]) throw new Error("Reconnecte-toi pour vérifier ta double authentification.");
+          await KMAuth.verifyMFACode({ factorId: mfa.factors[0].id, code: code.value });
+          code.value = "";
+        }
+        await KMAuth.deleteAccount({ password: document.getElementById("deleteAccountPassword").value, confirmation: "SUPPRIMER", appleSubscriptionAcknowledged: document.getElementById("deleteAccountAppleAcknowledged").checked });
+        document.getElementById("deleteAccountPassword").value = "";
+        deletionForm.hidden = true;
+        for (const paragraph of deletionDialog.querySelectorAll(":scope > p")) if (paragraph.id !== "deleteAccountAppleNotice") paragraph.hidden = true;
+        document.getElementById("deleteAccountTitle").textContent = "Ton compte est supprimé";
+        const returnLink = document.createElement("a");
+        returnLink.className = "primary-button";
+        returnLink.href = "Connexion.dc.html";
+        returnLink.textContent = "Revenir à l’accueil";
+        deletionDialog.appendChild(returnLink);
+        document.getElementById("openAccountDeletion").disabled = true;
+      } catch (error) {
+        document.getElementById("deleteAccountPassword").value = "";
+        status.textContent = error.message;
+      } finally {
+        deletingAccount = false;
+        confirm.disabled = cancel.disabled = false;
+      }
     });
 
     load().catch(error => {
