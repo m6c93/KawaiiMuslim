@@ -252,6 +252,7 @@
       document.getElementById("appleTerms").hidden = false;
       billingNote.textContent = "Créer un compte ne déclenche aucun paiement. L’achat se confirme ensuite avec Apple.";
       if (window.KMApple.payBeforeAccount) {
+        document.getElementById("restoreApple").hidden = false;
         document.getElementById("createParentAccount").hidden = true;
         subscriptionIntro.textContent = "Choisis ta formule, confirme le paiement Apple, puis crée ton compte famille. La découverte gratuite reste accessible sans abonnement.";
         billingNote.textContent = "Paiement sécurisé par Apple · Création du compte après l’achat";
@@ -455,6 +456,11 @@
       button.disabled = true;
       billingMessage.textContent = "Recherche de tes achats Apple…";
       try {
+        if (!context && window.KMApple?.payBeforeAccount) {
+          const pending = await window.KMApple.pending();
+          window.location.assign(pending.paid ? "Inscription.dc.html?apple_paid=1" : "Connexion.dc.html?reason=parent&next=%2FCompte.dc.html");
+          return;
+        }
         const result = await KMAuth.restoreApplePurchases();
         if (result.active) window.location.reload();
         else billingMessage.textContent = "Aucun abonnement Apple actif associé à ce compte parent. Vérifie que tu utilises le compte KMW de l’achat.";

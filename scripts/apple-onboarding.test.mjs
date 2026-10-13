@@ -25,11 +25,13 @@ test('reservation creates no access; authenticated clients cannot read secrets o
  await db.exec(await readFile(new URL('../supabase/migrations/20261010170000_apple_subscriptions.sql',import.meta.url),'utf8'));
 
  await db.exec(await readFile(new URL('../supabase/migrations/20261013150000_apple_purchase_before_account.sql',import.meta.url),'utf8'));
+ await db.exec(await readFile(new URL('../supabase/migrations/20261013153000_protect_existing_apple_account_tokens.sql',import.meta.url),'utf8'));
  const token='33333333-3333-4333-8333-333333333333',secret='a'.repeat(64);
  const reserve=(id=token,hash=secret)=>db.query('select reserve_apple_purchase($1,$2,$3)',[id,hash,'source']);
  const entitlement={user_id:parent,original_transaction_id:'onboard',transaction_id:'t',environment:'Production',product_id:'com.kawaiimuslimworld.family1.monthly',child_limit:1,apple_status:1,expires_at:new Date(Date.now()+3600000).toISOString(),signed_at:new Date().toISOString()};
  const claim=(hash=secret,owner=parent,payload=entitlement)=>db.query('select claim_apple_purchase($1,$2,$3,$4::jsonb)',[token,hash,owner,JSON.stringify(payload)]);
  try {
+ await assert.rejects(reserve(parent),/existing parent/);
  await reserve();await reserve();assert.equal((await db.query('select * from apple_subscriptions')).rows.length,0);
  await assert.rejects(reserve(token,'b'.repeat(64)),/mismatch/);
  await assert.rejects(claim('b'.repeat(64)),/proof invalid/);
@@ -40,4 +42,14 @@ test('reservation creates no access; authenticated clients cannot read secrets o
  for(let i=0;i<4;i++)await reserve(`44444444-4444-4444-8444-44444444444${i}`);
  await assert.rejects(reserve('44444444-4444-4444-8444-444444444449'),/rate limit/);
  } finally {await db.close();}
+});
+test('signed-out recovery resumes paid setup or requests the original parent account without starting another purchase',async()=>{
+ const html=await readFile(new URL('../Compte.dc.html',import.meta.url),'utf8');
+ const source=html.slice(html.indexOf('    document.getElementById("restoreApple").addEventListener'),html.indexOf('    const billingResult'));
+ for(const paid of [true,false]){
+  let handler,destination;const button={disabled:false};
+  vm.runInNewContext(source,{context:null,document:{getElementById:()=>({addEventListener:(_,fn)=>handler=fn})},window:{KMApple:{payBeforeAccount:true,pending:async()=>({paid})},location:{assign:x=>destination=x}},billingMessage:{},KMAuth:{restoreApplePurchases:async()=>{throw Error('Unexpected restore');},friendlyError:e=>e.message}});
+  await handler({currentTarget:button});assert.equal(button.disabled,false);
+  assert.equal(destination,paid?'Inscription.dc.html?apple_paid=1':'Connexion.dc.html?reason=parent&next=%2FCompte.dc.html');
+ }
 });
