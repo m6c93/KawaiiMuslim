@@ -28,22 +28,26 @@ class CompatibleCertificate extends OriginalCertificate {
 }
 crypto.X509Certificate = CompatibleCertificate as typeof crypto.X509Certificate;
 const originalCreatePublicKey = crypto.createPublicKey;
-crypto.createPublicKey = ((input: any) => {
-  const key = originalCreatePublicKey(input);
+const originalCreatePrivateKey = crypto.createPrivateKey;
+export function normalizeECKeyMetadata(key: any) {
   if(key.asymmetricKeyType === 'ec') {
-    const parsed = KEYUTIL.getKey(key.export({type:'spki',format:'pem'}) as string) as any;
+    const parsed = KEYUTIL.getKey(key.export({type:key.type==='private'?'pkcs8':'spki',format:'pem'}) as string) as any;
     const curves: Record<string,string> = {secp256r1:'prime256v1',prime256v1:'prime256v1',secp384r1:'secp384r1',secp521r1:'secp521r1'};
     if(!curves[parsed.curveName]) throw new Error('Unsupported public key curve');
     Object.defineProperty(key,'asymmetricKeyDetails',{value:{...key.asymmetricKeyDetails,namedCurve:curves[parsed.curveName]},configurable:true});
   }
   return key;
-}) as typeof crypto.createPublicKey;
+}
+crypto.createPublicKey = ((input: any) => normalizeECKeyMetadata(originalCreatePublicKey(input))) as typeof crypto.createPublicKey;
+// Older Edge runtimes also omit the private EC curve. jsonwebtoken correctly
+// rejects ES256 without prime256v1; recover the real curve rather than bypassing it.
+crypto.createPrivateKey = ((input: any) => normalizeECKeyMetadata(originalCreatePrivateKey(input))) as typeof crypto.createPrivateKey;
 // Load Apple's verifier after the compatibility functions so its dependencies
 // bind the correct public-key metadata. Signature and OCSP checks stay enabled.
 const { AppStoreServerAPIClient, SignedDataVerifier, Environment } = await import('npm:@apple/app-store-server-library@3.1.0');
 import { APPLE_ROOTS_BASE64 } from './apple-roots.ts';
 import { entitlementFromApple } from '../apple-purchase/core.mjs';
-export { Environment };
+export { Environment, AppStoreServerAPIClient };
 export function appleServices(environment: Environment) {
   const key = Deno.env.get('APPLE_IAP_PRIVATE_KEY');
   const keyId = Deno.env.get('APPLE_IAP_KEY_ID');
