@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#20285e">
   <title>Connexion — Kawaii Muslim</title>
+  <script>
+    (() => {
+      const params = new URLSearchParams(location.search);
+      const fragment = new URLSearchParams(location.hash.slice(1));
+      if (params.get("reset") !== "1" && fragment.get("type") !== "recovery") return;
+      window.__kmPasswordRecoveryRedirect = true;
+      const target = new URL("Reinitialiser-mot-de-passe.dc.html", location.origin);
+      if (params.has("code")) target.searchParams.set("code", params.get("code"));
+      target.hash = location.hash;
+      location.replace(target.pathname + target.search + target.hash);
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -64,7 +76,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=apple-pay-first-1"></script>
+  <script src="./km-auth.js?v=password-recovery-1"></script>
   <script>
     const form = document.getElementById("loginForm");
     const message = document.getElementById("message");
@@ -87,6 +99,7 @@
     const staffRoles = ["admin", "support", "content_admin"];
 
     const continueAfterAuthentication = async () => {
+      if (window.__kmPasswordRecoveryRedirect) return;
       const context = await KMAuth.getContext();
       if (!context) throw new Error("Connecte-toi pour continuer vers ton espace parent.");
       sessionStorage.removeItem("km-guest-mode");
