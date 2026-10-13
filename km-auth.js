@@ -499,7 +499,11 @@ window.KMAuth = (() => {
 
     signup: async ({ name, email, password, planCode = "" }) => {
       const validPlans = new Set(["family_1_child", "family_2_children", "family_3_children"]);
-      const selectedPlan = validPlans.has(planCode) ? planCode : "";
+      const nativeSignup = Boolean(window.KMApple);
+      const selectedPlan = !nativeSignup && validPlans.has(planCode) ? planCode : "";
+      const confirmationDestination = nativeSignup
+        ? `${window.location.origin}/Connexion.dc.html?reason=parent&next=%2FCompte.dc.html`
+        : `${window.location.origin}/Profils.dc.html${selectedPlan ? `?checkout_plan=${encodeURIComponent(selectedPlan)}` : ""}`;
       const data = requireSuccess(await client().auth.signUp({
         email: email.trim().toLowerCase(),
         password,
@@ -508,7 +512,7 @@ window.KMAuth = (() => {
             full_name: name.trim(),
             ...(selectedPlan ? { pending_plan_code: selectedPlan } : {})
           },
-          emailRedirectTo: `${window.location.origin}/Profils.dc.html${selectedPlan ? `?checkout_plan=${encodeURIComponent(selectedPlan)}` : ""}`
+          emailRedirectTo: confirmationDestination
         }
       }));
       return data;
