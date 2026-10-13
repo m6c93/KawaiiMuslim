@@ -550,8 +550,30 @@ window.KMAuth = (() => {
 
     resetPassword: async email => {
       return requireSuccess(await client().auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-        redirectTo: `${window.location.origin}/Connexion.dc.html?reset=1`
+        redirectTo: `${window.location.origin}/Reinitialiser-mot-de-passe.dc.html`
       }));
+    },
+
+    getPasswordRecoverySession: async expectedToken => {
+      const auth = client().auth;
+      let recovered = false;
+      const { data: listener } = auth.onAuthStateChange(event => {
+        if (event === "PASSWORD_RECOVERY") recovered = true;
+      });
+      try {
+        const session = await getSession();
+        if (!session || (!recovered && (!expectedToken || session.access_token !== expectedToken))) {
+          throw new Error("Ce lien ne permet pas de changer ton mot de passe. Demande un nouveau lien depuis « Mot de passe oublié ».");
+        }
+        const data = requireSuccess(await auth.getUser());
+        if (!data.user || data.user.id !== session.user.id) throw new Error("Le lien a expiré. Demande un nouveau lien.");
+        return { user: data.user };
+      } finally { listener.subscription.unsubscribe(); }
+    },
+
+    updatePassword: async password => {
+      if (typeof password !== "string" || password.length < 8) throw new Error("Choisis un mot de passe d’au moins 8 caractères.");
+      return requireSuccess(await client().auth.updateUser({ password }));
     },
 
     updateParent: async ({ fullName, avatar }) => {

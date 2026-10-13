@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#fff8ee">
+  <title>Nouveau mot de passe — Kawaii Muslim World</title>
+  <meta name="referrer" content="no-referrer">
+  <link rel="stylesheet" href="./account.css?v=family-profiles-20260819">
+  <style>
+    body{margin:0;background:#fff8ee;color:#49334a;font-family:system-ui,sans-serif}
+    main{max-width:420px;margin:auto;padding:calc(24px + env(safe-area-inset-top)) 24px calc(32px + env(safe-area-inset-bottom))}
+    .logo{display:block;width:100px;height:100px;object-fit:contain;margin:0 auto 24px}
+    h1{font-size:28px;text-align:center;line-height:1.2}p{line-height:1.5}#identity{overflow-wrap:anywhere;text-align:center;font-size:14px}
+    .field-input{background:white;color:#49334a;width:100%;box-sizing:border-box;font-size:16px;min-height:54px}
+    .primary-button{width:100%;box-sizing:border-box;border:0;background:#b84994;color:white;margin-top:18px;min-height:54px}
+    .primary-button:disabled{opacity:.55}a{color:#934376}.form-message{color:#934376}#done{text-align:center}.field-label{display:block;margin-top:18px}
+  </style>
+</head>
+<body>
+  <main>
+    <img class="logo" src="brand/assets/logo-kawaii-muslim.png" alt="Kawaii Muslim World">
+    <h1>Ton nouveau mot de passe</h1>
+    <p id="identity">Vérification de ton lien…</p>
+    <form id="recoveryForm" hidden>
+      <label class="field-label" for="newPassword">Nouveau mot de passe</label>
+      <input class="field-input" id="newPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="8 caractères minimum">
+      <label class="field-label" for="confirmPassword">Confirmer le mot de passe</label>
+      <input class="field-input" id="confirmPassword" type="password" minlength="8" autocomplete="new-password" required>
+      <button class="primary-button" id="savePassword" type="submit">Enregistrer mon mot de passe</button>
+    </form>
+    <p class="form-message" id="message" role="status" aria-live="polite"></p>
+    <section id="done" hidden>
+      <p>Ton mot de passe est enregistré.</p>
+      <p>Reviens dans <strong>l’application KMW</strong> et connecte-toi avec ton e-mail et ce nouveau mot de passe. Ton achat Apple reste conservé sur ton iPhone. Ne paie pas à nouveau.</p>
+    </section>
+    <p id="requestNew" hidden><a href="Connexion.dc.html?reason=parent&amp;next=%2FCompte.dc.html">Demander un nouveau lien</a></p>
+  </main>
+  <script>const recoveryToken = new URLSearchParams(location.hash.slice(1)).get("access_token");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./km-config.js"></script>
+  <script src="./km-auth.js?v=password-recovery-1"></script>
+  <script src="./password-recovery.js?v=1"></script>
+</body>
+</html>
