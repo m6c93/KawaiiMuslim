@@ -8,7 +8,7 @@ async function run(next,role='parent',signedIn=true){
  const stored=new Map([['km-guest-mode','1']]);
  const window={location:{origin:'https://www.kawaiimuslimworld.com',search:'?reason=parent&next='+encodeURIComponent(next),replace(url){this.href=url;}}};
  const message={textContent:''};
- const sandbox=vm.createContext({window,message,URL,URLSearchParams,sessionStorage:{removeItem:k=>stored.delete(k),setItem:(k,v)=>stored.set(k,v)},KMAuth:{getContext:async()=>signedIn?{profile:{role}}:null}});
+ const sandbox=vm.createContext({window,message,URL,URLSearchParams,sessionStorage:{removeItem:k=>stored.delete(k),setItem:(k,v)=>stored.set(k,v)},KMAuth:{completeAppleSignup:async()=>false,getContext:async()=>signedIn?{profile:{role}}:null}});
  vm.runInContext(source,sandbox);
  await vm.runInContext('continueAfterAuthentication()',sandbox);
  return {window,stored,message};
@@ -37,7 +37,7 @@ const account=readFileSync(new URL('../Compte.dc.html',import.meta.url),'utf8');
 test('signed-out parent stays on offers without loading private account data',async()=>{
  const prefix=account.slice(account.indexOf('    const load = async () => {'),account.indexOf('      document.querySelectorAll("[data-auth-only]")'));
  let rendered=0;
- const box=vm.createContext({KMAuth:{getContext:async()=>null},renderSignedOutOffer:async()=>{rendered++;}});
+ const box=vm.createContext({KMAuth:{completeAppleSignup:async()=>false,getContext:async()=>null},renderSignedOutOffer:async()=>{rendered++;}});
  await vm.runInContext(prefix+'}; load();',box);
  assert.equal(rendered,1);
 });

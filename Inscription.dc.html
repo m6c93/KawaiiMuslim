@@ -64,7 +64,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=apple-signup-confirmation-2"></script>
+  <script src="./km-auth.js?v=apple-pay-first-1"></script>
   <script>
     const form = document.getElementById("signupForm");
     const message = document.getElementById("message");
@@ -96,6 +96,15 @@
       selectedPlan.innerHTML = "<span>Bienvenue dans KMW</span><strong>Ton compte parent</strong><small>Création gratuite · Tu pourras choisir un abonnement Apple ensuite.</small>";
     }
     KMAuth.getSession().then(session => {
+      if (window.KMApple?.payBeforeAccount) {
+        return window.KMApple.pending().then(async pending => {
+          if (!pending.paid) { window.location.replace("Compte.dc.html");return; }
+          document.querySelector('h2').textContent = "Ton achat est confirmé 🌸";
+          selectedPlan.innerHTML = "<strong>Bienvenue dans la famille KMW</strong><small>Crée ton compte pour retrouver tes livres et activités. Aucun nouveau paiement.</small>";
+          document.querySelector('.privacy-note').textContent = "Ton achat Apple est enregistré sur cet iPhone. Après la création du compte, confirme ton e-mail puis reviens dans KMW pour activer ton accès. En créant ton compte, tu acceptes les conditions d’utilisation et la politique de confidentialité.";
+          if (session) { await KMAuth.completeAppleSignup();window.location.replace("Profils.dc.html"); }
+        });
+      }
       if (!session) return;
       if (window.KMApple) { window.location.assign("Compte.dc.html"); return; }
       message.className = "form-message success";
@@ -123,6 +132,7 @@
       submitButton.disabled = true;
       submitButton.textContent = "Création de ton espace…";
       try {
+        if (window.KMApple?.payBeforeAccount && !(await window.KMApple.pending()).paid) throw new Error("Choisis d’abord ta formule et confirme le paiement Apple.");
         const data = await KMAuth.signup({
           name: document.getElementById("name").value,
           email: document.getElementById("email").value,
@@ -130,7 +140,7 @@
           planCode
         });
         if (data.session) {
-          if (window.KMApple) { await KMAuth.clearPendingPlan(); window.location.assign("Compte.dc.html"); return; }
+          if (window.KMApple) { await KMAuth.clearPendingPlan(); await KMAuth.completeAppleSignup(); window.location.assign(window.KMApple.payBeforeAccount ? "Profils.dc.html" : "Compte.dc.html"); return; }
           message.className = "form-message success";
           message.textContent = "Compte créé. Ouverture du paiement sécurisé…";
           await KMAuth.clearPendingPlan();

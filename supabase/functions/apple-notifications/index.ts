@@ -16,12 +16,18 @@ Deno.serve(async request => {
     const signed=notification.data?.signedTransactionInfo;
     if(!signed) return jsonResponse({received:true}); // Apple TEST notifications have no transaction.
     const transaction=await service.verifier.verifyAndDecodeTransaction(signed);
-    const owner=transaction.appAccountToken;
-    if(!owner || !transaction.originalTransactionId || (environment===Environment.SANDBOX && !permitsSandbox(owner))) throw new Error('Invalid owner');
+    const accountToken=transaction.appAccountToken;
+    if(!accountToken || !transaction.originalTransactionId) throw new Error('Invalid owner');
     const admin=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+    const {data:binding}=await admin.from('apple_purchase_reservations').select('user_id,original_transaction_id').eq('account_token',accountToken).maybeSingle();
+    // Apple retries an unclaimed purchase. Never attach it to an arbitrary parent.
+    if(binding && (!binding.user_id || binding.original_transaction_id!==transaction.originalTransactionId)) throw new Error('Purchase awaiting account');
+    const owner=binding?.user_id||accountToken;
+    if(environment===Environment.SANDBOX && !permitsSandbox(owner)) throw new Error('Invalid sandbox owner');
     const {data:profile,error:profileError}=await admin.from('profiles').select('role,is_active').eq('id',owner).single();
     if(profileError || profile?.role!=='parent') throw new Error('Parent not found');
-    const entitlement=await currentAppleEntitlement(service,transaction.originalTransactionId,owner,environment);
+    const current=await currentAppleEntitlement(service,transaction.originalTransactionId,accountToken,environment);
+    const entitlement={...current,user_id:owner};
     const {error}=await admin.rpc('save_verified_apple_subscription',{p:entitlement});
     if(error) throw error;
     return jsonResponse({received:true});

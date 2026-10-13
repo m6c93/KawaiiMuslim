@@ -27,9 +27,16 @@ Deno.serve(async request => {
       environment=Environment.SANDBOX;service=appleServices(environment);
       transaction=await service.verifier.verifyAndDecodeTransaction(body.signedTransaction);
     }
-    entitlementFromApple(transaction,owner,environment);
+    const accountToken=transaction.appAccountToken;
+    if(!accountToken) throw new Error('Missing account token');
+    if(accountToken!==owner) {
+      const {data:binding,error:bindingError}=await admin.from('apple_purchase_reservations').select('user_id,original_transaction_id').eq('account_token',accountToken||'').single();
+      if(bindingError || binding?.user_id!==owner || binding.original_transaction_id!==transaction.originalTransactionId) throw new Error('Owner mismatch');
+    }
+    entitlementFromApple(transaction,accountToken,environment);
     // Query Apple for the CURRENT group status: old signed receipts cannot restore a refund.
-    const entitlement=await currentAppleEntitlement(service,transaction.originalTransactionId!,owner,environment);
+    const current=await currentAppleEntitlement(service,transaction.originalTransactionId!,accountToken!,environment);
+    const entitlement={...current,user_id:owner};
     const {error}=await admin.rpc('save_verified_apple_subscription',{p:entitlement});
     if(error) throw error;
     const active=activeApple(entitlement);

@@ -146,7 +146,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=child-gender-1"></script>
+  <script src="./km-auth.js?v=apple-pay-first-1"></script>
   <script src="./account-deletion.js?v=1" defer></script>
   <script>
     let context = null;
@@ -251,6 +251,19 @@
       document.getElementById("familyPrice").textContent = "Choisis le nombre d’enfants";
       document.getElementById("appleTerms").hidden = false;
       billingNote.textContent = "Créer un compte ne déclenche aucun paiement. L’achat se confirme ensuite avec Apple.";
+      if (window.KMApple.payBeforeAccount) {
+        document.getElementById("createParentAccount").hidden = true;
+        subscriptionIntro.textContent = "Choisis ta formule, confirme le paiement Apple, puis crée ton compte famille. La découverte gratuite reste accessible sans abonnement.";
+        billingNote.textContent = "Paiement sécurisé par Apple · Création du compte après l’achat";
+        const pending = await window.KMApple.pending();
+        if (pending.paid) {
+          const resume = document.getElementById("createParentAccount");
+          resume.hidden = false;resume.textContent = "Terminer la création de mon compte";resume.href = "Inscription.dc.html?apple_paid=1";
+          document.getElementById("planOptions").hidden = true;
+          subscriptionIntro.textContent = "Ton achat Apple est enregistré sur cet iPhone. Termine ton compte pour retrouver tes contenus ; aucun nouveau paiement n’est nécessaire.";
+          return;
+        }
+      }
       const options = [...document.querySelectorAll(".plan-option")];
       options.forEach(option => {
         option.disabled = true;
@@ -273,6 +286,7 @@
 
     const load = async () => {
       context = await KMAuth.getContext();
+      if (context?.profile?.role === "parent" && await KMAuth.completeAppleSignup()) { window.location.replace("Profils.dc.html");return; }
       if (!context) {
         await renderSignedOutOffer();
         return;
@@ -395,6 +409,13 @@
       const option = event.target.closest("[data-plan]");
       if (!option || option.disabled) return;
       if (!context) {
+        if (window.KMApple?.payBeforeAccount) {
+          option.disabled = true;
+          billingMessage.textContent = "Ouverture du paiement Apple…";
+          try { await KMAuth.startAppleSignup(option.dataset.plan); }
+          catch (error) { billingMessage.textContent = KMAuth.friendlyError(error);option.disabled = false; }
+          return;
+        }
         window.location.assign(`Inscription.dc.html?plan=${encodeURIComponent(option.dataset.plan)}`);
         return;
       }

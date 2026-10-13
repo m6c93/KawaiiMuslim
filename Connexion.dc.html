@@ -64,7 +64,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=family-profiles-20260819"></script>
+  <script src="./km-auth.js?v=apple-pay-first-1"></script>
   <script>
     const form = document.getElementById("loginForm");
     const message = document.getElementById("message");
@@ -97,6 +97,7 @@
         window.location.href = `MFA.dc.html?next=${encodeURIComponent(adminDestination)}`;
         return;
       }
+      if (await KMAuth.completeAppleSignup()) { window.location.replace("Profils.dc.html");return; }
       if (parentDestination) {
         sessionStorage.removeItem("km-after-profile");
         window.location.replace(requestedDestination);
@@ -153,4 +154,3 @@
   </script>
 </body>
 </html>
-
