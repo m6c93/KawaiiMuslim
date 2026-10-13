@@ -594,6 +594,28 @@ window.KMAuth = (() => {
       return requireSuccess(await client().rpc("get_family_subscription").maybeSingle());
     },
 
+    completeAppleSignup: async () => {
+      if (!window.KMApple?.payBeforeAccount) return false;
+      const session = await getSession();
+      if (!session) return false;
+      const pending = await window.KMApple.pending();
+      if (!pending.paid) return false;
+      const result = await window.KMApple.complete({ userID: session.user.id, accessToken: session.access_token });
+      if (!result.verified || !result.active) throw new Error("Ton achat attend encore sa validation. Ne paie pas une deuxième fois.");
+      return true;
+    },
+
+    startAppleSignup: async planCode => {
+      if (!window.KMApple?.payBeforeAccount) throw new Error("Mets à jour KMW dans TestFlight pour utiliser ce parcours.");
+      const ids = { family_1_child: "com.kawaiimuslimworld.family1.monthly", family_2_children: "com.kawaiimuslimworld.family2.monthly", family_3_children: "com.kawaiimuslimworld.family3.monthly" };
+      if (!ids[planCode]) throw new Error("Choisis une formule familiale.");
+      const result = await window.KMApple.purchaseFirst({ productID: ids[planCode] });
+      if (result.cancelled) throw new Error("Achat annulé. La découverte gratuite reste accessible.");
+      if (result.pending) throw new Error("Apple attend la confirmation de cet achat. Ne lance pas un autre paiement.");
+      if (!result.paid) throw new Error("Apple n’a pas confirmé l’achat.");
+      window.location.assign("Inscription.dc.html?apple_paid=1");
+    },
+
     startCheckout: async planCode => {
       const session = await getSession();
       if (!session) throw new Error("Connexion requise.");
