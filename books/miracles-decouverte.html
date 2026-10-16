@@ -73,7 +73,7 @@
     <section class="progress-wrap" aria-label="Progression dans le livre">
       <span id="pageLabel">Couverture</span>
       <input class="progress" id="progress" type="range" min="0" value="0" aria-label="Aller à une page">
-      <span id="totalLabel">5 pages offertes</span>
+      <span id="totalLabel">9 pages offertes</span>
     </section>
     <p class="hint">Utilise les flèches ou glisse la page du doigt</p>
   </main>
@@ -84,7 +84,7 @@
   <div class="scrim" id="scrim" hidden></div>
   <script>
     const requestedPreview=Math.max(0,Number(new URLSearchParams(location.search).get("previewPages"))||0);
-    const TOTAL=5, ASSET="../brand/books/miracles-du-coran/";
+    const TOTAL=9, ASSET="../brand/books/miracles-du-coran/";
     const pad=n=>String(n).padStart(2,"0"), pageSrc=n=>n>=1&&n<=TOTAL?`${ASSET}page-${pad(n)}.jpg`:"", $=id=>document.getElementById(id);
     const els={book:$("book"),cover:$("coverStage"),spread:$("spread"),leftPaper:$("leftPaper"),rightPaper:$("rightPaper"),left:$("leftPage"),right:$("rightPage"),turnSheet:$("turnSheet"),turnFront:$("turnFront"),turnBack:$("turnBack"),prev:$("prevBtn"),next:$("nextBtn"),progress:$("progress"),label:$("pageLabel"),drawer:$("drawer"),scrim:$("scrim"),thumbs:$("thumbs"),sound:$("soundBtn")};
     const activeProfile=(()=>{try{return JSON.parse(localStorage.getItem("km-active-profile-v2"))||{}}catch{return{}}})();
@@ -185,6 +185,6 @@
     els.book.addEventListener("touchcancel",()=>{touchGestureBlocked=false},{passive:true});
     window.addEventListener("resize",()=>{const nextMobile=isBookSinglePage();if(nextMobile!==mobileMode){const page=position?(mobileMode?position:(position-1)*2+1):0;position=page?(nextMobile?page:Math.ceil(page/2)):0;mobileMode=nextMobile}render()});render();
   </script>
-<script type="application/json" id="discovery-data">{"id": "miracles", "title": "Les miracles scientifiques du Coran", "pages": ["/brand/books/miracles-du-coran/page-01.jpg", "/brand/books/miracles-du-coran/page-02.jpg", "/brand/books/miracles-du-coran/page-03.jpg", "/brand/books/miracles-du-coran/page-04.jpg", "/brand/books/miracles-du-coran/page-05.jpg"]}</script>
+<script type="application/json" id="discovery-data">{"id":"miracles","title":"Les miracles scientifiques du Coran","pages":["/brand/books/miracles-du-coran/page-01.jpg","/brand/books/miracles-du-coran/page-02.jpg","/brand/books/miracles-du-coran/page-03.jpg","/brand/books/miracles-du-coran/page-04.jpg","/brand/books/miracles-du-coran/page-05.jpg","/brand/books/miracles-du-coran/page-06.jpg","/brand/books/miracles-du-coran/page-07.jpg","/brand/books/miracles-du-coran/page-08.jpg","/brand/books/miracles-du-coran/page-09.jpg"]}</script>
 </body>
 </html>

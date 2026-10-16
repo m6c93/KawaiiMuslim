@@ -178,7 +178,7 @@
       if(new URLSearchParams(location.search).get('guest') === '1') {
         target.searchParams.set('guest','1');
         if (/\/LivreColoriage\.dc\.html$/i.test(target.pathname)) target.searchParams.set('previewPages','4');
-        if (/\/books\/tawakkul\.html$/i.test(target.pathname)) target.searchParams.set('previewPages','5');
+        if (/\/books\/tawakkul\.html$/i.test(target.pathname)) target.searchParams.set('previewPages','9');
       }
       else target.searchParams.set('preview', '1');
       link.href = target.href;

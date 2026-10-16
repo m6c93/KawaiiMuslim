@@ -227,7 +227,7 @@
 </div>
 
 <script>
-window.__PAGES = ["/brand/discovery/tawakkul-1.jpg", "/brand/discovery/tawakkul-2.jpg", "/brand/discovery/tawakkul-3.jpg", "/brand/discovery/tawakkul-4.jpg", "/brand/discovery/tawakkul-5.jpg"];
+window.__PAGES = ["/brand/discovery/tawakkul-1.jpg","/brand/discovery/tawakkul-2.jpg","/brand/discovery/tawakkul-3.jpg","/brand/discovery/tawakkul-4.jpg","/brand/discovery/tawakkul-5.jpg","/brand/discovery/tawakkul-6.jpg","/brand/discovery/tawakkul-7.jpg","/brand/discovery/tawakkul-8.jpg","/brand/discovery/tawakkul-9.jpg"];
 (function(){
   var FIN = { type:'html', html:
       '<div class="grid-bg"></div><div class="inner">'+
@@ -240,9 +240,9 @@ window.__PAGES = ["/brand/discovery/tawakkul-1.jpg", "/brand/discovery/tawakkul-
   var leaves = [];
   var SRC = window.__PAGES || [];
   for(var i=0;i<SRC.length;i++){ leaves.push({ type:'image', src:SRC[i] }); }
-  // Discovery includes only the five offered leaves.
+  // Discovery includes only the nine offered leaves.
 
-  var PREVIEW_LIMIT = 5;
+  var PREVIEW_LIMIT = 9;
   if(PREVIEW_LIMIT){
     leaves = leaves.slice(0, Math.min(PREVIEW_LIMIT, leaves.length));
     document.documentElement.classList.add('limited-preview');
@@ -295,7 +295,7 @@ window.__PAGES = ["/brand/discovery/tawakkul-1.jpg", "/brand/discovery/tawakkul-
     pRight.classList.toggle('hidden', spreads[si][1]===null);
     pLeft.innerHTML = leafInner(spreads[si][0]);
     pRight.innerHTML = leafInner(spreads[si][1]);
-    counter.textContent = 'Découverte · '+(Math.max(...spreads[si].filter(x=>x!==null))+1)+' / 5 pages offertes';
+    counter.textContent = 'Découverte · '+(Math.max(...spreads[si].filter(x=>x!==null))+1)+' / 9 pages offertes';
     bar.style.width = (NUM>1 ? (si/(NUM-1))*100 : 100) + '%';
     prevBtn.disabled = (si<=0);
     nextBtn.disabled = false;
@@ -426,6 +426,6 @@ window.__PAGES = ["/brand/discovery/tawakkul-1.jpg", "/brand/discovery/tawakkul-
     <text x="50" y="58" font-family="Baloo 2, sans-serif" font-size="10" font-weight="800" fill="#E27FAE" text-anchor="middle">T</text>
   </svg>
 </template>
-<script type="application/json" id="discovery-data">{"id": "tawakkul", "title": "Tawakkul", "pages": ["/brand/discovery/tawakkul-1.jpg", "/brand/discovery/tawakkul-2.jpg", "/brand/discovery/tawakkul-3.jpg", "/brand/discovery/tawakkul-4.jpg", "/brand/discovery/tawakkul-5.jpg"]}</script>
+<script type="application/json" id="discovery-data">{"id":"tawakkul","title":"Tawakkul","pages":["/brand/discovery/tawakkul-1.jpg","/brand/discovery/tawakkul-2.jpg","/brand/discovery/tawakkul-3.jpg","/brand/discovery/tawakkul-4.jpg","/brand/discovery/tawakkul-5.jpg","/brand/discovery/tawakkul-6.jpg","/brand/discovery/tawakkul-7.jpg","/brand/discovery/tawakkul-8.jpg","/brand/discovery/tawakkul-9.jpg"]}</script>
 </body>
 </html>
