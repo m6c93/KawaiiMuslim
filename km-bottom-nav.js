@@ -60,8 +60,9 @@
     if (guestMode) {
       var guestPill = document.createElement("a");
       guestPill.className = "km-guest-pill";
-      guestPill.href = "index.html#tarifs";
-      guestPill.innerHTML = '<b>Mode découverte</b><span>Débloquer tout</span>';
+      guestPill.href = "Inscription.dc.html?plan=family_1_child";
+      guestPill.setAttribute("aria-label", "S’inscrire — 7 jours gratuits, carte bancaire requise");
+      guestPill.innerHTML = '<b>S’inscrire <i aria-hidden="true">→</i></b><span>7 jours gratuits</span>';
       document.body.appendChild(guestPill);
     }
 
