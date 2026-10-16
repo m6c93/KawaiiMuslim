@@ -18,3 +18,5 @@ body:has(dialog[open]){overflow:hidden}
 @media(max-height:500px) and (orientation:landscape){.reader,.premium-dialog{max-height:calc(100dvh - 16px);margin:8px auto}.reader-arabic{font-size:29px}.reader-head{padding-block:6px 12px}.reader-actions{margin-top:15px}}
 
 .card-front .tiny{max-width:100%;line-height:1.6;letter-spacing:1.2px}
+
+.reader-actions button.locked{background:#f0edea;color:#8b8086;border-color:#e1d8dc}.reader-actions button.locked small{color:#9a7389;font-size:10px}.reader-actions button.locked .material-symbols-rounded{opacity:.65}
