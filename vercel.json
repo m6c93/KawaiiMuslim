@@ -1,16 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "redirection.kawaiimuslimworld.com"
-        }
-      ],
-      "destination": "/Liens.dc.html"
-    },
-    {
       "source": "/api/quran-invitation",
       "destination": "/api/quran-invitation"
     },
@@ -26,6 +16,17 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "redirection.kawaiimuslimworld.com"
+        }
+      ],
+      "destination": "/Liens.dc.html",
+      "permanent": false
+    },
     {
       "source": "/coran-licence/demonstration.html",
       "destination": "/presentation-coran/",
