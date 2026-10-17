@@ -23,7 +23,8 @@ async function listen(s,notice){const token=++playToken,[surah,range]=s.dua.ref.
 byId('download-map').addEventListener('click',()=>withPro(downloadMap,byId('map-status')));
 byId('download-dua').addEventListener('click',()=>withPro(downloadDua,byId('dua-status')));
 byId('listen').addEventListener('click',()=>{if(audio){stop();return}withPro(listen,byId('dua-status'))});
-window.addEventListener('pagehide',stop);document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});
+window.addEventListener('pagehide',stop);document.addEventListener('km-app-inactive',stop);document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});
 async function boot(){try{const r=await fetch('stories.json?v=accordion-1');if(!r.ok)throw Error('Stories unavailable');stories=await r.json();if(stories.length!==25)throw Error('Stories incomplete');const query=new URLSearchParams(location.search);let index=query.get('prophet');if(query.has('weekly')){const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()),value=type=>Number(parts.find(p=>p.type===type).value),weeks=Math.floor((Date.UTC(value('year'),value('month')-1,value('day'))-Date.UTC(2026,9,12))/(7*86400000));index=String(((weeks%25)+25)%25)}selected=/^(?:[0-9]|1[0-9]|2[0-4])$/.test(index||'')?stories[Number(index)]:null;if(selected){renderStory();if(location.hash==='#invocation'&&selected.dua)renderDua()}else renderCollection()}catch{byId('load-status').textContent='Les histoires n’ont pas pu se charger. Actualise la page pour réessayer.'}}
 boot();
 })();
+

@@ -66,7 +66,7 @@
       document.body.appendChild(guestPill);
     }
 
-    items.forEach(function (item, index) {
+    if (!window.KMAppShell) items.forEach(function (item, index) {
       if (index === activeIndex) return;
       var preload = document.createElement("link");
       preload.rel = "prefetch";
@@ -89,3 +89,4 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
   else mount();
 })();
+
