@@ -36,3 +36,26 @@ body:has(dialog[open]){overflow:hidden}
 .reader-actions .audio-controls{margin:0}
 
 .reader-actions .audio-controls button{display:block;min-height:44px;padding:9px 15px;font-size:12px}
+
+
+/* A quiet background layer stays behind the cards. Reading surfaces stay still. */
+body{isolation:isolate}
+body::before,body::after{content:"";position:fixed;inset:-100px;z-index:-1;pointer-events:none;transform:translate3d(var(--garden-pointer-x,0px),calc(var(--garden-pointer-y,0px) + var(--garden-scroll-y,0px)),0)}
+body::before{background:radial-gradient(ellipse 440px 370px at 6% 28%,#e6d5e880,transparent 75%),radial-gradient(ellipse 460px 420px at 97% 78%,#dfe9d47a,transparent 75%)}
+body::after{background:radial-gradient(ellipse 370px 320px at 82% 17%,#f4e5cb73,transparent 75%);transform:translate3d(calc(var(--garden-pointer-x,0px) * -.6),calc(var(--garden-scroll-y,0px) * .5),0)}
+.inv-card{perspective:1300px}
+.card-depth{width:100%;height:100%;position:relative;transform-style:preserve-3d;transform:rotateX(var(--card-rx,0deg)) rotateY(var(--card-ry,0deg));transition:transform 180ms ease-out}
+.inv-card.flipped .card-depth{transform:none}
+.card-face{box-shadow:0 12px 26px #6550480d,0 2px 5px #65504806;transition:box-shadow 220ms ease}
+.card-front::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(115deg,transparent 25%,#fff8 48%,transparent 70%);pointer-events:none;opacity:0;transform:translateX(-100%)}
+.inv-card.card-pop .card-depth{animation:inv-card-pop 620ms cubic-bezier(.2,.7,.2,1)}
+.inv-card.card-pop .card-front::after{animation:inv-card-light 580ms ease-out}
+.inv-card.card-pop .flip-inner{transition-duration:720ms;transition-timing-function:cubic-bezier(.2,.75,.2,1)}
+.reader[open]{animation:inv-reader-reveal 220ms ease-out}
+@keyframes inv-card-pop{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-6px) scale(1.025)}65%{transform:translateY(-2px) scale(1.008)}100%{transform:translateY(0) scale(1)}}
+@keyframes inv-card-light{0%{opacity:0;transform:translateX(-100%)}30%{opacity:.6}100%{opacity:0;transform:translateX(100%)}}
+@keyframes inv-reader-reveal{from{opacity:0}to{opacity:1}}
+@media(hover:hover) and (pointer:fine){.inv-card:not(.flipped):hover .card-front{box-shadow:0 18px 35px #6550481c,0 3px 7px #6550480d}}
+@media(max-width:650px){body::before{background:radial-gradient(ellipse 290px 380px at 0% 35%,#e6d5e866,transparent 80%),radial-gradient(ellipse 300px 380px at 100% 80%,#dfe9d466,transparent 80%)}.inv-card.card-pop .card-depth{animation-name:inv-card-pop-touch}}
+@keyframes inv-card-pop-touch{0%{transform:scale(1)}35%{transform:scale(.98)}75%{transform:scale(1.012)}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){body::before,body::after,.card-depth,.inv-card.flipped .card-depth{transform:none!important}.card-depth,.card-face,.flip-inner{transition:none!important}.card-pop .card-depth,.card-pop .card-front::after,.reader[open]{animation:none!important}}
