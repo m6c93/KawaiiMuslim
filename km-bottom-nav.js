@@ -58,12 +58,12 @@
       });
     }
     if (guestMode) {
-      var guestPill = document.createElement("a");
-      guestPill.className = "km-guest-pill";
-      guestPill.href = "Inscription.dc.html?plan=family_1_child";
-      guestPill.setAttribute("aria-label", "S’inscrire — 7 jours gratuits, carte bancaire requise");
-      guestPill.innerHTML = '<b>S’inscrire <i aria-hidden="true">→</i></b><span>7 jours gratuits</span>';
-      document.body.appendChild(guestPill);
+      var guestActions = document.createElement("nav");
+      guestActions.className = "km-guest-actions";
+      guestActions.setAttribute("aria-label", "Connexion et inscription");
+      guestActions.innerHTML = '<div class="km-guest-actions-inner"><span class="km-guest-brand">Kawaii Muslim World</span><a class="km-guest-login" href="/Connexion.dc.html">Se connecter</a><a class="km-guest-signup" href="/Inscription.dc.html?plan=family_1_child" aria-label="S’inscrire — 7 jours gratuits, carte bancaire requise"><b>S’inscrire <span aria-hidden="true">→</span></b><small>7 jours gratuits</small></a></div>';
+      document.body.classList.add("km-has-guest-actions");
+      document.body.prepend(guestActions);
     }
 
     if (!window.KMAppShell) items.forEach(function (item, index) {

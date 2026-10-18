@@ -263,3 +263,17 @@ html[data-km-gender="boy"] .km-app-nav a:focus-visible { outline-color: #d6a447;
 body.km-shell-child{padding-bottom:calc(var(--km-nav-height) + var(--km-nav-bottom) + 24px)!important}
 body.km-shell-child .km-app-nav,body.km-shell-child .bottom-nav{display:none!important}
 body.km-shell-child.km-app-reading{padding-bottom:0!important}
+
+/* Authentication has its own row; it must never cover a page control. */
+:root{--km-guest-bar-height:80px}
+.km-guest-actions{position:relative;z-index:1003;box-sizing:border-box;min-height:calc(var(--km-guest-bar-height) + env(safe-area-inset-top,0px));padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;background:#fffaf2;border-bottom:1px solid #e7d5df}
+.km-guest-actions-inner{max-width:1150px;margin:auto;display:flex;align-items:center;justify-content:flex-end;gap:12px;min-width:0}
+.km-guest-brand{margin-right:auto;color:#69455a;font:800 20px/1.2 "Baloo 2",Nunito,sans-serif}
+.km-guest-login,.km-guest-signup{box-sizing:border-box;min-height:58px;display:flex;align-items:center;justify-content:center;border-radius:16px;text-decoration:none!important;font:800 14px/1.3 Nunito,sans-serif;padding:10px 20px}
+.km-guest-login{background:#fff;border:1px solid #bd8ba3;color:#74334f!important}
+.km-guest-signup{flex-direction:column;align-items:flex-start;border:1px solid #9c4d6e;background:#a95579;color:#fff!important;min-width:155px}
+.km-guest-signup b{font:800 15px/1.3 "Baloo 2",Nunito,sans-serif}.km-guest-signup b span{margin-left:18px}.km-guest-signup small{font:800 11px/1.4 Nunito,sans-serif;color:#fff5dc}
+.km-guest-login:hover{background:#f9edf2}.km-guest-signup:hover{background:#914366}
+.km-guest-actions a:focus-visible{outline:3px solid #476e99;outline-offset:3px}
+body.km-immersive-reader .km-guest-actions{display:none}
+@media(max-width:600px){.km-guest-actions{padding-left:12px;padding-right:12px}.km-guest-brand{display:none}.km-guest-actions-inner{gap:10px}.km-guest-login,.km-guest-signup{flex:1;min-width:0;padding:10px 12px}.km-guest-signup{align-items:center}.km-guest-login{font-size:13px}}
