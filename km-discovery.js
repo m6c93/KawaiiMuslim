@@ -64,7 +64,8 @@
     document.addEventListener('click',e=>{
       const link=e.target.closest('a[href]');if(!link)return;
       const u=new URL(link.href,location.href);if(u.origin!==location.origin)return;
-      const path=decodeURIComponent(u.pathname);
+      let path=decodeURIComponent(u.pathname);
+      if(path==='/books/colorie-ecris-apprends')path+='.html';
       if(routes[path]){e.preventDefault();e.stopImmediatePropagation();location.href=routes[path]+'?guest=1';}
       else if(path==='/LivreColoriage.dc.html'){e.preventDefault();e.stopImmediatePropagation();if(u.searchParams.get('book')==='hijabi-girls')location.href='/books/hijabi-decouverte.html?guest=1';else openUnlock();}
       else if(u.hash==='#tarifs'||link.classList.contains('km-guest-pill')){e.preventDefault();e.stopImmediatePropagation();openUnlock();}

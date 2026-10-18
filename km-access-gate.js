@@ -12,6 +12,8 @@
   var explicitGuestMode = new URLSearchParams(window.location.search).get("guest") === "1";
   var storedGuestMode = sessionStorage.getItem("km-guest-mode") === "1";
   var currentPath = decodeURIComponent(window.location.pathname);
+  // Treat the extensionless URL as the same three-letter discovery page.
+  if (currentPath === '/books/colorie-ecris-apprends') currentPath += '.html';
   var previewPages = new URLSearchParams(window.location.search).get("previewPages");
   var guestBookPreview = false;
   if (explicitGuestMode && currentPath === '/books/tawakkul.html') {
