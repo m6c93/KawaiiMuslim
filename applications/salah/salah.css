@@ -41,3 +41,5 @@ h1[tabindex="-1"]:focus{outline:none}.cards{grid-template-columns:repeat(4,minma
 .prayer-grid a.prayer-choice{flex-direction:column;align-items:flex-start;gap:8px;min-width:0}.tile.premium-option .premium-lock{position:static;width:max-content;margin:6px 0 10px}.premium-option .icon{display:block}@media(max-width:480px){header{flex-wrap:wrap}.brand{font-size:19px}.tile.premium-option{padding:16px}.tile.premium-option h3{font-size:21px}}
 
 .repetition-label{display:block;margin:8px 0;color:var(--green);font-size:15px;font-weight:900}.overview-words .repetition-label{font-size:13px}.repetition-source a{color:inherit}
+
+.access-check{max-width:1080px;margin:0 auto;padding:0 24px;color:var(--green);font-size:14px;font-weight:800}.access-check button{margin-left:10px}.premium-option[aria-disabled="true"]{cursor:progress;opacity:.75}
