@@ -1,0 +1,90 @@
+{
+  "provider": "ElevenLabs",
+  "voice": "mama aya",
+  "model": "Eleven v4",
+  "status": "partially_generated",
+  "note": "The user confirmed the same existing mama aya voice and Eleven v4. Inclination and complete tachahhoud are generated and integrated; other proposed scripts remain ungenerated.",
+  "items": [
+    {
+      "id": "takbir",
+      "text": "Je lève les mains et je dis : اللَّهُ أَكْبَرُ.",
+      "pronunciation_reference": "Allâhou akbar",
+      "status": "awaiting_generation"
+    },
+    {
+      "id": "inclinaison",
+      "text": "Je dis : اللَّهُ أَكْبَرُ. Puis je m’incline, les mains sur les genoux, le dos droit. Dans cette position, je dis : سُبْحَانَ رَبِّيَ الْعَظِيمِ. Je répète cette parole trois fois, calmement.",
+      "pronunciation_reference": "Soubhâna rabbiyal-‘azîm",
+      "status": "generated_integrated",
+      "file": "inclinaison-paroles.mp3"
+    },
+    {
+      "id": "redressement",
+      "text": "En me relevant, je dis : سَمِعَ اللَّهُ لِمَنْ حَمِدَهُ. Puis, bien debout : رَبَّنَا وَلَكَ الْحَمْدُ.",
+      "pronunciation_reference": "Sami‘allâhou liman hamidah. Rabbanâ wa lakal-hamd.",
+      "status": "awaiting_generation"
+    },
+    {
+      "id": "prosternation",
+      "text": "Je dis : اللَّهُ أَكْبَرُ. Je me prosterne, le front et le nez au sol. Dans cette position, je dis : سُبْحَانَ رَبِّيَ الْأَعْلَى. Je peux répéter cette parole trois fois, calmement.",
+      "pronunciation_reference": "Soubhâna rabbiyal-a‘lâ",
+      "status": "awaiting_generation"
+    },
+    {
+      "id": "assise",
+      "text": "Je dis : اللَّهُ أَكْبَرُ. Je me relève et je m’assieds entre les deux prosternations. Je dis : رَبِّ اغْفِرْ لِي، رَبِّ اغْفِرْ لِي.",
+      "pronunciation_reference": "Rabbighfir lî, rabbighfir lî",
+      "status": "awaiting_generation"
+    },
+    {
+      "id": "deuxieme-prosternation",
+      "text": "Je dis : اللَّهُ أَكْبَرُ. Je me prosterne une deuxième fois. Dans cette position, je dis : سُبْحَانَ رَبِّيَ الْأَعْلَى. Je peux répéter cette parole trois fois, calmement.",
+      "pronunciation_reference": "Soubhâna rabbiyal-a‘lâ",
+      "status": "awaiting_generation"
+    },
+    {
+      "id": "tachahhoud",
+      "text": "Assis, je récite le tachahhoud. Je dis : التَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ، السَّلَامُ عَلَى النَّبِيِّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ.",
+      "pronunciation_reference": "At-tahiyyâtou lillâhi was-salawâtou wat-tayyibât. As-salâmou ‘alan-nabiyyi wa rahmatoullâhi wa barakâtouh. As-salâmou ‘alaynâ wa ‘alâ ‘ibâdillâhis-sâlihîn. Ach-hadou an lâ ilâha illallâh, wa ach-hadou anna Mouhammadan ‘abdouhou wa rasoûlouh.",
+      "status": "generated_integrated",
+      "file": "tachahhoud-complet.mp3"
+    },
+    {
+      "id": "salawat",
+      "text": "Toujours assis, j’apprends la prière sur le Prophète. Je dis : اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ. اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ، كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ..",
+      "pronunciation_reference": "Allâhoumma salli ‘alâ Mouhammadin wa ‘alâ âli Mouhammad, kamâ sallayta ‘alâ Ibrâhîma wa ‘alâ âli Ibrâhîm, innaka hamîdoun majîd. Allâhoumma bârik ‘alâ Mouhammadin wa ‘alâ âli Mouhammad, kamâ bârakta ‘alâ Ibrâhîma wa ‘alâ âli Ibrâhîm, innaka hamîdoun majîd.",
+      "status": "awaiting_generation"
+    },
+    {
+      "id": "protection",
+      "text": "À la fin, je demande la protection d’Allah. Je dis : اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ عَذَابِ جَهَنَّمَ، وَمِنْ عَذَابِ الْقَبْرِ، وَمِنْ فِتْنَةِ الْمَحْيَا وَالْمَمَاتِ، وَمِنْ شَرِّ فِتْنَةِ الْمَسِيحِ الدَّجَّالِ.",
+      "pronunciation_reference": "Allâhoumma innî a‘oûdhou bika min ‘adhâbi jahannam, wa min ‘adhâbil-qabr, wa min fitnatil-mahyâ wal-mamât, wa min charri fitnatil-masîhid-dajjâl.",
+      "status": "awaiting_generation"
+    },
+    {
+      "id": "salam-droite",
+      "text": "Je tourne la tête vers ma droite et je salue. Je dis : السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ.",
+      "pronunciation_reference": "As-salâmou ‘alaykoum wa rahmatoullâh",
+      "status": "awaiting_generation"
+    },
+    {
+      "id": "salam-gauche",
+      "text": "Puis je tourne la tête vers ma gauche et je salue. Je dis : السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ.",
+      "pronunciation_reference": "As-salâmou ‘alaykoum wa rahmatoullâh",
+      "status": "awaiting_generation"
+    },
+    {
+      "id": "raka-suivante",
+      "text": "Je dis : اللَّهُ أَكْبَرُ. Je me relève et je pose ma main droite sur ma main gauche.",
+      "pronunciation_reference": "Allâhou akbar",
+      "status": "awaiting_generation"
+    },
+    {
+      "id": "tachahhoud-final",
+      "text": "Assis, je récite le tachahhoud. Je dis : التَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ، السَّلَامُ عَلَى النَّبِيِّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ.",
+      "pronunciation_reference": "At-tahiyyâtou lillâhi was-salawâtou wat-tayyibât. As-salâmou ‘alan-nabiyyi wa rahmatoullâhi wa barakâtouh. As-salâmou ‘alaynâ wa ‘alâ ‘ibâdillâhis-sâlihîn. Ach-hadou an lâ ilâha illallâh, wa ach-hadou anna Mouhammadan ‘abdouhou wa rasoûlouh.",
+      "status": "generated_integrated",
+      "file": "tachahhoud-complet.mp3"
+    }
+  ]
+}

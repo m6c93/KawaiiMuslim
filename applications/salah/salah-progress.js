@@ -1,0 +1,7 @@
+(()=>{'use strict';
+const key='kmw-salah-journal-v1',sessionKey='kmw-salah-session-v2';let journal={};try{journal=JSON.parse(localStorage.getItem(key))||{}}catch{}
+const read=()=>{try{return JSON.parse(localStorage.getItem(sessionKey))}catch{return null}};
+function persist(){try{localStorage.setItem(key,JSON.stringify(journal))}catch{}}
+function record(id,tried=false){if(!id)return;const item=journal[id]||{tries:0};item.seen=true;item.lastSeen=Date.now();if(tried){item.tries++;item.lastTried=Date.now()}journal[id]=item;persist()}
+window.SalahProgress={record,read,resume(data){try{localStorage.setItem(sessionKey,JSON.stringify(data))}catch{}},clear(){try{localStorage.removeItem(sessionKey)}catch{}},reset(){journal={};persist();this.clear()},review(){return window.SalahContent.lessons.findIndex(d=>!journal[d[4].id]?.tries)},markup(){const all=window.SalahContent.lessons.concat(window.SalahContent.closing),seen=all.filter(d=>journal[d[4].id]?.seen).length,tried=all.filter(d=>journal[d[4].id]?.tries).length;return `<section class="journal"><h3>Les petits pas accomplis</h3><p>${seen} étapes découvertes · ${tried} étapes essayées</p><div class="journal-list">${all.map(d=>{const p=journal[d[4].id],label=!p?.seen?'À découvrir':!p.tries?'Découvert':Date.now()-(p.lastTried||p.last||0)>86400000?'À revoir':'Essayé';return `<div><span>${d[0]}</span><small class="journal-state">${label}</small></div>`}).join('')}</div><p class="note">Ce suivi garde les essais déclarés sur cet appareil. Il ne vérifie pas la maîtrise de la prière.</p></section>`}};
+})();

@@ -1,0 +1,24 @@
+(()=>{'use strict';
+const rows=[
+ ['Je lave mes mains','Je lave mes deux mains jusqu’aux poignets.','Je frotte aussi entre mes doigts.','mains'],
+ ['Je rince ma bouche','Je rince ma bouche avec un peu d’eau, puis je la recrache.','Je prends mon temps.','bouche'],
+ ['Je nettoie mon nez','Je fais entrer doucement un peu d’eau dans mon nez, puis je la rejette.','Je fais ce geste doucement.','nez'],
+ ['Je lave mon visage','Je lave tout mon visage, du front au menton.','Je passe aussi sur les côtés du visage.','visage'],
+ ['Je lave mon bras droit','Je lave mon bras droit, de la main jusqu’au coude inclus.','Je commence par le côté droit.','bras-droit'],
+ ['Je lave mon bras gauche','Je lave mon bras gauche, de la main jusqu’au coude inclus.','L’eau atteint aussi le coude.','bras-gauche'],
+ ['Je passe sur ma tête','Avec mes mains mouillées, je fais un aller-retour sur ma tête.','Du devant de la tête jusqu’à la nuque, puis je reviens au point de départ. Un essuyage.','tete'],
+ ['J’essuie mes oreilles','Avec mes doigts mouillés, j’essuie l’intérieur et l’extérieur de mes oreilles.','Les index passent à l’intérieur et les pouces à l’extérieur.','oreilles'],
+ ['Je lave mon pied droit','Je lave mon pied droit jusqu’à la cheville incluse.','Je fais passer l’eau entre mes orteils.','pied-droit'],
+ ['Je lave mon pied gauche','Je lave mon pied gauche jusqu’à la cheville incluse.','Je lave aussi le talon.','pied-gauche'],
+ ['Mes ablutions sont terminées','J’ai terminé les gestes. J’apprends l’attestation à dire après les ablutions.','Je peux maintenant me préparer pour la prière.','fin']
+];
+const steps=rows.map((r,i)=>[r[0],r[1],i,r[2],{id:'wudu-'+r[3]}]);
+// Display each panel from the original sheet without changing the uploaded image.
+const columns=[[0,320],[330,320],[662,316],[990,322]],bands=[[0,379],[385,390],[780,419]];
+function figure(index){const [x,w]=columns[index%4],[y,h]=bands[Math.floor(index/4)];return `<figure class="wudu-frame" style="aspect-ratio:${w}/${h}"><img src="art/ablutions-guide.png" alt="${steps[index][0]}" width="1312" height="1199" decoding="async" style="width:${1312/w*100}%;left:${-x/w*100}%;top:${-y/h*100}%"></figure>`}
+function planche(){return '<details class="wudu-planche"><summary>Voir la planche entière</summary><a href="art/ablutions-guide.png" target="_blank" rel="noopener"><img src="art/ablutions-guide.png" alt="Planche illustrée des gestes des ablutions" width="1312" height="1199" loading="lazy"></a><p class="note">Touche la planche pour l’agrandir.</p></details>'}
+function words(index){if(index!==10)return '';return `<section class="prayer-words"><span class="eyebrow">APRÈS LES ABLUTIONS</span><h2>L’attestation à apprendre</h2><p class="note">« Al-hamdulillâh » est un remerciement. Voici l’invocation rapportée après les ablutions.</p><p class="arabic" lang="ar" dir="rtl">أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ</p><div class="word-language"><h3>En phonétique</h3><p class="word-phonetic">Ach-hadou an lâ ilâha illallâhou wahdahou lâ charîka lah, wa ach-hadou anna Mouhammadan ‘abdouhou wa rasoûlouh.</p></div><div class="word-language"><h3>Le sens en français</h3><p class="word-translation">J’atteste qu’il n’y a de divinité digne d’adoration qu’Allah, Seul et sans associé, et j’atteste que Muhammad est Son serviteur et Son messager.</p></div><a class="note" href="https://sunnah.com/muslim:234b" target="_blank" rel="noopener">Sahîh Muslim · 234b ↗</a></section>`}
+function source(index){const ref=index===6?['Al-Bukhârî · 185','https://sunnah.com/bukhari:185']:index===7?['Abû Dâwûd · 135','https://sunnah.com/abudawud:135']:index===10?['Muslim · 234b','https://sunnah.com/muslim:234b']:['Al-Bukhârî · 159','https://sunnah.com/bukhari:159'];return `<details class="step-source"><summary>📖 Sources et repères</summary><p><a href="${ref[1]}" target="_blank" rel="noopener">${ref[0]} ↗</a> · <a href="https://quran.com/5/6" target="_blank" rel="noopener">Coran · 5:6 ↗</a></p><p class="note">La planche montre trois lavages. Un lavage complet est aussi rapporté ; les gestes de la tête et des oreilles se font par essuyage.</p><blockquote lang="ar" dir="rtl">تَوَضَّأَ النَّبِيُّ صلى الله عليه وسلم مَرَّةً مَرَّةً</blockquote><p class="note">Ibn ‘Abbâs rapporte que le Prophète ﷺ a accompli les ablutions en lavant chaque partie une fois.</p><a href="https://sunnah.com/bukhari:157" target="_blank" rel="noopener">Al-Bukhârî · 157 ↗</a></details>`}
+try{if(!localStorage.getItem('kmw-salah-wudu-illustrated-v1')){const old=window.SalahProgress.read();if(old?.mode==='water')window.SalahProgress.resume({...old,step:[3,4,6,8][Number(old.step)]??0});localStorage.setItem('kmw-salah-wudu-illustrated-v1','1')}}catch{}
+window.SalahWudu={steps,figure,planche,words,source};
+})();

@@ -1,0 +1,127 @@
+{
+  "requested_voice": "Maman V4",
+  "provider": "ElevenLabs",
+  "status": "generated",
+  "items": [
+    {
+      "id": "preparer",
+      "text": "Je me tourne vers la qibla et je me tiens debout. Je regarde vers l’endroit où je vais me prosterner.",
+      "file": "preparer.mp3",
+      "duration": 6.348,
+      "sha256": "b2d12367a2d34a8fe3ef8d91eea6f89fa5d4b803a5ef1da96895142802674866"
+    },
+    {
+      "id": "takbir",
+      "text": "Je lève les mains et je dis le takbîr. Les mains arrivent vers les épaules ou les oreilles.",
+      "file": "takbir.mp3",
+      "duration": 5.721,
+      "sha256": "7869c964c1c297780aa287c6b95942809b4406fcc929da3cbe5e747a92546dcc"
+    },
+    {
+      "id": "mains",
+      "text": "Je pose ma main droite sur ma main gauche, sur la poitrine. Je prends mon temps avant la récitation.",
+      "file": "mains.mp3",
+      "duration": 6.531,
+      "sha256": "5b03491cb3307ec82a39894265454fab3696e402496f1d16eab6d460ffabc292"
+    },
+    {
+      "id": "fatiha",
+      "text": "Je reste debout et je récite Al-Fâtiha, un verset après l’autre. Al-Fâtiha se récite à chaque rak’a.",
+      "file": "fatiha.mp3",
+      "duration": 7.628,
+      "sha256": "36bb8f9775f9e1ca0104f39f127e48f62094fc3e44da2d92af46c23730990137"
+    },
+    {
+      "id": "courte-sourate",
+      "text": "Dans les deux premières rak’as, je peux réciter une sourate après Al-Fâtiha. Al-Ikhlâs est un exemple : ce n’est pas la seule sourate possible.",
+      "file": "courte-sourate.mp3",
+      "duration": 9.247,
+      "sha256": "030ba81b2ed77837efaf574b72816087a6449067e998389dbf332d7efaa40c8b"
+    },
+    {
+      "id": "inclinaison",
+      "text": "Je dis : اللَّهُ أَكْبَرُ. Puis je m’incline, les mains sur les genoux, le dos droit. Dans cette position, je dis : سُبْحَانَ رَبِّيَ الْعَظِيمِ. Je répète cette parole trois fois, calmement.",
+      "file": "inclinaison-paroles.mp3",
+      "duration": 14.367,
+      "sha256": "e1bbad60d40d6361864968d4a38c360d6bf1cbea377f1659a3e2f134637f07df",
+      "generated_on": "2026-10-20"
+    },
+    {
+      "id": "redressement",
+      "text": "Je me relève et je reste bien droit, sans me précipiter. En me relevant : Sami‘allâhou liman hamidah. Debout : Rabbanâ wa lakal-hamd. Le guide décrit ici l’apprentissage de la prière seul.",
+      "file": "redressement.mp3",
+      "duration": 15.229,
+      "sha256": "6f155df2dca8c9540fd67c37da9b6733b4e0d9ad31fdcb9036dc84db02b12f8c"
+    },
+    {
+      "id": "prosternation",
+      "text": "Je dis le takbîr et je me prosterne, le front et le nez au sol. Je pose les mains avant les genoux. Les orteils restent en appui. Je répète cette parole trois fois.",
+      "file": "prosternation.mp3",
+      "duration": 11.729,
+      "sha256": "bbbd1e3386729d2c911a529ad4a44756a092ff5cae7829332450b2610cca65e3"
+    },
+    {
+      "id": "assise",
+      "text": "Je dis le takbîr, je me relève et je m’assieds entre les deux prosternations. Je prends une pause tranquille et je demande pardon.",
+      "file": "assise.mp3",
+      "duration": 8.594,
+      "sha256": "50a2aaddec96e1f2939af61d15294463a301e5cbec452f8b0d94166781b4f160"
+    },
+    {
+      "id": "deuxieme-prosternation",
+      "text": "Je dis le takbîr et je me prosterne une deuxième fois. Ensuite, les étapes dépendent du nombre de rak’as de la prière.",
+      "file": "deuxieme-prosternation.mp3",
+      "duration": 7.967,
+      "sha256": "c2e54e80269b5a375f093985479dcd82161e0841c949ffd807f4f505ba22f25d"
+    },
+    {
+      "id": "tachahhoud",
+      "text": "Assis, je récite le tachahhoud. Je dis : التَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ، السَّلَامُ عَلَى النَّبِيِّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ.",
+      "file": "tachahhoud-complet.mp3",
+      "duration": 22.596,
+      "sha256": "a0491de8f9015187f8c909f59ca7616682bd63dca53776e985ca43558903b93b",
+      "generated_on": "2026-10-20"
+    },
+    {
+      "id": "salawat",
+      "text": "Toujours assis, j’apprends la prière sur le Prophète. Un petit passage à la fois.",
+      "file": "salawat.mp3",
+      "duration": 5.251,
+      "sha256": "25173a71fcd7f8d88a477e157bd44413d8337fe3012202ee3ecf626c1091e8c1"
+    },
+    {
+      "id": "protection",
+      "text": "À la fin, je demande la protection d’Allah. Cette invocation se dit avant les salutations finales.",
+      "file": "protection.mp3",
+      "duration": 6.609,
+      "sha256": "82741d2c80b8adbe53da285d33de8f96f8fee0f0c7a568b410040a1e039412e5"
+    },
+    {
+      "id": "salam-droite",
+      "text": "Je tourne la tête vers ma droite et je salue. Sa droite se trouve à gauche de ton écran.",
+      "file": "salam-droite.mp3",
+      "duration": 5.642,
+      "sha256": "d64a807ec5383a92e791e6ed2fc851cc96cea05d5d9a96e5d8c5fb512634d701"
+    },
+    {
+      "id": "salam-gauche",
+      "text": "Puis je tourne la tête vers ma gauche et je salue. Sa gauche se trouve à droite de ton écran.",
+      "file": "salam-gauche.mp3",
+      "duration": 5.956,
+      "sha256": "ffe772d83a950bc7d843da2f5f1d959dbbebb921fc54f819237ef704a7996b4e"
+    },
+    {
+      "id": "tachahhoud-final",
+      "text": "Assis, je récite le tachahhoud. Je dis : التَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ، السَّلَامُ عَلَى النَّبِيِّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ.",
+      "file": "tachahhoud-complet.mp3",
+      "duration": 22.596,
+      "sha256": "a0491de8f9015187f8c909f59ca7616682bd63dca53776e985ca43558903b93b",
+      "generated_on": "2026-10-20",
+      "shared_recording_with": "tachahhoud"
+    }
+  ],
+  "voice": "mama aya",
+  "model": "Eleven v4",
+  "generated_on": "2026-10-20",
+  "delivery": "Static MP3 files generated through the authenticated ElevenLabs web interface; no browser credential or API key is included."
+}
