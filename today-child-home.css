@@ -467,8 +467,8 @@ html[data-km-gender="boy"] button:focus-visible { outline-color: #287c7a; }
 /* Compact discovery card on a phone. */
 @media(max-width:680px){.weekly-moments>.today-salat{display:block;min-width:0}.today-salat-intro{grid-template-columns:100px minmax(0,1fr);gap:13px}.today-salat-figure img{height:180px}.today-salat-cta{width:100%;white-space:normal;text-align:center}.today-salat-copy,.today-salat-words{min-width:0}.today-salat-arabic{overflow-wrap:break-word}}
 
-/* Keep the Salah discovery directly below the weekly invocation on every screen. */
-.weekly-moments>.weekly-dua{grid-column:1;grid-row:1}.weekly-moments>.today-salat{grid-column:1;grid-row:2;margin:0}.weekly-moments>.weekly-prophet{grid-column:2;grid-row:1 / span 2}
+/* Desktop: invocation on the left; prophet then Salah on the right. */
+.weekly-moments>.weekly-dua{grid-column:1;grid-row:1 / span 2}.weekly-moments>.today-salat{grid-column:2;grid-row:2;margin:0}.weekly-moments>.weekly-prophet{grid-column:2;grid-row:1}
 @media(max-width:900px){.weekly-moments>.weekly-dua,.weekly-moments>.today-salat,.weekly-moments>.weekly-prophet{grid-column:1;grid-row:auto}.weekly-moments>.today-salat{order:0}.weekly-moments>.today-salat .today-salat-intro{grid-template-columns:100px minmax(0,1fr);gap:13px}.weekly-moments>.today-salat .today-salat-figure img{height:180px}.weekly-moments>.today-salat .today-salat-copy h2{font-size:27px}}
 
 .weekly-moments>.today-salat .today-salat-intro{grid-template-columns:100px minmax(0,1fr);gap:16px}.weekly-moments>.today-salat .today-salat-figure img{height:190px}.weekly-moments>.today-salat .today-salat-copy h2{font-size:29px}.weekly-moments>.today-salat .today-salat-copy>p{font-size:13px}.weekly-moments>.today-salat .today-salat-cta{font-size:13px;padding:12px 16px}.weekly-moments>.today-salat .today-salat-arabic{font-size:25px}
