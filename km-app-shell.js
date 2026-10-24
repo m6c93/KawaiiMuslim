@@ -36,3 +36,46 @@ addEventListener('popstate',()=>{const key=new URLSearchParams(location.search).
 const initial=items.some(i=>i[0]===params.get('section'))?params.get('section'):'today';document.body.dataset.kmSection=initial;
 navigate(initial,{historyMode:'replace',anchor:params.get('anchor')||''}).then(async()=>{if(!active)return;for(const item of items){if(item[0]===initial)continue;await new Promise(r=>setTimeout(r,160));try{await load(item[0]).promise}catch{}}});
 })();
+
+/* Keep the application navigation outside the book, including nested readers. */
+(()=>{
+  'use strict';
+  const host=document.getElementById('kmAppViews');
+  if(!host)return;
+  const bar=document.createElement('div');bar.className='km-reader-return';bar.hidden=true;
+  const back=document.createElement('button');back.type='button';back.textContent='← Retour à la bibliothèque';
+  back.addEventListener('click',()=>window.KMAppShell.navigate('library',{force:true}));
+  bar.append(back);document.body.append(bar);
+  const bookPath=path=>/^\/(?:books\/(?!colorie-ecris-apprends(?:\.html)?$)[^/]+(?:\.html)?|uploads\/[^/]+\.html|Livre\.dc(?:\.html)?)$/i.test(decodeURIComponent(path));
+  function visible(frame){
+    if(frame.hidden||frame.closest('[hidden],[aria-hidden="true"]'))return false;
+    const win=frame.ownerDocument.defaultView,style=win.getComputedStyle(frame),rect=frame.getBoundingClientRect();
+    return style.display!=='none'&&style.visibility!=='hidden'&&rect.width>0&&rect.height>0;
+  }
+  function reading(frame,depth=0){
+    if(depth>4||!visible(frame))return false;
+    try{
+      const win=frame.contentWindow,doc=frame.contentDocument;if(!doc)return false;
+      if(bookPath(win.location.pathname))return true;
+      return [...doc.querySelectorAll('iframe')].some(child=>{
+        const r=child.getBoundingClientRect();
+        // Small book previews in the catalogue do not enter immersive reading.
+        return r.width>=win.innerWidth*.65&&r.height>=win.innerHeight*.6&&reading(child,depth+1);
+      });
+    }catch{return false;}
+  }
+  function sync(){
+    const frame=host.querySelector('.km-app-view.is-active');
+    const active=!!frame&&reading(frame);
+    document.body.classList.toggle('km-book-reading',active);
+    bar.hidden=!active;
+    const nav=document.querySelector('.km-app-nav');
+    if(nav){nav.inert=active;if(active)nav.setAttribute('aria-hidden','true');else if(!document.body.classList.contains('km-immersive-reader'))nav.setAttribute('aria-hidden','false');}
+  }
+  host.addEventListener('load',sync,true);
+  new MutationObserver(sync).observe(host,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+  window.addEventListener('pageshow',sync);window.addEventListener('resize',sync);
+  // A child document can open or close a nested book without changing the host DOM.
+  window.setInterval(()=>{if(!document.hidden)sync()},400);
+  sync();
+})();

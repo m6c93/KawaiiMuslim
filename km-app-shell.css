@@ -4,3 +4,11 @@
 .km-continuous-app.km-has-guest-actions .km-guest-actions{position:fixed;top:0;left:0;right:0}
 .km-continuous-app.km-has-guest-actions #kmAppViews,.km-continuous-app.km-has-guest-actions .km-app-start{top:calc(var(--km-guest-bar-height) + env(safe-area-inset-top,0px))}
 .km-continuous-app.km-has-guest-actions.km-immersive-reader #kmAppViews{top:0}
+
+/* Leave a dedicated exit row, never controls over the pages. */
+body.km-book-reading .km-app-nav,body.km-book-reading .km-guest-actions{display:none!important}
+body.km-book-reading #kmAppViews{top:calc(48px + env(safe-area-inset-top,0px))!important;bottom:0!important}
+.km-reader-return{position:fixed;z-index:1100;inset:0 0 auto;box-sizing:border-box;height:calc(48px + env(safe-area-inset-top,0px));padding:calc(4px + env(safe-area-inset-top,0px)) 12px 4px;display:flex;align-items:center;background:#fffaf2;border-bottom:1px solid #e7d5df}
+.km-reader-return[hidden]{display:none}
+.km-reader-return button{font:800 13px Nunito,system-ui,sans-serif;color:#69455a;background:#fff;border:1px solid #dbc7d1;border-radius:12px;padding:8px 14px;min-height:40px;cursor:pointer}
+.km-reader-return button:focus-visible{outline:3px solid #467c70;outline-offset:2px}
