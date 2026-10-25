@@ -1,4 +1,18 @@
 (()=>{'use strict';
+// The iOS app owns its navigation bar and needs top-level section pages.
+if(window.webkit?.messageHandlers?.kmShell){
+ if(/\/Application\.dc(?:\.html)?$/i.test(location.pathname)){
+  const params=new URLSearchParams(location.search);
+  const routes={today:"Aujourd%27hui.dc.html",library:'Bibliotheque%20Kawaii%20Muslim.dc.html',workshop:'Atelier.dc.html',invocations:'Safe%20Place.dc.html',apps:'Applications.dc.html'};
+  const target=new URL(routes[params.get('section')]||routes.today,location.href);
+  for(const key of ['guest','preview','theme'])if(params.has(key))target.searchParams.set(key,params.get(key));
+  let guest=false;try{guest=sessionStorage.getItem('km-guest-mode')==='1'}catch{}
+  if(guest)target.searchParams.set('guest','1');
+  target.hash=params.get('anchor')||location.hash;
+  location.replace(target.href);
+ }
+ return;
+}
 const sections={"/aujourd'hui.dc":"today","/aujourd-hui.dc":"today","/bibliotheque kawaii muslim.dc":"library","/atelier.dc":"workshop","/safe place.dc":"invocations","/applications.dc":"apps"};
 const normalized=path=>decodeURIComponent(path).replace(/\.html$/i,'').toLowerCase();
 const params=new URLSearchParams(location.search),section=sections[normalized(location.pathname)];
