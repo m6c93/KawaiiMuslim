@@ -68,7 +68,9 @@ navigate(initial,{historyMode:'replace',anchor:params.get('anchor')||''}).then(a
     const frame=host.querySelector('.km-app-view.is-active');
     const active=!!frame&&reading(frame);
     document.body.classList.toggle('km-book-reading',active);
-    bar.hidden=!active;
+    let clean=false;try{clean=active&&frame.contentDocument.documentElement.classList.contains("km-reader-clean")}catch{}
+    document.body.classList.toggle("km-clean-book-reading",clean);
+    bar.hidden=!active||clean;
     const nav=document.querySelector('.km-app-nav');
     if(nav){nav.inert=active;if(active)nav.setAttribute('aria-hidden','true');else if(!document.body.classList.contains('km-immersive-reader'))nav.setAttribute('aria-hidden','false');}
   }

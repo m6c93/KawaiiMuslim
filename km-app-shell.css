@@ -12,3 +12,7 @@ body.km-book-reading #kmAppViews{top:calc(48px + env(safe-area-inset-top,0px))!i
 .km-reader-return[hidden]{display:none}
 .km-reader-return button{font:800 13px Nunito,system-ui,sans-serif;color:#69455a;background:#fff;border:1px solid #dbc7d1;border-radius:12px;padding:8px 14px;min-height:40px;cursor:pointer}
 .km-reader-return button:focus-visible{outline:3px solid #467c70;outline-offset:2px}
+
+/* A reader with its own exit control needs no second header or subscription overlay. */
+body.km-clean-book-reading #kmAppViews{inset:0!important}
+body.km-clean-book-reading .km-reader-return,body.km-book-reading .km-guest-pill{display:none!important}
