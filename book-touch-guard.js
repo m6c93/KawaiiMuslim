@@ -65,6 +65,17 @@
     .km-reader-clean .drawer{z-index:100!important}.km-reader-clean .scrim{z-index:99!important}
     .km-reader-clean .book:not(.is-open) .cover-stage{inset:0 25%!important;width:50%!important}
     @media(prefers-reduced-motion:reduce){.km-reader-clean .topbar,.km-reader-clean .nav{transition:none!important}}
+
+    .km-landscape-prompt{box-sizing:border-box;width:calc(100% - 32px);max-width:350px;max-height:calc(100dvh - 32px);overflow:auto;margin:auto;padding:28px 22px 18px;border:1px solid #e9d8ce;border-radius:26px;background:#fffaf3;color:#28483d;text-align:center;box-shadow:0 20px 60px #17382d40;font:15px/1.5 "Trebuchet MS",system-ui,sans-serif}
+    .km-landscape-prompt::backdrop{background:#17382d80;backdrop-filter:blur(5px)}
+    .km-landscape-prompt svg{display:block;width:82px;height:68px;margin:0 auto 15px;color:#387461}
+    .km-landscape-prompt h2{font-size:23px;line-height:1.2;margin:0 0 10px}
+    .km-landscape-prompt p{margin:0 0 18px;color:#62786d}
+    .km-landscape-prompt button{width:100%;min-height:48px;border:0;border-radius:14px;font:700 14px "Trebuchet MS",system-ui,sans-serif;cursor:pointer}
+    .km-landscape-prompt .landscape-start{background:#a95579;color:#fff}
+    .km-landscape-prompt .landscape-continue{margin-top:5px;background:transparent;color:#486457}
+    .km-landscape-prompt button:focus-visible{outline:3px solid #d6ac51;outline-offset:3px}
+    .km-landscape-prompt .landscape-status{font-size:13px;margin:12px 0 0}
     `;
     document.head.append(style);
     const counter=document.createElement('span');counter.className='reader-page-count';counter.setAttribute('aria-live','polite');toolbar.append(counter);
@@ -87,6 +98,42 @@
     document.addEventListener('fullscreenchange',()=>{fit();syncFullscreen();show();});window.addEventListener('resize',fit);window.visualViewport?.addEventListener('resize',fit);
     document.addEventListener('keydown',e=>{if(e.key==='Escape')root.classList.remove('reader-focus-mode');});
     fit();show();syncFullscreen();
+
+    // Suggest landscape once per opening; never block portrait reading.
+    const portraitReading=matchMedia('(orientation: portrait)');
+    const handheld=()=>navigator.maxTouchPoints>0||matchMedia('(pointer: coarse)').matches;
+    let landscapeOffered=false,orientationLocked=false,landscapeDialog=null;
+    function releaseOrientation(){if(orientationLocked){try{screen.orientation?.unlock?.()}catch{}orientationLocked=false}}
+    function offerLandscape(){
+      const portrait=portraitReading.matches;
+      if(!portrait){if(landscapeDialog?.open)landscapeDialog.close();landscapeOffered=true;return;}
+      if(landscapeOffered||!handheld()||!matchMedia('(max-width: 1024px)').matches)return;
+      landscapeOffered=true;
+      landscapeDialog=document.createElement('dialog');
+      landscapeDialog.className='km-landscape-prompt';
+      landscapeDialog.setAttribute('aria-labelledby','km-landscape-title');
+      landscapeDialog.innerHTML='<svg viewBox="0 0 90 72" fill="none" aria-hidden="true"><rect x="15" y="26" width="62" height="35" rx="7" fill="#edf3e9" stroke="currentColor" stroke-width="3"/><path d="M68 35v17M22 15c14-13 38-9 47 2m-1-9 2 11-11-2" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><h2 id="km-landscape-title">Tourne ton téléphone</h2><p>En paysage, les deux pages sont plus grandes et plus faciles à lire.</p><button type="button" class="landscape-start">Lire en paysage</button><button type="button" class="landscape-continue">Continuer en portrait</button><p class="landscape-status" role="status" hidden></p>';
+      document.body.append(landscapeDialog);
+      landscapeDialog.querySelector('.landscape-continue').onclick=()=>landscapeDialog.close();
+      landscapeDialog.addEventListener('close',show);
+      landscapeDialog.querySelector('.landscape-start').onclick=async()=>{
+        const button=landscapeDialog.querySelector('.landscape-start'),message=landscapeDialog.querySelector('.landscape-status');
+        button.disabled=true;
+        try{
+          if(!document.fullscreenElement&&root.requestFullscreen){try{await root.requestFullscreen()}catch{}}
+          if(screen.orientation?.lock){try{await screen.orientation.lock('landscape');orientationLocked=true}catch{}}
+          offerLandscape();fit();show();syncFullscreen();
+          if(landscapeDialog.open){message.textContent='Tourne le téléphone sur le côté. Si besoin, déverrouille sa rotation.';message.hidden=false;}
+        }finally{button.disabled=false}
+      };
+      landscapeDialog.showModal();
+    }
+    portraitReading.addEventListener?.('change',offerLandscape);
+    window.addEventListener('resize',offerLandscape);
+    document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)releaseOrientation();offerLandscape();});
+    window.addEventListener('pagehide',releaseOrientation);
+    offerLandscape();
+
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
