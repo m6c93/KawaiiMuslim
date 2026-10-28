@@ -632,12 +632,12 @@ class Component extends DCLogic {
       const isAlphabetBook = normalizedTitle.includes('colorie')
         && normalizedTitle.includes('apprends')
         && normalizedTitle.includes('arabe');
-      const discoveryId = normalizedTitle === 'tawakkul' ? 'tawakkul' : isMiraclesBook ? 'miracles' : coloringSlug === 'hijabi-girls' ? 'hijabi' : '';
-      const isDiscovery = guestMode && Boolean(discoveryId);
+      const discoveryId = isInvocationsBook(b) ? 'invocations' : normalizedTitle === 'tawakkul' ? 'tawakkul' : isMiraclesBook ? 'miracles' : coloringSlug === 'hijabi-girls' ? 'hijabi' : '';
+      const isDiscovery = (discoveryId === 'invocations' ? !subscribed : guestMode) && Boolean(discoveryId);
       const isPreview = Boolean(b.preview);
       return {
         ...b,
-        sub: isDiscovery ? (discoveryId === "hijabi" ? "3 coloriages offerts · à garder sur cet appareil" : "5 premières pages offertes") : b.sub,
+        sub: isDiscovery ? (discoveryId === "invocations" ? "10 premières pages offertes · la suite avec Premium" : discoveryId === "hijabi" ? "3 coloriages offerts · à garder sur cet appareil" : "5 premières pages offertes") : b.sub,
         url: guestMode && isPreview ? "Safe%20Place.dc.html?guest=1" : isDiscovery ? `books/${discoveryId}-decouverte.html?guest=1` : isAlphabetBook
           ? 'books/colorie-ecris-apprends.html'
           : isMiraclesBook
