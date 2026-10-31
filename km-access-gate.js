@@ -4,6 +4,17 @@
   if (window.__kmAccessGateStarted) return;
   window.__kmAccessGateStarted = true;
 
+  // Kawaii Salah is fully public, including links from the former discovery page.
+  var freeSalahPaths = new Set([
+    "/applications/salah",
+    "/applications/salah/",
+    "/applications/salah/index",
+    "/applications/salah/index.html",
+    "/applications/salah/decouverte",
+    "/applications/salah/decouverte.html"
+  ]);
+  if (freeSalahPaths.has(decodeURIComponent(window.location.pathname))) return;
+
   var root = document.documentElement;
   var localPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
     && new URLSearchParams(window.location.search).get("preview") === "1";

@@ -1,20 +1,13 @@
-(()=>{'use strict';
-const app=document.querySelector('#app');
-const subscribe='/presentation.html#tarifs';
-const lock='<span class="premium-lock"><span aria-hidden="true">🔒</span> Premium</span>';
-const card=(title,description,icon)=>`<a class="tile premium-option" href="${subscribe}" aria-label="${title} · Premium · Voir l’abonnement"><span class="icon" aria-hidden="true">${icon}</span>${lock}<h3>${title}</h3><p>${description}</p><small>Débloquer avec Premium →</small></a>`;
-app.innerHTML=`<section class="hero"><div><span class="pill">Kawaii Salah</span><h1>J’apprends la prière,<br>à mon rythme.</h1><p>Découvre la prière en images, puis les parcours guidés avec Premium.</p><div class="start-options"><a class="primary" href="#overviewTitle">Voir les 4 rakʿat gratuitement →</a><a class="quiet premium-option" href="${subscribe}">🔒 Je découvre les mouvements</a><a class="quiet premium-option" href="${subscribe}">🔒 Je m’entraîne</a></div></div><div class="scene"><div class="pose-stage"><img class="pose-image" src="art/folded.webp" alt="Le petit guide sur son tapis de prière" width="1086" height="1448"></div></div></section><section class="discovery-free"><span class="pill">Gratuit · Sans abonnement</span><h2>Une prière de 4 rak‘as, en images</h2><p>Toutes les étapes de Dhohr et leurs explications simples, sur une même page.</p><a class="primary" href="#overviewTitle">Je regarde les images →</a></section><section class="cards" aria-label="Tous les parcours de Kawaii Salah">${card('Les mouvements','Je découvre les positions une par une, avec la voix pour me guider.','🕌')}${card('Avant de prier','Les ablutions illustrées, geste après geste.','💧')}${card('Je retrouve !','Je remets les gestes dans le bon ordre.','🧩')}${card('Pour terminer','Le tachahhoud, les invocations et le salam.','☀️')}</section><section class="prayer-picker"><span class="eyebrow">LES ÉTAPES DANS LE BON ORDRE</span><h2>Ma prière guidée</h2><p>Je choisis une prière pour apprendre son enchaînement avec la voix.</p><div class="prayer-grid">${window.SalahPrayers.prayers.map(p=>`<a class="prayer-choice premium-option" href="${subscribe}" aria-label="${p.name} · ${p.count} rakʿat · Premium · Voir l’abonnement"><strong>${p.name}</strong><span>${p.count} rakʿat</span>${lock}</a>`).join('')}</div></section><section class="surah-entry"><div><span class="eyebrow">UN VERSET À LA FOIS</span><h2>Mes sourates</h2><p>J’écoute, je répète, puis j’essaie sans le texte.</p></div><div class="surah-buttons">${window.SalahContent.surahs.map(s=>`<a class="quiet premium-option" href="${subscribe}" aria-label="${s.name} · Premium · Voir l’abonnement">${s.name}<small>${s.count} versets · 🔒 Premium</small></a>`).join('')}</div></section><section class="discovery-family">${card('En famille','Je retrouve les étapes découvertes, essayées et à revoir.','🌷')}</section>${window.SalahOverview.render()}`;
-const intro=app.querySelector('.overview-intro');
-intro.querySelector('.eyebrow').textContent='ACCÈS GRATUIT · SANS ABONNEMENT';
-intro.querySelector('.note:not(.repetition-source)').textContent='Les 4 rakʿat et leurs explications restent gratuites. Touche une image avec le cadenas pour découvrir l’abonnement et débloquer le guidage complet.';
-for(const button of app.querySelectorAll('[data-overview-step]')){const card=document.createElement('div');card.className=button.className;card.innerHTML=button.innerHTML;
- const image=card.querySelector('.overview-image'),link=document.createElement('a');
- link.className='overview-image overview-premium-image premium-option';
- link.href=subscribe;
- link.setAttribute('aria-label',button.getAttribute('aria-label').replace('Voir le détail','Premium : voir l’abonnement'));
- link.innerHTML=image.innerHTML+'<span class="overview-image-lock" aria-hidden="true">🔒</span>';
- image.replaceWith(link);button.replaceWith(card)}
-for(const note of app.querySelectorAll('.overview-detail'))note.textContent='Assise finale en tawarruk : les détails s’apprennent dans le parcours guidé Premium.';
-app.querySelector('.overview-end').innerHTML='<p>Pour apprendre chaque geste avec le guidage vocal, les paroles et les sourates, retrouve les parcours complets dans Kawaii Salah Premium.</p><a class="primary" href="/presentation.html#tarifs">🔒 Débloquer Kawaii Salah Premium →</a><p class="note">Déjà abonné à KMW ? Connecte-toi pour accéder aux parcours.</p>';
-window.SalahOverview.bind(app,()=>{});
+(function () {
+  "use strict";
+
+  // Keep old bookmarks and cached discovery pages pointing to the full, free app.
+  if (window.__salahFreeRedirect) return;
+  if (!/\/applications\/salah\/decouverte(?:\.html)?\/?$/.test(window.location.pathname)) return;
+  window.__salahFreeRedirect = true;
+
+  var destination = new URL("/applications/salah/", window.location.href);
+  destination.search = window.location.search;
+  destination.hash = window.location.hash;
+  window.location.replace(destination.href);
 })();
