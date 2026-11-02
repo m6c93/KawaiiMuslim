@@ -96,6 +96,21 @@
     .km-reader-clean.km-reader-turned .drawer{width:min(520px,94%)}
     .km-reader-clean.km-reader-turned #zoomDialog{position:fixed;inset:50% auto auto 50%;margin:0;box-sizing:border-box;width:calc(var(--km-reader-width) - 24px);height:calc(var(--km-reader-height) - 24px);max-width:none;max-height:none;transform:translate(-50%,-50%) rotate(90deg)}
     .km-reader-clean.km-reader-turned #zoomPages img{width:100%;max-width:100%}
+
+    /* Reserve a real control area on phones instead of placing controls over
+       the pages. A wrapped toolbar also fits small screens and the last page. */
+    .km-reader-clean.km-reader-mobile .reader{box-sizing:border-box!important;padding:0 0 var(--km-controls-reserve,90px)!important}
+    .km-reader-clean.km-reader-mobile .topbar{bottom:max(12px,env(safe-area-inset-bottom))!important;box-sizing:border-box!important;height:auto!important;min-height:66px!important;max-width:calc(var(--km-reader-width) - 24px)!important;flex-wrap:wrap!important;justify-content:center!important;gap:8px!important;padding:8px!important;border-radius:18px!important}
+    .km-reader-clean.km-reader-mobile .home,.km-reader-clean.km-reader-mobile .icon{width:48px!important;height:48px!important;min-width:48px!important;flex:0 0 48px!important;display:grid!important;place-items:center!important;font-size:28px!important;line-height:1!important;border-radius:12px!important;background:#ffffff14!important}
+    .km-reader-clean.km-reader-mobile .reader-page-count{flex:0 0 auto;min-width:62px;font-size:14px;line-height:1.3;padding:0 3px}
+    .km-reader-clean.km-reader-mobile .reader-rotate{min-width:108px;min-height:48px;padding:0 14px;border-radius:13px;font-size:14px;line-height:1.3}
+    .km-reader-clean.km-reader-mobile .reader-unlock{display:flex;align-items:center;justify-content:center;min-height:48px;box-sizing:border-box;padding:0 14px;font-size:14px}
+    .km-reader-clean.km-reader-mobile .topbar [hidden]{display:none!important}
+    .km-reader-clean.km-reader-mobile.reader-controls-hidden .topbar{opacity:1!important;pointer-events:auto!important}
+    .km-reader-clean.km-reader-mobile:not(.km-reader-landscape) .nav{top:calc((var(--km-reader-height) - var(--km-controls-reserve))/2)!important}
+    .km-reader-clean.km-reader-mobile.km-reader-landscape .reader{padding:0 0 0 var(--km-controls-reserve,100px)!important}
+    .km-reader-clean.km-reader-mobile.km-reader-landscape .topbar{inset:50% auto auto max(12px,env(safe-area-inset-left))!important;transform:translateY(-50%)!important;flex-direction:column!important;flex-wrap:nowrap!important;min-height:0!important;max-height:calc(var(--km-reader-height) - 24px)!important;overflow-y:auto}
+    .km-reader-clean.km-reader-mobile.km-reader-landscape #prevBtn{left:calc(var(--km-controls-reserve) - 16px)!important}
     `;
     document.head.append(style);
     const counter=document.createElement('span');counter.className='reader-page-count';counter.setAttribute('aria-live','polite');toolbar.append(counter);
@@ -119,14 +134,24 @@
       const turned=portrait&&manualLandscape;
       root.classList.toggle('km-reader-turned',turned);
       root.classList.toggle('km-reader-portrait',portrait&&!turned);
-      const width=turned?h:w,height=turned?w:h,pageWidth=Math.min(width,height*2);
+      const width=turned?h:w,height=turned?w:h;
+      const mobileControls=handheld||Math.min(w,h)<600;
+      const sideControls=mobileControls&&width>height;
+      root.classList.toggle('km-reader-mobile',mobileControls);
+      root.classList.toggle('km-reader-landscape',sideControls);
       root.style.setProperty('--km-reader-width',width+'px');root.style.setProperty('--km-reader-height',height+'px');
-      root.style.setProperty('--km-page-width',pageWidth+'px');root.style.setProperty('--km-page-height',pageWidth/2+'px');
       rotate.hidden=!(handheld||w<700)||!portrait;
       rotate.textContent=turned?'↶ Portrait':'↻ Paysage';
       rotate.setAttribute('aria-label',turned?'Revenir en portrait':'Faire pivoter le livre en paysage');
       rotate.setAttribute('aria-pressed',String(turned));
       full.hidden=width<600;
+      // Offset sizes stay in reader coordinates when the body is rotated.
+      // In landscape, the side margin preserves more space for readable pages.
+      const edge=Math.max(12,parseFloat(getComputedStyle(toolbar)[sideControls?'left':'bottom'])||0);
+      const reserve=mobileControls?(sideControls?toolbar.offsetWidth:toolbar.offsetHeight)+edge+20:0;
+      const pageWidth=Math.min(Math.max(80,width-(sideControls?reserve:0)),Math.max(80,height-(sideControls?0:reserve))*2);
+      root.style.setProperty('--km-controls-reserve',reserve+'px');
+      root.style.setProperty('--km-page-width',pageWidth+'px');root.style.setProperty('--km-page-height',pageWidth/2+'px');
     }
     function queueFit(){
       cancelAnimationFrame(fitFrame);clearTimeout(fitLater);
@@ -137,7 +162,7 @@
     rotate.addEventListener('click',()=>{manualLandscape=!manualLandscape;dismissLandscapeTip();fit();show();});
     screen.orientation?.addEventListener?.('change',queueFit);
     window.addEventListener('pageshow',queueFit);
-    if(window.ResizeObserver)new ResizeObserver(queueFit).observe(root);
+    if(window.ResizeObserver){const observer=new ResizeObserver(queueFit);observer.observe(root);observer.observe(toolbar);}
     let turnGesture=null;
     book.addEventListener('touchstart',event=>{
       if(event.touches.length!==1){if(turnGesture)turnGesture.pinch=true;return;}
