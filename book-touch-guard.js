@@ -30,7 +30,7 @@
   if (!/\/books\/invocations-(?:aya-ali|decouverte)(?:\.html)?$/.test(location.pathname)) return;
   function loadPaperTurn() {
     const script = document.createElement('script');
-    script.src = '/invocation-page-turn.js?v=trimmed-paper-3';
+    script.src = '/invocation-page-turn.js?v=uniform-paper-4';
     document.head.appendChild(script);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadPaperTurn, { once: true });
@@ -58,7 +58,7 @@
     root.classList.add('km-reader-clean');
     const style=document.createElement('style');
     style.textContent=`
-    html.km-reader-clean,html.km-reader-clean body{margin:0!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#fbfcf7!important}
+    html.km-reader-clean,html.km-reader-clean body{margin:0!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#b8cec5!important}
     .km-reader-clean .reader{position:fixed!important;inset:0!important;width:100%!important;height:100dvh!important;padding:0!important;display:grid!important;place-items:center!important}
     .km-reader-clean .book-shell{width:100%!important;height:100%!important;min-height:0!important;display:grid!important;place-items:center!important;padding:0!important;gap:0!important}
     .km-reader-clean .book{width:var(--km-page-width)!important;height:var(--km-page-height)!important;max-width:none!important;max-height:none!important;aspect-ratio:2/1!important;filter:none!important}
@@ -109,7 +109,9 @@
     .km-reader-clean.km-reader-mobile.reader-controls-hidden .topbar{opacity:1!important;pointer-events:auto!important}
     .km-reader-clean.km-reader-mobile:not(.km-reader-landscape) .nav{top:calc((var(--km-reader-height) - var(--km-controls-reserve))/2)!important}
     .km-reader-clean.km-reader-mobile.km-reader-landscape .reader{padding:0 var(--km-controls-reserve,100px)!important}
-    .km-reader-clean.km-reader-mobile.km-reader-landscape .topbar{inset:50% auto auto max(12px,env(safe-area-inset-left))!important;transform:translateY(-50%)!important;flex-direction:column!important;flex-wrap:nowrap!important;min-height:0!important;max-height:calc(var(--km-reader-height) - 24px)!important;overflow-y:auto}
+    .km-reader-clean.km-reader-mobile.km-reader-landscape .topbar{inset:50% auto auto max(12px,env(safe-area-inset-left))!important;transform:translateY(-50%)!important;flex-direction:column!important;flex-wrap:nowrap!important;width:64px!important;padding:7px!important;gap:6px!important;min-height:0!important;max-height:calc(var(--km-reader-height) - 24px)!important;overflow-y:auto}
+    .km-reader-clean.km-reader-mobile.km-reader-landscape .reader-page-count{min-width:0;width:100%;padding:0;font-size:12px;white-space:normal}
+    .km-reader-clean.km-reader-mobile.km-reader-landscape .reader-unlock{padding:0 3px;width:48px;min-height:48px;font-size:11px;white-space:normal;text-align:center}
     .km-reader-clean.km-reader-mobile.km-reader-landscape #prevBtn{left:calc(var(--km-controls-reserve) - 16px)!important}
     `;
     document.head.append(style);
@@ -149,7 +151,7 @@
       // Equal landscape margins keep the book centred on the screen,
       // while the left margin holds the controls clear of the pages.
       const edge=Math.max(12,parseFloat(getComputedStyle(toolbar)[sideControls?'left':'bottom'])||0);
-      const reserve=mobileControls?(sideControls?toolbar.offsetWidth:toolbar.offsetHeight)+edge+20:0;
+      const reserve=mobileControls?(sideControls?toolbar.offsetWidth:toolbar.offsetHeight)+edge+(sideControls?8:20):0;
       const pageWidth=Math.min(Math.max(80,width-(sideControls?2*reserve:0)),Math.max(80,height-(sideControls?0:reserve))*2);
       root.style.setProperty('--km-controls-reserve',reserve+'px');
       root.style.setProperty('--km-page-width',pageWidth+'px');root.style.setProperty('--km-page-height',pageWidth/2+'px');

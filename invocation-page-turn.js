@@ -153,9 +153,10 @@
     const style = document.createElement('style');
     style.textContent = `
       html.km-reader-clean,html.km-reader-clean body{background:#b8cec5!important}
-      .km-reader-clean .reader{background:radial-gradient(ellipse at 50% 35%,#dce8e2,#adc5ba)!important}
-      .km-reader-clean .book.km-natural-book{--km-book-gutter:48px;width:calc(var(--km-page-width) - var(--km-book-gutter))!important;height:calc(var(--km-page-height) - var(--km-book-gutter)/2)!important}
-      @media(max-width:700px){.km-reader-clean .book.km-natural-book{--km-book-gutter:24px}}
+      .km-reader-clean .reader{background:#b8cec5!important}
+      .km-reader-clean .book.km-natural-book{--km-book-gutter:24px;width:calc(var(--km-page-width) - var(--km-book-gutter))!important;height:calc(var(--km-page-height) - var(--km-book-gutter)/2)!important}
+      @media(max-width:700px){.km-reader-clean .book.km-natural-book{--km-book-gutter:12px}}
+      .km-reader-clean.km-reader-mobile .book.km-natural-book{--km-book-gutter:12px}
       .book.km-natural-book{filter:none!important;transform-style:flat;perspective:none!important;isolation:isolate}
       .km-natural-book .spread{box-shadow:0 16px 34px #19382f45,0 2px 5px #19382f38;outline:1px solid #49645840;border-radius:8px}
       .km-natural-book .cover-stage{box-shadow:0 16px 34px #19382f50,0 2px 5px #19382f38;outline:1px solid #49645840}
