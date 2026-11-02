@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { leafGeometry } = require('../invocation-page-turn.js');
+const { leafGeometry, paperColumns } = require('../invocation-page-turn.js');
 const { readFileSync } = require('node:fs');
 const vm = require('node:vm');
 
@@ -32,6 +32,24 @@ for (const forward of [true, false]) {
   });
 }
 
+test('curved paper covers every column once without gaps in either direction', () => {
+  for (const width of [183, 657.5]) for (const ratio of [1, 2]) for (const forward of [true, false]) {
+    for (const p of [0, .05, .2, .4, .5, .6, .8, .95, 1]) {
+      const columns = paperColumns(width, width, p, forward, ratio).filter(Boolean);
+      assert.ok(columns.length > 0);
+      columns.forEach((column, i) => {
+        assert.ok(column.u >= 0 && column.u <= 1, 'texture remains inside one page');
+        assert.ok(column.scale >= .999 && column.scale < 1.4);
+        if (i) assert.equal(column.x, columns[i - 1].x + 1, 'no gap revealing the underlying page');
+        if (p === 0 || p === 1) {
+          assert.equal(column.back, p === 1, 'only the visible face is painted');
+          if (i) assert.ok(column.u >= columns[i - 1].u, 'neither face mirrors its text');
+        }
+      });
+    }
+  }
+});
+
 // Exercise the reader contract without browser automation or image assets.
 function reader({ reduced = false, failedImages = false } = {}) {
   const listeners = {}, frames = new Map(), timers = new Map();
@@ -45,7 +63,7 @@ function reader({ reduced = false, failedImages = false } = {}) {
       removeAttribute(k) { delete this.attributes[k]; },
       remove() { this.parent.children = this.parent.children.filter(n => n !== this); },
       querySelector() { return { src: 'cover', currentSrc: 'cover' }; },
-      getContext() { return { scale() {}, fillRect() {}, drawImage() {} }; }
+      getContext(type) { return type === 'webgl' ? null : { setTransform() {}, clearRect() {}, scale() {}, fillRect() {}, drawImage() {} }; }
     };
   }
   const els = Object.fromEntries(['book', 'cover', 'spread', 'leftPaper', 'rightPaper', 'left', 'right'].map(k => [k, element()]));
@@ -87,6 +105,7 @@ function reader({ reduced = false, failedImages = false } = {}) {
 test('turn completes, rejects a second click and removes transient layers', async () => {
   const r = reader();
   await r.ctx.go(2);
+  assert.equal(r.els.book.children.filter(n => n.className === 'km-paper-leaf').length, 1, 'one opaque canvas, no overlapping DOM strips');
   await r.ctx.go(3);
   assert.equal(r.ctx.position, 1, 'reading progress changes only when the turn finishes');
   r.frame(0); r.frame(1000);

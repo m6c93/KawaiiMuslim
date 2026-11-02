@@ -27,8 +27,104 @@
     });
   }
 
+  // Shared vertices form one opaque surface. Separate overlapping CSS faces
+  // allow their backs to bleed through at the joins on some compositors.
+  function paperMesh(width, height, progress, forward, count = 64, stiff = false) {
+    const segments = leafGeometry(width, progress, forward, count, stiff);
+    const vertices = new Float32Array((count + 1) * 2 * 6);
+    let offset = 0;
+    for (let i = 0; i <= count; i++) {
+      const s = segments[Math.min(i, count - 1)], radians = s.angle * Math.PI / 180;
+      let x = forward ? s.x : s.x + s.width, z = s.z;
+      if (i === count) {
+        x += (forward ? 1 : -1) * Math.cos(radians) * s.width;
+        z += (forward ? -1 : 1) * Math.sin(radians) * s.width;
+      }
+      const u = forward ? i / count : 1 - i / count;
+      for (const v of [0, 1]) {
+        vertices.set([x, v * height, z, u, v, Math.cos(radians)], offset);
+        offset += 6;
+      }
+    }
+    return vertices;
+  }
+
+  // Paint each device-pixel column once, choosing the nearest part of the
+  // curved sheet. No antialiased strip joins or translucent CSS backs remain.
+  function paperColumns(width, height, progress, forward, ratio = 1, stiff = false) {
+    const mesh = paperMesh(width, height, progress, forward, 64, stiff);
+    const padding = Math.ceil(height * .22), perspective = Math.max(1400, width * 4);
+    const columns = new Array(Math.ceil((width * 2 + padding * 2) * ratio));
+    for (let i = 0; i < 64; i++) {
+      const a = i * 12, b = (i + 1) * 12;
+      const sa = perspective / (perspective - mesh[a + 2]);
+      const sb = perspective / (perspective - mesh[b + 2]);
+      const xa = (padding + width + mesh[a] * sa) * ratio;
+      const xb = (padding + width + mesh[b] * sb) * ratio;
+      if (Math.abs(xb - xa) < .0001) continue;
+      const from = Math.max(0, Math.ceil(Math.min(xa, xb) - .5));
+      const to = Math.min(columns.length - 1, Math.floor(Math.max(xa, xb) - .5));
+      for (let x = from; x <= to; x++) {
+        const t = clamp((x + .5 - xa) / (xb - xa)), scale = sa + (sb - sa) * t;
+        if (columns[x] && columns[x].scale > scale) continue;
+        const normal = mesh[a + 5] + (mesh[b + 5] - mesh[a + 5]) * t;
+        const u = (mesh[a + 3] * sa * (1 - t) + mesh[b + 3] * sb * t) / scale;
+        columns[x] = { x, scale, u: normal >= 0 ? u : 1 - u, back: normal < 0,
+          normal, sampleWidth: Math.abs(mesh[b + 3] - mesh[a + 3]) / Math.abs(xb - xa) };
+      }
+    }
+    return columns;
+  }
+
+  function createPaperRenderer() {
+    const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d', { alpha: true });
+    canvas.className = 'km-paper-leaf'; canvas.setAttribute('aria-hidden', 'true');
+    canvas.dataset.renderer = 'opaque-continuous-surface';
+    const faces = [document.createElement('canvas'), document.createElement('canvas')];
+    let width, height, padding, ratio;
+    return {
+      canvas,
+      prepare(front, back, pageWidth, pageHeight) {
+        width = pageWidth; height = pageHeight; padding = Math.ceil(height * .22);
+        ratio = Math.min(devicePixelRatio || 1, 2);
+        const cw = width * 2 + padding * 2, ch = height + padding * 2;
+        canvas.width = Math.ceil(cw * ratio); canvas.height = Math.ceil(ch * ratio);
+        Object.assign(canvas.style, { left: -padding + 'px', top: -padding + 'px', width: cw + 'px', height: ch + 'px' });
+        [front, back].forEach((image, i) => {
+          const face = faces[i]; face.width = Math.min(2048, Math.ceil(width * ratio));
+          face.height = Math.min(2048, Math.ceil(height * ratio));
+          const context = face.getContext('2d');
+          context.fillStyle = '#fffdf9'; context.fillRect(0, 0, face.width, face.height);
+          if (image) {
+            const fit = Math.min(face.width / image.naturalWidth, face.height / image.naturalHeight);
+            const w = image.naturalWidth * fit, h = image.naturalHeight * fit;
+            context.drawImage(image, (face.width - w) / 2, (face.height - h) / 2, w, h);
+          }
+        });
+      },
+      draw(progress, forward, stiff) {
+        const lift = Math.sin(Math.PI * progress);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const column of paperColumns(width, height, progress, forward, ratio, stiff)) {
+          if (!column) continue;
+          const face = faces[column.back ? 1 : 0];
+          const sample = Math.min(face.width, Math.max(.5, column.sampleWidth * face.width));
+          const sx = Math.max(0, Math.min(face.width - sample, column.u * face.width - sample / 2));
+          const top = (padding + height * .5 * (1 - column.scale)) * ratio;
+          const span = height * column.scale * ratio;
+          ctx.globalAlpha = 1;
+          ctx.drawImage(face, sx, 0, sample, face.height, column.x, top, 1, span);
+          ctx.fillStyle = '#322718';
+          ctx.globalAlpha = lift * (.05 + .10 * (1 - Math.abs(column.normal)));
+          ctx.fillRect(column.x, top, 1, span);
+        }
+        ctx.globalAlpha = 1;
+      }
+    };
+  }
+
   if (typeof module === 'object' && module.exports) {
-    module.exports = { leafGeometry, ease };
+    module.exports = { leafGeometry, paperMesh, paperColumns, ease };
   }
   if (typeof document === 'undefined') return;
 
@@ -38,19 +134,20 @@
     // numbering, progress persistence, zoom, touch and controls stay in charge.
     if (typeof go !== 'function' || typeof els === 'undefined' || els.book.dataset.paperTurn) return;
     const book = els.book, reducedMotion = matchMedia('(prefers-reduced-motion:reduce)');
-    book.dataset.paperTurn = 'curved-v1';
+    book.dataset.paperTurn = 'continuous-v2';
     book.classList.add('km-natural-book');
     const style = document.createElement('style');
     style.textContent = `
-      .book.km-natural-book{filter:none!important;transform-style:preserve-3d;isolation:auto}
+      html.km-reader-clean,html.km-reader-clean body{background:#b8cec5!important}
+      .km-reader-clean .reader{background:radial-gradient(ellipse at 50% 35%,#dce8e2,#adc5ba)!important}
+      .km-reader-clean .book.km-natural-book{--km-book-gutter:48px;width:calc(var(--km-page-width) - var(--km-book-gutter))!important;height:calc(var(--km-page-height) - var(--km-book-gutter)/2)!important}
+      @media(max-width:700px){.km-reader-clean .book.km-natural-book{--km-book-gutter:24px}}
+      .book.km-natural-book{filter:none!important;transform-style:flat;perspective:none!important;isolation:isolate}
+      .km-natural-book .spread{box-shadow:0 16px 34px #19382f45,0 2px 5px #19382f38;outline:1px solid #49645840;border-radius:8px}
+      .km-natural-book .cover-stage{box-shadow:0 16px 34px #19382f50,0 2px 5px #19382f38;outline:1px solid #49645840}
       .km-natural-book .paper img{user-select:none;-webkit-user-drag:none}
       .km-natural-book .binding{width:28px;background:linear-gradient(90deg,transparent,#271e1014 35%,#271e1038 49%,#fff9e84d 53%,#271e100a 68%,transparent)}
-      .km-natural-book .km-paper-leaf{position:absolute;left:50%;top:0;width:50%;height:100%;z-index:40;pointer-events:none;transform-style:preserve-3d}
-      .km-paper-strip{position:absolute;left:0;top:0;height:100%;transform-style:preserve-3d;will-change:transform}
-      .km-paper-face{position:absolute;inset:0;background:#fffdf9;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-      .km-paper-face.back{transform:rotateY(180deg)}
-      .km-paper-face canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
-      .km-paper-tone{position:absolute;inset:0;background:#322718;pointer-events:none;opacity:0}
+      .km-natural-book .km-paper-leaf{position:absolute;display:block;z-index:40;pointer-events:none;opacity:1;mix-blend-mode:normal}
       .km-paper-cast{position:absolute;top:1%;height:98%;width:50%;z-index:25;pointer-events:none;background:radial-gradient(ellipse at center,#21170945,transparent 73%);filter:blur(11px);opacity:0;will-change:opacity,transform}
       .km-natural-book[aria-busy=true] .paper::after{opacity:0}
     `;
@@ -77,25 +174,7 @@
       const background = getComputedStyle(els.cover.querySelector('.cover-image')).backgroundImage;
       return background.match(/^url\(["']?(.*?)["']?\)$/)?.[1] || '';
     }
-    function face(image, offset, width, height, pageWidth, back) {
-      const element = document.createElement('div');
-      element.className = 'km-paper-face' + (back ? ' back' : '');
-      const canvas = document.createElement('canvas');
-      const ratio = Math.min(devicePixelRatio || 1, 2);
-      canvas.width = Math.ceil(width * ratio); canvas.height = Math.ceil(height * ratio);
-      const ctx = canvas.getContext('2d');
-      ctx.scale(canvas.width / width, canvas.height / height);
-      ctx.fillStyle = '#fffdf9'; ctx.fillRect(0, 0, width, height);
-      if (image) {
-        const fit = Math.min(pageWidth / image.naturalWidth, height / image.naturalHeight);
-        const w = image.naturalWidth * fit, h = image.naturalHeight * fit;
-        ctx.drawImage(image, (pageWidth - w) / 2 - offset, (height - h) / 2, w, h);
-      }
-      const tone = document.createElement('div'); tone.className = 'km-paper-tone';
-      element.append(canvas, tone);
-      return { element, tone };
-    }
-
+    let paperRenderer;
     let finishActive = null;
     // A resize, rotation or backgrounded tab must never leave a half-turned leaf.
     window.addEventListener('resize', () => finishActive?.());
@@ -142,21 +221,12 @@
         // clientWidth/clientHeight remain in book coordinates when the phone's
         // portrait-only host rotates the whole reader into landscape.
         const width = book.clientWidth / 2, height = book.clientHeight;
-        const count = matchMedia('(pointer:coarse)').matches ? 12 : 18;
-        const strips = leafGeometry(width, 0, forward, count, opening || closing);
-        leaf = document.createElement('div'); leaf.className = 'km-paper-leaf'; leaf.setAttribute('aria-hidden', 'true');
-        const pieces = strips.map(segment => {
-          const piece = document.createElement('div'); piece.className = 'km-paper-strip';
-          piece.style.width = (segment.width + 1.2) + 'px';
-          piece.style.transformOrigin = forward ? 'left center' : 'right center';
-          const a = face(front, segment.frontOffset, segment.width + 1.2, height, width, false);
-          const b = face(back, segment.backOffset, segment.width + 1.2, height, width, true);
-          piece.append(a.element, b.element); leaf.append(piece);
-          return { piece, frontTone: a.tone, backTone: b.tone };
-        });
+        paperRenderer ||= createPaperRenderer();
+        paperRenderer.prepare(front, back, width, height);
+        paperRenderer.draw(0, forward, opening || closing);
+        leaf = paperRenderer.canvas;
         cast = document.createElement('div'); cast.className = 'km-paper-cast'; cast.setAttribute('aria-hidden', 'true');
         book.append(cast, leaf);
-        book.style.perspective = Math.max(1400, width * 4) + 'px';
         if (opening) {
           els.cover.hidden = true; els.spread.hidden = false; els.leftPaper.style.opacity = '0';
           setEmbedPage(els.right, targetRight);
@@ -172,14 +242,9 @@
           if (finished) return;
           if (start === undefined) start = timestamp;
           const elapsed = clamp((timestamp - start) / duration), p = ease(elapsed);
-          const geometry = leafGeometry(width, p, forward, count, opening || closing);
           const lift = Math.sin(Math.PI * p);
-          geometry.forEach((segment, i) => {
-            pieces[i].piece.style.transform = `translate3d(${segment.x}px,0,${segment.z}px) rotateY(${segment.angle}deg)`;
-            const shade = lift * (0.08 + 0.13 * i / count);
-            pieces[i].frontTone.style.opacity = shade;
-            pieces[i].backTone.style.opacity = shade * 0.72;
-          });
+          try { paperRenderer.draw(p, forward, opening || closing); }
+          catch (_) { paperRenderer = null; done(); return; }
           cast.style.opacity = lift * 0.7;
           cast.style.transform = `translateX(${width * (forward ? 1 - p : p)}px) scaleX(${0.5 + lift * 0.6})`;
           if (opening || closing) book.style.transform = `translateX(${-width / 2 * (opening ? 1 - p : p)}px)`;
