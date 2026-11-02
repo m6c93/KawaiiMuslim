@@ -16,3 +16,7 @@ body.km-book-reading #kmAppViews{top:calc(48px + env(safe-area-inset-top,0px))!i
 /* A reader with its own exit control needs no second header or subscription overlay. */
 body.km-clean-book-reading #kmAppViews{inset:0!important}
 body.km-clean-book-reading .km-reader-return,body.km-book-reading .km-guest-pill{display:none!important}
+
+/* Paint the outer Safari canvas too when a clean book fills the app frame. */
+html:has(body.km-clean-book-reading),body.km-clean-book-reading,body.km-clean-book-reading #kmAppViews{background:#b8cec5!important}
+body.km-clean-book-reading #kmAppViews,body.km-clean-book-reading .km-app-view.is-active{max-width:none!important;margin:0!important;width:100%!important}
