@@ -30,7 +30,7 @@
   if (!/\/books\/invocations-(?:aya-ali|decouverte)(?:\.html)?$/.test(location.pathname)) return;
   function loadPaperTurn() {
     const script = document.createElement('script');
-    script.src = '/invocation-page-turn.js?v=continuous-paper-2';
+    script.src = '/invocation-page-turn.js?v=trimmed-paper-3';
     document.head.appendChild(script);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadPaperTurn, { once: true });

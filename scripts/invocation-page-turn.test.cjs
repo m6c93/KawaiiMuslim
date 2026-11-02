@@ -1,8 +1,20 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { leafGeometry, paperColumns } = require('../invocation-page-turn.js');
+const { leafGeometry, paperColumns, pageImageRect } = require('../invocation-page-turn.js');
 const { readFileSync } = require('node:fs');
 const vm = require('node:vm');
+
+test('page crop removes the printer border while retaining text and page numbers', () => {
+  // Both invocation editions use 1579 × 1600 page exports. Printer marks sit
+  // in the outer 20 pixels; page numbers remain around y=1500.
+  for (const size of [183, 657.5]) {
+    const crop = pageImageRect(1579, 1600, size, size);
+    assert.ok(crop.x > 20 && crop.y > 20);
+    assert.ok(crop.x + crop.width < 1559 && crop.y + crop.height < 1580);
+    assert.ok(crop.y + crop.height > 1520, 'page number stays visible');
+    assert.equal(crop.width, crop.height, 'fill square pages without letterboxing or stretching');
+  }
+});
 
 for (const forward of [true, false]) {
   test(`sheet stays continuous and settles flat (${forward ? 'next' : 'previous'})`, () => {
