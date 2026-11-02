@@ -108,7 +108,7 @@
     .km-reader-clean.km-reader-mobile .topbar [hidden]{display:none!important}
     .km-reader-clean.km-reader-mobile.reader-controls-hidden .topbar{opacity:1!important;pointer-events:auto!important}
     .km-reader-clean.km-reader-mobile:not(.km-reader-landscape) .nav{top:calc((var(--km-reader-height) - var(--km-controls-reserve))/2)!important}
-    .km-reader-clean.km-reader-mobile.km-reader-landscape .reader{padding:0 0 0 var(--km-controls-reserve,100px)!important}
+    .km-reader-clean.km-reader-mobile.km-reader-landscape .reader{padding:0 var(--km-controls-reserve,100px)!important}
     .km-reader-clean.km-reader-mobile.km-reader-landscape .topbar{inset:50% auto auto max(12px,env(safe-area-inset-left))!important;transform:translateY(-50%)!important;flex-direction:column!important;flex-wrap:nowrap!important;min-height:0!important;max-height:calc(var(--km-reader-height) - 24px)!important;overflow-y:auto}
     .km-reader-clean.km-reader-mobile.km-reader-landscape #prevBtn{left:calc(var(--km-controls-reserve) - 16px)!important}
     `;
@@ -146,10 +146,11 @@
       rotate.setAttribute('aria-pressed',String(turned));
       full.hidden=width<600;
       // Offset sizes stay in reader coordinates when the body is rotated.
-      // In landscape, the side margin preserves more space for readable pages.
+      // Equal landscape margins keep the book centred on the screen,
+      // while the left margin holds the controls clear of the pages.
       const edge=Math.max(12,parseFloat(getComputedStyle(toolbar)[sideControls?'left':'bottom'])||0);
       const reserve=mobileControls?(sideControls?toolbar.offsetWidth:toolbar.offsetHeight)+edge+20:0;
-      const pageWidth=Math.min(Math.max(80,width-(sideControls?reserve:0)),Math.max(80,height-(sideControls?0:reserve))*2);
+      const pageWidth=Math.min(Math.max(80,width-(sideControls?2*reserve:0)),Math.max(80,height-(sideControls?0:reserve))*2);
       root.style.setProperty('--km-controls-reserve',reserve+'px');
       root.style.setProperty('--km-page-width',pageWidth+'px');root.style.setProperty('--km-page-height',pageWidth/2+'px');
     }
