@@ -4,6 +4,15 @@
 
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => value * value * (3 - 2 * value);
+  // The page exports include a white printer border and crop marks. Keep the
+  // original assets intact and use the same small crop in CSS and the turn.
+  const PAGE_TRIM = 0.016;
+  function pageImageRect(imageWidth, imageHeight, pageWidth, pageHeight) {
+    const aspect = pageWidth / pageHeight;
+    const width = Math.min(imageWidth, imageHeight * aspect) * (1 - PAGE_TRIM * 2);
+    const height = width / aspect;
+    return { x: (imageWidth - width) / 2, y: (imageHeight - height) / 2, width, height };
+  }
 
   // Integrate the tangent along the sheet: unlike a flat rotateY, the outer
   // edge follows the spine with a gentle bend, then settles completely flat.
@@ -84,7 +93,7 @@
     let width, height, padding, ratio;
     return {
       canvas,
-      prepare(front, back, pageWidth, pageHeight) {
+      prepare(front, back, pageWidth, pageHeight, frontIsCover = false, backIsCover = false) {
         width = pageWidth; height = pageHeight; padding = Math.ceil(height * .22);
         ratio = Math.min(devicePixelRatio || 1, 2);
         const cw = width * 2 + padding * 2, ch = height + padding * 2;
@@ -96,9 +105,14 @@
           const context = face.getContext('2d');
           context.fillStyle = '#fffdf9'; context.fillRect(0, 0, face.width, face.height);
           if (image) {
-            const fit = Math.min(face.width / image.naturalWidth, face.height / image.naturalHeight);
-            const w = image.naturalWidth * fit, h = image.naturalHeight * fit;
-            context.drawImage(image, (face.width - w) / 2, (face.height - h) / 2, w, h);
+            if (i === 0 ? frontIsCover : backIsCover) {
+              const fit = Math.min(face.width / image.naturalWidth, face.height / image.naturalHeight);
+              const w = image.naturalWidth * fit, h = image.naturalHeight * fit;
+              context.drawImage(image, (face.width - w) / 2, (face.height - h) / 2, w, h);
+            } else {
+              const crop = pageImageRect(image.naturalWidth, image.naturalHeight, pageWidth, pageHeight);
+              context.drawImage(image, crop.x, crop.y, crop.width, crop.height, 0, 0, face.width, face.height);
+            }
           }
         });
       },
@@ -124,7 +138,7 @@
   }
 
   if (typeof module === 'object' && module.exports) {
-    module.exports = { leafGeometry, paperMesh, paperColumns, ease };
+    module.exports = { leafGeometry, paperMesh, paperColumns, pageImageRect, ease };
   }
   if (typeof document === 'undefined') return;
 
@@ -134,7 +148,7 @@
     // numbering, progress persistence, zoom, touch and controls stay in charge.
     if (typeof go !== 'function' || typeof els === 'undefined' || els.book.dataset.paperTurn) return;
     const book = els.book, reducedMotion = matchMedia('(prefers-reduced-motion:reduce)');
-    book.dataset.paperTurn = 'continuous-v2';
+    book.dataset.paperTurn = 'continuous-v3-trimmed';
     book.classList.add('km-natural-book');
     const style = document.createElement('style');
     style.textContent = `
@@ -145,7 +159,8 @@
       .book.km-natural-book{filter:none!important;transform-style:flat;perspective:none!important;isolation:isolate}
       .km-natural-book .spread{box-shadow:0 16px 34px #19382f45,0 2px 5px #19382f38;outline:1px solid #49645840;border-radius:8px}
       .km-natural-book .cover-stage{box-shadow:0 16px 34px #19382f50,0 2px 5px #19382f38;outline:1px solid #49645840}
-      .km-natural-book .paper img{user-select:none;-webkit-user-drag:none}
+      .km-natural-book .paper img{user-select:none;-webkit-user-drag:none;object-fit:cover;transform:scale(${1 / (1 - PAGE_TRIM * 2)});transform-origin:center}
+      #zoomPages img,.thumb img{clip-path:inset(${PAGE_TRIM * 100}%)}
       .km-natural-book .binding{width:28px;background:linear-gradient(90deg,transparent,#271e1014 35%,#271e1038 49%,#fff9e84d 53%,#271e100a 68%,transparent)}
       .km-natural-book .km-paper-leaf{position:absolute;display:block;z-index:40;pointer-events:none;opacity:1;mix-blend-mode:normal}
       .km-paper-cast{position:absolute;top:1%;height:98%;width:50%;z-index:25;pointer-events:none;background:radial-gradient(ellipse at center,#21170945,transparent 73%);filter:blur(11px);opacity:0;will-change:opacity,transform}
@@ -222,7 +237,7 @@
         // portrait-only host rotates the whole reader into landscape.
         const width = book.clientWidth / 2, height = book.clientHeight;
         paperRenderer ||= createPaperRenderer();
-        paperRenderer.prepare(front, back, width, height);
+        paperRenderer.prepare(front, back, width, height, opening, closing);
         paperRenderer.draw(0, forward, opening || closing);
         leaf = paperRenderer.canvas;
         cast = document.createElement('div'); cast.className = 'km-paper-cast'; cast.setAttribute('aria-hidden', 'true');
