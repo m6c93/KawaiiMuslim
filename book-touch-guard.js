@@ -24,6 +24,19 @@
   }, { capture: true, passive: true });
 })();
 
+/* Only these two readers share the curved-paper renderer. */
+(function () {
+  'use strict';
+  if (!/\/books\/invocations-(?:aya-ali|decouverte)(?:\.html)?$/.test(location.pathname)) return;
+  function loadPaperTurn() {
+    const script = document.createElement('script');
+    script.src = '/invocation-page-turn.js?v=curved-paper-1';
+    document.head.appendChild(script);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadPaperTurn, { once: true });
+  else loadPaperTurn();
+})();
+
 (function () {
   "use strict";
 
