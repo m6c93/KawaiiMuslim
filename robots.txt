@@ -1,4 +1,2 @@
 User-agent: *
-Disallow: /
-
-# Le site est encore en préouverture. Remplacer par "Allow: /" au lancement public.
+Allow: /
