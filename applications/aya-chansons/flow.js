@@ -28,11 +28,18 @@
   screen.querySelector('h1').tabIndex=-1;screen.querySelector('h1').focus({preventScroll:true});window.scrollTo(0,0);
  }
  function home(){if(history.state?.ayaLesson){history.back();}else renderHome();}
- function open(key){if(!Object.hasOwn(names,key))return;key==='colors'?window.AyaColors.video():window.AyaPremium.open(key);}
+ function open(key){
+  if(!Object.hasOwn(names,key))return;
+  show(key,names[key]);mode('intro');
+  const root=key==='colors'?screen:document.querySelector('#premium-content');
+  root.innerHTML=`<section class="lesson-intro"><span class="intro-icon" aria-hidden="true">${icons[key]}</span><h1>${names[key]}</h1><p>Une chanson, puis des petits jeux !</p><ol class="lesson-plan"><li><span class="plan-number">1</span><div><strong>Je regarde et je chante</strong><small>J’écoute les mots avec Aya.</small></div></li><li><span class="plan-number">2</span><div><strong>Je joue avec les mots</strong><small>Je retrouve les bonnes réponses.</small></div></li><li><span class="plan-number">✦</span><div><strong>Je gagne ma récompense</strong><small>Un bravo pour mes découvertes !</small></div></li></ol><button class="primary" id="start-lesson" type="button">C’est parti ! →</button></section>`;
+  root.querySelector('#start-lesson').onclick=()=>key==='colors'?window.AyaColors.video():window.AyaPremium.open(key);
+  const heading=root.querySelector('h1');heading.tabIndex=-1;heading.focus({preventScroll:true});
+ }
  function next(key){open(order[(order.indexOf(key)+1)%order.length]);}
  function video(root,key,title,src,poster,game){
   mode('video');const saved=read();saved.last=key;write(saved);
-  root.innerHTML=`<section class="watch-screen" aria-label="${title}"><div class="watch-title"><h1>${title}</h1><button class="nav" type="button" id="expand-video" aria-label="Afficher la vidéo en plein écran">⛶ <span>Plein écran</span></button></div><div class="watch-stage"><video controls playsinline preload="metadata" poster="${poster}" aria-label="${title}"></video></div><section class="watch-end" hidden><span class="end-star" aria-hidden="true">✦</span><h2>À toi de jouer !</h2><button type="button" class="primary" id="watch-game">Jouer avec Aya →</button><button type="button" class="quiet" id="watch-again">Revoir la chanson</button></section><p class="watch-error" role="status" hidden>La vidéo n’a pas chargé. <button type="button" class="quiet" id="watch-retry">Réessayer</button></p></section>`;
+  root.innerHTML=`<section class="watch-screen" aria-label="${title}"><div class="watch-title"><div><h1>${title}</h1><p class="watch-next-hint">1. La chanson <span aria-hidden="true">→</span> 2. Les jeux</p></div><button class="nav" type="button" id="expand-video" aria-label="Afficher la vidéo en plein écran">⛶ <span>Plein écran</span></button></div><div class="watch-stage"><video controls playsinline preload="metadata" poster="${poster}" aria-label="${title}"></video></div><section class="watch-end" hidden><span class="end-star" aria-hidden="true">✦</span><h2>À toi de jouer !</h2><button type="button" class="primary" id="watch-game">Jouer avec Aya →</button><button type="button" class="quiet" id="watch-again">Revoir la chanson</button></section><p class="watch-error" role="status" hidden>La vidéo n’a pas chargé. <button type="button" class="quiet" id="watch-retry">Réessayer</button></p></section>`;
   const player=root.querySelector('video'),stage=root.querySelector('.watch-stage'),end=root.querySelector('.watch-end'),expand=root.querySelector('#expand-video');
   root.querySelector('h1').tabIndex=-1;root.querySelector('h1').focus({preventScroll:true});
   player.src=src;let lastSaved=-1;
