@@ -14,3 +14,11 @@ test('guest, invalid topic and invalid token fail closed',async t=>{
  for(const [request,code] of [[req('media/jours',''),401],[req('media/../../foo'),404],[{...req(),method:'GET'},405]]){const res=response();await handler(request,res);assert.equal(res.code,code)}
  t.mock.method(globalThis,'fetch',async()=>new Response('',{status:401}));const res=response();await handler(req(),res);assert.equal(res.code,401);
 });
+test('complete lesson media match their published sizes and hashes',async()=>{
+ const manifest=require('../api/aya-media-manifest.json');const {readFile}=require('node:fs/promises');const {join}=require('node:path');
+ for(const [topic,entry] of Object.entries(manifest)){
+  const bytes=Buffer.concat(await Promise.all(entry.parts.map(part=>readFile(join(__dirname,'../applications/aya-chansons/media',part)))));
+  assert.equal(bytes.length,entry.size,topic+' truncated');
+  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),entry.sha256,topic+' corrupt');
+ }
+});

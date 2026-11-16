@@ -1,0 +1,35 @@
+{
+  "corps": {
+    "parts": [
+      "corps-00.bin",
+      "corps-01.bin",
+      "corps-02.bin",
+      "corps-03.bin",
+      "corps-04.bin"
+    ],
+    "size": 2408849,
+    "sha256": "983043d5ce3cd01b2b6d5e11b415396d0876da7b0e3e8214a53ae52f85136531"
+  },
+  "ecole": {
+    "parts": [
+      "ecole-00.bin",
+      "ecole-01.bin",
+      "ecole-02.bin",
+      "ecole-03.bin",
+      "ecole-04.bin"
+    ],
+    "size": 2425569,
+    "sha256": "d99aaca1639d4e012be358eecd775171df3d3f42920f506be7738f1f6a208fd6"
+  },
+  "alphabet": {
+    "parts": [
+      "alphabet-00.bin",
+      "alphabet-01.bin",
+      "alphabet-02.bin",
+      "alphabet-03.bin",
+      "alphabet-04.bin"
+    ],
+    "size": 2200761,
+    "sha256": "754ac1e2040962ea745928a0ae47bba657961d99c5a85bababe96353dedc5cbf"
+  }
+}

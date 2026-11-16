@@ -83,7 +83,7 @@
     title.textContent=topics[key].lesson;
     panel.innerHTML='<p class="premium-intro" role="status">Ouverture de la leçon…</p>';
     if(!dialog.open)dialog.showModal();
-    const timer=setTimeout(()=>controller.abort(),20000);
+    const timer=setTimeout(()=>controller.abort(),60000);
     try {
       const signedIn=await session();
       if(!pending())return;

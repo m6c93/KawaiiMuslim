@@ -1,7 +1,8 @@
 'use strict';
 const {readFile}=require('node:fs/promises');
 const {join}=require('node:path');
-const {createDecipheriv}=require('node:crypto');
+const {createDecipheriv,createHash}=require('node:crypto');
+const mediaManifest=require('./aya-media-manifest.json');
 const AUTH='https://pasgxojzybmvbjhuokkk.supabase.co';
 const ANON='sb_publishable_JfiHxlqfI8pXr4Emho4vOw_QBePfSHm';
 module.exports=async(req,res)=>{
@@ -31,10 +32,13 @@ module.exports=async(req,res)=>{
   const subscription=Array.isArray(result)?result[0]:result;
   if(profiles?.[0]?.is_active!==true||!['active','trialing'].includes(subscription?.status))return reply(403,'subscribe');
   if(subscription.current_period_end&&Date.parse(subscription.current_period_end)<=Date.now())return reply(403,'subscribe');
-  const key=process.env.AYA_PRODUCTION_MEDIA_KEY;
+  const media=match && mediaManifest[match[1]];
+  const key=media ? process.env.AYA_REPAIRED_MEDIA_KEY : process.env.AYA_PRODUCTION_MEDIA_KEY;
   if(!/^[a-f0-9]{64}$/.test(key||''))return reply(503,'unavailable');
   if(!match)return reply(200,'allowed');
-  const encrypted=await readFile(join(process.cwd(),'applications/aya-chansons/media',match[1]+'.bin'));
+  const directory=join(process.cwd(),'applications/aya-chansons/media');
+  const encrypted=media ? Buffer.concat(await Promise.all(media.parts.map(part=>readFile(join(directory,part))))) : await readFile(join(directory,match[1]+'.bin'));
+  if(media && (encrypted.length!==media.size || createHash('sha256').update(encrypted).digest('hex')!==media.sha256))return reply(503,'unavailable');
   const decipher=createDecipheriv('aes-256-gcm',Buffer.from(key,'hex'),encrypted.subarray(0,12));
   decipher.setAuthTag(encrypted.subarray(-16));
   const bytes=Buffer.concat([decipher.update(encrypted.subarray(12,-16)),decipher.final()]);
