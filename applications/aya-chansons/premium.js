@@ -23,7 +23,7 @@
     ]}
   };
   const dialog=document.querySelector('#aya-premium'), panel=document.querySelector('#premium-content');
-  const title=document.querySelector('#premium-title'), close=document.querySelector('#premium-close');
+  const title=document.querySelector('#premium-title');
   const appPath='/applications/aya-chansons/';
   const account='/Compte.dc.html?abonnement=requis';
   const authScript='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
@@ -49,22 +49,14 @@
     if(childId)headers['X-KMW-Child-Profile']=childId;
     return fetch(path,{method:'POST',headers,cache:'no-store',signal});
   }
-  const snap=()=>{const root=document.querySelector('#premium-themes');if(!root)return;
-    root.innerHTML=`<div class="aya-themes-heading"><h2 class="themes-title">Encore avec Aya</h2><span class="premium-tag">Premium</span></div>
-    <div class="themes">${Object.entries(topics).map(([key,t])=>`<button type="button" class="theme aya-topic" data-topic="${key}"><span class="topic-icon" aria-hidden="true">${t.icon}</span><span><b>${t.name}</b><small>${access==='allowed'?(awarded.includes(key)?'✦ Terminé':'Ouvrir →'):'🔒 Abonnés'}</small></span></button>`).join('')}</div>`;
-    root.querySelectorAll('[data-topic]').forEach(b=>b.onclick=()=>open(b.dataset.topic));
-  };
-  addEventListener('aya:home',snap);
-  snap();
-
+  const snap=()=>{};
   function release(){
     if(request)request.abort();
     request=null;
     panel.querySelector('video')?.pause();
     if(objectUrl){URL.revokeObjectURL(objectUrl);objectUrl=null;}
   }
-  close.onclick=()=>dialog.close();
-  dialog.addEventListener('close',()=>{release();current=null;panel.replaceChildren();});
+  addEventListener('aya:leave',()=>{release();current=null;});
   function showLocked(kind,key){
     const signin=kind==='signin';
     const login='/Connexion.dc.html?next='+encodeURIComponent(appPath+'?lecon='+key);
@@ -76,13 +68,13 @@
   }
   async function open(key){
     if(!Object.hasOwn(topics,key))return;
-    dispatchEvent(new Event('aya:pause-colors'));
+    window.AyaFlow.show(key,topics[key].lesson);
     release();current=key;
     const controller=new AbortController();request=controller;
-    const pending=()=>dialog.open&&request===controller;
+    const pending=()=>!dialog.hidden&&request===controller;
     title.textContent=topics[key].lesson;
     panel.innerHTML='<p class="premium-intro" role="status">Ouverture de la leçon…</p>';
-    if(!dialog.open)dialog.showModal();
+
     const timer=setTimeout(()=>controller.abort(),60000);
     try {
       const signedIn=await session();
@@ -102,28 +94,18 @@
       if(!pending())return;
       access='allowed';snap();
       objectUrl=URL.createObjectURL(video);
-      panel.innerHTML=`<section class="lesson-video" aria-labelledby="premium-video-title">
-        <h3 id="premium-video-title"><span class="lesson-step" aria-hidden="true">1</span> Regarde la vidéo</h3>
-        <video controls playsinline preload="metadata" poster="media/${key}-poster.webp" aria-label="Vidéo de la leçon"></video>
-        <div class="lesson-next"><span class="lesson-step" aria-hidden="true">2</span><button type="button" class="quiet" id="premium-play">Jouer après la vidéo →</button></div>
-      </section>`;
-      const player=panel.querySelector('video'), play=panel.querySelector('#premium-play');
-      player.src=objectUrl;
-      player.addEventListener('ended',()=>{
-        play.classList.replace('quiet','primary');
-        play.textContent='À moi de jouer ! →';
-      });
-      panel.querySelector('#premium-play').onclick=()=>{release();quiz(key,0);};
+      window.AyaFlow.video(panel,key,topics[key].lesson,objectUrl,'media/'+key+'-poster.webp',()=>{release();quiz(key,0);});
     } catch {if(pending())showUnavailable(key);}
     finally {clearTimeout(timer);}
   }
   function quiz(key,index){
-    if(!dialog.open||current!==key||access!=='allowed')return;
+    if(dialog.hidden||current!==key||access!=='allowed')return;
+    window.AyaFlow.mode('game');
     const t=topics[key];
     if(index>=t.questions.length){
       if(!awarded.includes(key)){awarded.push(key);try{localStorage.setItem('kmw-aya-premium-stamps',JSON.stringify(awarded));}catch{}}
-      panel.innerHTML=`<div class="premium-intro"><span class="premium-reward" aria-hidden="true">${t.icon}</span><h3>Bravo !</h3><p>Tu as terminé la leçon.</p><button type="button" class="primary" id="premium-finish">Retour à Aya</button></div>`;
-      panel.querySelector('#premium-finish').onclick=()=>dialog.close();snap();return;
+      panel.innerHTML=`<div class="premium-intro"><span class="premium-reward" aria-hidden="true">${t.icon}</span><h3>Bravo !</h3><p>Tu as terminé la leçon.</p><button type="button" class="primary" id="premium-finish">Chanson suivante →</button><button type="button" class="text-back" id="premium-home">Accueil</button></div>`;
+      panel.querySelector('#premium-finish').onclick=()=>window.AyaFlow.next(key);panel.querySelector('#premium-home').onclick=()=>window.AyaFlow.home();snap();return;
     }
     const [arabic,reading,choices,answer]=t.questions[index];
     const order=choices.map((_,i)=>i);
@@ -137,14 +119,6 @@
     });
     next.onclick=()=>quiz(key,index+1);
   }
-  const deepLink=new URLSearchParams(location.search).get('lecon');
-  if(Object.hasOwn(topics,deepLink))open(deepLink);
-  else if(!new URLSearchParams(location.search).has('guest')){
-    // Paint the tiles immediately, then update the subscriber badges in the background.
-    session().then(async s=>{
-      if(!s?.access_token)return;
-      const response=await check(s.access_token,'/api/aya/access',AbortSignal.timeout(7000));
-      if(response.ok&&response.headers.get('content-type')?.startsWith('application/json')){access='allowed';if(!dialog.open)snap();}
-    }).catch(()=>{});
-  }
+  window.AyaPremium={open,topics};
+  window.AyaFlow.init();
 })();

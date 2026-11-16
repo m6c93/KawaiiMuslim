@@ -29,7 +29,7 @@
   const stop=()=>{clip.pause();screen.querySelector('#colors-video')?.pause();};
   addEventListener('aya:pause-colors', stop);
   function render(markup,view){
-    stop();currentView=view;screen.innerHTML=markup;window.scrollTo(0,0);
+    stop();window.AyaFlow.show('colors',view==='carnet'?'Mon carnet':'Les couleurs');currentView=view;screen.innerHTML=markup;window.scrollTo(0,0);
     const heading=screen.querySelector('h1');heading.tabIndex=-1;heading.focus({preventScroll:true});
   }
   function play(word){
@@ -39,30 +39,8 @@
   }
   function word(key,showFrench=true){const [ar,latin]=colors[key];return `<div class="word-line"><span class="word" dir="rtl" lang="ar">${ar}</span><span>${latin}${showFrench?' · '+title(key):''}</span></div>`;}
   const progress=(n,total,label)=>`<div class="activity-bar"><span>${label}</span><div class="dots" aria-label="Étape ${n} sur ${total}">${Array.from({length:total},(_,i)=>`<i class="${i<n?'on':''}" aria-hidden="true"></i>`).join('')}</div></div>`;
-  function home(){
-    const next=nextPack();
-    const gameLabel=next<0?'Réviser les couleurs':done.length?'Continuer les couleurs':'Jouer aux couleurs';
-    render(`<section class="view hero video-hero">
-      <div class="hero-copy">
-        <p class="eyebrow">♫ L’arabe en chansons</p>
-        <h1>Joue avec Aya</h1>
-        <p>On commence par <strong>les couleurs</strong> !</p>
-        <div class="palette" aria-hidden="true">${Object.values(colors).map(c=>`<i style="background:${c[2]}"></i>`).join('')}</div>
-      </div>
-      <section class="lesson-video" aria-labelledby="colors-video-title">
-        <h2 id="colors-video-title"><span class="lesson-step" aria-hidden="true">1</span> Regarde la vidéo</h2>
-        <video id="colors-video" controls playsinline preload="none" poster="media/couleurs.webp" src="media/couleurs.mp4" aria-label="La chanson des couleurs avec Aya"></video>
-        <div class="lesson-next"><span class="lesson-step" aria-hidden="true">2</span><button type="button" class="quiet" id="begin">${gameLabel} →</button></div>
-      </section>
-    </section><section class="view" id="premium-themes" aria-label="Les autres leçons avec Aya"></section>`,'home');
-    dispatchEvent(new Event('aya:home'));
-    const video=screen.querySelector('#colors-video'), begin=screen.querySelector('#begin');
-    video.addEventListener('ended',()=>{
-      begin.classList.replace('quiet','primary');
-      begin.textContent='À moi de jouer ! →';
-    });
-    button('#begin',startNext);
-  }
+  function home(){window.AyaFlow.home();}
+  function colorsVideo(){window.AyaFlow.show('colors','Les couleurs');window.AyaFlow.video(screen,'colors','Les couleurs','media/couleurs.mp4','media/couleurs.webp',startNext);}
   function startNext(){const next=nextPack();if(next<0){pack=0;questions=shuffle(Object.keys(colors)).slice(0,3);step=0;question(true);}else start(next);}
   function start(index){pack=index;step=0;discover();}
   function discover(){
@@ -103,15 +81,15 @@
     if(!review&&!done.includes(pack)){done.push(pack);try{localStorage.setItem(key,JSON.stringify(done));}catch{}}
     const next=nextPack();
     render(`<section class="reward view"><img src="media/aya-bravo.webp" alt="Aya sourit"><h1>Bravo !</h1><span class="sticker" aria-hidden="true">${review?'✦':packs[pack].stamp}</span><p>${review?'Tu as retrouvé les couleurs !':'Un autocollant dans ton carnet !'}</p><button class="primary" id="reward-next" type="button">${next>=0?'Encore des couleurs':'Ouvrir mon carnet'} →</button><button class="text-back" type="button" id="back-home">Retour à Aya</button></section>`,'reward');
-    button('#reward-next',next>=0?startNext:carnet);button('#back-home',home);
+    screen.querySelector('#reward-next').textContent='Chanson suivante →';button('#reward-next',()=>window.AyaFlow.open('alphabet'));button('#back-home',home);
   }
   function carnet(){
     render(`<section class="carnet view"><p class="eyebrow">Mes couleurs avec Aya</p><h1>Mon carnet</h1><div class="stickers">${packs.map(({name,stamp},i)=>`<div class="stamp"><span class="sticker ${done.includes(i)?'':'locked'}" role="img" aria-label="${done.includes(i)?'Gagné':'À gagner'} : ${name}">${done.includes(i)?stamp:'☆'}</span><small>${name}</small></div>`).join('')}</div><p>${done.length} / ${packs.length} autocollants</p><button class="primary" type="button" id="carnet-play">${nextPack()<0?'Réviser les couleurs':'Jouer aux couleurs'} →</button><button class="text-back" type="button" id="carnet-back">Retour à Aya</button></section>`,'carnet');
     button('#carnet-play',startNext);button('#carnet-back',home);
   }
-  document.querySelector('#home').addEventListener('click',home);
+  
   document.querySelector('#book').addEventListener('click',()=>currentView==='carnet'?home():carnet());
   const catalog=document.querySelector('#catalog');
   try {const ref=new URL(document.referrer);if(ref.origin===location.origin&&/^\/(?:Applications|Application)\.dc(?:\.html)?$/i.test(ref.pathname)&&ref.searchParams.get('guest')!=='1'&&sessionStorage.getItem('km-guest-mode')!=='1')catalog.href='/Application.dc.html?section=apps';}catch{}
-  home();
+  window.AyaColors={video:colorsVideo,game:startNext,stop};
 })();
