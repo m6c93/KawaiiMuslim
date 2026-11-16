@@ -95,7 +95,7 @@
       if(!pending())return;
       access='allowed';snap();
       objectUrl=URL.createObjectURL(video);
-      window.AyaFlow.video(panel,key,topics[key].lesson,objectUrl,'media/'+key+'-poster.webp',()=>{release();quiz(key,0);});
+      window.AyaFlow.video(panel,key,topics[key].lesson,objectUrl,'media/'+key+'-poster.webp',()=>{release();quiz(key,0);},destination!=='song-only');
     } catch {if(pending())showUnavailable(key,destination);}
     finally {clearTimeout(timer);}
   }
