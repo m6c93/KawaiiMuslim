@@ -40,7 +40,8 @@
   function word(key,showFrench=true){const [ar,latin]=colors[key];return `<div class="word-line"><span class="word" dir="rtl" lang="ar">${ar}</span><span>${latin}${showFrench?' · '+title(key):''}</span></div>`;}
   const progress=(n,total,label)=>`<div class="activity-bar"><span>${label}</span><div class="dots" aria-label="Étape ${n} sur ${total}">${Array.from({length:total},(_,i)=>`<i class="${i<n?'on':''}" aria-hidden="true"></i>`).join('')}</div></div>`;
   function home(){window.AyaFlow.home();}
-  function colorsVideo(){window.AyaFlow.show('colors','Les couleurs');window.AyaFlow.video(screen,'colors','Les couleurs','media/couleurs.mp4?v=complete-2','media/couleurs.webp',startNext);}
+  function colorsVideo(){window.AyaFlow.show('colors','Les couleurs');window.AyaFlow.video(screen,'colors','Les couleurs','media/couleurs.mp4?v=complete-2','media/couleurs.webp',directQuestions);}
+  function directQuestions(){stop();pack=Math.max(0,nextPack());step=0;questions=shuffle(packs[pack].keys);question(false);}
   function startNext(){const next=nextPack();if(next<0){pack=0;questions=shuffle(Object.keys(colors)).slice(0,3);step=0;question(true);}else start(next);}
   function start(index){pack=index;step=0;discover();}
   function discover(){
@@ -91,5 +92,5 @@
   document.querySelector('#book').addEventListener('click',()=>currentView==='carnet'?home():carnet());
   const catalog=document.querySelector('#catalog');
   try {const ref=new URL(document.referrer);if(ref.origin===location.origin&&/^\/(?:Applications|Application)\.dc(?:\.html)?$/i.test(ref.pathname)&&ref.searchParams.get('guest')!=='1'&&sessionStorage.getItem('km-guest-mode')!=='1')catalog.href='/Application.dc.html?section=apps';}catch{}
-  window.AyaColors={video:colorsVideo,game:startNext,stop};
+  window.AyaColors={video:colorsVideo,game:startNext,questions:directQuestions,stop};
 })();

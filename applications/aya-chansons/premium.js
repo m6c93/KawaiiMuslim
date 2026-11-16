@@ -62,11 +62,11 @@
     const login='/Connexion.dc.html?next='+encodeURIComponent(appPath+'?lecon='+key);
     panel.innerHTML=`<div class="premium-intro"><p>Cette leçon est réservée aux abonnés.</p><div class="premium-actions">${signin?`<a class="primary" href="${login}">Se connecter</a><a class="quiet" href="/presentation.html#tarifs">Voir les abonnements</a>`:`<a class="primary" href="${account}">Voir les abonnements</a>`}</div></div>`;
   }
-  function showUnavailable(key){
+  function showUnavailable(key,destination='video'){
     panel.innerHTML='<div class="premium-intro"><p role="status">Impossible d’ouvrir la leçon pour le moment.</p><button class="quiet" type="button" id="premium-retry">Réessayer</button></div>';
-    panel.querySelector('#premium-retry').onclick=()=>open(key);
+    panel.querySelector('#premium-retry').onclick=()=>open(key,destination);
   }
-  async function open(key){
+  async function open(key,destination='video'){
     if(!Object.hasOwn(topics,key))return;
     window.AyaFlow.show(key,topics[key].lesson);
     release();current=key;
@@ -80,7 +80,7 @@
       const signedIn=await session();
       if(!pending())return;
       if(!signedIn?.access_token){access='signin';snap();showLocked('signin',key);return;}
-      const response=await check(signedIn.access_token,'/api/aya/media/'+key,controller.signal);
+      const response=await check(signedIn.access_token,destination==='questions'?'/api/aya/access':'/api/aya/media/'+key,controller.signal);
       if(!pending())return;
       if(response.status===401||response.status===403){
         const detail=response.status===403 ? await response.json().catch(()=>null) : null;
@@ -89,13 +89,14 @@
         showLocked(access,key);
         return;
       }
-      if(!response.ok||!response.headers.get('content-type')?.startsWith('video/mp4')){showUnavailable(key);return;}
+      if(destination==='questions'&&response.ok){access='allowed';quiz(key,0);return;}
+      if(!response.ok||!response.headers.get('content-type')?.startsWith('video/mp4')){showUnavailable(key,destination);return;}
       const video=await response.blob();
       if(!pending())return;
       access='allowed';snap();
       objectUrl=URL.createObjectURL(video);
       window.AyaFlow.video(panel,key,topics[key].lesson,objectUrl,'media/'+key+'-poster.webp',()=>{release();quiz(key,0);});
-    } catch {if(pending())showUnavailable(key);}
+    } catch {if(pending())showUnavailable(key,destination);}
     finally {clearTimeout(timer);}
   }
   function quiz(key,index){

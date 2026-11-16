@@ -32,14 +32,15 @@
   if(!Object.hasOwn(names,key))return;
   show(key,names[key]);mode('intro');
   const root=key==='colors'?screen:document.querySelector('#premium-content');
-  root.innerHTML=`<section class="lesson-intro"><span class="intro-icon" aria-hidden="true">${icons[key]}</span><h1>${names[key]}</h1><p>Une chanson, puis des petits jeux !</p><ol class="lesson-plan"><li><span class="plan-number">1</span><div><strong>Je regarde et je chante</strong><small>J’écoute les mots avec Aya.</small></div></li><li><span class="plan-number">2</span><div><strong>Je joue avec les mots</strong><small>Je retrouve les bonnes réponses.</small></div></li><li><span class="plan-number">✦</span><div><strong>Je gagne ma récompense</strong><small>Un bravo pour mes découvertes !</small></div></li></ol><button class="primary" id="start-lesson" type="button">C’est parti ! →</button></section>`;
+  root.innerHTML=`<section class="lesson-intro"><span class="intro-icon" aria-hidden="true">${icons[key]}</span><h1>${names[key]}</h1><p>Une chanson à savourer, des questions pour jouer.</p><ol class="lesson-plan"><li><span class="plan-number">1</span><div><strong>Je regarde et je chante</strong><small>J’écoute les mots avec Aya.</small></div></li><li><span class="plan-number">2</span><div><strong>Je joue avec les mots</strong><small>Je retrouve les bonnes réponses.</small></div></li><li><span class="plan-number">✦</span><div><strong>Je gagne ma récompense</strong><small>Un bravo pour mes découvertes !</small></div></li></ol><button class="primary" id="start-lesson" type="button">▶ Voir la chanson</button><button class="quiet intro-questions" id="start-questions" type="button">Passer aux questions →</button><small class="intro-choice">Choisis ce qui te fait envie.</small></section>`;
   root.querySelector('#start-lesson').onclick=()=>key==='colors'?window.AyaColors.video():window.AyaPremium.open(key);
+  root.querySelector('#start-questions').onclick=()=>key==='colors'?window.AyaColors.questions():window.AyaPremium.open(key,'questions');
   const heading=root.querySelector('h1');heading.tabIndex=-1;heading.focus({preventScroll:true});
  }
  function next(key){open(order[(order.indexOf(key)+1)%order.length]);}
  function video(root,key,title,src,poster,game){
   mode('video');const saved=read();saved.last=key;write(saved);
-  root.innerHTML=`<section class="watch-screen" aria-label="${title}"><div class="watch-title"><div><h1>${title}</h1><p class="watch-next-hint">1. La chanson <span aria-hidden="true">→</span> 2. Les jeux</p></div><button class="nav" type="button" id="expand-video" aria-label="Afficher la vidéo en plein écran">⛶ <span>Plein écran</span></button></div><div class="watch-stage"><video controls playsinline preload="metadata" poster="${poster}" aria-label="${title}"></video></div><section class="watch-end" hidden><span class="end-star" aria-hidden="true">✦</span><h2>À toi de jouer !</h2><button type="button" class="primary" id="watch-game">Jouer avec Aya →</button><button type="button" class="quiet" id="watch-again">Revoir la chanson</button></section><p class="watch-error" role="status" hidden>La vidéo n’a pas chargé. <button type="button" class="quiet" id="watch-retry">Réessayer</button></p></section>`;
+  root.innerHTML=`<section class="watch-screen" aria-label="${title}"><div class="watch-title"><div><h1>${title}</h1><p class="watch-next-hint">Un petit moment pour chanter avec Aya</p></div><button class="nav" type="button" id="expand-video" aria-label="Afficher la vidéo en plein écran">⛶ <span>Plein écran</span></button></div><div class="watch-stage"><video controls playsinline preload="metadata" poster="${poster}" aria-label="${title}"></video></div><div class="watch-actions"><div class="watch-companion"><img src="media/aya.webp" alt="" width="48" height="60"><p>À ton rythme<small>Tu peux aussi jouer tout de suite.</small></p></div><button type="button" class="primary" id="watch-questions">Passer aux questions →</button></div><section class="watch-end" hidden><span class="end-star" aria-hidden="true">✦</span><h2>À toi de jouer !</h2><button type="button" class="primary" id="watch-game">Jouer avec Aya →</button><button type="button" class="quiet" id="watch-again">Revoir la chanson</button></section><p class="watch-error" role="status" hidden>La vidéo n’a pas chargé. <button type="button" class="quiet" id="watch-retry">Réessayer</button></p></section>`;
   const player=root.querySelector('video'),stage=root.querySelector('.watch-stage'),end=root.querySelector('.watch-end'),expand=root.querySelector('#expand-video');
   root.querySelector('h1').tabIndex=-1;root.querySelector('h1').focus({preventScroll:true});
   player.src=src;let lastSaved=-1;
@@ -50,10 +51,12 @@
   player.addEventListener('error',()=>{root.querySelector('.watch-error').hidden=false;});
   player.addEventListener('ended',()=>{
    persist();if(document.fullscreenElement)document.exitFullscreen?.().catch(()=>{});if(player.webkitDisplayingFullscreen)player.webkitExitFullscreen?.();
-   stage.hidden=true;end.hidden=false;expand.hidden=true;mode('finished');root.querySelector('#watch-game').focus();
+   root.querySelector('.watch-actions').hidden=true;stage.hidden=true;end.hidden=false;expand.hidden=true;mode('finished');root.querySelector('#watch-game').focus();
   });
-  root.querySelector('#watch-again').onclick=()=>{end.hidden=true;stage.hidden=false;expand.hidden=false;mode('video');player.currentTime=0;player.play().catch(()=>{});};
-  root.querySelector('#watch-game').onclick=()=>{player.pause();mode('game');game();};
+  root.querySelector('#watch-again').onclick=()=>{root.querySelector('.watch-actions').hidden=false;end.hidden=true;stage.hidden=false;expand.hidden=false;mode('video');player.currentTime=0;player.play().catch(()=>{});};
+  const goToQuestions=()=>{player.pause();persist();mode('game');game();};
+  root.querySelector('#watch-game').onclick=goToQuestions;
+  root.querySelector('#watch-questions').onclick=goToQuestions;
   root.querySelector('#watch-retry').onclick=()=>{root.querySelector('.watch-error').hidden=true;player.load();};
   expand.onclick=()=>{if(player.webkitEnterFullscreen)player.webkitEnterFullscreen();else player.requestFullscreen?.().catch(()=>{});};
  }
