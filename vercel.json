@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/aya/:path*",
+      "destination": "/api/aya?resource=:path*"
+    },
+    {
       "source": "/api/quran-invitation",
       "destination": "/api/quran-invitation"
     },
@@ -156,5 +160,10 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/aya.js": {
+      "includeFiles": "applications/aya-chansons/media/*.bin"
+    }
+  }
 }
