@@ -101,6 +101,7 @@
   }
   function quiz(key,index){
     if(dialog.hidden||current!==key||access!=='allowed')return;
+    window.AyaQuestionAudio.stop();
     window.AyaFlow.mode('game');
     const t=topics[key];
     if(index>=t.questions.length){
@@ -111,8 +112,9 @@
     const [arabic,reading,choices,answer]=t.questions[index];
     const order=choices.map((_,i)=>i);
     for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
-    panel.innerHTML=`<section class="premium-question"><small>Étape ${index+1} sur ${t.questions.length}</small><h3>${t.prompt}</h3><div class="word" lang="ar" dir="rtl">${arabic}</div><div>${reading}</div><div class="premium-cards">${order.map(i=>`<button type="button" class="premium-choice" data-choice="${i}">${Array.isArray(choices[i])?`<span aria-hidden="true">${choices[i][0]}</span>${choices[i][1]}`:key==='alphabet'?`<span lang="ar">${choices[i]}</span>`:choices[i]}</button>`).join('')}</div><p role="status"></p><button type="button" class="primary" id="premium-next" hidden>${index+1===t.questions.length?'Terminer':'Continuer'} →</button></section>`;
+    panel.innerHTML=`<section class="premium-question"><small>Étape ${index+1} sur ${t.questions.length}</small><h3>${t.prompt}</h3><div class="word" lang="ar" dir="rtl">${arabic}</div><div>${reading}</div><button type="button" class="quiet" data-question-audio>🔊 Écouter la question</button><div class="premium-cards">${order.map(i=>`<button type="button" class="premium-choice" data-choice="${i}">${Array.isArray(choices[i])?`<span aria-hidden="true">${choices[i][0]}</span>${choices[i][1]}`:key==='alphabet'?`<span lang="ar">${choices[i]}</span>`:choices[i]}</button>`).join('')}</div><p role="status"></p><button type="button" class="primary" id="premium-next" hidden>${index+1===t.questions.length?'Terminer':'Continuer'} →</button></section>`;
     const choicesButtons=[...panel.querySelectorAll('[data-choice]')], feedback=panel.querySelector('[role=status]'), next=panel.querySelector('#premium-next');
+    window.AyaQuestionAudio.attach(panel,key+'-'+index);
     let tries=0;
     choicesButtons.forEach(b=>b.onclick=()=>{
       if(Number(b.dataset.choice)!==answer){b.classList.add('wrong');feedback.textContent=++tries>=2?'Essaie la réponse entourée.':'Essaie encore.';if(tries>=2)choicesButtons.find(c=>Number(c.dataset.choice)===answer).classList.add('good');return;}

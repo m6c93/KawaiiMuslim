@@ -26,7 +26,7 @@
   const title=s=>s[0].toUpperCase()+s.slice(1);
   const shuffle=items=>{const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
   const button=(selector,run)=>screen.querySelector(selector)?.addEventListener('click',run);
-  const stop=()=>{clip.pause();screen.querySelector('#colors-video')?.pause();};
+  const stop=()=>{window.AyaQuestionAudio?.stop();clip.pause();screen.querySelector('#colors-video')?.pause();};
   addEventListener('aya:pause-colors', stop);
   function render(markup,view){
     stop();window.AyaFlow.show('colors',view==='carnet'?'Mon carnet':'Les couleurs');currentView=view;screen.innerHTML=markup;window.scrollTo(0,0);
@@ -55,11 +55,11 @@
     const target=questions[step], shape=step===questions.length-1?'balloon':'crayon';
     const candidates=review?Object.keys(colors):packs[pack].keys;
     const choices=shuffle([target,...shuffle(candidates.filter(k=>k!==target)).slice(0,2)]);
-    render(`<section class="activity view">${progress(step+1,questions.length,review?'Les couleurs · Je révise':'Les couleurs · Je joue')}<h1>${shape==='balloon'?'Trouve le ballon':'Choisis le crayon'}</h1>${word(target,false)}<div class="drop" id="box"><span>${shape==='balloon'?'✦ Touche le bon ballon':'▱ Dépose le crayon ici'}</span></div><div class="tray" aria-label="Choix de couleurs">${choices.map(k=>`<button type="button" class="choice" data-word="${k}" aria-label="${title(k)}" style="--color:${colors[k][2]}"><span class="shape ${shape}" aria-hidden="true"></span></button>`).join('')}</div><div class="feedback" id="feedback" role="status" aria-live="polite">${shape==='balloon'?'':'Tu peux aussi toucher un crayon.'}</div><div class="step-next"><button class="quiet" type="button" id="hint-audio">♫ Écouter</button><button class="primary" id="continue" type="button" hidden>${step===questions.length-1?'Terminer':'Continuer'} →</button></div></section>`,'quiz');
+    render(`<section class="activity view">${progress(step+1,questions.length,review?'Les couleurs · Je révise':'Les couleurs · Je joue')}<h1>${shape==='balloon'?'Trouve le ballon':'Choisis le crayon'}</h1>${word(target,false)}<div class="drop" id="box"><span>${shape==='balloon'?'✦ Touche le bon ballon':'▱ Dépose le crayon ici'}</span></div><div class="tray" aria-label="Choix de couleurs">${choices.map(k=>`<button type="button" class="choice" data-word="${k}" aria-label="${title(k)}" style="--color:${colors[k][2]}"><span class="shape ${shape}" aria-hidden="true"></span></button>`).join('')}</div><div class="feedback" id="feedback" role="status" aria-live="polite">${shape==='balloon'?'':'Tu peux aussi toucher un crayon.'}</div><div class="step-next"><button class="quiet" type="button" id="hint-audio" data-question-audio>🔊 Écouter la question</button><button class="primary" id="continue" type="button" hidden>${step===questions.length-1?'Terminer':'Continuer'} →</button></div></section>`,'quiz');
     const box=screen.querySelector('#box'), feedback=screen.querySelector('#feedback'), next=screen.querySelector('#continue'), listen=screen.querySelector('#hint-audio');
     const tiles=[...screen.querySelectorAll('.choice')], correct=tiles.find(t=>t.dataset.word===target);
     const hint=()=>{feedback.textContent='Cherche '+target+'.';correct.classList.add('hint');};
-    listen.addEventListener('click',()=>play(target));
+    window.AyaQuestionAudio.attach(screen,target);
     function choose(tile){
       if(answerFound)return;
       if(tile!==correct){++mistakes;tile.classList.add('try');feedback.textContent='Essaie une autre couleur.';if(mistakes>=2)hint();return;}
