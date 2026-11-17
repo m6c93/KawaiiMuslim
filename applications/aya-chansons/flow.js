@@ -13,7 +13,7 @@
  function leave(){document.querySelectorAll('video').forEach(v=>v.pause());window.AyaColors?.stop();dispatchEvent(new Event('aya:leave'));}
  function show(key,title){
   leave();current=key;mode('lesson');screen.hidden=key!=='colors';lesson.hidden=key==='colors';
-  catalog.hidden=true;book.hidden=true;back.textContent='← Accueil';back.setAttribute('aria-label','Retour à l’accueil des chansons');
+  catalog.hidden=true;book.hidden=true;back.textContent='← Maison';back.setAttribute('aria-label','Retour à la maison');
   top.dataset.lesson=title;screen.replaceChildren();document.querySelector('#premium-content').replaceChildren();
   if(history.state?.ayaLesson!==key){if(history.state?.ayaLesson)history.replaceState({ayaLesson:key},'', '#'+key);else history.pushState({ayaLesson:key},'', '#'+key);}
   window.scrollTo(0,0);
@@ -22,26 +22,23 @@
   leave();current=null;mode('home');lesson.hidden=true;screen.hidden=false;catalog.hidden=false;book.hidden=false;
   top.dataset.lesson='';back.textContent='Avec Aya';back.setAttribute('aria-label','Accueil des chansons');
   const saved=read();const last=Object.hasOwn(names,saved.last)?saved.last:null;
-  screen.innerHTML=`<section class="house-welcome"><p class="eyebrow">L’arabe en chansons</p><h1>La maison d’Aya</h1><p>Où veux-tu jouer ?</p></section><div class="aya-house" aria-label="Choisir une pièce de la maison"><img src="media/house/home.webp" alt="La maison d’Aya et Mimi : dressing, miroir, coin lecture, bureau et calendrier" width="1120" height="1400" fetchpriority="high">${order.map(key=>`<button class="house-room room-${key}" data-song="${key}"><span>${key==='alphabet'?'Les lettres':names[key]}</span><small>${key==='colors'?'Découverte gratuite':'Abonnés'}</small></button>`).join('')}</div><button class="resume-song house-resume" id="resume-song"><span class="resume-icon" aria-hidden="true">▶</span><span><strong>${last?'Reprendre ma chanson':'Chanter avec Aya'}</strong><small>${names[last||'colors']}</small></span><span aria-hidden="true">→</span></button>`;
+  screen.innerHTML=`<section class="house-welcome"><p class="eyebrow">L’arabe en chansons</p><h1>La maison d’Aya</h1><p>Touche une télé pour regarder la chanson.</p></section><div class="aya-house tv-house" aria-label="Les télés de la maison"><img src="media/house/home-tv.webp" alt="La maison avec cinq pièces et Mimi près de la porte" width="1122" height="1402" fetchpriority="high">${order.map(key=>`<button class="room-tv tv-${key}" data-song="${key}" aria-label="Regarder la chanson : ${names[key]}"><span class="television"><span class="tv-display"><img src="media/${key==='colors'?'couleurs.webp':key+'-poster.webp'}" alt=""><span class="tv-play" aria-hidden="true">▶</span></span><span class="tv-knobs" aria-hidden="true">●<br>●</span></span><span class="tv-caption">${key==='alphabet'?'Les lettres':names[key]}</span></button>`).join('')}</div>${last?`<button class="resume-song house-resume" id="resume-song"><span class="resume-icon" aria-hidden="true">▶</span><span><strong>Reprendre ma chanson</strong><small>${names[last]}</small></span><span aria-hidden="true">→</span></button>`:''}<section class="house-games" aria-labelledby="questions-title"><h2 id="questions-title">Les questions par thème</h2><p>À toi de jouer, même sans regarder la vidéo.</p><div class="theme-questions">${order.map(key=>`<button type="button" data-questions="${key}"><span aria-hidden="true">${icons[key]}</span><strong>${names[key]}</strong><small>${key==='colors'?'Gratuit':'Abonnés'}</small></button>`).join('')}</div></section>`;
   screen.querySelectorAll('[data-song]').forEach(b=>b.onclick=()=>open(b.dataset.song));
-  screen.querySelector('#resume-song')?.addEventListener('click',()=>open(last||'colors'));
+  screen.querySelectorAll('[data-questions]').forEach(b=>b.onclick=()=>open(b.dataset.questions,'questions'));
+  screen.querySelector('#resume-song')?.addEventListener('click',()=>open(last));
   screen.querySelector('h1').tabIndex=-1;screen.querySelector('h1').focus({preventScroll:true});window.scrollTo(0,0);
  }
  function home(){if(history.state?.ayaLesson){history.back();}else renderHome();}
- function open(key){
+ function open(key,destination='video'){
   if(!Object.hasOwn(names,key))return;
-  show(key,names[key]);mode('intro');
-  const root=key==='colors'?screen:document.querySelector('#premium-content');
-  root.innerHTML=`<section class="lesson-intro"><span class="intro-icon" aria-hidden="true">${icons[key]}</span><h1>${names[key]}</h1><p>Chante, écoute… puis touche la bonne réponse !</p><ol class="lesson-plan"><li><span class="plan-number">1</span><div><strong>Je chante avec Aya</strong><small>La chanson fait des pauses pour jouer.</small></div></li><li><span class="plan-number">2</span><div><strong>Je touche la bonne réponse</strong><small>J’écoute la question, puis je choisis.</small></div></li><li><span class="plan-number">✦</span><div><strong>Je gagne ma récompense</strong><small>Un bravo pour mes découvertes !</small></div></li></ol><button class="primary" id="start-lesson" type="button">▶ Chanter et jouer</button><button class="quiet intro-questions" id="start-questions" type="button">Jouer avec les mots →</button><button class="text-back" type="button" id="start-song-only">Chanson seule</button><small class="intro-choice">Choisis ce qui te fait envie.</small></section>`;
-  root.querySelector('#start-lesson').onclick=()=>key==='colors'?window.AyaColors.video():window.AyaPremium.open(key);
-  root.querySelector('#start-questions').onclick=()=>key==='colors'?window.AyaColors.questions():window.AyaPremium.open(key,'questions');
-  root.querySelector('#start-song-only').onclick=()=>key==='colors'?window.AyaColors.video(false):window.AyaPremium.open(key,'song-only');
-  const heading=root.querySelector('h1');heading.tabIndex=-1;heading.focus({preventScroll:true});
+  if(key==='colors'){
+   if(destination==='questions')window.AyaColors.questions();else window.AyaColors.video();
+  }else window.AyaPremium.open(key,destination);
  }
  function next(key){open(order[(order.indexOf(key)+1)%order.length]);}
  function video(root,key,title,src,poster,game,interactive=true){
   mode('video');const saved=read();saved.last=key;write(saved);
-  root.innerHTML=`<section class="watch-screen" aria-label="${title}"><div class="watch-title"><div><h1>${title}</h1><p class="watch-next-hint">${interactive?'La chanson fait des pauses pour jouer':'Un petit moment pour chanter avec Aya'}</p></div><button class="nav" type="button" id="expand-video" aria-label="Afficher la vidéo en plein écran">⛶ <span>Plein écran</span></button></div><div class="watch-stage"><video controls controlslist="nofullscreen nodownload noremoteplayback" disablepictureinpicture playsinline preload="metadata" poster="${poster}" aria-label="${title}"></video></div><div class="watch-actions"><div class="watch-companion"><img src="media/aya.webp" alt="" width="48" height="60"><p>À ton rythme<small>Tu peux aussi jouer tout de suite.</small></p></div><button type="button" class="primary" id="watch-questions">Passer aux questions →</button></div><section class="watch-end" hidden><span class="end-star" aria-hidden="true">✦</span><h2>À toi de jouer !</h2><button type="button" class="primary" id="watch-game">Jouer avec Aya →</button><button type="button" class="quiet" id="watch-again">Revoir la chanson</button></section><p class="watch-error" role="status" hidden>La vidéo n’a pas chargé. <button type="button" class="quiet" id="watch-retry">Réessayer</button></p></section>`;
+  root.innerHTML=`<section class="watch-screen" aria-label="${title}"><div class="watch-title"><div><h1>${title}</h1><p class="watch-next-hint">La chanson, puis les questions</p></div><button class="nav" type="button" id="expand-video" aria-label="Afficher la vidéo en plein écran">⛶ <span>Plein écran</span></button></div><div class="watch-stage"><video controls autoplay controlslist="nofullscreen nodownload noremoteplayback" disablepictureinpicture playsinline preload="metadata" poster="${poster}" aria-label="${title}"></video></div><div class="watch-actions"><div class="watch-companion"><img src="media/aya.webp" alt="" width="48" height="60"><p>Après la chanson<small>Les questions arrivent juste après.</small></p></div><button type="button" class="primary" id="watch-questions">Passer aux questions →</button></div><section class="watch-end" hidden><span class="end-star" aria-hidden="true">✦</span><h2>À toi de jouer !</h2><button type="button" class="primary" id="watch-game">Jouer avec Aya →</button><button type="button" class="quiet" id="watch-again">Revoir la chanson</button></section><p class="watch-error" role="status" hidden>La vidéo n’a pas chargé. <button type="button" class="quiet" id="watch-retry">Réessayer</button></p></section>`;
   const player=root.querySelector('video'),stage=root.querySelector('.watch-stage'),end=root.querySelector('.watch-end'),expand=root.querySelector('#expand-video');
   root.querySelector('h1').tabIndex=-1;root.querySelector('h1').focus({preventScroll:true});
   player.src=src;let lastSaved=-1;
@@ -52,14 +49,14 @@
   player.addEventListener('error',()=>{root.querySelector('.watch-error').hidden=false;});
   player.addEventListener('ended',()=>{
    persist();if(document.fullscreenElement)document.exitFullscreen?.().catch(()=>{});if(player.webkitDisplayingFullscreen)player.webkitExitFullscreen?.();
-   root.querySelector('.watch-actions').hidden=true;stage.hidden=true;end.hidden=false;expand.hidden=true;mode('finished');root.querySelector('#watch-game').focus();
+   mode('game');game();
   });
   root.querySelector('#watch-again').onclick=()=>{root.querySelector('.watch-actions').hidden=false;end.hidden=true;stage.hidden=false;expand.hidden=false;mode('video');player.currentTime=0;player.play().catch(()=>{});};
   const goToQuestions=()=>{player.pause();persist();mode('game');game();};
   root.querySelector('#watch-game').onclick=goToQuestions;
   root.querySelector('#watch-questions').onclick=goToQuestions;
   root.querySelector('#watch-retry').onclick=()=>{root.querySelector('.watch-error').hidden=true;player.load();};
-  window.AyaInteractive?.attach(root,key,interactive);
+  player.play().catch(()=>{ /* Mobile browsers may require touching the native play control. */ });
   expand.onclick=()=>{const shell=root.querySelector('.watch-screen');if(document.fullscreenElement)document.exitFullscreen?.().catch(()=>{});else if(shell.requestFullscreen)shell.requestFullscreen().catch(()=>shell.classList.toggle('expanded'));else shell.classList.toggle('expanded');};
  }
  back.onclick=home;
