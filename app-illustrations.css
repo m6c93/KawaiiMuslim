@@ -44,3 +44,53 @@ body[data-km-section="apps"] .apps .visual .badge {
     height: 204px !important;
   }
 }
+
+/* Brighter colour, with a calmer editorial presentation. */
+body[data-km-section="apps"] .apps > article { --art-bg:#f6deda; --app-accent:#9e4964; }
+body[data-km-section="apps"] .apps > .salah { --art-bg:#dcece3; --app-accent:#36705d; }
+body[data-km-section="apps"] .apps > .coran { --art-bg:#e3ecd8; --app-accent:#506f40; }
+body[data-km-section="apps"] .apps > .arabic { --art-bg:#f6e6c8; --app-accent:#8b6334; }
+body[data-km-section="apps"] .apps > .reading { --art-bg:#dcebf0; --app-accent:#3e7182; }
+body[data-km-section="apps"] .apps > .mimi { --art-bg:#e8e1f2; --app-accent:#75548e; }
+body[data-km-section="apps"] .apps > .prophets { --art-bg:#e0ebe0; --app-accent:#4c7055; }
+body[data-km-section="apps"] .apps .visual { background:var(--art-bg)!important; height:324px; min-height:324px; }
+body[data-km-section="apps"] .apps .visual .app-illustration {
+  width:274px!important; height:274px!important;
+  mix-blend-mode:multiply;
+  filter:brightness(1.13) contrast(1.12) saturate(1.12);
+  border-radius:0;
+}
+body[data-km-section="apps"] .apps .app-card {
+  border-radius:22px; background:#fffdfa;
+  box-shadow:0 6px 20px #503a3010;
+  border:1px solid #e8dfd7;
+}
+body[data-km-section="apps"] .apps .app-card:hover {
+  transform:translateY(-2px); box-shadow:0 9px 24px #503a3018;
+}
+body[data-km-section="apps"] .apps .card-body h2 {
+  font-family:Nunito,system-ui,sans-serif; font-size:26px;
+  font-weight:800; line-height:1.18; color:#393c3a; letter-spacing:-.035em;
+}
+body[data-km-section="apps"] .apps .launch {
+  background:var(--app-accent)!important; box-shadow:none;
+  border-radius:12px; font-family:Nunito,system-ui,sans-serif;
+}
+body[data-km-section="apps"] .apps .visual .badge {
+  border:0; border-radius:8px; background:#ffffffb8; color:#424941;
+  font-weight:800; font-size:11px;
+}
+body[data-km-section="apps"] .hero::before,
+body[data-km-section="apps"] .hero::after { display:none; }
+body[data-km-section="apps"] .hero h1 {
+  font-family:Nunito,system-ui,sans-serif; font-weight:800;
+  font-size:clamp(36px,5vw,54px); letter-spacing:-.045em;
+}
+@media(max-width:760px) {
+  body[data-km-section="apps"] .apps .visual { height:284px; min-height:284px; }
+  body[data-km-section="apps"] .apps .visual .app-illustration { width:234px!important; height:234px!important; }
+  body[data-km-section="apps"] .apps .card-body h2 { font-size:23px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  body[data-km-section="apps"] .apps .app-card:hover { transform:none; }
+}
