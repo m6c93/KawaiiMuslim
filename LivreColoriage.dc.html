@@ -102,17 +102,21 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   const currentPosition=()=>{
     try{return frame.contentDocument.querySelector('input[type="range"]')?.value||"0"}catch(error){return"0"}
   };
+  const isBookAsset = value => {
+    try { const u = new URL(value); return u.origin === location.origin && /^\/shared-book-assets\/[a-f0-9]+\.(?:jpe?g|png|webp)$/i.test(u.pathname); }
+    catch { return false; }
+  };
   const visiblePages=()=>{
     try{
       const doc=frame.contentDocument,view=frame.contentWindow;
       return [...doc.querySelectorAll("main figure img")]
         .filter(img=>{
           const rect=img.getBoundingClientRect(),style=view.getComputedStyle(img);
-          return rect.width>20&&rect.height>20&&style.display!=="none"&&style.visibility!=="hidden"&&img.src.startsWith("data:image/")&&img.src.length>12000&&/^Page\s+\d+/i.test(img.alt||"");
+          return rect.width>20&&rect.height>20&&style.display!=="none"&&style.visibility!=="hidden"&&(img.src.startsWith("data:image/")||isBookAsset(img.src))&&/^Page\s+\d+/i.test(img.alt||"");
         })
         .map((img,index)=>({
           imageSrc:img.src,
-          pageNumber:(img.alt.match(/\d+/)||[String(index+1)])[0],
+          pageNumber:img.dataset.pageIndex || (img.alt.match(/\d+/)||[String(index+1)])[0],
           side:img.closest("figure")?.classList.contains("left-paper")?"gauche":"droite"
         }));
     }catch(error){return[]}

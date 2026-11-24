@@ -379,7 +379,10 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
         const validSaved = saved
           && saved.slug === requestedBook
           && String(saved.pageNumber) === String(requestedPage)
-          && String(saved.imageSrc || "").startsWith("data:image/")
+          && (String(saved.imageSrc || "").startsWith("data:image/") || (() => {
+            try { const u = new URL(saved.imageSrc); return u.origin === location.origin && /^\/shared-book-assets\/[a-f0-9]+\.(?:jpe?g|png|webp)$/i.test(u.pathname); }
+            catch { return false; }
+          })())
           && String(saved.sourceKey || "") === `book-coloring:${requestedBook}:page:${requestedPage}`;
         if (!validSaved) throw new Error("Rouvre cette page depuis le livre pour continuer ton coloriage.");
         imageSource = saved.imageSrc;

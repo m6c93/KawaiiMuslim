@@ -708,6 +708,7 @@ window.KMAuth = (() => {
       }));
     },
 
+    bookFileUrl: value => signedPrivateUrl(value, "content-books"),
     listContent: async () => {
       const items = requireSuccess(await client().from("content_items")
         .select("*")

@@ -632,6 +632,14 @@ class Component extends DCLogic {
       const isAlphabetBook = normalizedTitle.includes('colorie')
         && normalizedTitle.includes('apprends')
         && normalizedTitle.includes('arabe');
+      let bookUrl = b.url;
+      if (b.available && !b.preview) {
+        if (normalizedTitle === 'tawakkul') bookUrl = 'books/tawakkul.html';
+        else if (normalizedTitle === 'vers allah') bookUrl = 'books/vers-allah.html';
+        else if (/^(?:private:\/\/content-books\/|https:\/\/[^/]+\/storage\/v1\/object\/(?:sign|public|authenticated)\/content-books\/)/.test(bookUrl)) {
+          bookUrl = 'Livre.dc.html?' + new URLSearchParams({src: bookUrl, title: b.title});
+        }
+      }
       const discoveryId = isInvocationsBook(b) ? 'invocations' : normalizedTitle === 'tawakkul' ? 'tawakkul' : isMiraclesBook ? 'miracles' : coloringSlug === 'hijabi-girls' ? 'hijabi' : '';
       const isDiscovery = (discoveryId === 'invocations' ? !subscribed : guestMode) && Boolean(discoveryId);
       const isPreview = Boolean(b.preview);
@@ -644,7 +652,7 @@ class Component extends DCLogic {
           ? 'books/miracles-du-coran.html'
           : isColoringBook
           ? `LivreColoriage.dc.html?book=${encodeURIComponent(coloringSlug)}&title=${encodeURIComponent(b.title)}`
-          : b.url,
+          : bookUrl,
         coverImg: isAlphabetBook
           ? 'brand/books/colorie-ecris-apprends/front-cover-v2.png'
           : isMiraclesBook
