@@ -48,7 +48,7 @@
 
   const styles = document.createElement('link');
   styles.rel = 'stylesheet';
-  styles.href = '/books/reader-controls.css?v=iphone-landscape-6';
+  styles.href = '/books/reader-controls.css?v=auto-landscape-1';
   document.head.append(styles);
 
   // The iPhone shell can also arrange the legacy reader elements. Keep the
@@ -179,9 +179,6 @@
     const sound = byId('soundBtn'), full = byId('fullscreenBtn');
     sound.title = 'Son des pages';
     sound.setAttribute('aria-pressed', 'true');
-    const rotate = document.createElement('button');
-    rotate.type = 'button'; rotate.className = 'icon'; rotate.id = 'readerRotateBtn';
-    actions.append(rotate);
     const summary = settings.querySelector('summary');
     function closeSettings() { settings.open = false; }
     document.addEventListener('pointerdown', event => {
@@ -275,7 +272,16 @@
         for (const frame of frames) {
           const rect = frame.getBoundingClientRect(); left += rect.left + frame.clientLeft; top += rect.top + frame.clientTop;
         }
-        const insets = {left:safe.left-left, top:safe.top-top, right:left+innerWidth-safe.right, bottom:top+innerHeight-safe.bottom};
+        const bounds = frames[0].getBoundingClientRect();
+        const physical = {left:safe.left-left, top:safe.top-top,
+          right:left+bounds.width-safe.right, bottom:top+bounds.height-safe.bottom};
+        // The coloring footer and its iframe rotate together in the parent.
+        const parentTurned = libraryFrame && window.parent.document.documentElement.classList.contains('km-landscape-page')
+          && window.parent.matchMedia('screen and (orientation: portrait)').matches
+          && !document.fullscreenElement && !document.webkitFullscreenElement;
+        const insets = parentTurned
+          ? {left:physical.top, top:physical.right, right:physical.bottom, bottom:physical.left}
+          : physical;
         for (const side of Object.keys(insets)) {
           const distance = Math.max(0, Math.ceil(insets[side]) || 0)+'px';
           if (root.style.getPropertyValue('--reader-host-'+side)!==distance) root.style.setProperty('--reader-host-'+side, distance);
@@ -288,7 +294,7 @@
       Boolean(window.webkit?.messageHandlers?.kmShell || window.KMApple);
     const layoutApple = appleDevice && window.Element?.prototype.attachShadow
       ? createAppleLandscape({book, dock, home, pages, settings}) : null;
-    let manualLandscape = false, fitFrame = 0, fitLater = 0;
+    let fitFrame = 0, fitLater = 0;
     function fit() {
       const viewport = window.visualViewport;
       const unzoomed = viewport && Math.abs(viewport.scale - 1) < .01;
@@ -298,21 +304,13 @@
       root.style.setProperty('--km-view-x', (unzoomed ? viewport.offsetLeft || 0 : 0) + 'px');
       root.style.setProperty('--km-view-y', (unzoomed ? viewport.offsetTop || 0 : 0) + 'px');
       readHostEdges();
-      const portrait = h > w;
-      if (!portrait) manualLandscape = false;
-      const turned = portrait && manualLandscape;
+      const turned = h > w && !presentationFrame;
       const width = turned ? h : w, height = turned ? w : h;
       root.classList.toggle('km-reader-turned', turned);
       root.classList.toggle('km-reader-wide', width >= height && width >= 500);
       root.style.setProperty('--km-reader-width', width + 'px');
       root.style.setProperty('--km-reader-height', height + 'px');
       measureStage();
-      const touch = navigator.maxTouchPoints > 0 || matchMedia('(pointer: coarse)').matches;
-      rotate.hidden = presentationFrame || !portrait || (!touch && w >= 700);
-      rotate.textContent = turned ? '↶' : '↻';
-      rotate.title = turned ? 'Revenir en portrait' : 'Lire en paysage';
-      rotate.setAttribute('aria-label', rotate.title);
-      rotate.setAttribute('aria-pressed', String(turned));
       full.hidden = !(document.fullscreenEnabled || root.webkitRequestFullscreen);
       layoutApple?.(width > height && width >= 430);
     }
@@ -322,9 +320,6 @@
       fitFrame = requestAnimationFrame(fit);
       fitLater = setTimeout(fit, 250);
     }
-    rotate.addEventListener('click', () => {
-      manualLandscape = !manualLandscape; fit(); closeSettings(); summary.focus();
-    });
     async function toggleFullscreen(event) {
       event.preventDefault(); event.stopImmediatePropagation(); closeSettings();
       try {
@@ -352,7 +347,7 @@
     window.visualViewport?.addEventListener('resize', queueFit);
     window.visualViewport?.addEventListener('scroll', queueFit);
 
-    // In manual landscape the physical Y axis runs across the book.
+    // When the viewport is turned, the physical Y axis runs across the book.
     let swipe = null;
     book.addEventListener('touchstart', event => {
       if (event.touches.length !== 1) { if (swipe) swipe.pinch = true; return; }

@@ -89,6 +89,7 @@ navigate(initial,{historyMode:'replace',anchor:params.get('anchor')||'',workshop
       if(/^\/Coloriage\.dc(?:\.html)?$/i.test(win.location.pathname))return 'coloring';
       if(/^\/Atelier\.dc(?:\.html)?$/i.test(win.location.pathname)&&
          doc.querySelector('#artViewer[open],#scanModal:not([hidden])'))return 'coloring';
+      if(doc.documentElement.classList.contains('km-landscape-page'))return "clean";
       if(bookPath(win.location.pathname))return doc.documentElement.classList.contains("km-reader-clean") ? "clean" : true;
       for(const child of doc.querySelectorAll('iframe')){
         const r=child.getBoundingClientRect();

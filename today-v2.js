@@ -69,7 +69,7 @@
       // Only built-in readers have a persistent URL derived from their database slug.
       var slugs = ['tawakkul','vers-allah','invocations-aya-ali','miracles-du-coran','aliments-dans-le-coran','animaux-du-coran','aya-armure-de-lumiere','bubble-tea-time-hijabi','hijabi-girls','exploration-espace','colorie-ecris-apprends'];
       var book = rows.find(row => row.child_profile_id === childId && slugs.includes(row.book_slug) && Number.isFinite(Date.parse(row.last_read_at)));
-      latestBook = book ? {title:book.book_title || book.book_slug,href:'/books/'+book.book_slug+'.html',time:Date.parse(book.last_read_at)} : null;
+      latestBook = book ? {title:book.book_title || book.book_slug,href:'/books/'+book.book_slug+'.html'+(book.book_slug==='colorie-ecris-apprends'?'?from=library':''),time:Date.parse(book.last_read_at)} : null;
       renderRecent();
     } catch { /* The most recent activity on this device stays available offline. */ }
   }

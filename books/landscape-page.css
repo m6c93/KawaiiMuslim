@@ -1,0 +1,36 @@
+/* The coloring-book frame and its footer share one landscape coordinate system.
+   The alphabet workbook uses the same viewport when opened from the library. */
+@media screen and (orientation: portrait) {
+  html.km-landscape-page { height: 100%; overflow: hidden; }
+  html.km-landscape-page body {
+    box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    left: 100%;
+    margin: 0;
+    width: 100vh;
+    width: 100dvh;
+    height: 100vw;
+    height: 100dvw;
+    max-width: none;
+    min-height: 0;
+    transform-origin: top left;
+    transform: rotate(90deg);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-inline: max(env(safe-area-inset-top, 0px), var(--km-safe-top, 0px)) max(env(safe-area-inset-bottom, 0px), var(--km-safe-bottom, 0px));
+  }
+  .km-landscape-page .reader-shell, .km-landscape-page #bookFrame { max-width: 100%; }
+  .km-landscape-page .colorbar { padding: 5px 10px max(5px, env(safe-area-inset-left, 0px)); }
+  .km-landscape-page .colorbar-inner { display: flex; align-items: center; gap: 8px; }
+  .km-landscape-page .action-side { flex: 1; }
+  .km-landscape-page .page-actions { flex-wrap: nowrap; overflow-x: auto; }
+  .km-landscape-page .color-page { width: auto; }
+  /* Native modal dialogs render in the top layer outside the turned body. */
+  .km-landscape-page :is(dialog, #reviewCardsDialog)[open] {
+    position: fixed; inset: 50% auto auto 50%; margin: 0;
+    width: min(480px, calc(100dvh - 32px)); max-width: none; max-height: calc(100dvw - 24px);
+    transform: translate(-50%, -50%) rotate(90deg); overflow: auto;
+  }
+}
