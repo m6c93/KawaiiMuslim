@@ -54,13 +54,6 @@
     if(!guest)return;
     sessionStorage.setItem('km-guest-mode','1');
     for(const [selector,label] of [['.coran .badge','3 sourates offertes'],['.arabic .badge','3 lettres offertes']]){const badge=document.querySelector(selector);if(badge)badge.textContent=label;}
-    if(decodeURIComponent(location.pathname)==='/Coloriage.dc.html'){
-      document.body.classList.add('discovery-coloring');
-      const editorStyle=document.createElement('style');editorStyle.textContent=`
-      body.discovery-coloring,body.discovery-coloring .workspace{background:#fff8ee;color:#49335f}body.discovery-coloring .topbar{background:#fff8ee;color:#49335f;border-color:#ead4e3;display:flex;align-items:center;flex-wrap:nowrap;padding:8px;gap:6px}body.discovery-coloring .topbar .title{flex:1;min-width:0}body.discovery-coloring .title strong{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}body.discovery-coloring .title small{display:none}body.discovery-coloring .top-actions{display:flex;gap:4px;flex-wrap:nowrap}body.discovery-coloring #compareButton,body.discovery-coloring #printButton,body.discovery-coloring #saveButton{display:none}body.discovery-coloring .action,body.discovery-coloring #backAction{background:#fff0f5;color:#80527c;border-color:#e4c6dd;min-width:42px;min-height:44px;padding:8px}body.discovery-coloring .tools{background:#fff8ee;border-color:#ecdce7}body.discovery-coloring .zoom button,body.discovery-coloring .tool{background:#f2e4ee;color:#80527c;border-color:#e4c6dd}body.discovery-coloring #finishButton{background:#bb589d;color:white}body.discovery-coloring .zoom{background:#fff8eecc;color:#49335f}
-      `;document.head.appendChild(editorStyle);
-      for(const [id,label] of [['undoButton','Annuler le dernier trait'],['redoButton','Rétablir le dernier trait']]){const b=document.getElementById(id);if(b){b.setAttribute('aria-label',label);b.textContent=id==='undoButton'?'↶':'↷';}}
-    }
     document.addEventListener('click',e=>{
       const link=e.target.closest('a[href]');if(!link)return;
       const u=new URL(link.href,location.href);if(u.origin!==location.origin)return;
