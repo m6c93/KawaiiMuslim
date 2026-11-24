@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<style id="km-app-canvas">html{background:#fffaf2!important;color-scheme:light}html[style*="visibility: hidden"]::before{content:"";position:fixed;inset:0;background:#fffaf2;visibility:visible;z-index:2147483640;pointer-events:none}.km-library-boot{background:#fffaf2!important;color:#69455a!important}.km-library-boot span{color:#8a7180!important}</style><script src="/km-app-shell-entry.js?v=continuous-1"></script>
+<style id="km-app-canvas">html{background:#fffaf2!important;color-scheme:light}html[style*="visibility: hidden"]::before{content:"";position:fixed;inset:0;background:#fffaf2;visibility:visible;z-index:2147483640;pointer-events:none}.km-library-boot{background:#fffaf2!important;color:#69455a!important}.km-library-boot span{color:#8a7180!important}</style><script src="/km-app-shell-entry.js?v=coloring-atelier-1"></script>
   <script src="./km-access-gate.js?v=guest-nav-fix-20260830"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -103,6 +103,74 @@
   <script src="./km-bottom-nav.js?v=continuous-1"></script>
   <script src="./km-child-theme.js?v=boy-theme-2"></script>
   <link rel="stylesheet" href="./km-world-light-theme.css?v=boy-palette-1">
+  <style>
+    .shell { width:min(980px,calc(100% - 32px)); padding-bottom:calc(85px + env(safe-area-inset-bottom)); }
+    body[data-km-section="workshop"] .workshop-banner { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px clamp(18px,4vw,36px); min-height:112px; }
+    body[data-km-section="workshop"] .workshop-banner .hero-copy { padding:0; }
+    body[data-km-section="workshop"] .workshop-banner .km-atelier-hero-art { position:static; flex:0 1 30%; width:clamp(82px,17vw,155px); max-height:125px; object-fit:contain; align-self:end; }
+    .workshop-banner h1 { margin:6px 0 0; font-size:clamp(29px,5vw,44px); line-height:1.05; }
+    .workshop-banner::after { content:none; }
+    .gallery-link { display:inline-flex; align-items:center; gap:9px; min-height:44px; color:inherit; font-weight:900; text-underline-offset:4px; }
+    body[data-km-section="workshop"] > .km-guest-actions { display:none; }
+    .child-picker:not(:empty) { margin-top:18px; }
+    #choisir,#galerie { scroll-margin-block-start:12px; }
+    #choiceHeading,.gallery-head h2 { margin:22px 0 12px; font:800 clamp(24px,4vw,32px)/1.15 "Baloo 2",sans-serif; }
+    .drawing-choices { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(7px,1.8vw,18px); }
+    .drawing-choice { min-width:0; display:flex; flex-direction:column; align-items:stretch; overflow:hidden; background:#fff; border:1px solid var(--km-world-line,#ead7dd); border-radius:17px; color:inherit; text-decoration:none; box-shadow:0 4px 14px rgba(79,48,70,.06); }
+    .drawing-choice img { width:100%; height:clamp(92px,24vw,200px); object-fit:contain; background:#fff; }
+    .drawing-choice strong { display:grid; align-content:center; flex:1; min-height:44px; padding:7px 5px; background:var(--km-world-paper,#fffcf7); font:800 clamp(13px,2.6vw,18px)/1.15 "Baloo 2",sans-serif; text-align:center; }
+    .resume-art { display:flex; justify-content:space-between; align-items:center; gap:14px; margin-top:16px; padding:10px 16px; color:#285c4d; border-radius:15px; background:#dff1e7; text-decoration:none; }
+    .resume-art strong,.resume-art small { display:block; }
+    .resume-art small { margin-top:2px; }
+    .more-activities { margin:14px 0 0; }
+    .more-activities summary { display:list-item; width:fit-content; min-height:44px; padding:10px 8px; cursor:pointer; font-weight:900; }
+    summary:focus-visible { outline:3px solid var(--gold); outline-offset:2px; }
+    .more-activities .hero-actions { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr)); margin:3px 0 12px; }
+    .more-activities .big-action { display:flex; min-height:50px; padding:7px 12px; border-radius:14px; text-align:left; }
+    .more-activities .big-action strong { font-size:15px; }
+    .more-activities .icon { width:32px; height:32px; flex-basis:32px; margin:0; font-size:18px; }
+    .more-activities .preview-locked::after { position:static; margin-left:auto; padding:4px; content:"🔒"; transform:none; }
+    .gallery-head { margin:12px 0 10px; }
+    .gallery-head h2 { margin-bottom:4px; }
+    .art-copy .art-buttons { grid-template-columns:1fr auto; }
+    .art-copy .art-buttons:has(:only-child) { grid-template-columns:1fr; }
+    .art-button.secondary { min-width:44px; }
+    .finished-art { width:min(600px,95vw); padding:12px; border:0; border-radius:18px; color:var(--ink); }
+    .finished-art::backdrop { background:rgba(35,27,47,.65); }
+    .finished-art div { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:9px; }
+    .finished-art img { display:block; width:100%; height:auto; max-height:70dvh; object-fit:contain; }
+    .finished-art details { margin:8px 2px 0; }
+    .finished-art summary { min-height:44px; width:fit-content; padding:10px 0; cursor:pointer; }
+    .finished-art form { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:center; }
+    .finished-art form label,.finished-art output { grid-column:1/-1; }
+    .finished-art .field { min-height:44px; margin:0; font-size:16px; }
+    .finished-art output { color:#7f3b5b; font-size:13px; }
+    .empty { padding:22px 12px; }
+    @media (max-height:550px) and (orientation:landscape) {
+      .shell { width:calc(100% - max(28px,env(safe-area-inset-left)) - max(28px,env(safe-area-inset-right))); }
+      .topbar { justify-content:flex-end; padding:0; min-height:0; }
+      .topbar .brand { display:none; }
+      .topbar .back { min-height:44px; padding:4px 12px; margin:0; background:transparent; border:0; }
+      body[data-km-section="workshop"] .workshop-banner { min-height:42px; padding:0 15px; border-radius:14px; }
+      body[data-km-section="workshop"] .workshop-banner .km-atelier-hero-art { width:auto; height:50px; flex:0 0 64px; }
+      .workshop-banner .hero-copy { display:flex; gap:18px; align-items:center; }
+      .workshop-banner h1 { margin:0; font-size:23px; }
+      .gallery-link,.more-activities summary { font-size:14px; }
+      #choiceHeading { margin:10px 0 8px; font-size:21px; }
+      .drawing-choice { flex-direction:row; align-items:center; background:#fff; }
+      .drawing-choice img { width:48%; height:86px; }
+      .drawing-choice strong { align-self:stretch; }
+      .resume-art { margin-top:7px; padding:5px 12px; min-height:44px; }
+      .resume-art small { display:inline; margin-inline-start:7px; }
+      .resume-art strong { display:inline; }
+    }
+    @media(max-width:430px) {
+      .shell { width:calc(100% - 20px); }
+      .topbar { padding:9px 0; }
+      .back span { display:inline; }
+      .art-copy { padding:8px; }
+    }
+  </style>
 </head>
 <body data-km-section="workshop">
   <div class="shell">
@@ -112,39 +180,59 @@
     </nav>
 
     <main>
-      <section class="hero">
-        <img class="km-world-hero-art km-atelier-hero-art" src="brand/assets/aya-mimi-atelier.png" data-boy-src="brand/assets/adam-mimi-atelier.webp" data-boy-alt="Adam dessine une fleur avec Mimi dans son atelier" alt="Aya dessine une fleur avec Mimi dans son atelier">
+      <header class="hero workshop-banner">
         <div class="hero-copy">
-          <span class="kicker">L’Atelier des Petits Artistes</span>
-          <h1 id="heroTitle">Mon Atelier 🎨</h1>
-          <p>Colorie à l’écran, imprime tes dessins préférés ou ajoute une création faite sur papier. Tout reste bien rangé dans ta galerie.</p>
+          <h1 id="heroTitle">Mon atelier</h1>
+          <a class="gallery-link" href="#galerie">Ma galerie <span aria-hidden="true">↓</span></a>
         </div>
-        <div class="hero-actions">
-          <a class="big-action" data-guest-lock href="Bibliotheque%20Kawaii%20Muslim.dc.html#coloriages"><span class="icon">🖍️</span><span><strong>Colorier</strong><small>Choisir un coloriage numérique</small></span></a>
-          <button class="big-action" data-guest-lock id="openDrawing" type="button"><span class="icon">✏️</span><span><strong>Dessin libre</strong><small>Dessiner sur une feuille blanche</small></span></button>
-          <a class="big-action" data-guest-lock href="Bibliotheque%20Kawaii%20Muslim.dc.html#coloriages"><span class="icon">🖨️</span><span><strong>Imprimer</strong><small>Choisir une page à imprimer</small></span></a>
-          <button class="big-action" data-guest-lock id="openScan" type="button"><span class="icon">📸</span><span><strong>Ajouter mon dessin</strong><small>Photographier un coloriage papier</small></span></button>
-        </div>
+        <img class="km-world-hero-art km-atelier-hero-art" src="brand/assets/aya-mimi-atelier.png" data-boy-src="brand/assets/adam-mimi-atelier.webp" data-boy-alt="Adam dessine une fleur avec Mimi dans son atelier" alt="Aya dessine une fleur avec Mimi dans son atelier">
+      </header>
+
+      <div class="child-picker" id="childPicker" aria-label="Choisir un enfant"></div>
+      <a class="resume-art" id="resumeArt" hidden><span><strong>Continuer mon dessin</strong><small id="resumeTitle"></small></span><span aria-hidden="true">→</span></a>
+
+      <section id="choisir" aria-labelledby="choiceHeading">
+        <h2 id="choiceHeading">Choisis ton dessin</h2>
+        <div class="drawing-choices" id="drawingChoices"></div>
+        <details class="more-activities">
+          <summary>Plus d’activités</summary>
+          <div class="hero-actions">
+            <button class="big-action" data-guest-lock id="openDrawing" type="button"><span class="icon" aria-hidden="true">✏️</span><strong>Dessin libre</strong></button>
+            <a class="big-action" id="catalogLink" href="Bibliotheque%20Kawaii%20Muslim.dc.html#coloriages"><span class="icon" aria-hidden="true">📚</span><strong>Tous les coloriages</strong></a>
+            <a class="big-action" data-guest-lock href="Bibliotheque%20Kawaii%20Muslim.dc.html#coloriages"><span class="icon" aria-hidden="true">🖨️</span><strong>Imprimer un dessin</strong></a>
+            <button class="big-action" data-guest-lock id="openScan" type="button"><span class="icon" aria-hidden="true">📸</span><strong>Ajouter un dessin sur papier</strong></button>
+          </div>
+        </details>
       </section>
 
-      <section>
+      <section id="galerie" aria-labelledby="galleryTitle">
         <header class="gallery-head">
-          <div><h2>Ma galerie</h2><p id="gallerySubtitle">Tes créations apparaissent ici automatiquement.</p></div>
-          <div class="child-picker" id="childPicker"></div>
+          <div><h2 id="galleryTitle">Ma galerie</h2><p id="gallerySubtitle"></p></div>
         </header>
-        <div class="filters" id="filters">
-          <button class="chip active" data-filter="all" type="button">Tout</button>
-          <button class="chip" data-filter="drawings" type="button">✏️ Mes dessins</button>
-          <button class="chip" data-filter="books" type="button">📚 Livres</button>
-          <button class="chip" data-filter="in_progress" type="button">À terminer</button>
-          <button class="chip" data-filter="completed" type="button">Terminés</button>
-          <button class="chip" data-filter="paper" type="button">Sur papier</button>
+        <div class="filters" id="filters" hidden>
+          <button class="chip active" data-filter="all" aria-pressed="true" type="button">Tout</button>
+          <button class="chip" data-filter="in_progress" aria-pressed="false" type="button">À continuer</button>
+          <button class="chip" data-filter="completed" aria-pressed="false" type="button">Terminés</button>
         </div>
         <div class="art-grid" id="gallery"><p class="loading">Ouverture de la galerie…</p></div>
         <p class="message" id="pageMessage"></p>
       </section>
     </main>
   </div>
+
+  <dialog class="finished-art" id="artViewer" aria-labelledby="viewTitle">
+    <div><strong id="viewTitle"></strong><button class="chip" type="button" id="closeViewer">Fermer</button></div>
+    <img id="viewImage" alt="">
+    <details id="renameOptions">
+      <summary>Renommer mon dessin</summary>
+      <form id="renameForm">
+        <label for="artName">Titre du dessin</label>
+        <input class="field" id="artName" maxlength="160" required>
+        <button class="chip" type="submit">Enregistrer</button>
+        <output id="renameMessage" role="status"></output>
+      </form>
+    </details>
+  </dialog>
 
   <div class="modal" id="scanModal" hidden>
     <form class="modal-card" id="scanForm">
@@ -170,22 +258,22 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=child-gender-1"></script>
+  <script src="./km-auth.js?v=coloring-gallery-1"></script>
   <script>
     const guestMode = new URLSearchParams(window.location.search).get("guest") === "1";
     const localDesignPreview = (/^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
       && new URLSearchParams(window.location.search).get("preview") === "1") || guestMode;
     if (guestMode) {
-      const freeColoring=document.querySelector('a.big-action[data-guest-lock]');
-      if(freeColoring){freeColoring.removeAttribute('data-guest-lock');freeColoring.href='/books/hijabi-decouverte.html?guest=1';freeColoring.querySelector('small').textContent='3 coloriages Hijabi Girls offerts';}
+      document.getElementById("catalogLink").href = "Bibliotheque%20Kawaii%20Muslim.dc.html?guest=1#coloriages";
       document.querySelectorAll("[data-guest-lock]").forEach(action => {
         action.classList.add("preview-locked");
         action.setAttribute("aria-label",`${action.querySelector("strong").textContent} — réservé aux abonnés`);
-        action.querySelector("small").textContent = "Disponible avec l’abonnement";
+
         action.addEventListener("click", event => {
           event.preventDefault();
           event.stopImmediatePropagation();
-          window.KMDiscovery.openUnlock();
+          if (window.KMDiscovery) window.KMDiscovery.openUnlock();
+          else location.assign("/Compte.dc.html?abonnement=requis");
         },true);
       });
     }
@@ -206,128 +294,169 @@
     })[character]);
     const dateLabel = value => new Intl.DateTimeFormat("fr-FR",{day:"numeric",month:"short",year:"numeric"}).format(new Date(value));
 
+    const discoveryChoices = [1,2,3].map(page => ({
+      source:`discovery-coloring:hijabi:${page}`, title:`Hijabi Girls · ${page}`, image:`/brand/discovery/hijabi-${page}.jpg`
+    }));
+    const memberChoices = [
+      {slug:"lune-ramadan",title:"La lune de Ramadan"},
+      {slug:"abeille-coran",title:"L’abeille du Coran"},
+      {slug:"tapis-priere",title:"Le tapis de prière"}
+    ].map(item => ({source:`builtin-coloring:${item.slug}`,title:item.title,image:`/brand/assets/coloring-${item.slug}.png`}));
+    const choices = guestMode ? discoveryChoices : memberChoices;
+
+    const editorLink = (source,title,draftId) => {
+      const query = new URLSearchParams({src:source,title,format:"image",atelier:"1"});
+      if (guestMode) query.set("guest","1");
+      else if (localDesignPreview) query.set("preview","1");
+      if (!guestMode && selectedChildId) query.set("child",selectedChildId);
+      if (draftId) query.set("draft",draftId);
+      return "Coloriage.dc.html?" + query;
+    };
+    const renderChoices = () => {
+      document.getElementById("drawingChoices").innerHTML = choices.map(item =>
+        `<a class="drawing-choice" href="${escapeHtml(editorLink(item.source,item.title))}"><img src="${item.image}" alt=""><strong>${escapeHtml(item.title)}</strong></a>`
+      ).join("");
+    };
+    const takeReturningChild = () => {
+      try {
+        const id = sessionStorage.getItem("km-atelier-return-child");
+        sessionStorage.removeItem("km-atelier-return-child");
+        return id;
+      } catch { return ""; }
+    };
     const renderChildren = () => {
       const active = localDesignPreview
-        ? { type: "child", id: "preview-child", name: "Toto", avatar: "🐤" }
+        ? {type:"child",id:"preview-child",name:"",avatar:"🐤"}
         : KMAuth.getActiveProfile();
       const isChild = active.type === "child" && context.children.some(child => child.id === active.id);
+      const returning = takeReturningChild();
       if (isChild) {
         selectedChildId = active.id;
         document.body.classList.add("child-mode");
         childPicker.hidden = true;
-        document.getElementById("heroTitle").textContent = `L’Atelier de ${active.name || "mon petit artiste"} 🎨`;
-        document.getElementById("gallerySubtitle").textContent = "Retrouve ici tes coloriages à continuer et tes créations terminées.";
+        document.getElementById("heroTitle").textContent = active.name ? `L’atelier de ${active.name}` : "Mon atelier";
       } else {
         document.body.classList.remove("child-mode");
-        const requested = new URLSearchParams(location.search).get("child");
+        childPicker.hidden = false;
+        const requested = returning || selectedChildId || new URLSearchParams(location.search).get("child");
         selectedChildId = context.children.some(child => child.id === requested) ? requested : (context.children[0]?.id || "");
         childPicker.innerHTML = context.children.map(child => `
-          <button class="chip ${child.id === selectedChildId ? "active" : ""}" data-child="${child.id}" type="button">${escapeHtml(child.avatar)} ${escapeHtml(child.name)}</button>
+          <button class="chip ${child.id === selectedChildId ? "active" : ""}" aria-pressed="${child.id === selectedChildId}" data-child="${escapeHtml(child.id)}" type="button">${escapeHtml(child.avatar)} ${escapeHtml(child.name)}</button>
         `).join("");
-        document.getElementById("gallerySubtitle").textContent = "Le parent peut consulter les créations de chaque enfant.";
       }
       document.getElementById("scanChild").innerHTML = context.children.map(child =>
-        `<option value="${child.id}">${escapeHtml(child.avatar)} ${escapeHtml(child.name)}</option>`
+        `<option value="${escapeHtml(child.id)}">${escapeHtml(child.avatar)} ${escapeHtml(child.name)}</option>`
       ).join("");
       document.getElementById("scanChild").value = selectedChildId;
       document.querySelector('label[for="scanChild"]').hidden = isChild;
       document.getElementById("scanChild").hidden = isChild;
+      renderChoices();
     };
 
-    const renderGallery = () => {
-      const shown = artworks.filter(item => {
-        const isBook = String(item.source_url || "").startsWith("book-coloring:");
-        const isDrawing = String(item.source_url || "").startsWith("builtin-drawing:blank");
-        if (activeFilter === "all") return true;
-        if (activeFilter === "drawings") return isDrawing;
-        if (activeFilter === "books") return isBook;
-        if (activeFilter === "paper") return item.kind === "paper";
-        return item.status === activeFilter;
+    const bookPage = source => String(source || "").match(/^book-coloring:([a-z0-9-]+):page:(\d+)$/);
+    const resumeLink = item => {
+      const book = bookPage(item.source_url);
+      if (!book) return editorLink(item.source_url,item.title,item.id);
+      const query = new URLSearchParams({
+        book:book[1],title:String(item.title).replace(/\s*·\s*Page\s+\d+.*$/i,""),
+        position:String(Math.ceil(Number(book[2])/2)),resumePage:book[2],resumeDraft:item.id,child:selectedChildId
       });
+      return "LivreColoriage.dc.html?" + query;
+    };
+    const draftPrefix = "km-guest-coloring:";
+    const finishedPrefix = "km-finished-coloring:";
+    const localArtworks = () => {
+      const result = new Map();
+      try {
+        for (let i=0;i<localStorage.length;i++) {
+          const key = localStorage.key(i);
+          const archived = key?.startsWith(finishedPrefix);
+          if (!archived && !key?.startsWith(draftPrefix)) continue;
+          let saved;
+          try { saved = JSON.parse(localStorage.getItem(key)); } catch { continue; }
+          if (!saved) continue;
+          const source = archived ? saved.sourceUrl : key.slice(draftPrefix.length);
+          if (!source) continue;
+          const discovery = /^discovery-coloring:(?:hijabi:[123]|arabic:(?:29|30|31|57|58|59|solo:[123]))$/.test(source);
+          if (guestMode !== discovery || (!guestMode && saved.childId && saved.childId !== selectedChildId)) continue;
+          const status = archived || saved.status === "completed" ? "completed" : "in_progress";
+          if (status === "in_progress" && !saved.strokes?.length) continue;
+          const id = String(saved.id || (archived ? key.slice(finishedPrefix.length) : source));
+          if (result.has(id) && !archived) continue;
+          const choice = choices.find(item => item.source === source);
+          const title = saved.title || choice?.title || (discovery ? "Mon dessin en arabe" : "Mon dessin");
+          result.set(id,{id,source_url:source,title,status,kind:"digital",
+            updated_at:saved.updatedAt,image_url:saved.imageUrl || "",localKey:key});
+        }
+      } catch {}
+      return [...result.values()].sort((a,b) => (Date.parse(b.updated_at)||0) - (Date.parse(a.updated_at)||0));
+    };
+    const localItemAt = (key,item) => {
+      const stored = JSON.parse(localStorage.getItem(key) || "null");
+      if (!stored) return null;
+      const fallbackId = key.startsWith(finishedPrefix) ? key.slice(finishedPrefix.length) : item.source_url;
+      return String(stored.id || fallbackId) === item.id ? stored : null;
+    };
+    const deleteLocalArtwork = item => {
+      // The editor can briefly retain both copies while archiving an older drawing.
+      for (const key of [draftPrefix + item.source_url,finishedPrefix + item.id]) {
+        if (localItemAt(key,item)) localStorage.removeItem(key);
+      }
+    };
+    const galleryImage = item => {
+      const picture = String(item.image_url || "");
+      return /^(https?:|blob:|data:image\/(?:webp|jpeg|png);base64,)/i.test(picture) ? picture : "";
+    };
+    const renderGallery = () => {
+      const resume = document.getElementById("resumeArt");
+      const latestDraft = artworks.find(item => item.status === "in_progress");
+      resume.hidden = !latestDraft;
+      if (latestDraft) {
+        resume.href = resumeLink(latestDraft);
+        document.getElementById("resumeTitle").textContent = latestDraft.title;
+      }
+      const filters = document.getElementById("filters");
+      filters.hidden = !artworks.some(item => item.status === "completed") || !latestDraft;
+      if (filters.hidden) activeFilter = "all";
+      filters.querySelectorAll("[data-filter]").forEach(button => {
+        const selected = activeFilter === button.dataset.filter;
+        button.classList.toggle("active",selected);
+        button.setAttribute("aria-pressed",String(selected));
+      });
+      const shown = artworks.filter(item => activeFilter === "all" || item.status === activeFilter);
       gallery.innerHTML = shown.map(item => {
         const isDraft = item.status === "in_progress";
-        const bookMatch = String(item.source_url || "").match(/^book-coloring:([a-z0-9-]+):page:(\d+)$/);
-        const isBook = Boolean(bookMatch);
-        const isDrawing = String(item.source_url || "").startsWith("builtin-drawing:blank");
-        const hasUsableImage = /^(https?:|data:|blob:)/i.test(String(item.image_url || ""));
-        const pageNumber = bookMatch?.[2] || "";
         const memory = item.drawing_data?.memory || {};
-        const displayTitle = memory.title || item.title;
-        const bookTitle = String(displayTitle).replace(/\s*·\s*Page\s+\d+.*$/i,"").trim() || item.title;
-        const resumeParams = isBook
-          ? new URLSearchParams({book:bookMatch[1],title:bookTitle,position:String(Math.max(0,Math.ceil(Number(pageNumber)/2))),resumePage:pageNumber,resumeDraft:String(item.id),v:"resume-mobile-fix-20260830"})
-          : null;
-        if (resumeParams && guestMode) resumeParams.set("guest","1");
-        const resumeUrl = isBook
-          ? `LivreColoriage.dc.html?${resumeParams.toString()}`
-          : `Coloriage.dc.html?src=${encodeURIComponent(item.source_url)}&title=${encodeURIComponent(item.title)}&draft=${item.id}&child=${encodeURIComponent(selectedChildId)}`;
-        const preview = hasUsableImage
-          ? `<img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.title)}">`
-          : isBook
-            ? `<div class="book-placeholder"><span class="book-icon">📖</span><span class="book-kicker">Coloriage du livre</span><span class="book-page">${pageNumber ? `Page ${pageNumber}` : escapeHtml(displayTitle)}</span></div>`
-            : `<span style="font-size:50px">🎨</span>`;
+        const title = memory.title || item.title;
+        const image = galleryImage(item);
+        const choice = choices.find(choice => choice.source === item.source_url);
+        const preview = image || choice?.image;
+        const page = bookPage(item.source_url)?.[2];
+        const action = isDraft ? `<a class="art-button" href="${escapeHtml(resumeLink(item))}">Continuer</a>`
+          : `<button class="art-button" type="button" data-view="${escapeHtml(item.id)}">${image ? "Voir mon dessin" : "Mon dessin"}</button>`;
         return `<article class="art-card">
-          <div class="art-preview">
-            ${preview}
-            <span class="art-badge ${isDraft ? "draft" : ""}">${isDraft ? "À terminer" : item.kind === "paper" ? "Sur papier" : "Terminé"}</span>
-            ${isBook ? `<span class="book-tag">📚 Livre</span>` : ""}
-            ${isDrawing ? `<span class="book-tag">✏️ Dessin libre</span>` : ""}
+          <div class="art-preview">${preview ? `<img src="${escapeHtml(preview)}" alt="">` : `<div class="book-placeholder"><span class="book-icon" aria-hidden="true">${page ? "📖" : "🖍️"}</span>${page ? `<span>Page ${page}</span>` : ""}</div>`}
+            <span class="art-badge ${isDraft ? "draft" : ""}">${isDraft ? "À continuer" : item.kind === "paper" ? "Sur papier" : "Terminé"}</span>
           </div>
-          <div class="art-copy">
-            <strong>${escapeHtml(displayTitle)}</strong>
-            <small>${dateLabel(item.updated_at)}</small>
-            ${memory.phrase ? `<p class="memory-phrase">“${escapeHtml(memory.phrase)}”</p>` : ""}
-            <div class="art-buttons">
-              ${isDraft ? `<a class="art-button" href="${resumeUrl}">${isBook ? "Reprendre le livre" : "Continuer"}</a>` : `<a class="art-button" href="${escapeHtml(item.image_url)}" target="_blank" rel="noopener">Voir</a>`}
-              <button class="art-button secondary" data-delete="${item.id}" type="button" aria-label="Supprimer">🗑️</button>
+          <div class="art-copy"><strong>${escapeHtml(title)}</strong>
+            ${Number.isFinite(Date.parse(item.updated_at)) ? `<small>${dateLabel(item.updated_at)}</small>` : ""}
+            ${memory.phrase ? `<p class="memory-phrase">${escapeHtml(memory.phrase)}</p>` : ""}
+            <div class="art-buttons">${action}
+              <button class="art-button secondary" data-delete="${escapeHtml(item.id)}" type="button" aria-label="Supprimer ${escapeHtml(title)}">🗑️</button>
             </div>
-          </div>
-        </article>`;
-      }).join("") || `<div class="empty"><span>🎨</span><strong>${activeFilter === "all" ? "La galerie attend sa première création !" : "Aucun coloriage dans cette rubrique."}</strong></div>`;
+          </div></article>`;
+      }).join("") || `<div class="empty">${selectedChildId || guestMode ? "Tes dessins apparaîtront ici." : "Ajoute un profil enfant depuis ton compte pour retrouver ses dessins."}</div>`;
     };
 
+    let galleryRequest = 0;
     const loadGallery = async () => {
-      if (guestMode) {
-        const filters = document.querySelector(".filters"); if (filters) filters.style.display = "none";
-        document.getElementById("heroTitle").textContent = "Mon atelier découverte 🎨";
-        document.getElementById("gallerySubtitle").textContent = "Tes coloriages sont sauvegardés sur cet appareil.";
-        gallery.innerHTML = [1,2,3].map(page => {
-          let saved = null;
-          try { saved = JSON.parse(localStorage.getItem(`km-guest-coloring:discovery-coloring:hijabi:${page}`) || "null"); } catch (_) {}
-          const params = new URLSearchParams({guest:"1",src:`discovery-coloring:hijabi:${page}`,title:`Hijabi Girls · Coloriage ${page}`,format:"image"});
-          return `<article class="art-card"><div class="art-preview"><img src="/brand/discovery/hijabi-${page}.jpg" alt="Coloriage Hijabi Girls ${page}"><span class="art-badge draft">${saved ? "À continuer" : "Offert"}</span></div><div class="art-copy"><strong>Hijabi Girls · ${page}/3</strong><small>${saved ? "Ton dessin est conservé sur cet appareil" : "Un coloriage pour découvrir"}</small><div class="art-buttons"><a class="art-button" href="/Coloriage.dc.html?${params}">${saved ? "Continuer mon coloriage" : "Colorier"}</a></div></div></article>`;
-        }).join("");
-        return;
-      }
-      if (!selectedChildId) {
-        gallery.innerHTML = '<div class="empty"><span>🐤</span><strong>Ajoute d’abord un profil enfant depuis ton compte.</strong></div>';
-        return;
-      }
-      gallery.innerHTML = '<p class="loading">Ouverture de la galerie…</p>';
-      artworks = localDesignPreview ? [
-        {
-          id: "preview-armure",
-          child_id: "preview-child",
-          title: "Aya et l’Armure de Lumière · Page 3",
-          image_url: new URL("brand/assets/coloring-armure-lumiere.png", location.href).href,
-          source_url: "book-coloring:aya-armure-de-lumiere:page:3",
-          status: "in_progress",
-          kind: "digital",
-          updated_at: new Date().toISOString(),
-          drawing_data: { memory: { title: "Aya et l’Armure de Lumière · Page 3" } }
-        },
-        {
-          id: "preview-bubble",
-          child_id: "preview-child",
-          title: "Bubble Tea Time Hijabi · Page 3",
-          image_url: new URL("brand/assets/coloring-bubble-tea.png", location.href).href,
-          source_url: "book-coloring:bubble-tea-time-hijabi:page:3",
-          status: "completed",
-          kind: "digital",
-          updated_at: new Date(Date.now() - 86400000).toISOString(),
-          drawing_data: { memory: { title: "Bubble Tea Time Hijabi · Page 3" } }
-        }
-      ].slice(0, guestMode ? 1 : 2) : await KMAuth.listArtworks(selectedChildId);
+      const request = ++galleryRequest;
+      const result = localDesignPreview ? localArtworks() : selectedChildId ? await KMAuth.listArtworks(selectedChildId) : [];
+      if (request !== galleryRequest) return;
+      artworks = result;
+      const child = context.children.find(item => item.id === selectedChildId);
+      document.getElementById("galleryTitle").textContent = !guestMode && !document.body.classList.contains("child-mode") && child ? `La galerie de ${child.name}` : "Ma galerie";
+      document.getElementById("gallerySubtitle").textContent = guestMode ? "Tes dessins sont gardés sur cet appareil." : "";
       renderGallery();
     };
 
@@ -347,22 +476,82 @@
       const button = event.target.closest("[data-child]");
       if (!button) return;
       selectedChildId = button.dataset.child;
-      childPicker.querySelectorAll(".chip").forEach(chip => chip.classList.toggle("active",chip === button));
-      document.getElementById("scanChild").value = selectedChildId;
+      renderChildren();
+      artworks = [];
+      renderGallery();
       await loadGallery();
     });
     document.getElementById("filters").addEventListener("click", event => {
       const button = event.target.closest("[data-filter]");
       if (!button) return;
       activeFilter = button.dataset.filter;
-      document.querySelectorAll("[data-filter]").forEach(chip => chip.classList.toggle("active",chip === button));
       renderGallery();
     });
+    const artViewer = document.getElementById("artViewer");
+    let viewedArtwork = null;
+    document.getElementById("renameForm").addEventListener("submit",async event => {
+      event.preventDefault();
+      if (!viewedArtwork) return;
+      const item = viewedArtwork;
+      const name = document.getElementById("artName").value.trim();
+      const feedback = document.getElementById("renameMessage");
+      if (!name) {
+        feedback.textContent = "Écris un titre pour ton dessin.";
+        return;
+      }
+      const save = event.currentTarget.querySelector("button");
+      save.disabled = true;
+      try {
+        if (localDesignPreview && item.localKey) {
+          const archiveKey = finishedPrefix + item.id;
+          const key = localItemAt(archiveKey,item) ? archiveKey : item.localKey;
+          const stored = localItemAt(key,item);
+          if (!stored) throw new Error("Ce dessin a changé. Ouvre à nouveau ta galerie.");
+          stored.title = name;
+          localStorage.setItem(key,JSON.stringify(stored));
+        } else {
+          await KMAuth.renameCompletedArtwork({item,childId:selectedChildId,title:name});
+        }
+        await loadGallery();
+        if (viewedArtwork?.id !== item.id) return;
+        viewedArtwork = artworks.find(art => art.id === item.id);
+        document.getElementById("viewTitle").textContent = name;
+        document.getElementById("viewImage").alt = name;
+        feedback.textContent = "Titre enregistré.";
+      } catch (error) {
+        feedback.textContent = KMAuth.friendlyError(error);
+        await loadGallery().catch(() => {});
+        if (viewedArtwork?.id === item.id) viewedArtwork = artworks.find(art => art.id === item.id);
+      } finally { save.disabled = false; }
+    });
+    artViewer.addEventListener("close",() => { viewedArtwork = null; });
+    document.getElementById("closeViewer").addEventListener("click",() => artViewer.close());
     gallery.addEventListener("click", async event => {
+      const view = event.target.closest("[data-view]");
+      if (view) {
+        const item = artworks.find(art => String(art.id) === view.dataset.view);
+        if (!item) return;
+        viewedArtwork = item;
+        const title = item.drawing_data?.memory?.title || item.title;
+        document.getElementById("viewTitle").textContent = title;
+        document.getElementById("artName").value = title;
+        document.getElementById("renameMessage").textContent = "";
+        document.getElementById("renameOptions").open = false;
+        document.getElementById("renameOptions").hidden = item.kind !== "digital";
+        const image = galleryImage(item);
+        document.getElementById("viewImage").hidden = !image;
+        if (image) document.getElementById("viewImage").src = image;
+        document.getElementById("viewImage").alt = item.title;
+        artViewer.showModal();
+        return;
+      }
       const button = event.target.closest("[data-delete]");
       if (!button || !confirm("Retirer ce coloriage de la galerie ?")) return;
+      const item = artworks.find(art => String(art.id) === button.dataset.delete);
+      if (!item) return;
       try {
-        await KMAuth.deleteArtwork(button.dataset.delete);
+        if (localDesignPreview && item.localKey) deleteLocalArtwork(item);
+        else await KMAuth.deleteArtwork(item.id);
         await loadGallery();
       } catch (error) { pageMessage.textContent = KMAuth.friendlyError(error); }
     });
@@ -373,7 +562,7 @@
       drawingUrl.searchParams.set("src", `builtin-drawing:blank:${drawingId}`);
       drawingUrl.searchParams.set("title", "Mon dessin");
       drawingUrl.searchParams.set("child", selectedChildId);
-      drawingUrl.searchParams.set("v", "drawing-free-1");
+      drawingUrl.searchParams.set("atelier", "1");
       if (localDesignPreview && !guestMode) drawingUrl.searchParams.set("preview", "1");
       window.location.href = drawingUrl.pathname.split("/").pop() + drawingUrl.search;
     });
@@ -423,6 +612,16 @@
       }
     });
 
+    const refreshWorkshop = () => {
+      if (!context) return;
+      renderChildren();
+      loadGallery().catch(error => { pageMessage.textContent = KMAuth.friendlyError(error); });
+    };
+    document.addEventListener("km-app-active",refreshWorkshop);
+    window.addEventListener("pageshow",event => { if (event.persisted) refreshWorkshop(); });
+    window.addEventListener("storage",event => {
+      if (localDesignPreview && (event.key?.startsWith(draftPrefix) || event.key?.startsWith(finishedPrefix))) refreshWorkshop();
+    });
     (async () => {
       context = localDesignPreview
         ? {

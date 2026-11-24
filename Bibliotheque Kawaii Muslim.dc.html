@@ -344,6 +344,7 @@
       <!-- FILTERS -->
       <div data-km-reveal style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
         <span class="km-filter-chip" style="background:#E27FAE; color:#fff; font-weight:700; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Tous les livres</span>
+        <a class="km-filter-chip" href="{{ coloringChooser }}" style="text-decoration:none; background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:700; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Coloriages</a>
         <a class="km-filter-chip" href="Safe%20Place.dc.html" style="text-decoration:none; cursor:pointer; background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Safe Place</a>
         <span class="km-filter-chip km-coming-chip" aria-label="Prières, bientôt disponible" style="background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Prières · bientôt</span>
         <span class="km-filter-chip km-coming-chip" aria-label="Ramadan, bientôt disponible" style="background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Ramadan · bientôt</span>
@@ -401,7 +402,7 @@
           <h2 style="font-family:'Baloo 2',cursive; font-weight:800; font-size:22px; margin:0;">🎨 L’Atelier des Petits Artistes</h2>
           <p style="font-size:12.5px; color:#9fa2c8; margin:3px 0 0;">Colorie à l’écran ou imprime ton dessin</p>
         </div>
-        <a href="Atelier.dc.html" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px; padding:10px 17px; color:#fff; border:1px solid rgba(255,255,255,.16); border-radius:22px; background:linear-gradient(145deg,#E789B6,#C95E93); font-size:12px; font-weight:800; box-shadow:0 8px 20px rgba(231,137,182,.25);">🖼️ Voir ma galerie</a>
+        <a href="{{ coloringGallery }}" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px; padding:10px 17px; color:#fff; border:1px solid rgba(255,255,255,.16); border-radius:22px; background:linear-gradient(145deg,#E789B6,#C95E93); font-size:12px; font-weight:800; box-shadow:0 8px 20px rgba(231,137,182,.25);">🖼️ Voir ma galerie</a>
       </div>
       <div class="km-coloring-grid">
         <sc-for list="{{ colorings }}" as="page" hint-placeholder-count="5">
@@ -414,8 +415,8 @@
                 <span style="font-size:52px; filter:grayscale(1) opacity(.55);">{{ page.emoji }}</span>
               </sc-if>
               <sc-if value="{{ page.canDownload }}" hint-placeholder-val="{{ true }}">
-                <a href="{{ page.url }}" style="position:absolute; inset:0; display:block;"></a>
-                <span style="position:absolute; bottom:10px; left:10px; background:rgba(79,192,161,.94); color:#fff; font-weight:700; font-size:10.5px; letter-spacing:.35px; padding:5px 11px; border-radius:14px; text-transform:uppercase;">🖍️ Colorier · 🖨 Imprimer</span>
+                <a href="{{ page.url }}" aria-label="Ouvrir {{ page.title }}" style="position:absolute; inset:0; z-index:1; display:block;"></a>
+                <span style="position:absolute; bottom:10px; left:10px; background:rgba(79,192,161,.94); color:#fff; font-weight:700; font-size:10.5px; letter-spacing:.35px; padding:5px 11px; border-radius:14px; text-transform:uppercase;">{{ page.actionLabel }}</span>
               </sc-if>
               <sc-if value="{{ page.soon }}" hint-placeholder-val="{{ false }}">
                 <span style="position:absolute; bottom:10px; left:10px; background:rgba(125,130,165,.9); color:#fff; font-weight:700; font-size:10.5px; padding:5px 11px; border-radius:14px; text-transform:uppercase;">Bientôt</span>
@@ -702,7 +703,20 @@ class Component extends DCLogic {
       canDownload: Boolean(p.url) && subscribed,
       locked: Boolean(p.url) && !subscribed,
     }));
-    const colorings = [...managedColorings, ...placeholderColorings];
+    const workshopUrl = guestMode ? 'Atelier.dc.html?guest=1' : 'Atelier.dc.html';
+    const colorings = [...managedColorings, ...placeholderColorings].map((item) => {
+      const page = {...item, actionLabel: 'Ouvrir'};
+      if (!item.url || !item.canDownload) return page;
+      try {
+        const editor = new URL(item.url, window.location.href);
+        if (editor.origin === window.location.origin && editor.pathname === '/Coloriage.dc.html') {
+          editor.searchParams.set('return', '/Bibliotheque%20Kawaii%20Muslim.dc.html#coloriages');
+          page.url = editor.pathname + editor.search;
+          page.actionLabel = 'Colorier';
+        }
+      } catch {}
+      return page;
+    });
 
     return {
       showGate: !profile,
@@ -728,6 +742,8 @@ class Component extends DCLogic {
       starChildName: this.state.starChildName,
       books,
       colorings,
+      coloringChooser: workshopUrl + '#choisir',
+      coloringGallery: workshopUrl + '#galerie',
       chooseEnfant: () => { window.location.href = 'Profils.dc.html'; },
       chooseMaman: () => { window.location.href = 'Profils.dc.html'; },
       switchProfile: () => { window.location.href = guestMode ? 'Connexion.dc.html' : 'Profils.dc.html'; },

@@ -27,3 +27,27 @@ body.km-clean-book-reading #kmAppViews {
   width: var(--reader-host-width, 100%) !important;
   height: var(--reader-host-height, 100%) !important;
 }
+
+/* The editor supplies its own exit and palette. Give it the visible viewport. */
+body.km-coloring-open .km-app-nav,
+body.km-coloring-open .km-guest-actions,
+body.km-coloring-open .km-guest-pill { display:none!important }
+body.km-coloring-open #kmAppViews {
+  inset:var(--reader-host-y,0px) auto auto var(--reader-host-x,0px)!important;
+  width:var(--reader-host-width,100%)!important;
+  height:var(--reader-host-height,100%)!important;
+}
+
+/* Let the workshop open on its drawing choices, including in a short viewport. */
+.km-continuous-app[data-km-section="workshop"] .km-guest-actions,
+.km-continuous-app[data-km-section="workshop"] .km-guest-pill { display:none!important }
+.km-continuous-app[data-km-section="workshop"]:not(.km-book-reading):not(.km-coloring-open) #kmAppViews {
+  top:env(safe-area-inset-top,0px);
+}
+@media (orientation:landscape) and (max-height:520px) {
+  .km-continuous-app[data-km-section="workshop"] .km-app-nav {
+    box-sizing:border-box; padding:3px 8px; min-height:48px; bottom:max(3px,env(safe-area-inset-bottom)); border-radius:16px;
+  }
+  .km-continuous-app[data-km-section="workshop"] .km-app-nav a { min-height:44px; padding:2px 4px; flex-direction:row; gap:5px; }
+  .km-continuous-app[data-km-section="workshop"] .km-nav-indicator { top:3px; bottom:3px; border-radius:12px; }
+}

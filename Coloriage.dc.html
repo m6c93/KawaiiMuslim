@@ -4,7 +4,7 @@
   <script src="./km-access-gate.js?v=guest-nav-fix-20260830"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#211e56">
+  <meta name="theme-color" content="#fffcfb">
   <title>Coloriage — Kawaii Muslim</title>
   <script>
     (() => {
@@ -27,50 +27,148 @@
     button,a { -webkit-tap-highlight-color:transparent; }
     [hidden] { display:none!important; }
     html.direct-coloring .choice { display:none!important; }
-    .app { min-height:100dvh; display:grid; grid-template-rows:auto minmax(0,1fr); background:
-      radial-gradient(circle at 10% 16%,rgba(231,137,182,.16),transparent 25%),
-      radial-gradient(circle at 88% 75%,rgba(79,192,161,.14),transparent 25%),
-      linear-gradient(145deg,#17143e,#302968 60%,#211e56); }
-    .topbar { position:sticky; top:0; z-index:20; min-height:68px; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; padding:calc(9px + env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 9px max(12px,env(safe-area-inset-left)); border-bottom:1px solid rgba(255,255,255,.1); background:rgba(25,22,63,.92); backdrop-filter:blur(14px); }
-    .title { min-width:0; text-align:center; }
-    .title strong { display:block; overflow:hidden; font:800 clamp(16px,3vw,22px)/1.1 "Baloo 2",cursive; text-overflow:ellipsis; white-space:nowrap; }
-    .title small { color:#d6d3ed; font-size:10px; }
-    .top-actions { display:flex; gap:7px; }
-    .action { cursor:pointer; min-height:42px; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:9px 13px; color:#fff; border:1px solid rgba(255,255,255,.18); border-radius:14px; background:rgba(255,255,255,.1); text-decoration:none; font-size:11px; font-weight:900; }
-    .action.primary { border:0; background:linear-gradient(135deg,#66ccb0,#3bac8d); }
-    .workspace { min-height:0; display:grid; grid-template-columns:94px minmax(0,1fr); }
-    .tools { position:sticky; top:68px; z-index:12; height:calc(100dvh - 68px); overflow:auto; display:flex; flex-direction:column; align-items:center; gap:10px; padding:14px 10px max(14px,env(safe-area-inset-bottom)); border-right:1px solid rgba(255,255,255,.1); background:rgba(22,19,57,.72); }
-    .tool-label { color:#c9c8de; font-size:9px; font-weight:900; text-transform:uppercase; }
-    .palette { display:grid; grid-template-columns:repeat(2,34px); gap:8px; }
-    .color { cursor:pointer; width:34px; height:34px; border:3px solid rgba(255,255,255,.25); border-radius:50%; background:var(--color); box-shadow:0 4px 10px rgba(0,0,0,.18); }
-    .color.active { border-color:#fff; transform:scale(1.12); }
-    .tool { cursor:pointer; width:66px; min-height:44px; display:grid; place-items:center; padding:6px; color:#fff; border:1px solid rgba(255,255,255,.14); border-radius:14px; background:rgba(255,255,255,.08); font-size:10px; font-weight:900; text-align:center; }
-    .tool.active { color:#2d6658; border-color:#a5ead7; background:#dff8ef; }
-    .tool-types { display:grid; grid-template-columns:repeat(2,32px); gap:6px; }
-    .type-tool { cursor:pointer; width:32px; height:32px; display:grid; place-items:center; padding:0; color:#fff; border:1px solid rgba(255,255,255,.16); border-radius:10px; background:rgba(255,255,255,.08); font-size:16px; }
-    .type-tool.active { color:#2d6658; border-color:#a5ead7; background:#dff8ef; }
-    .sizes { display:flex; align-items:center; gap:6px; }
-    .size { cursor:pointer; width:24px; height:24px; display:grid; place-items:center; border:0; border-radius:50%; background:rgba(255,255,255,.09); }
-    .size::after { content:""; width:var(--dot); height:var(--dot); border-radius:50%; background:#fff; }
-    .size.active { outline:2px solid var(--gold); }
-    .pressure { width:72px; display:grid; gap:5px; text-align:center; }
-    .pressure input { width:72px; margin:0; cursor:pointer; accent-color:var(--pink); }
-    .pressure strong { color:#fff; font-size:9px; line-height:1.1; }
-    .custom-color { position:relative; width:34px; height:34px; overflow:hidden; display:grid; place-items:center; border:2px dashed rgba(255,255,255,.65); border-radius:50%; background:conic-gradient(#f55,#fc5,#5d7,#5ce,#78f,#d6e,#f55); font-size:16px; }
-    .custom-color input { position:absolute; inset:0; width:100%; height:100%; cursor:pointer; opacity:0; }
-    .stickers { width:72px; display:grid; grid-template-columns:repeat(3,1fr); gap:4px; }
-    .sticker { cursor:pointer; height:25px; padding:0; border:1px solid rgba(255,255,255,.13); border-radius:8px; background:rgba(255,255,255,.08); font-size:14px; }
-    .sticker.active { outline:2px solid var(--gold); background:#fff; }
-    .stage { min-width:0; min-height:0; overflow:auto; display:grid; place-items:start center; padding:clamp(12px,3vw,30px); touch-action:pan-x pan-y; }
-    .paper { position:relative; width:min(820px,100%); overflow:hidden; border-radius:13px; background:#fff; box-shadow:0 26px 70px rgba(5,4,24,.5); touch-action:none; }
+    #editorApp {
+      --ink:#3f3051; --muted:#6d6275; --accent:#784365; --line:#e4d9df; --surface:#fffcfb;
+      --edge-top:max(env(safe-area-inset-top,0px),var(--km-safe-top,0px));
+      --edge-right:max(env(safe-area-inset-right,0px),var(--km-safe-right,0px));
+      --edge-bottom:max(env(safe-area-inset-bottom,0px),var(--km-safe-bottom,0px));
+      --edge-left:max(env(safe-area-inset-left,0px),var(--km-safe-left,0px));
+      height:100vh; height:100dvh; max-width:100%; min-height:0;
+      display:grid; grid-template-rows:auto minmax(0,1fr); overflow:hidden;
+      color:var(--ink); background:#f3ede8; font:800 14px/1.25 "Nunito",system-ui,sans-serif;
+    }
+    #editorApp button,#editorApp a,#editorApp input { font:inherit; }
+    #editorApp button,#editorApp a { -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+    #editorApp :is(button,a,input):focus-visible,#editorApp label:focus-within { outline:3px solid #76518f; outline-offset:2px; }
+    #editorApp button { color:inherit; cursor:pointer; }
+    #editorApp button:disabled { opacity:.48; cursor:default; }
+    .paint-header {
+      display:flex; align-items:center; gap:clamp(6px,1.5vw,18px);
+      padding:calc(6px + var(--edge-top)) max(9px,var(--edge-right)) 6px max(9px,var(--edge-left));
+      background:var(--surface); border-bottom:1px solid var(--line);
+    }
+    .paint-heading { flex:1; min-width:0; }
+    .paint-heading strong,.paint-heading small { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .paint-heading strong { font:800 clamp(15px,2.7vw,22px)/1.1 "Baloo 2","Nunito",sans-serif; }
+    .paint-heading small { color:var(--muted); font-size:11px; }
+    #editorApp .paint-action,#editorApp .paint-mode,#editorApp .paint-option {
+      box-sizing:border-box; display:inline-flex; justify-content:center; align-items:center; gap:6px;
+      min-height:44px; border:1px solid var(--line); border-radius:13px; padding:6px 11px;
+      background:white; color:var(--ink); text-decoration:none; white-space:nowrap;
+    }
+    #editorApp #backAction { color:var(--ink); background:transparent; border:0; padding:0 4px; min-width:44px; }
+    .paint-icon { width:22px; height:22px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    #editorApp #finishButton { color:#fff; background:#407963; border-color:#407963; font-weight:900; }
+    .paint-workspace { display:grid; grid-template-rows:minmax(0,1fr) auto; min-height:0; min-width:0; }
+    #editorApp .stage {
+      grid-row:1; min-height:0; min-width:0; overflow:auto; display:flex; padding:8px;
+      overscroll-behavior:contain; background:#f3ede8;
+    }
+    #editorApp .paper {
+      flex:none; max-width:none; position:relative; align-self:flex-start; margin:auto; overflow:hidden; border-radius:5px; background:white;
+      box-shadow:0 3px 16px #52394b21; touch-action:none;
+    }
     .paper canvas { display:block; width:100%; height:auto; }
-    #drawCanvas { position:absolute; inset:0; z-index:2; }
-    .zoom-controls { position:sticky; top:14px; z-index:11; align-self:start; justify-self:end; display:flex; align-items:center; gap:5px; margin:0 4px -48px 0; padding:5px; border-radius:14px; background:rgba(23,20,62,.88); box-shadow:0 8px 25px rgba(0,0,0,.2); }
-    .zoom-controls button { width:34px; height:34px; cursor:pointer; color:#fff; border:0; border-radius:10px; background:rgba(255,255,255,.12); font-weight:900; }
-    .zoom-controls output { min-width:43px; color:#fff; font-size:10px; font-weight:900; text-align:center; }
-    .loading { min-height:70dvh; display:grid; place-items:center; color:var(--ink); background:#f8f6fb; text-align:center; }
-    .loading span { display:block; margin-bottom:8px; font-size:42px; }
-    .finish { margin-top:auto; color:#fff; border:0; background:linear-gradient(145deg,var(--pink),#cf6898); box-shadow:0 9px 20px rgba(231,137,182,.26); }
+    #drawCanvas { position:absolute; inset:0; z-index:2; touch-action:none; }
+    .loading { min-height:160px; min-width:130px; display:grid; place-items:center; text-align:center; }
+    .loading span { font-size:32px; display:block; }
+    .paint-tools {
+      grid-row:2; display:grid; justify-items:center; gap:3px; padding:3px max(6px,var(--edge-right)) calc(5px + var(--edge-bottom)) max(6px,var(--edge-left));
+      background:var(--surface); border-top:1px solid var(--line);
+    }
+    .paint-colors,.paint-modes { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:clamp(2px,1.25vw,10px); }
+    .paint-colors { width:min(100%,420px); grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px; }
+    .paint-modes { grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; width:min(100%,380px); }
+    #editorApp .color,.paint-custom { cursor:pointer; width:100%; min-width:0; min-height:44px; position:relative; display:grid; place-items:center; border:0; background:transparent; padding:0; }
+    #editorApp .color::before,.paint-custom::before {
+      content:""; width:34px; height:34px; border:1px solid #3f30511f; border-radius:50%; background:var(--color);
+    }
+    #editorApp .color.active::after { content:"✓"; position:absolute; color:white; font:bold 19px system-ui; text-shadow:0 1px 3px #222; }
+    #editorApp .color.active::before { outline:2px solid var(--ink); outline-offset:2px; }
+    #editorApp .paint-mode { padding:3px 8px; min-width:0; min-height:44px; font-size:13px; gap:5px; }
+    #editorApp .paint-mode.active,#editorApp .paint-option.active { color:#713655; border-color:#b67c9a; background:#fae4ee; }
+    #editorApp .paint-mode .paint-icon { width:20px; height:20px; }
+    #editorApp .palette-more {
+      display:grid; place-items:center; justify-self:stretch; min-width:0; min-height:44px;
+      margin:0; padding:0; border:0; background:transparent; color:var(--accent); cursor:pointer;
+    }
+    .palette-more .palette-plus {
+      box-sizing:border-box; width:24px; height:24px; display:grid; place-items:center;
+      border:2px dashed #9c7f98; border-radius:50%; font:750 18px/1 system-ui,sans-serif;
+    }
+    .palette-more .palette-more-label { display:block; max-width:45px; font-size:9px; line-height:1; text-align:center; }
+    @media(max-width:340px) { .paint-colors { gap:0; } }
+    .paint-custom::before { background:conic-gradient(#f69,#fc7,#6c8,#7ad,#a8e,#f69); }
+    .paint-custom::after { position:absolute; content:"+"; color:#342b43; font:bold 20px system-ui; }
+    .paint-custom input { position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:1; }
+    #moreOptions {
+      margin:auto; width:min(440px,calc(100vw - 20px)); max-height:calc(100vh - 24px); max-height:calc(100dvh - var(--edge-top) - var(--edge-bottom) - 18px);
+      color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:21px; padding:0; overflow:auto; overscroll-behavior:contain;
+      box-shadow:0 12px 44px #3c263e42;
+    }
+    #moreOptions::backdrop { background:#39273573; }
+    .paint-options-head { display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:1; padding:7px 12px 7px 17px; background:var(--surface); border-bottom:1px solid var(--line); }
+    .paint-options-head h2,.paint-options-body h3 { margin:0; font:800 22px "Baloo 2","Nunito",sans-serif; }
+    .paint-options-body { display:grid; gap:12px; padding:12px 16px 16px; }
+    .paint-options-body section { display:grid; gap:5px; }
+    #moreOptions[data-panel="colors"] { width:min(345px,calc(100vw - 20px)); }
+    .paint-more-tools { display:grid; gap:12px; }
+    #paintExtraColors .paint-row { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:2px; }
+    #paintExtraColors .color { max-width:none; }
+    #paintExtraColors .paint-custom { display:flex; width:max-content; max-width:100%; gap:8px; padding:0 7px; }
+    #paintExtraColors .paint-custom::before { width:25px; height:25px; }
+    #paintExtraColors .paint-custom::after { display:none; }
+    .paint-adjustments { padding-block:2px; border-block:1px solid var(--line); }
+    .paint-adjustments summary { cursor:pointer; min-height:44px; align-content:center; font-weight:900; }
+    .paint-adjustments[open] section { margin:4px 0 10px; }
+    .paint-options-body h3 { font-size:16px; }
+    .paint-row { display:flex; flex-wrap:wrap; align-items:center; gap:5px; }
+    .paint-row .color,.paint-row .paint-custom { max-width:48px; }
+    #editorApp .paint-option { min-height:44px; min-width:44px; font-size:13px; padding:5px 10px; }
+    .paint-option[data-size]::before { content:""; width:var(--dot); height:var(--dot); background:currentColor; border-radius:50%; }
+    .paint-range { display:grid; grid-template-columns:minmax(80px,1fr) minmax(0,1fr); align-items:center; gap:7px; color:var(--muted); font-size:12px; }
+    .paint-range input { width:100%; height:36px; margin:0; accent-color:var(--accent); }
+    #editorApp #compareButton[hidden] { display:none!important; }
+    @media(max-width:540px) {
+      .paint-header { gap:5px; }
+      #editorApp .paint-action { padding:5px 8px; font-size:13px; }
+      .paint-header .paint-label-compact { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+      #editorApp #undoButton { width:44px; padding:0; }
+    }
+    @media(min-width:360px) and (max-width:540px) {
+      #editorApp #undoButton { width:auto; padding-inline:8px; }
+      #undoButton .paint-label-compact { position:static; width:auto; height:auto; clip-path:none; }
+    }
+    @media(min-width:700px),(orientation:landscape) and (min-width:440px) {
+      .paint-workspace { grid-template-columns:minmax(112px,144px) minmax(0,1fr); grid-template-rows:minmax(0,1fr); }
+      #editorApp .stage { grid-area:1 / 2; padding:clamp(8px,1.5vw,18px) max(10px,var(--edge-right)) max(8px,var(--edge-bottom)) 10px; }
+      .paint-tools { grid-area:1 / 1; align-content:center; justify-items:stretch; padding:5px 6px max(5px,var(--edge-bottom)) max(6px,var(--edge-left)); border-top:0; border-right:1px solid var(--line); overflow:auto; }
+      .paint-colors { grid-template-columns:repeat(2,minmax(0,1fr)); gap:3px; }
+      #editorApp .palette-more { grid-column:1 / -1; display:flex; justify-content:center; align-items:center; gap:4px; }
+      .palette-more .palette-plus { width:23px; height:23px; font-size:16px; }
+      .palette-more .palette-more-label { display:inline; font-size:11px; line-height:1.1; max-width:54px; }
+      .paint-modes { grid-template-columns:1fr; gap:4px; }
+    }
+    @media(orientation:landscape) and (max-height:455px) and (min-width:440px) {
+      .paint-workspace { grid-template-columns:calc(150px + var(--edge-left)) minmax(0,1fr); }
+      .paint-header { padding-block: max(2px,var(--edge-top)) 2px; }
+      .paint-tools { align-content:safe center; }
+      .paint-tools .paint-mode { min-height:44px; }
+      .paint-colors { grid-template-columns:repeat(3,minmax(0,1fr)); gap:0; }
+    }
+    @media(orientation:landscape) and (min-width:440px) and (max-height:340px) {
+      .paint-workspace { grid-template-columns:calc(165px + var(--edge-left)) minmax(0,1fr); }
+      .paint-modes { grid-template-columns:1fr 1fr; }
+      .paint-modes .paint-icon { display:none; }
+      #paintMore { grid-column:1 / -1; }
+    }
+    @media(orientation:landscape) and (min-width:440px) and (max-height:278px) {
+      .paint-workspace { grid-template-columns:calc(240px + var(--edge-left)) minmax(0,1fr); }
+      .paint-tools { grid-template-columns:132px 1fr; gap:4px; align-items:center; }
+      .paint-modes { grid-template-columns:1fr; }
+    }
+    @media(min-width:900px) { .paint-workspace { grid-template-columns:calc(150px + var(--edge-left)) minmax(0,1fr); } }
+    @media print { #editorApp { display:none!important; } }
     .choice { position:fixed; inset:0; z-index:50; display:grid; place-items:center; padding:20px; background:radial-gradient(120% 90% at 50% 0,#36449a,#171a40 72%); }
     .choice-card { width:min(700px,100%); padding:clamp(25px,5vw,45px); border:1px solid rgba(255,255,255,.14); border-radius:30px; background:rgba(255,255,255,.08); box-shadow:0 35px 90px rgba(0,0,0,.35); text-align:center; backdrop-filter:blur(12px); }
     .mascot { width:75px; height:75px; margin:0 auto 15px; overflow:hidden; border:3px solid #fff; border-radius:50%; background:#fff; }
@@ -86,42 +184,9 @@
     .choice-message { min-height:18px; margin-top:12px; color:#ffd1e4; font-size:11px; font-weight:900; }
     #printOutput { display:none; }
     .toast { position:fixed; right:16px; bottom:16px; z-index:30; max-width:290px; padding:11px 15px; color:var(--ink); border-radius:16px; background:#fff; box-shadow:0 12px 30px rgba(0,0,0,.2); font-size:11px; font-weight:900; transition:.2s; }
-    .finish-modal,.celebration { position:fixed; inset:0; z-index:80; display:grid; place-items:center; padding:20px; background:rgba(18,16,53,.78); backdrop-filter:blur(10px); }
-    .memory-card { width:min(470px,100%); padding:30px; color:var(--ink); border-radius:30px; background:#fff; box-shadow:0 30px 90px rgba(0,0,0,.35); text-align:center; }
-    .memory-card h2 { margin:0; font:800 31px/1.05 "Baloo 2",cursive; }
-    .memory-card p { margin:7px 0 20px; color:var(--muted); font-size:12px; }
-    .memory-card label { display:block; margin:12px 0 5px; color:var(--ink); font-size:10px; font-weight:900; text-align:left; text-transform:uppercase; }
-    .memory-card input { width:100%; min-height:46px; padding:10px 13px; color:var(--ink); border:1px solid #e2dfea; border-radius:14px; background:#faf9fc; font:800 13px "Nunito",sans-serif; }
-    .memory-actions { display:grid; grid-template-columns:1fr 1.4fr; gap:9px; margin-top:20px; }
-    .memory-actions button { min-height:46px; cursor:pointer; border:0; border-radius:14px; font-weight:900; }
-    .memory-actions .confirm { color:#fff; background:linear-gradient(135deg,var(--pink),#cf6898); }
-    .celebration { overflow:hidden; color:#fff; background:radial-gradient(circle at 50% 30%,#6b68c7,#232052 72%); text-align:center; }
-    .celebration-card { position:relative; z-index:2; }
-    .celebration-card span { display:block; font-size:78px; animation:star-pop .7s both; }
-    .celebration-card h2 { margin:8px 0 3px; font:800 clamp(34px,7vw,55px)/1 "Baloo 2",cursive; }
-    .celebration-card p { margin:0; color:#e9e7ff; font-weight:800; }
-    .confetti { position:absolute; top:-10%; width:11px; height:18px; border-radius:4px; background:var(--c); animation:confetti-fall var(--d) linear infinite; animation-delay:var(--delay); }
-    @keyframes star-pop { from { opacity:0; transform:scale(.2) rotate(-25deg); } to { opacity:1; transform:scale(1) rotate(0); } }
-    @keyframes confetti-fall { to { transform:translateY(120vh) rotate(720deg); } }
-    @media (max-width:700px) {
-      html,body { width:100%; max-width:100vw; height:100%; overflow:hidden; }
-      .app { width:100%; max-width:100vw; height:100dvh; min-height:0; overflow:hidden; grid-template-rows:auto minmax(0,1fr); }
-      .topbar { grid-template-columns:auto minmax(0,1fr); }
-      .top-actions { grid-column:1/-1; display:grid; grid-template-columns:1fr 1fr; }
-      .home-label,.title small { display:none; }
-      .workspace { width:100%; max-width:100vw; height:100%; min-height:0; overflow:hidden; grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(0,1fr) auto; }
-      .stage { grid-row:1; width:100%; min-width:0; min-height:0; overflow:auto; padding:10px 8px; overscroll-behavior:contain; }
-      .paper { width:min(100%,560px); max-width:100%; }
-      .tools { position:relative; bottom:auto; top:auto; grid-row:2; width:100%; max-width:100vw; height:auto; overflow-x:auto; overflow-y:hidden; overscroll-behavior-x:contain; flex-direction:row; justify-content:flex-start; padding:9px max(10px,env(safe-area-inset-right)) calc(9px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left)); border-top:1px solid rgba(255,255,255,.12); border-right:0; background:rgba(22,19,57,.98); scrollbar-width:none; }
-      .tools::-webkit-scrollbar { display:none; }
-      .tool-label { display:none; }
-      .palette { flex:0 0 auto; display:flex; }
-      .tool-types { flex:0 0 auto; display:flex; }
-      .stickers { flex:0 0 126px; grid-template-columns:repeat(6,1fr); }
-      .zoom-controls { position:fixed; top:auto; right:8px; bottom:104px; margin:0; }
-      .finish { position:sticky; right:0; flex:0 0 68px; margin:0 0 0 auto; box-shadow:-10px 0 18px rgba(22,19,57,.7),0 9px 20px rgba(231,137,182,.26); }
+    @media(max-width:540px) {
       .choice-buttons { grid-template-columns:1fr; }
-      .choice-button { min-height:105px; }
+      .choice-button { min-height:80px; }
     }
     @media print {
       @page { size:auto; margin:8mm; }
@@ -129,112 +194,129 @@
       .app,.choice,.toast { display:none!important; }
       #printOutput { width:100%; max-height:calc(100vh - 16mm); display:block!important; object-fit:contain; }
     }
-  body.book-coloring-mode #compareButton,
-body.book-coloring-mode #printButton,
-body.book-coloring-mode #saveButton,
-body.book-coloring-mode .type-tool[data-tool="highlighter"],
-body.book-coloring-mode .type-tool[data-tool="brush"],
-body.book-coloring-mode .type-tool[data-tool="bucket"],
-body.book-coloring-mode .type-tool[data-tool="sticker"],
-body.book-coloring-mode .pressure,
-body.book-coloring-mode #stickers,
-body.book-coloring-mode #safeModeButton{display:none!important}
-body.book-coloring-mode .tools{gap:10px}
-body.book-coloring-mode .top-actions{gap:7px}
-body.book-coloring-mode .title small{color:#daf3eb}
-html.embedded-coloring-demo,html.embedded-coloring-demo body{overflow:hidden}
-html.embedded-coloring-demo .app{min-height:100vh;height:100vh}
-html.embedded-coloring-demo .topbar{min-height:54px;padding:6px 10px;grid-template-columns:minmax(0,1fr) auto}
-html.embedded-coloring-demo #backAction,html.embedded-coloring-demo #compareButton,html.embedded-coloring-demo #printButton,html.embedded-coloring-demo #saveButton{display:none!important}
-html.embedded-coloring-demo .title{text-align:left}
-html.embedded-coloring-demo .workspace{grid-template-columns:78px minmax(0,1fr)}
-html.embedded-coloring-demo .tools{top:54px;height:calc(100vh - 54px);padding:10px 6px;gap:7px}
-html.embedded-coloring-demo .palette{grid-template-columns:repeat(2,29px);gap:6px}
-html.embedded-coloring-demo .color,html.embedded-coloring-demo .custom-color{width:29px;height:29px}
-html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px}
 </style>
-<script src="/km-discovery.js?v=discovery-3" defer></script>
+<script src="/km-discovery.js?v=coloring-20261124" defer></script>
 </head>
 <body>
   <main class="app" id="editorApp" hidden>
-    <header class="topbar">
-      <a class="action" id="backAction" href="Atelier.dc.html"><span>←</span><span class="home-label" id="backLabel">Atelier</span></a>
-      <div class="title"><strong id="coloringTitle">Mon coloriage</strong><small id="saveStatus">Prêt à colorier</small></div>
-      <div class="top-actions">
-        <button class="action" id="undoButton" type="button">↶ Annuler</button>
-        <button class="action" id="redoButton" type="button">↷ Rétablir</button>
-        <button class="action" id="compareButton" type="button">👀 Avant</button>
-        <button class="action" id="printButton" type="button">🖨 Imprimer</button>
-        <button class="action primary" id="saveButton" type="button">☁ Sauvegarder</button>
-      </div>
+    <header class="paint-header">
+      <a class="paint-action" id="backAction" href="Atelier.dc.html"><svg class="paint-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m10 5-7 7 7 7M4 12h17"/></svg><span class="paint-label-compact" id="backLabel">Atelier</span></a>
+      <div class="paint-heading"><strong id="coloringTitle">Mon coloriage</strong><small id="saveStatus" role="status">Prêt à colorier</small></div>
+      <button class="paint-action" id="undoButton" type="button" title="Annuler" aria-label="Annuler le dernier geste"><svg class="paint-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 4 4 9l5 5M4 9h9a6 6 0 0 1 0 12h-2"/></svg><span class="paint-label-compact">Annuler</span></button>
+      <button class="paint-action" id="finishButton" type="button"><svg class="paint-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m4 12 5 5L20 6"/></svg>J’ai fini</button>
     </header>
-    <div class="workspace">
-      <aside class="tools" aria-label="Feutres numériques">
-        <span class="tool-label">Couleurs</span>
-        <div class="palette" id="palette">
-          <button class="color active" style="--color:#ef6f9f" data-color="#ef6f9f" aria-label="Rose"></button>
-          <button class="color" style="--color:#7d72df" data-color="#7d72df" aria-label="Violet"></button>
-          <button class="color" style="--color:#4a92e8" data-color="#4a92e8" aria-label="Bleu"></button>
-          <button class="color" style="--color:#4fc0a1" data-color="#4fc0a1" aria-label="Vert"></button>
-          <button class="color" style="--color:#f0b53f" data-color="#f0b53f" aria-label="Jaune"></button>
-          <button class="color" style="--color:#ed754d" data-color="#ed754d" aria-label="Orange"></button>
-          <button class="color" style="--color:#8c563f" data-color="#8c563f" aria-label="Marron"></button>
-          <button class="color" style="--color:#34345e" data-color="#34345e" aria-label="Bleu nuit"></button>
-          <label class="custom-color" aria-label="Choisir une autre couleur">＋<input id="customColor" type="color" value="#ef6f9f"></label>
-        </div>
-        <span class="tool-label">Outil</span>
-        <div class="tool-types" id="toolTypes">
-          <button class="type-tool" data-tool="pencil" type="button" aria-label="Crayon" title="Crayon">✏️</button>
-          <button class="type-tool active" data-tool="marker" type="button" aria-label="Feutre" title="Feutre">🖍️</button>
-          <button class="type-tool" data-tool="highlighter" type="button" aria-label="Surligneur" title="Surligneur">🟨</button>
-          <button class="type-tool" data-tool="brush" type="button" aria-label="Pinceau" title="Pinceau">🖌️</button>
-          <button class="type-tool" data-tool="bucket" type="button" aria-label="Pot de peinture" title="Pot de peinture">🪣</button>
-          <button class="type-tool" data-tool="sticker" type="button" aria-label="Autocollants" title="Autocollants">🌟</button>
-        </div>
-        <span class="tool-label">Taille</span>
-        <div class="sizes">
-          <button class="size" style="--dot:5px" data-size="6" aria-label="Feutre fin"></button>
-          <button class="size active" style="--dot:10px" data-size="14" aria-label="Feutre moyen"></button>
-          <button class="size" style="--dot:15px" data-size="24" aria-label="Gros feutre"></button>
-        </div>
-        <span class="tool-label">Pression</span>
-        <label class="pressure" for="pressureRange">
-          <input id="pressureRange" type="range" min="20" max="100" step="5" value="55" aria-label="Pression du feutre">
-          <strong id="pressureLabel">Normale</strong>
-        </label>
-        <span class="tool-label">Stylet</span>
-        <label class="pressure" for="stylusSensitivity">
-          <input id="stylusSensitivity" type="range" min="75" max="200" step="5" value="155" aria-label="Sensibilité du stylet">
-          <strong id="stylusSensitivityLabel">Sensible 155%</strong>
-        </label>
-        <span class="tool-label">Stickers</span>
-        <div class="stickers" id="stickers">
-          <button class="sticker active" data-sticker="⭐" type="button">⭐</button>
-          <button class="sticker" data-sticker="🌙" type="button">🌙</button>
-          <button class="sticker" data-sticker="🌸" type="button">🌸</button>
-          <button class="sticker" data-sticker="💖" type="button">💖</button>
-          <button class="sticker" data-sticker="☁️" type="button">☁️</button>
-          <button class="sticker" data-sticker="✨" type="button">✨</button>
-        </div>
-        <button class="tool active" id="safeModeButton" type="button">🛡️<br>Contours</button>
-        <button class="tool" id="eraserButton" type="button">🧽<br>Gomme</button>
-        <button class="tool" id="clearButton" type="button">✨<br>Recommencer</button>
-        <button class="tool finish" id="finishButton" type="button">⭐<br>Terminé</button>
-      </aside>
-      <section class="stage">
-        <div class="zoom-controls" aria-label="Zoom">
-          <button id="zoomOut" type="button" aria-label="Dézoomer">−</button>
-          <output id="zoomValue">100%</output>
-          <button id="zoomIn" type="button" aria-label="Zoomer">＋</button>
-        </div>
+    <div class="paint-workspace">
+      <section class="stage" aria-label="Zone de dessin">
         <article class="paper" id="paper">
           <div class="loading" id="loading"><div><span>🖍️</span><strong>Préparation de l’atelier…</strong></div></div>
           <canvas id="baseCanvas" hidden></canvas>
           <canvas id="drawCanvas" hidden></canvas>
         </article>
       </section>
+      <aside class="paint-tools" aria-label="Couleurs et outils">
+        <div id="palette" class="paint-colors" role="group" aria-label="Couleurs">
+<button type="button" class="color active" style="--color:#ef6f9f" data-color="#ef6f9f" aria-label="Rose" aria-pressed="true" title="Rose"></button>
+<button type="button" class="color" style="--color:#7d72df" data-color="#7d72df" aria-label="Violet" aria-pressed="false" title="Violet"></button>
+<button type="button" class="color" style="--color:#4a92e8" data-color="#4a92e8" aria-label="Bleu" aria-pressed="false" title="Bleu"></button>
+<button type="button" class="color" style="--color:#4fc0a1" data-color="#4fc0a1" aria-label="Vert" aria-pressed="false" title="Vert"></button>
+<button type="button" class="color" style="--color:#f0b53f" data-color="#f0b53f" aria-label="Jaune" aria-pressed="false" title="Jaune"></button>
+<button type="button" class="color" style="--color:#ed754d" data-color="#ed754d" aria-label="Orange" aria-pressed="false" title="Orange"></button>
+          <button type="button" class="palette-more" id="paintMoreColors" aria-label="Autres couleurs" title="Autres couleurs" aria-controls="moreOptions" aria-haspopup="dialog"><span class="palette-plus" aria-hidden="true">+</span><span class="palette-more-label" aria-hidden="true">Autres couleurs</span></button>
+        </div>
+        <div class="paint-modes" id="toolTypes" role="group" aria-label="Outils">
+          <button class="paint-mode type-tool active" type="button" data-tool="bucket" aria-pressed="true"><svg class="paint-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 3 9 9-8 8-8-8 9-9M5 10h11M7 2l5 5"/><path d="M19 16s-2 2.2-2 3.5a2 2 0 0 0 4 0C21 18.2 19 16 19 16Z"/></svg>Remplir</button>
+          <button class="paint-mode type-tool" type="button" data-tool="marker" aria-pressed="false"><svg class="paint-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m4 15 10-11a2 2 0 0 1 3 0l3 3a2 2 0 0 1 0 3L9 20l-6 1 1-6Zm3-1 4 4M15 5l4 4"/></svg>Feutre</button>
+          <button class="paint-mode" type="button" id="paintMore" aria-label="Plus d’outils" aria-haspopup="dialog" aria-controls="moreOptions"><svg class="paint-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></svg>Plus</button>
+        </div>
+      </aside>
     </div>
+    <dialog id="moreOptions" aria-labelledby="paintMoreTitle">
+      <div class="paint-options-head"><h2 id="paintMoreTitle">Plus d’outils</h2><button class="paint-option" id="closePaintMore" type="button" aria-label="Fermer"><svg class="paint-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <div class="paint-options-body">
+        <section id="paintExtraColors" aria-label="Autres couleurs" hidden><div class="paint-row">
+<button type="button" class="color" style="--color:#cf465c" data-color="#cf465c" aria-label="Rouge" aria-pressed="false" title="Rouge"></button>
+<button type="button" class="color" style="--color:#8c563f" data-color="#8c563f" aria-label="Marron" aria-pressed="false" title="Marron"></button>
+<button type="button" class="color" style="--color:#34345e" data-color="#34345e" aria-label="Bleu nuit" aria-pressed="false" title="Bleu nuit"></button>
+<button type="button" class="color" style="--color:#171923" data-color="#171923" aria-label="Noir" aria-pressed="false" title="Noir"></button>
+<button type="button" class="color" style="--color:#ffffff" data-color="#ffffff" aria-label="Blanc" aria-pressed="false" title="Blanc"></button>
+          <button type="button" class="color" style="--color:#f6a78d" data-color="#f6a78d" aria-label="Pêche" aria-pressed="false" title="Pêche"></button>
+        </div>
+        <label class="paint-custom">Couleur au choix<input id="customColor" type="color" value="#ef6f9f" aria-label="Choisir ma couleur"></label>
+        </section>
+        <div class="paint-more-tools" id="paintExtraTools">
+        <section><h3>Outils</h3><div class="paint-row">
+<button type="button" class="paint-option type-tool" data-tool="pencil" aria-pressed="false">Crayon</button>
+<button type="button" class="paint-option type-tool" data-tool="brush" aria-pressed="false">Pinceau</button>
+<button type="button" class="paint-option type-tool" data-tool="highlighter" aria-pressed="false">Surligneur</button>
+<button type="button" class="paint-option type-tool" data-tool="sticker" aria-pressed="false">Autocollant</button>
+          <button class="paint-option" id="eraserButton" type="button" aria-pressed="false">Gomme</button>
+          <button class="paint-option active" id="safeModeButton" type="button" aria-pressed="true">Contours protégés</button>
+        </div></section>
+        <section><h3>Taille du trait</h3><div class="paint-row sizes">
+          <button class="paint-option size" type="button" style="--dot:5px" data-size="6" aria-pressed="false">Fin</button>
+          <button class="paint-option size active" type="button" style="--dot:10px" data-size="14" aria-pressed="true">Moyen</button>
+          <button class="paint-option size" type="button" style="--dot:15px" data-size="24" aria-pressed="false">Épais</button>
+        </div></section>
+        <section><h3>Autocollants</h3><div class="paint-row" id="stickers">
+<button class="paint-option sticker active" data-sticker="⭐" type="button" aria-label="Étoile">⭐</button>
+<button class="paint-option sticker" data-sticker="🌙" type="button" aria-label="Lune">🌙</button>
+<button class="paint-option sticker" data-sticker="🌸" type="button" aria-label="Fleur">🌸</button>
+<button class="paint-option sticker" data-sticker="💖" type="button" aria-label="Cœur">💖</button>
+<button class="paint-option sticker" data-sticker="☁️" type="button" aria-label="Nuage">☁️</button>
+<button class="paint-option sticker" data-sticker="✨" type="button" aria-label="Étincelles">✨</button>
+        </div></section>
+        <details class="paint-adjustments"><summary>Réglages</summary>
+        <section><h3>Réglages du trait</h3>
+          <label class="paint-range" for="pressureRange"><span>Pression · <strong id="pressureLabel">Normale</strong></span><input id="pressureRange" type="range" min="20" max="100" step="5" value="55"></label>
+          <label class="paint-range" for="stylusSensitivity"><span>Sensibilité du stylet · <strong id="stylusSensitivityLabel">155 %</strong></span><input id="stylusSensitivity" type="range" min="75" max="200" step="5" value="155"></label>
+        </section>
+        <section><h3>Zoom</h3><div class="paint-row">
+          <button class="paint-option" id="zoomOut" type="button" aria-label="Dézoomer">−</button><output id="zoomValue">100 %</output><button class="paint-option" id="zoomIn" type="button" aria-label="Zoomer">＋</button>
+        </div></section>
+        </details>
+        <section><h3>Mon dessin</h3><div class="paint-row">
+          <button class="paint-option" id="redoButton" type="button">Rétablir</button>
+          <button class="paint-option" id="compareButton" type="button">Voir l’original</button>
+          <button class="paint-option" id="printButton" type="button">Imprimer</button>
+          <button class="paint-option" id="saveButton" type="button">Sauvegarder</button>
+          <button class="paint-option" id="clearButton" type="button">Recommencer</button>
+        </div></section>
+        </div>
+      </div>
+    </dialog>
   </main>
+  <script>
+    (() => {
+      const panel = document.getElementById("moreOptions");
+      const openButton = document.getElementById("paintMore");
+      const colorButton = document.getElementById("paintMoreColors");
+      const colors = document.getElementById("paintExtraColors");
+      const tools = document.getElementById("paintExtraTools");
+      const heading = document.getElementById("paintMoreTitle");
+      let opener = openButton;
+      function openPanel(button, colorsOnly) {
+        opener = button;
+        colors.hidden = !colorsOnly;
+        tools.hidden = colorsOnly;
+        panel.dataset.panel = colorsOnly ? "colors" : "tools";
+        heading.textContent = colorsOnly ? "Autres couleurs" : "Plus d’outils";
+        panel.showModal();
+        if (colorsOnly) colors.querySelector("[data-color]").focus();
+      }
+      openButton.addEventListener("click", () => openPanel(openButton, false));
+      colorButton.addEventListener("click", () => openPanel(colorButton, true));
+      document.getElementById("closePaintMore").addEventListener("click", () => panel.close());
+      panel.addEventListener("close", () => opener.focus());
+      panel.addEventListener("click", event => {
+        if (event.target === panel) {
+          const box = panel.getBoundingClientRect();
+          if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) panel.close();
+          return;
+        }
+        if (event.target.closest("[data-color],[data-tool],[data-sticker],#eraserButton,#compareButton,#redoButton")) panel.close();
+      });
+    })();
+  </script>
 
   <section class="choice" id="choice">
     <div class="choice-card">
@@ -255,32 +337,6 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
   </section>
   <img id="printOutput" alt="">
   <div class="toast" id="toast" hidden></div>
-  <section class="finish-modal" id="finishModal" hidden>
-    <div class="memory-card">
-      <div style="font-size:54px">🌟</div>
-      <h2>Ma fiche souvenir</h2>
-      <p>Une jolie trace de ce moment créatif.</p>
-      <label for="memoryTitle">Le titre de ma création</label>
-      <input id="memoryTitle" maxlength="80" placeholder="Mon magnifique coloriage">
-      <label for="memoryPhrase">Ma petite phrase</label>
-      <input id="memoryPhrase" maxlength="140" placeholder="J’ai adoré colorier les étoiles !">
-      <div class="memory-actions">
-        <button id="cancelFinish" type="button">Continuer</button>
-        <button class="confirm" id="confirmFinish" type="button">⭐ Terminer</button>
-      </div>
-    </div>
-  </section>
-  <section class="celebration" id="celebration" hidden>
-    <i class="confetti" style="left:8%;--c:#f3bd4a;--d:2.7s;--delay:-.4s"></i>
-    <i class="confetti" style="left:20%;--c:#e789b6;--d:3.1s;--delay:-1.1s"></i>
-    <i class="confetti" style="left:34%;--c:#4fc0a1;--d:2.5s;--delay:-.7s"></i>
-    <i class="confetti" style="left:52%;--c:#8f82e7;--d:3.3s;--delay:-1.5s"></i>
-    <i class="confetti" style="left:68%;--c:#f3bd4a;--d:2.8s;--delay:-.2s"></i>
-    <i class="confetti" style="left:83%;--c:#e789b6;--d:3s;--delay:-1.2s"></i>
-    <i class="confetti" style="left:94%;--c:#4fc0a1;--d:2.4s;--delay:-.9s"></i>
-    <div class="celebration-card"><span>⭐</span><h2>Macha Allah !</h2><p id="celebrationMessage">Quelle jolie création !</p></div>
-  </section>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
   <script src="./km-auth.js"></script>
@@ -315,7 +371,7 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
     let bookReturnUrl = "";
     let format = "image";
     let childId = "";
-    let draftId = requestedDraft;
+    let draftId = "";
     let strokes = [];
     let redoStack = [];
     let currentStroke = null;
@@ -323,7 +379,6 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
     let size = 14;
     let pressure = .55;
     let stylusSensitivity = 1.55;
-    let stylusNotified = false;
     let activeTool = "marker";
     let activeSticker = "⭐";
     let safeMode = true;
@@ -337,7 +392,14 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
     let pinching = false;
     const activePointers = new Map();
     let saveTimer = null;
-    let saving = false;
+    const deviceOnly = guestMode || localDesignPreview;
+    const deviceDraftId = () => crypto.randomUUID?.() || "draft-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+    const writeSession = deviceDraftId();
+    let revision = 0, savedRevision = -1;
+    let editingReady = false, finishing = false;
+    let pendingTap = null, stickerOrigin = null, activePointer = null;
+    const snapshot = document.createElement("canvas");
+    const outlineMask = document.createElement("canvas");
     let savePromise = null;
     let initialized = false;
     let basePixels = null;
@@ -349,8 +411,37 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
       clearTimeout(toast.timer);
       toast.timer = setTimeout(() => element.hidden = true,2200);
     };
+    function configureBack() {
+      const back=document.getElementById("backAction");
+      let url;
+      if (requestedReturn) {
+        try {
+          const candidate = new URL(requestedReturn,location.href);
+          const path = decodeURIComponent(candidate.pathname);
+          const allowed = /^\/(?:Bibliotheque Kawaii Muslim|Atelier|LivreColoriage)\.dc(?:\.html)?$/i.test(path) ||
+            /^\/books\/(?:colorie-ecris-apprends|hijabi-decouverte)(?:\.html)?$/i.test(path);
+          if (allowed && candidate.origin === location.origin) url=candidate;
+        } catch {}
+      }
+      if (!url && params.get("atelier") === "1") {
+        url = new URL("Atelier.dc.html", location.href);
+        url.hash = requestedDraft ? "galerie" : "choisir";
+      }
+      url ||= new URL(bookReturnUrl || "Atelier.dc.html", location.href);
+      if (guestMode) url.searchParams.set("guest","1");
+      if (localDesignPreview) url.searchParams.set("preview","1");
+      if (url.pathname.includes("Atelier")) {
+        document.getElementById("backLabel").textContent="Atelier";
+        if (requestedChild) url.searchParams.set("child",requestedChild);
+      } else if (decodeURIComponent(url.pathname).includes("Bibliotheque")) {
+        document.getElementById("backLabel").textContent="Bibliothèque";
+      } else {
+        document.getElementById("backLabel").textContent=url.pathname.includes("colorie-ecris-apprends") ? "Lettres" : "Livre";
+      }
+      back.href=url.href;
+    }
     const validateSource = () => {
-      if(guestMode && source.startsWith('discovery-coloring:arabic:')){const u=new URL(params.get('return')||'/books/colorie-ecris-apprends.html?guest=1',location.href);bookReturnUrl=u.origin===location.origin&&u.pathname==='/books/colorie-ecris-apprends.html'?u.href:'/books/colorie-ecris-apprends.html?guest=1';document.getElementById('backAction').href=bookReturnUrl;document.getElementById('backLabel').textContent='Lettres';}
+      if (guestMode && source.startsWith("discovery-coloring:arabic:")) bookReturnUrl="/books/colorie-ecris-apprends.html?guest=1";
       if(guestMode && !/^discovery-coloring:(?:hijabi:[123]|arabic:(?:29|30|31|57|58|59|solo:[123]))$/.test(source))throw new Error("Choisis une activité offerte dans la découverte.");
       const savedBookMatch = !bookColoring ? source.match(/^book-coloring:([a-z0-9-]+):page:(\d+)$/) : null;
       const savedBookTitles = {
@@ -400,7 +491,6 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
         document.querySelectorAll(".tool-label").forEach(label => {
           if (["Pression", "Stylet", "Stickers"].includes(label.textContent.trim())) label.hidden = true;
         });
-        document.getElementById("finishButton").innerHTML = "⭐<br>J’ai terminé";
       } else {
         const builtInColorings = {
 "discovery-coloring:arabic:29":"./brand/books/colorie-ecris-apprends/page-029.webp",
@@ -439,6 +529,9 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
           artworkSourceKey = sourceUrl.href;
         }
       }
+      configureBack();
+      activeTool = format === "blank" ? "marker" : "bucket";
+      syncTools();
       document.title = `${title} — Kawaii Muslim`;
       document.getElementById("coloringTitle").textContent = title;
     };
@@ -467,9 +560,19 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
       document.getElementById("loading").hidden = true;
       baseCanvas.hidden = drawCanvas.hidden = false;
       basePixels = baseCtx.getImageData(0,0,baseCanvas.width,baseCanvas.height).data;
+      snapshot.width = outlineMask.width = drawCanvas.width;
+      snapshot.height = outlineMask.height = drawCanvas.height;
+      if (format !== "blank") {
+        const mask = outlineMask.getContext("2d");
+        const pixels = mask.createImageData(drawCanvas.width, drawCanvas.height);
+        for (let i = 0; i < basePixels.length; i += 4) {
+          if ((basePixels[i] + basePixels[i + 1] + basePixels[i + 2]) / 3 < 155) pixels.data[i + 3] = 255;
+        }
+        mask.putImageData(pixels, 0, 0);
+      }
       initialized = true;
       await new Promise(resolve => requestAnimationFrame(resolve));
-      basePaperWidth = paper.getBoundingClientRect().width;
+      fitPaper();
     };
     const hexToRgb = hex => {
       const value = String(hex || "#000000").replace("#","");
@@ -620,12 +723,9 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
       paintFreehand(drawCtx,stroke);
     };
     const protectContours = (force=false) => {
-      if (!basePixels || (!force && !safeMode)) return;
-      const pixels = drawCtx.getImageData(0,0,drawCanvas.width,drawCanvas.height);
-      for (let i=0;i<pixels.data.length;i+=4) {
-        if ((basePixels[i]+basePixels[i+1]+basePixels[i+2])/3 < 155) pixels.data[i+3] = 0;
-      }
-      drawCtx.putImageData(pixels,0,0);
+      if (!basePixels || format === "blank" || (!force && !safeMode)) return;
+      drawCtx.save(); drawCtx.globalCompositeOperation = "destination-out";
+      drawCtx.drawImage(outlineMask, 0, 0); drawCtx.restore();
     };
     const redraw = () => {
       drawCtx.clearRect(0,0,drawCanvas.width,drawCanvas.height);
@@ -641,59 +741,100 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
         penPressure
       ];
     };
-    const scheduleSave = () => {
-      saveStatus.textContent = "Sauvegarde…";
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(() => saveDraft(),1100);
+    const guestKey = () => "km-guest-coloring:" + artworkSourceKey;
+    const finishedKey = id => "km-finished-coloring:" + id;
+    const recoveryKey = () => "km-coloring-recovery:" + context.user.id + ":" + childId + ":" + artworkSourceKey;
+    const readRecord = key => {
+      try { return JSON.parse(localStorage.getItem(key) || "null"); } catch { return null; }
     };
-    const saveDraft = async () => {
-      if (!childId || !initialized) return;
-      if (savePromise) return savePromise;
-      saving = true;
-      savePromise = (async () => {
-        try {
-          if (guestMode || localDesignPreview) {
-            draftId = draftId || `guest-${Date.now()}`;
-            localStorage.setItem(`km-guest-coloring:${artworkSourceKey}`,JSON.stringify({id:draftId,strokes,updatedAt:new Date().toISOString()}));
-            saveStatus.textContent = "Sauvegardé sur cet appareil";
-            return;
-          }
-          const saved = await KMAuth.saveArtworkDraft({
-            id:draftId,childId,title,sourceUrl:artworkSourceKey,
-            drawingData:{version:2,width:drawCanvas.width,height:drawCanvas.height,strokes}
-          });
-          draftId = saved.id;
-          saveStatus.textContent = "Sauvegardé automatiquement";
-        } catch (error) {
-          saveStatus.textContent = "Sauvegarde à réessayer";
-          toast(KMAuth.friendlyError(error));
-        } finally {
-          saving = false;
-          savePromise = null;
+    const record = () => ({id:draftId, childId, writeSession, strokes, title, updatedAt:new Date().toISOString()});
+    function archiveFinished(artwork) {
+      const sourceKey = guestKey(), raw = localStorage.getItem(sourceKey);
+      const active = raw && JSON.parse(raw);
+      const id = artwork.id || "legacy-" + artworkSourceKey + ":" + (artwork.updatedAt || "completed");
+      const key = finishedKey(id);
+      if (localStorage.getItem(key) === null) {
+        localStorage.setItem(key, JSON.stringify({...artwork,id,sourceUrl:artworkSourceKey,status:"completed"}));
+      }
+      // Prefer an existing gallery copy (it may already have a new title). Delete
+      // the matching draft only after ensuring that its completed copy exists.
+      if (active && active.id === artwork.id && localStorage.getItem(sourceKey) === raw) localStorage.removeItem(sourceKey);
+    }
+    function checkpoint() {
+      if (deviceOnly) {
+        if (!draftId || localStorage.getItem(finishedKey(draftId)) !== null) draftId = "guest-" + deviceDraftId();
+        localStorage.setItem(guestKey(), JSON.stringify({...record(), status:"in_progress"}));
+      } else {
+        localStorage.setItem(recoveryKey(), JSON.stringify(record()));
+      }
+    }
+    function scheduleSave() {
+      revision++;
+      try {
+        checkpoint();
+        if (deviceOnly) {
+          savedRevision = revision;
+          saveStatus.textContent = "Sauvegardé sur cet appareil";
+          return;
         }
-      })();
+      } catch { /* The remote save can still succeed when the device storage is full. */ }
+      clearTimeout(saveTimer);
+      saveStatus.textContent = "Sauvegarde…";
+      saveTimer = setTimeout(() => saveDraft().catch(() => {}), 650);
+    }
+    async function flushDraft() {
+      while (savedRevision < revision) {
+        const pending = revision;
+        if (deviceOnly) {
+          checkpoint();
+        } else {
+          const drawingData = {version:2, width:drawCanvas.width, height:drawCanvas.height, strokes:structuredClone(strokes)};
+          const saved = await KMAuth.saveArtworkDraft({id:draftId,childId,title,sourceUrl:artworkSourceKey,drawingData});
+          draftId = saved.id;
+          try {
+            if (pending !== revision) checkpoint();
+            else if (readRecord(recoveryKey())?.writeSession === writeSession) localStorage.removeItem(recoveryKey());
+          } catch {}
+        }
+        savedRevision = pending;
+      }
+      saveStatus.textContent = deviceOnly ? "Sauvegardé sur cet appareil" : "Sauvegardé dans ton atelier";
+    }
+    function saveDraft() {
+      clearTimeout(saveTimer); saveTimer = null;
+      if (savePromise) return savePromise;
+      savePromise = flushDraft().catch(error => {
+        saveStatus.textContent = "Sauvegarde à réessayer";
+        throw error;
+      }).finally(() => { savePromise = null; });
       return savePromise;
-    };
-    const loadDraft = async () => {
-      if (guestMode || localDesignPreview) {
-        try {
-          const saved = JSON.parse(localStorage.getItem(`km-guest-coloring:${artworkSourceKey}`) || "null");
-          if (saved) {
-            draftId = saved.id || draftId;
-            strokes = Array.isArray(saved.strokes) ? saved.strokes : [];
-            redraw();
-            saveStatus.textContent = "Coloriage retrouvé sur cet appareil";
-          }
-        } catch (error) {}
+    }
+    async function loadDraft() {
+      const recovery = readRecord(deviceOnly ? guestKey() : recoveryKey());
+      if (deviceOnly && recovery?.status === "completed") {
+        archiveFinished(recovery);
         return;
       }
-      const draft = await KMAuth.findArtworkDraft({childId,sourceUrl:artworkSourceKey});
-      if (!draft) return;
-      draftId = draft.id;
-      strokes = Array.isArray(draft.drawing_data?.strokes) ? draft.drawing_data.strokes : [];
+      let draft = null;
+      if (!deviceOnly) {
+        try { draft = await KMAuth.findArtworkDraft({childId,sourceUrl:artworkSourceKey}); }
+        catch (error) { if (!recovery) throw error; }
+      }
+      const useLocal = recovery && Array.isArray(recovery.strokes) && (deviceOnly || !draft ||
+        ((!recovery.id || recovery.id === draft.id) && Date.parse(recovery.updatedAt) >= Date.parse(draft.updated_at)));
+      if (useLocal) {
+        strokes = recovery.strokes;
+        draftId = deviceOnly ? recovery.id : (draft?.id || "");
+        savedRevision = deviceOnly ? revision : -1;
+      } else if (draft) {
+        draftId = draft.id;
+        strokes = Array.isArray(draft.drawing_data?.strokes) ? draft.drawing_data.strokes : [];
+        savedRevision = revision;
+      } else { return; }
       redraw();
-      saveStatus.textContent = "Coloriage retrouvé";
-    };
+      saveStatus.textContent = "Dessin retrouvé";
+      if (useLocal && !deviceOnly) saveDraft().catch(() => {});
+    }
     const mergedDataUrl = () => {
       const output = document.createElement("canvas");
       output.width = baseCanvas.width; output.height = baseCanvas.height;
@@ -728,11 +869,12 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
         }
         const child = await KMAuth.addChild({ name:childName, avatar:"🐤", ageGroup:"6-8" });
         childId = child.id;
-        childSelect.innerHTML = `<option value="${child.id}">${child.avatar} ${child.name}</option>`;
+        childSelect.replaceChildren(new Option((child.avatar || "") + " " + child.name, child.id));
         childSelect.value = child.id;
         KMAuth.setActiveProfile({type:"child",id:child.id,name:child.name,avatar:child.avatar});
       }
       if (format === "pdf") {
+        document.documentElement.classList.remove("direct-coloring");
         document.getElementById("choiceMessage").textContent = "Ce fichier PDF est prêt à imprimer. Choisis un coloriage en image pour utiliser les feutres numériques.";
         return;
       }
@@ -740,6 +882,7 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
       editorApp.hidden = false;
       await loadBase();
       await loadDraft();
+      editingReady = true;
       if (bookColoring && choice.isConnected) {
         choice.remove();
         document.documentElement.scrollTop = 0;
@@ -747,6 +890,14 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
       }
     };
 
+    function fitPaper() {
+      if (!initialized || !stage.clientWidth || !stage.clientHeight) return;
+      const style = getComputedStyle(stage);
+      const width = stage.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      const height = stage.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+      basePaperWidth = Math.min(width, height * baseCanvas.width / baseCanvas.height);
+      setZoom(zoom);
+    }
     const setZoom = value => {
       zoom = Math.max(.75,Math.min(2.5,value));
       if (basePaperWidth) paper.style.width = `${Math.round(basePaperWidth*zoom)}px`;
@@ -760,121 +911,120 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
       const radius = Math.max(35,size*3);
       return [...strokes].reverse().find(item => item.type === "sticker" && Math.hypot(item.x-point[0],item.y-point[1]) <= Math.max(radius,item.size*.6));
     };
-    drawCanvas.addEventListener("pointerdown", event => {
-      event.preventDefault();
-      drawCanvas.setPointerCapture(event.pointerId);
-      activePointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
-      if (activePointers.size === 2) {
-        pinching = true;
-        currentStroke = null;
-        movingSticker = null;
-        pinchStartDistance = pointerDistance();
-        pinchStartZoom = zoom;
-        redraw();
-        return;
+    function cancelGesture() {
+      currentStroke = null;
+      pendingTap = null;
+      if (movingSticker && stickerOrigin) {
+        movingSticker.x = stickerOrigin.x; movingSticker.y = stickerOrigin.y;
       }
-      if (pinching || activePointers.size > 1) return;
+      movingSticker = null; stickerOrigin = null; activePointer = null;
+      redraw();
+    }
+    drawCanvas.addEventListener("pointerdown", event => {
+      if (!editingReady || finishing || event.button !== 0) return;
+      event.preventDefault();
+      try { drawCanvas.setPointerCapture(event.pointerId); } catch {}
+      activePointers.set(event.pointerId, {x:event.clientX,y:event.clientY});
+      if (activePointers.size === 2) {
+        cancelGesture(); pinching = true;
+        pinchStartDistance = pointerDistance(); pinchStartZoom = zoom;
+      }
+      if (pinching || activePointers.size !== 1) return;
       const point = pointFromEvent(event);
-      redoStack = [];
+      activePointer = event.pointerId;
       if (activeTool === "bucket" && !erasing) {
-        strokes.push({type:"fill",x:point[0],y:point[1],color,pressure,safe:safeMode});
-        redraw();
-        scheduleSave();
-        toast("La zone est remplie 🪣");
+        pendingTap = {type:"fill",x:point[0],y:point[1],color,pressure,safe:safeMode};
         return;
       }
       if (activeTool === "sticker" && !erasing) {
         movingSticker = nearbySticker(point);
-        if (!movingSticker) {
-          movingSticker = {type:"sticker",emoji:activeSticker,x:point[0],y:point[1],size:Math.max(30,size*3),pressure};
-          strokes.push(movingSticker);
-        }
-        selectedSticker = movingSticker;
-        redraw();
+        if (movingSticker) stickerOrigin = {x:movingSticker.x, y:movingSticker.y};
+        else pendingTap = {type:"sticker",emoji:activeSticker,x:point[0],y:point[1],size:Math.max(30,size*3),pressure};
         return;
       }
-      currentStroke = {
-        type:"stroke",tool:erasing ? "eraser" : activeTool,color,size,pressure,
-        safe:safeMode,eraser:erasing,dynamic:event.pointerType==="pen",
-        sensitivity:stylusSensitivity,points:[point]
-      };
-      if (currentStroke.dynamic && !stylusNotified) {
-        stylusNotified = true;
-        toast("Stylet détecté : pression dynamique activée ✨");
-      }
+      currentStroke = {type:"stroke",tool:erasing ? "eraser" : activeTool,color,size,pressure,
+        safe:safeMode,eraser:erasing,dynamic:event.pointerType === "pen",sensitivity:stylusSensitivity,points:[point]};
+      const cache = snapshot.getContext("2d");
+      cache.clearRect(0,0,snapshot.width,snapshot.height); cache.drawImage(drawCanvas,0,0);
       drawStroke(currentStroke);
     });
+    let drawFrame = 0;
+    function paintGesture() {
+      drawFrame = 0;
+      if (movingSticker) { redraw(); return; }
+      if (!currentStroke) return;
+      drawCtx.clearRect(0,0,drawCanvas.width,drawCanvas.height); drawCtx.drawImage(snapshot,0,0);
+      drawStroke(currentStroke); protectContours(currentStroke.safe);
+    }
     drawCanvas.addEventListener("pointermove", event => {
-      if (activePointers.has(event.pointerId)) activePointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+      if (!activePointers.has(event.pointerId)) return;
+      activePointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
       if (pinching && activePointers.size >= 2) {
-        event.preventDefault();
-        const distance = pointerDistance();
-        if (pinchStartDistance) setZoom(pinchStartZoom*(distance/pinchStartDistance));
+        event.preventDefault(); if (pinchStartDistance) setZoom(pinchStartZoom * pointerDistance() / pinchStartDistance);
         return;
       }
-      if (movingSticker) {
-        event.preventDefault();
-        const point = pointFromEvent(event);
-        movingSticker.x = point[0]; movingSticker.y = point[1];
-        redraw();
-        return;
-      }
-      if (!currentStroke) return;
+      if (event.pointerId !== activePointer) return;
       event.preventDefault();
-      const samples = currentStroke.dynamic && typeof event.getCoalescedEvents === "function"
-        ? event.getCoalescedEvents()
-        : [event];
-      (samples.length ? samples : [event]).forEach(sample => currentStroke.points.push(pointFromEvent(sample)));
-      redraw();
-      drawStroke(currentStroke);
-      protectContours(currentStroke.safe);
-    });
-    const endStroke = event => {
-      if (event) {
-        event.preventDefault();
-        activePointers.delete(event.pointerId);
-      }
-      if (pinching) {
-        if (!activePointers.size) pinching = false;
-        return;
-      }
       if (movingSticker) {
-        movingSticker = null;
-        redraw();
-        scheduleSave();
-        return;
-      }
-      if (!currentStroke) return;
-      strokes.push(currentStroke);
-      currentStroke = null;
-      redraw();
-      scheduleSave();
-    };
+        const point = pointFromEvent(event); movingSticker.x=point[0]; movingSticker.y=point[1];
+      } else if (pendingTap?.type === "sticker") {
+        const point = pointFromEvent(event); pendingTap.x=point[0]; pendingTap.y=point[1]; return;
+      } else if (currentStroke) {
+        const samples = event.getCoalescedEvents?.() || [];
+        for (const sample of (samples.length ? samples : [event])) currentStroke.points.push(pointFromEvent(sample));
+      } else return;
+      if (!drawFrame) drawFrame = requestAnimationFrame(paintGesture);
+    });
+    function endStroke(event) {
+      if (!activePointers.delete(event.pointerId)) return;
+      if (pinching) { if (!activePointers.size) pinching=false; return; }
+      if (event.pointerId !== activePointer) return;
+      cancelAnimationFrame(drawFrame); drawFrame=0;
+      if (event.type !== "pointerup") { cancelGesture(); return; }
+      const action = pendingTap || currentStroke;
+      if (action) {
+        if (currentStroke && currentStroke.points.length > 1) currentStroke.points.push(pointFromEvent(event));
+        strokes.push(action);
+        if (action.type === "sticker") selectedSticker = action;
+      } else if (movingSticker) selectedSticker = movingSticker;
+      else return;
+      pendingTap=null; currentStroke=null; movingSticker=null; stickerOrigin=null; activePointer=null;
+      redoStack=[]; redraw(); scheduleSave();
+    }
     drawCanvas.addEventListener("pointerup",endStroke);
     drawCanvas.addEventListener("pointercancel",endStroke);
-    document.getElementById("palette").addEventListener("click",event => {
+    drawCanvas.addEventListener("lostpointercapture",endStroke);
+    editorApp.addEventListener("click",event => {
       const button = event.target.closest("[data-color]");
       if (!button) return;
       color = button.dataset.color; erasing = false;
-      document.querySelectorAll("[data-color]").forEach(item => item.classList.toggle("active",item===button));
+      syncTools();
       document.getElementById("eraserButton").classList.remove("active");
     });
     document.getElementById("customColor").addEventListener("input",event => {
       color = event.target.value;
       erasing = false;
-      document.querySelectorAll("[data-color]").forEach(item => item.classList.remove("active"));
+      syncTools();
       document.getElementById("eraserButton").classList.remove("active");
     });
-    document.getElementById("toolTypes").addEventListener("click",event => {
+    editorApp.addEventListener("click",event => {
       const button = event.target.closest("[data-tool]");
       if (!button) return;
       activeTool = button.dataset.tool;
       erasing = false;
-      document.querySelectorAll("[data-tool]").forEach(item => item.classList.toggle("active",item===button));
+      syncTools();
       document.getElementById("eraserButton").classList.remove("active");
       if (activeTool === "bucket") toast("Touche une zone à remplir 🪣");
       if (activeTool === "sticker") toast("Touche le dessin pour placer ton sticker 🌟");
     });
+    function syncTools() {
+      for (const button of editorApp.querySelectorAll("[data-tool],[data-color],#eraserButton")) {
+        const active = button.dataset.tool ? !erasing && button.dataset.tool === activeTool :
+          button.dataset.color ? button.dataset.color.toLowerCase() === color.toLowerCase() : erasing;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      }
+    }
     document.getElementById("stickers").addEventListener("click",event => {
       const button = event.target.closest("[data-sticker]");
       if (!button) return;
@@ -887,7 +1037,7 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
         scheduleSave();
       }
       document.querySelectorAll("[data-sticker]").forEach(item => item.classList.toggle("active",item===button));
-      document.querySelectorAll("[data-tool]").forEach(item => item.classList.toggle("active",item.dataset.tool==="sticker"));
+      syncTools();
       document.getElementById("eraserButton").classList.remove("active");
     });
     document.querySelector(".sizes").addEventListener("click",event => {
@@ -920,7 +1070,7 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
       toast(safeMode ? "Les contours noirs sont protégés" : "Coloriage libre activé");
     });
     document.getElementById("eraserButton").addEventListener("click",event => {
-      erasing = !erasing; event.currentTarget.classList.toggle("active",erasing);
+      erasing = !erasing; syncTools();
     });
     document.getElementById("undoButton").addEventListener("click",() => {
       const stroke = strokes.pop(); if (!stroke) return;
@@ -938,11 +1088,8 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
     });
     document.getElementById("zoomIn").addEventListener("click",() => setZoom(zoom+.2));
     document.getElementById("zoomOut").addEventListener("click",() => setZoom(zoom-.2));
-    window.addEventListener("resize",() => {
-      if (!initialized) return;
-      basePaperWidth = Math.min(820,Math.max(280,stage.clientWidth-24));
-      setZoom(zoom);
-    });
+    window.addEventListener("resize",fitPaper);
+    if (window.ResizeObserver) new ResizeObserver(fitPaper).observe(stage);
     document.getElementById("clearButton").addEventListener("click",() => {
       if (!strokes.length || !confirm("Effacer tous les feutres et recommencer ?")) return;
       redoStack = [...strokes].reverse(); strokes=[]; redraw(); scheduleSave();
@@ -977,66 +1124,68 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
       choice.hidden = false;
       document.getElementById("choiceMessage").textContent=KMAuth.friendlyError(error);
     }));
-    document.getElementById("finishButton").addEventListener("click",() => {
-      document.getElementById("memoryTitle").value = title;
-      document.getElementById("finishModal").hidden = false;
-    });
-    document.getElementById("cancelFinish").addEventListener("click",() => {
-      document.getElementById("finishModal").hidden = true;
-    });
-    document.getElementById("confirmFinish").addEventListener("click",async event => {
+    function guestThumbnail() {
+      const thumb = document.createElement("canvas");
+      const scale = Math.min(1, 420 / Math.max(drawCanvas.width, drawCanvas.height));
+      thumb.width = Math.round(drawCanvas.width * scale); thumb.height = Math.round(drawCanvas.height * scale);
+      const ctx = thumb.getContext("2d");
+      for (const canvas of [baseCanvas,drawCanvas]) ctx.drawImage(canvas,0,0,thumb.width,thumb.height);
+      return thumb.toDataURL("image/jpeg", .82);
+    }
+    document.getElementById("finishButton").addEventListener("click", async event => {
+      if (!editingReady || finishing) return;
+      finishing = true;
       const button = event.currentTarget;
+      button.disabled = true; button.setAttribute("aria-busy","true");
+      editorApp.inert = true;
       try {
-        button.disabled = true;
-        button.textContent = "⭐ Enregistrement…";
         await saveDraft();
-        if (guestMode || localDesignPreview) {
-          document.getElementById("celebrationMessage").textContent = "Bravo ! Ton coloriage découverte est gardé sur cet appareil.";
-          document.getElementById("finishModal").hidden = true;
-          document.getElementById("celebration").hidden = false;
-          setTimeout(() => { window.location.href = bookReturnUrl || "Aujourd%27hui.dc.html?guest=1"; },1800);
-          return;
+        const target = new URL("Atelier.dc.html", location.href);
+        if (!guestMode) {
+          target.searchParams.set("child", childId);
+          try { sessionStorage.setItem("km-atelier-return-child",childId); } catch {}
         }
-        const blob = await mergedBlob();
-        const child = context.children.find(item => item.id === childId);
-        const memory = {
-          title:document.getElementById("memoryTitle").value.trim() || title,
-          phrase:document.getElementById("memoryPhrase").value.trim(),
-          childName:child?.name || "",
-          date:new Date().toISOString()
-        };
-        await KMAuth.completeArtwork({
-          id:draftId,childId,imageBlob:blob,
-          drawingData:{version:2,width:drawCanvas.width,height:drawCanvas.height,strokes,memory}
-        });
-        const starReward = await KMAuth.awardChildStars({
-          childId,
-          eventType:"activity_complete",
-          sourceKey:bookColoring ? artworkSourceKey : `coloring:${draftId}`,
-          description:`Coloriage terminé : ${memory.title}`
-        }).catch(() => ({ awarded:0 }));
-        document.getElementById("celebrationMessage").textContent = starReward.awarded
-          ? `Coloriage terminé : +${starReward.awarded} étoile ⭐`
-          : "Ta création est maintenant dans ta galerie.";
-        document.getElementById("finishModal").hidden = true;
-        document.getElementById("celebration").hidden = false;
-        setTimeout(() => {
-          window.location.href = bookColoring
-            ? bookReturnUrl
-            : `Atelier.dc.html?child=${encodeURIComponent(childId)}&celebrated=1`;
-        },2200);
+        if (localDesignPreview) target.searchParams.set("preview","1");
+        if (deviceOnly) {
+          archiveFinished({...record(),imageUrl:guestThumbnail()});
+          if (guestMode) target.searchParams.set("guest","1");
+        } else {
+          const memory = {title, childName:context.children.find(c=>c.id===childId)?.name || "",date:new Date().toISOString()};
+          await KMAuth.completeArtwork({id:draftId,childId,imageBlob:await mergedBlob(),
+            drawingData:{version:2,width:drawCanvas.width,height:drawCanvas.height,strokes,memory}});
+          await KMAuth.awardChildStars({childId,eventType:"activity_complete",sourceKey:bookColoring ? artworkSourceKey : "coloring:"+draftId,
+            description:"Coloriage terminé : "+title}).catch(() => {});
+        }
+        target.searchParams.set("celebrated","1"); target.hash="galerie";
+        location.assign(target.href);
       } catch (error) {
-        toast(KMAuth.friendlyError(error));
-        button.disabled=false;
-        button.textContent="⭐ Terminer";
+        finishing=false; editorApp.inert=false; button.disabled=false; button.removeAttribute("aria-busy");
+        saveStatus.textContent="Enregistrement à réessayer"; toast(KMAuth.friendlyError(error));
       }
     });
-    window.addEventListener("beforeunload",() => { if (saveTimer) saveDraft(); });
+    function flushOnLeave() {
+      if (!finishing && editingReady && revision > 0 && revision > savedRevision) saveDraft().catch(() => {});
+    }
+    document.getElementById("backAction").addEventListener("click",async event => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const back=event.currentTarget, url=new URL(back.href);
+      if (url.pathname.includes("Atelier") && !guestMode && childId) {
+        url.searchParams.set("child",childId);
+        try {sessionStorage.setItem("km-atelier-return-child",childId);} catch {}
+        back.href=url.href;
+      }
+      if (!editingReady || revision === 0 || savedRevision >= revision) return;
+      event.preventDefault();
+      try { await saveDraft(); location.assign(url.href); }
+      catch (error) { toast(KMAuth.friendlyError(error)); }
+    });
+    window.addEventListener("pagehide",flushOnLeave);
+    document.addEventListener("visibilitychange",()=>{if(document.hidden)flushOnLeave();});
 
     try {
       validateSource();
       context = guestMode || localDesignPreview
-        ? {profile:{role:"guest"},children:[{id:"guest-child",name:"Découverte",avatar:"🎨"}]}
+        ? {profile:{role:"guest"},children:[{id:guestMode?"guest-child":"preview-child",name:"Découverte",avatar:"🎨"}]}
         : await KMAuth.getContext();
       if (!context) {
         window.location.replace(`Connexion.dc.html?next=${encodeURIComponent(location.pathname+location.search)}`);
@@ -1044,16 +1193,18 @@ html.embedded-coloring-demo .top-actions .action{min-height:36px;padding:7px 9px
         const active = guestMode || localDesignPreview
           ? {type:"child",id:requestedChild || "guest-child",name:"Découverte",avatar:"🎨"}
           : KMAuth.getActiveProfile();
-        childSelect.innerHTML = context.children.map(child => `<option value="${child.id}">${child.avatar} ${child.name}</option>`).join("");
-        if (requestedChild && context.children.some(child => child.id === requestedChild)) childSelect.value = requestedChild;
-        else if (active.type === "child" && context.children.some(child => child.id === active.id)) childSelect.value = active.id;
+        const activeChild = active.type === "child" ? context.children.find(child => child.id === active.id) : null;
+        const children = activeChild ? [activeChild] : context.children;
+        childSelect.replaceChildren(...children.map(child => new Option((child.avatar || "") + " " + child.name, child.id)));
+        if (activeChild) childSelect.value = activeChild.id;
+        else if (children.some(child => child.id === requestedChild)) childSelect.value = requestedChild;
         if (!context.children.length) {
           document.documentElement.classList.remove("direct-coloring");
           childSelect.hidden = true;
           document.getElementById("quickChild").hidden = false;
           document.getElementById("choiceMessage").textContent = "Une seule fois : indique son prénom pour créer sa galerie privée.";
         }
-        if ((source.startsWith("discovery-coloring:") || requestedDraft || bookColoring || source.startsWith("builtin-drawing:blank") || params.get("embed") === "1") && childSelect.value) await startEditor();
+        if ((params.get("atelier") === "1" || source.startsWith("discovery-coloring:") || requestedDraft || bookColoring || source.startsWith("builtin-drawing:blank") || params.get("embed") === "1") && childSelect.value) await startEditor();
       }
     } catch (error) {
       if (error?.message !== "book_redirect") {

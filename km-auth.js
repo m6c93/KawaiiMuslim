@@ -456,6 +456,27 @@ window.KMAuth = (() => {
         .single());
     },
 
+    renameCompletedArtwork: async ({ item, childId, title }) => {
+      const { session } = await validateArtworkChild(childId);
+      const name = String(title || "").trim();
+      if (!name || name.length > 160) throw new Error("Choisis un titre de 1 à 160 caractères.");
+      const changes = { title:name };
+      if (item.drawing_data?.memory) {
+        changes.drawing_data = { ...item.drawing_data, memory:{ ...item.drawing_data.memory, title:name } };
+      }
+      const updated = requireSuccess(await client().from("child_artworks")
+        .update(changes)
+        .eq("id", item.id)
+        .eq("owner_id", session.user.id)
+        .eq("child_profile_id", childId)
+        .eq("kind", "digital")
+        .eq("status", "completed")
+        .eq("updated_at", item.updated_at)
+        .select("id")
+        .maybeSingle());
+      if (!updated) throw new Error("Ce dessin a changé. Vérifie le titre, puis réessaie.");
+    },
+
     uploadPaperArtwork: async ({ childId, title, file }) => {
       const { session } = await validateArtworkChild(childId);
       if (!file || !String(file.type).startsWith("image/")) {
