@@ -28,3 +28,6 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+# Generated from the original book illustrations at build time.
+/shared-book-assets/

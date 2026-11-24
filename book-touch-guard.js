@@ -24,19 +24,6 @@
   }, { capture: true, passive: true });
 })();
 
-/* Only these two readers share the curved-paper renderer. */
-(function () {
-  'use strict';
-  if (!/\/books\/invocations-(?:aya-ali|decouverte)(?:\.html)?$/.test(location.pathname)) return;
-  function loadPaperTurn() {
-    const script = document.createElement('script');
-    script.src = '/invocation-page-turn.js?v=uniform-paper-4';
-    document.head.appendChild(script);
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadPaperTurn, { once: true });
-  else loadPaperTurn();
-})();
-
 (function () {
   "use strict";
 
@@ -47,10 +34,10 @@
   document.head.appendChild(script);
 })();
 
-/* Give invocation books the entire viewport, including inside the library. */
+/* Give illustrated books the entire viewport, including inside the library. */
 (() => {
   'use strict';
-  if (!/\/books\/invocations-(?:aya-ali|decouverte)(?:\.html)?$/.test(location.pathname)) return;
+  if (!document.documentElement.hasAttribute('data-picture-reader')) return;
   function mount() {
     if (window.KM_BOOK_EMBED || document.documentElement.classList.contains('km-reader-clean')) return;
     const root=document.documentElement, book=document.getElementById('book'), toolbar=document.querySelector('.topbar');
@@ -120,7 +107,10 @@
     const full=document.getElementById('fullscreenBtn');
     const end=document.getElementById('previewEnd');
     let unlock=null;
-    if(end?.querySelector('a')){unlock=end.querySelector('a').cloneNode(true);unlock.className='reader-unlock';unlock.textContent='🔒 La suite';unlock.hidden=true;toolbar.append(unlock);}
+    if(end?.querySelector('a')){unlock=end.querySelector('a').cloneNode(true);unlock.className='reader-unlock';unlock.textContent='🔒 La suite';unlock.hidden=true;toolbar.append(unlock);
+      if(end.hasAttribute('data-discovery')) unlock.addEventListener('click',event=>{
+        if(window.KMDiscovery){event.preventDefault();window.KMDiscovery.openUnlock();}
+      });}
     const label=document.getElementById('pageLabel'),total=document.getElementById('totalLabel');
     const sync=()=>{counter.textContent=(label?.textContent||'Couverture').replace('Pages ','').replace('Page ','')+' / '+(total?.textContent||'').replace(' pages','');if(unlock)unlock.hidden=end.hidden;book.classList.toggle('is-open',document.getElementById('coverStage')?.hidden===true);};
     new MutationObserver(sync).observe(document.querySelector('.reader'),{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['hidden']});sync();
@@ -146,13 +136,14 @@
       rotate.textContent=turned?'↶ Portrait':'↻ Paysage';
       rotate.setAttribute('aria-label',turned?'Revenir en portrait':'Faire pivoter le livre en paysage');
       rotate.setAttribute('aria-pressed',String(turned));
-      full.hidden=width<600;
+      full.hidden=width<600 || !(document.fullscreenEnabled || root.webkitRequestFullscreen);
       // Offset sizes stay in reader coordinates when the body is rotated.
       // Equal landscape margins keep the book centred on the screen,
       // while the left margin holds the controls clear of the pages.
+      const rightInset=parseFloat(getComputedStyle(document.querySelector('.book-shell'),'::before').paddingRight)||0;
       const edge=Math.max(sideControls?6:12,parseFloat(getComputedStyle(toolbar)[sideControls?'left':'bottom'])||0);
       const reserve=mobileControls?(sideControls?toolbar.offsetWidth:toolbar.offsetHeight)+edge+(sideControls?6:20):0;
-      const pageWidth=Math.min(Math.max(80,width-(sideControls?2*reserve:0)),Math.max(80,height-(sideControls?0:reserve))*2);
+      const pageWidth=Math.min(Math.max(80,width-(sideControls?2*Math.max(reserve,rightInset):0)),Math.max(80,height-(sideControls?0:reserve))*2);
       root.style.setProperty('--km-controls-reserve',reserve+'px');
       root.style.setProperty('--km-page-width',pageWidth+'px');root.style.setProperty('--km-page-height',pageWidth/2+'px');
     }
@@ -190,7 +181,7 @@
     function show(){root.classList.remove('reader-controls-hidden');clearTimeout(timer);timer=setTimeout(()=>{if(!toolbar.querySelector(':focus-visible')&&document.getElementById('drawer')?.getAttribute('aria-hidden')!=='false')root.classList.add('reader-controls-hidden');},2800);}
     document.addEventListener('pointermove',show,{passive:true});document.addEventListener('pointerdown',show,{passive:true});document.addEventListener('focusin',show);document.addEventListener('keydown',show);
     // If native fullscreen is unavailable (e.g. iPhone), the reader still fills its window.
-    async function toggleFullscreen(event){event.preventDefault();event.stopImmediatePropagation();try{if(document.fullscreenElement)await document.exitFullscreen();else if(root.requestFullscreen)await root.requestFullscreen();else root.classList.toggle('reader-focus-mode');}catch{root.classList.toggle('reader-focus-mode');}fit();show();syncFullscreen();}
+    async function toggleFullscreen(event){event.preventDefault();event.stopImmediatePropagation();try{if(document.fullscreenElement)await document.exitFullscreen();else if(root.requestFullscreen)await root.requestFullscreen();else if(root.webkitRequestFullscreen)await root.webkitRequestFullscreen();else root.classList.toggle('reader-focus-mode');}catch{root.classList.toggle('reader-focus-mode');}fit();show();syncFullscreen();}
     function syncFullscreen(){const active=!!document.fullscreenElement||root.classList.contains('reader-focus-mode');full.setAttribute('aria-label',active?'Quitter le plein écran':'Plein écran');full.title=active?'Quitter le plein écran':'Plein écran';full.setAttribute('aria-pressed',String(active));}
     full.addEventListener('click',toggleFullscreen,true);
     document.addEventListener('fullscreenchange',()=>{fit();syncFullscreen();show();});window.addEventListener('resize',queueFit);window.visualViewport?.addEventListener('resize',queueFit);
@@ -230,5 +221,6 @@
     window.addEventListener('pagehide',dismissLandscapeTip);
 
   }
+  document.addEventListener('km-reader-ready',mount);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();

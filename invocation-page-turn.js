@@ -1,4 +1,4 @@
-/* Shared paper animation for the full and discovery Aya & Ali invocation books. */
+/* Paper geometry and page-turn playback shared by illustrated and PDF books. */
 (function () {
   'use strict';
 
@@ -93,7 +93,7 @@
     let width, height, padding, ratio;
     return {
       canvas,
-      prepare(front, back, pageWidth, pageHeight, frontIsCover = false, backIsCover = false) {
+      prepare(front, back, pageWidth, pageHeight, frontIsCover = false, backIsCover = false, trimPages = true, wrapCover = false) {
         width = pageWidth; height = pageHeight; padding = Math.ceil(height * .22);
         ratio = Math.min(devicePixelRatio || 1, 2);
         const cw = width * 2 + padding * 2, ch = height + padding * 2;
@@ -105,7 +105,11 @@
           const context = face.getContext('2d');
           context.fillStyle = '#fffdf9'; context.fillRect(0, 0, face.width, face.height);
           if (image) {
-            if (i === 0 ? frontIsCover : backIsCover) {
+            const cover = i === 0 ? frontIsCover : backIsCover;
+            if (cover && wrapCover) {
+              const width = image.naturalWidth / 2;
+              context.drawImage(image, width, 0, width, image.naturalHeight, 0, 0, face.width, face.height);
+            } else if (cover || !trimPages) {
               const fit = Math.min(face.width / image.naturalWidth, face.height / image.naturalHeight);
               const w = image.naturalWidth * fit, h = image.naturalHeight * fit;
               context.drawImage(image, (face.width - w) / 2, (face.height - h) / 2, w, h);
@@ -142,14 +146,13 @@
   }
   if (typeof document === 'undefined') return;
 
-  function mount() {
-    if (!/\/books\/invocations-(?:aya-ali|decouverte)(?:\.html)?$/.test(location.pathname)) return;
-    // These bindings belong to the existing reader. Its access gate, page
-    // numbering, progress persistence, zoom, touch and controls stay in charge.
-    if (typeof go !== 'function' || typeof els === 'undefined' || els.book.dataset.paperTurn) return;
+  function attach(reader) {
+    const {els, pagesFor, maxPosition, pageSrc, render, pageSound} = reader;
+    const paintSide = reader.paintSide || ((side, page) => reader.setEmbedPage(els[side], page));
     const book = els.book, reducedMotion = matchMedia('(prefers-reduced-motion:reduce)');
     book.dataset.paperTurn = 'continuous-v3-trimmed';
     book.classList.add('km-natural-book');
+    if (reader.trimPages) book.classList.add('km-print-trim');
     const style = document.createElement('style');
     style.textContent = `
       html.km-reader-clean,html.km-reader-clean body{background:#b8cec5!important}
@@ -160,8 +163,8 @@
       .book.km-natural-book{filter:none!important;transform-style:flat;perspective:none!important;isolation:isolate}
       .km-natural-book .spread{box-shadow:0 16px 34px #19382f45,0 2px 5px #19382f38;outline:1px solid #49645840;border-radius:8px}
       .km-natural-book .cover-stage{box-shadow:0 16px 34px #19382f50,0 2px 5px #19382f38;outline:1px solid #49645840}
-      .km-natural-book .paper img{user-select:none;-webkit-user-drag:none;object-fit:cover;transform:scale(${1 / (1 - PAGE_TRIM * 2)});transform-origin:center}
-      #zoomPages img,.thumb img{clip-path:inset(${PAGE_TRIM * 100}%)}
+      .km-natural-book .paper img{user-select:none;-webkit-user-drag:none}.km-print-trim .paper img{object-fit:cover;transform:scale(${1 / (1 - PAGE_TRIM * 2)});transform-origin:center}
+      html:has(.km-print-trim) #zoomPages img,html:has(.km-print-trim) .thumb img{clip-path:inset(${PAGE_TRIM * 100}%)}
       .km-natural-book .binding{width:28px;background:linear-gradient(90deg,transparent,#271e1014 35%,#271e1038 49%,#fff9e84d 53%,#271e100a 68%,transparent)}
       .km-natural-book .km-paper-leaf{position:absolute;display:block;z-index:40;pointer-events:none;opacity:1;mix-blend-mode:normal}
       .km-paper-cast{position:absolute;top:1%;height:98%;width:50%;z-index:25;pointer-events:none;background:radial-gradient(ellipse at center,#21170945,transparent 73%);filter:blur(11px);opacity:0;will-change:opacity,transform}
@@ -185,6 +188,7 @@
       return promise;
     }
     function coverSource() {
+      if (reader.coverSource) return reader.coverSource();
       const image = els.cover.querySelector('img');
       if (image) return image.currentSrc || image.src;
       const background = getComputedStyle(els.cover.querySelector('.cover-image')).backgroundImage;
@@ -206,11 +210,12 @@
     document.addEventListener('visibilitychange', () => { if (document.hidden) finishActive?.(); });
     reducedMotion.addEventListener?.('change', () => { if (reducedMotion.matches) finishActive?.(); });
 
-    go = async function turnInvocationPage(next) {
+    async function turn(next) {
+      const position = reader.position;
       const target = Math.max(0, Math.min(maxPosition(), next));
-      if (target === position || turning) return;
-      if (reducedMotion.matches || isBookSinglePage()) { position = target; render(); return; }
-      turning = true;
+      if (target === position || finishActive) return;
+      if (reducedMotion.matches) { reader.position = target; render(); return; }
+      if (reader.setBusy) reader.setBusy(true);
       book.setAttribute('aria-busy', 'true');
       const origin = position, opening = origin === 0, closing = target === 0;
       const forward = target > origin;
@@ -224,32 +229,35 @@
       const done = () => {
         if (finished) return;
         finished = true; cancelAnimationFrame(frame); clearTimeout(timer);
-        position = target;
+        reader.position = target;
         book.style.transform = saved.transform; book.style.perspective = saved.perspective;
         els.leftPaper.style.opacity = saved.leftOpacity;
         render(); leaf?.remove(); cast?.remove();
-        book.removeAttribute('aria-busy'); turning = false; finishActive = null;
+        book.removeAttribute('aria-busy'); if (reader.setBusy) reader.setBusy(false); finishActive = null;
       };
       finishActive = done;
+      timer = setTimeout(done, 3000);
       try {
-        const [front, back] = await Promise.all([imageFor(frontSource), imageFor(backSource), imageFor(underSource)]);
+        const resolveImage = async source => imageFor(await source);
+        const [front, back] = await Promise.all([resolveImage(frontSource), resolveImage(backSource), resolveImage(underSource)]);
         if (finished) return;
         // clientWidth/clientHeight remain in book coordinates when the phone's
         // portrait-only host rotates the whole reader into landscape.
         const width = book.clientWidth / 2, height = book.clientHeight;
+        if (!width || !height) { done(); return; }
         paperRenderer ||= createPaperRenderer();
-        paperRenderer.prepare(front, back, width, height, opening, closing);
+        paperRenderer.prepare(front, back, width, height, opening, closing, reader.trimPages, reader.wrapCover);
         paperRenderer.draw(0, forward, opening || closing);
         leaf = paperRenderer.canvas;
         cast = document.createElement('div'); cast.className = 'km-paper-cast'; cast.setAttribute('aria-hidden', 'true');
         book.append(cast, leaf);
         if (opening) {
           els.cover.hidden = true; els.spread.hidden = false; els.leftPaper.style.opacity = '0';
-          setEmbedPage(els.right, targetRight);
+          paintSide('right', targetRight);
         } else if (closing) {
           els.leftPaper.style.opacity = '0';
         } else {
-          setEmbedPage(forward ? els.right : els.left, forward ? targetRight : targetLeft);
+          paintSide(forward ? 'right' : 'left', forward ? targetRight : targetLeft);
         }
         pageSound();
         const duration = opening || closing ? 1050 : 900;
@@ -267,13 +275,25 @@
           if (elapsed < 1) frame = requestAnimationFrame(draw); else done();
         }
         frame = requestAnimationFrame(draw);
-        timer = setTimeout(done, duration + 350);
+        clearTimeout(timer); timer = setTimeout(done, duration + 350);
       } catch (_) {
         // Reading remains usable if a canvas or an image cannot be prepared.
         done();
       }
-    };
+    }
+    return { turn, finish: () => finishActive?.() };
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, { once: true });
+  window.KMPicturePaper = { attach };
+  // Previously opened editions may still carry their original inline controller.
+  function mount() {
+    if (typeof go !== 'function' || typeof els === 'undefined' || els.book.dataset.paperTurn) return;
+    const controller = attach({
+      els, maxPosition, pagesFor, pageSrc, render, pageSound, setEmbedPage, trimPages:true,
+      get position() { return position; }, set position(value) { position = value; },
+      setBusy(value) { turning = value; }
+    });
+    go = controller.turn;
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, { once:true });
   else mount();
 })();

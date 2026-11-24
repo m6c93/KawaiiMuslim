@@ -1,4 +1,5 @@
 {
+  "buildCommand": "node scripts/prepare-book-art.mjs",
   "rewrites": [
     {
       "source": "/api/aya/:path*",
