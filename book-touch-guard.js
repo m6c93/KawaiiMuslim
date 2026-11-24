@@ -34,193 +34,173 @@
   document.head.appendChild(script);
 })();
 
-/* Give illustrated books the entire viewport, including inside the library. */
+/* Shared controls for the library, its book frames and the PDF reader. */
 (() => {
   'use strict';
-  if (!document.documentElement.hasAttribute('data-picture-reader')) return;
+  const root = document.documentElement;
+  if (!root.hasAttribute('data-picture-reader')) return;
+  let libraryFrame = false;
+  try { libraryFrame = window.frameElement?.id === 'bookFrame'; } catch {}
+  if (window.KM_BOOK_EMBED && !libraryFrame) return;
+
+  const styles = document.createElement('link');
+  styles.rel = 'stylesheet';
+  styles.href = '/books/reader-controls.css?v=reader-navigation-3';
+  document.head.append(styles);
+
   function mount() {
-    if (window.KM_BOOK_EMBED || document.documentElement.classList.contains('km-reader-clean')) return;
-    const root=document.documentElement, book=document.getElementById('book'), toolbar=document.querySelector('.topbar');
-    if (!book || !toolbar) return;
+    const byId = id => document.getElementById(id);
+    const book = byId('book'), toolbar = document.querySelector('.topbar');
+    if (!book || !toolbar || root.classList.contains('km-reader-clean')) return;
+    root.classList.remove('embed-book');
     root.classList.add('km-reader-clean');
-    const style=document.createElement('style');
-    style.textContent=`
-    html.km-reader-clean,html.km-reader-clean body{margin:0!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#b8cec5!important}
-    .km-reader-clean .reader{position:fixed!important;inset:0!important;width:100%!important;height:100dvh!important;padding:0!important;display:grid!important;place-items:center!important}
-    .km-reader-clean .book-shell{width:100%!important;height:100%!important;min-height:0!important;display:grid!important;place-items:center!important;padding:0!important;gap:0!important}
-    .km-reader-clean .book{width:var(--km-page-width)!important;height:var(--km-page-height)!important;max-width:none!important;max-height:none!important;aspect-ratio:2/1!important;filter:none!important}
-    .km-reader-clean .progress-wrap,.km-reader-clean .hint,.km-reader-clean .mobile-page-controls,.km-reader-clean .rotate-notice,.km-reader-clean .preview-end,.km-reader-clean .sky{display:none!important}
-    .km-reader-clean .topbar{position:fixed!important;inset:auto auto max(8px,env(safe-area-inset-bottom)) 50%!important;transform:translateX(-50%);z-index:80!important;width:max-content!important;max-width:calc(100vw - 16px)!important;height:48px!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:6px!important;padding:4px 6px!important;border:1px solid #ffffff30!important;border-radius:16px;background:#17382de8!important;backdrop-filter:blur(12px)!important;box-shadow:0 3px 12px #0002;pointer-events:auto!important;transition:opacity .18s}
-    .km-reader-clean .title,.km-reader-clean #soundBtn,.km-reader-clean #zoomBtn{display:none!important}
-    .km-reader-clean .actions{display:contents!important}
-    .km-reader-clean .home,.km-reader-clean .icon{width:40px!important;height:40px!important;min-width:40px!important;flex:0 0 40px!important;order:0!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important;font-size:23px!important}
-    .km-reader-clean .home:focus-visible,.km-reader-clean .icon:focus-visible{outline:2px solid #ffd86c;outline-offset:-2px}
-    .km-reader-clean .nav{display:grid!important;place-items:center;position:fixed!important;top:50%!important;transform:translateY(-50%)!important;z-index:70!important;width:40px!important;height:52px!important;min-width:40px!important;border-radius:13px!important;font-size:30px!important;background:#17382dbb!important;box-shadow:none!important;transition:opacity .18s}
-    .km-reader-clean #prevBtn{left:max(5px,env(safe-area-inset-left))!important;right:auto!important}
-    .km-reader-clean #nextBtn{right:max(5px,env(safe-area-inset-right))!important;left:auto!important}
-    .km-reader-clean .nav:disabled{visibility:hidden!important}
-    .km-reader-clean .reader-page-count{font-size:11px;white-space:nowrap;min-width:50px;text-align:center;color:#fff6e6}
-    .km-reader-clean .reader-unlock{padding:9px 11px;color:#fff;background:#ac517a;border-radius:12px;text-decoration:none;font-size:12px;font-weight:800;white-space:nowrap}
-    .km-reader-clean.reader-controls-hidden .topbar,.km-reader-clean.reader-controls-hidden .nav{opacity:0!important;pointer-events:none!important}
-    .km-reader-clean .drawer{z-index:100!important}.km-reader-clean .scrim{z-index:99!important}
-    .km-reader-clean .book:not(.is-open) .cover-stage{inset:0 25%!important;width:50%!important}
-    @media(prefers-reduced-motion:reduce){.km-reader-clean .topbar,.km-reader-clean .nav{transition:none!important}}
 
-    /* A passive tip: no backdrop, focus trap, or overlay intercepting the book. */
-    .km-landscape-tip{position:fixed;z-index:85;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);box-sizing:border-box;width:max-content;max-width:calc(100vw - 24px);display:flex;align-items:center;gap:8px;padding:6px 6px 6px 14px;border:1px solid #d9e4d8;border-radius:16px;background:#fffaf3ed;color:#28483d;font:13px/1.4 "Trebuchet MS",system-ui,sans-serif;box-shadow:0 3px 12px #17382d12;pointer-events:none}
-    .km-landscape-tip button{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;padding:0;border:0;border-radius:12px;background:transparent;color:inherit;font:24px system-ui,sans-serif;pointer-events:auto;cursor:pointer}
-    .km-landscape-tip button:focus-visible{outline:2px solid #a95579;outline-offset:-3px}
-
-    /* The reader can turn inside a portrait-only host without locking the device. */
-    .km-reader-clean .reader{width:var(--km-reader-width)!important;height:var(--km-reader-height)!important}
-    .km-reader-clean.km-reader-turned body{position:fixed!important;inset:50% auto auto 50%!important;width:var(--km-reader-width)!important;height:var(--km-reader-height)!important;transform:translate(-50%,-50%) rotate(90deg);transform-origin:center}
-    .km-reader-clean .reader-rotate{flex:0 0 auto;min-width:72px;min-height:40px;padding:0 8px;border:0;border-radius:11px;background:#fffaf3;color:#244b3d;font:800 11px system-ui,sans-serif;cursor:pointer;white-space:nowrap}
-    .km-reader-clean .reader-rotate:focus-visible{outline:2px solid #ffd86c;outline-offset:2px}
-    .km-reader-clean .topbar{max-width:calc(var(--km-reader-width) - 16px)!important;gap:4px!important}
-    .km-reader-clean .reader-page-count{min-width:40px}
-    .km-reader-clean .reader-unlock{padding:9px 8px}
-    .km-reader-clean.km-reader-portrait.reader-controls-hidden .topbar,.km-reader-clean.km-reader-portrait.reader-controls-hidden .nav{opacity:1!important;pointer-events:auto!important}
-    .km-reader-clean.km-reader-turned .drawer{width:min(520px,94%)}
-    .km-reader-clean.km-reader-turned #zoomDialog{position:fixed;inset:50% auto auto 50%;margin:0;box-sizing:border-box;width:calc(var(--km-reader-width) - 24px);height:calc(var(--km-reader-height) - 24px);max-width:none;max-height:none;transform:translate(-50%,-50%) rotate(90deg)}
-    .km-reader-clean.km-reader-turned #zoomPages img{width:100%;max-width:100%}
-
-    /* Reserve a real control area on phones instead of placing controls over
-       the pages. A wrapped toolbar also fits small screens and the last page. */
-    .km-reader-clean.km-reader-mobile .reader{box-sizing:border-box!important;padding:0 0 var(--km-controls-reserve,90px)!important}
-    .km-reader-clean.km-reader-mobile .topbar{bottom:max(12px,env(safe-area-inset-bottom))!important;box-sizing:border-box!important;height:auto!important;min-height:66px!important;max-width:calc(var(--km-reader-width) - 24px)!important;flex-wrap:wrap!important;justify-content:center!important;gap:8px!important;padding:8px!important;border-radius:18px!important}
-    .km-reader-clean.km-reader-mobile .home,.km-reader-clean.km-reader-mobile .icon{width:48px!important;height:48px!important;min-width:48px!important;flex:0 0 48px!important;display:grid!important;place-items:center!important;font-size:28px!important;line-height:1!important;border-radius:12px!important;background:#ffffff14!important}
-    .km-reader-clean.km-reader-mobile .reader-page-count{flex:0 0 auto;min-width:62px;font-size:14px;line-height:1.3;padding:0 3px}
-    .km-reader-clean.km-reader-mobile .reader-rotate{min-width:108px;min-height:48px;padding:0 14px;border-radius:13px;font-size:14px;line-height:1.3}
-    .km-reader-clean.km-reader-mobile .reader-unlock{display:flex;align-items:center;justify-content:center;min-height:48px;box-sizing:border-box;padding:0 14px;font-size:14px}
-    .km-reader-clean.km-reader-mobile .topbar [hidden]{display:none!important}
-    .km-reader-clean.km-reader-mobile.reader-controls-hidden .topbar{opacity:1!important;pointer-events:auto!important}
-    .km-reader-clean.km-reader-mobile:not(.km-reader-landscape) .nav{top:calc((var(--km-reader-height) - var(--km-controls-reserve))/2)!important}
-    .km-reader-clean.km-reader-mobile.km-reader-landscape .reader{padding:0 var(--km-controls-reserve,100px)!important}
-    .km-reader-clean.km-reader-mobile.km-reader-landscape .topbar{inset:50% auto auto max(6px,env(safe-area-inset-left))!important;transform:translateY(-50%)!important;flex-direction:column!important;flex-wrap:nowrap!important;width:50px!important;padding:0!important;gap:6px!important;min-height:0!important;max-height:calc(var(--km-reader-height) - 24px)!important;overflow-y:auto}
-    .km-reader-clean.km-reader-mobile.km-reader-landscape .reader-page-count{min-width:0;width:100%;padding:0;font-size:12px;white-space:normal}
-    .km-reader-clean.km-reader-mobile.km-reader-landscape .reader-unlock{padding:0 3px;width:48px;min-height:48px;font-size:11px;white-space:normal;text-align:center}
-    .km-reader-clean.km-reader-mobile.km-reader-landscape #prevBtn{left:calc(var(--km-controls-reserve) - 16px)!important}
-    `;
-    document.head.append(style);
-    const counter=document.createElement('span');counter.className='reader-page-count';counter.setAttribute('aria-live','polite');toolbar.append(counter);
-    const home=toolbar.querySelector('.home');if(home){home.textContent='×';home.setAttribute('aria-label','Quitter le livre');home.title='Quitter le livre';}
-    const full=document.getElementById('fullscreenBtn');
-    const end=document.getElementById('previewEnd');
-    let unlock=null;
-    if(end?.querySelector('a')){unlock=end.querySelector('a').cloneNode(true);unlock.className='reader-unlock';unlock.textContent='🔒 La suite';unlock.hidden=true;toolbar.append(unlock);
-      if(end.hasAttribute('data-discovery')) unlock.addEventListener('click',event=>{
-        if(window.KMDiscovery){event.preventDefault();window.KMDiscovery.openUnlock();}
-      });}
-    const label=document.getElementById('pageLabel'),total=document.getElementById('totalLabel');
-    const sync=()=>{counter.textContent=(label?.textContent||'Couverture').replace('Pages ','').replace('Page ','')+' / '+(total?.textContent||'').replace(' pages','');if(unlock)unlock.hidden=end.hidden;book.classList.toggle('is-open',document.getElementById('coverStage')?.hidden===true);};
-    new MutationObserver(sync).observe(document.querySelector('.reader'),{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['hidden']});sync();
-    const handheld=navigator.maxTouchPoints>0||matchMedia('(pointer: coarse)').matches;
-    let manualLandscape=false,fitFrame=0,fitLater=0;
-    const rotate=document.createElement('button');rotate.type='button';rotate.className='reader-rotate';rotate.id='readerRotateBtn';toolbar.append(rotate);
-    function fit(){
-      const viewport=window.visualViewport,unzoomed=viewport&&Math.abs(viewport.scale-1)<.01;
-      const w=Math.round(unzoomed?viewport.width:window.innerWidth),h=Math.round(unzoomed?viewport.height:window.innerHeight);
-      if(!w||!h)return;
-      const portrait=h>w;
-      if(!portrait)manualLandscape=false;
-      const turned=portrait&&manualLandscape;
-      root.classList.toggle('km-reader-turned',turned);
-      root.classList.toggle('km-reader-portrait',portrait&&!turned);
-      const width=turned?h:w,height=turned?w:h;
-      const mobileControls=handheld||Math.min(w,h)<600;
-      const sideControls=mobileControls&&width>height;
-      root.classList.toggle('km-reader-mobile',mobileControls);
-      root.classList.toggle('km-reader-landscape',sideControls);
-      root.style.setProperty('--km-reader-width',width+'px');root.style.setProperty('--km-reader-height',height+'px');
-      rotate.hidden=!(handheld||w<700)||!portrait;
-      rotate.textContent=turned?'↶ Portrait':'↻ Paysage';
-      rotate.setAttribute('aria-label',turned?'Revenir en portrait':'Faire pivoter le livre en paysage');
-      rotate.setAttribute('aria-pressed',String(turned));
-      full.hidden=width<600 || !(document.fullscreenEnabled || root.webkitRequestFullscreen);
-      // Offset sizes stay in reader coordinates when the body is rotated.
-      // Equal landscape margins keep the book centred on the screen,
-      // while the left margin holds the controls clear of the pages.
-      const rightInset=parseFloat(getComputedStyle(document.querySelector('.book-shell'),'::before').paddingRight)||0;
-      const edge=Math.max(sideControls?6:12,parseFloat(getComputedStyle(toolbar)[sideControls?'left':'bottom'])||0);
-      const reserve=mobileControls?(sideControls?toolbar.offsetWidth:toolbar.offsetHeight)+edge+(sideControls?6:20):0;
-      const pageWidth=Math.min(Math.max(80,width-(sideControls?2*Math.max(reserve,rightInset):0)),Math.max(80,height-(sideControls?0:reserve))*2);
-      root.style.setProperty('--km-controls-reserve',reserve+'px');
-      root.style.setProperty('--km-page-width',pageWidth+'px');root.style.setProperty('--km-page-height',pageWidth/2+'px');
+    const home = toolbar.querySelector('.home');
+    home.innerHTML = '<span aria-hidden="true">←</span>Retour';
+    home.title = 'Retour à la bibliothèque';
+    if (libraryFrame) {
+      home.target = '_parent';
+      if (new URLSearchParams(location.search).get('guest') === '1') home.search = '?guest=1';
     }
-    function queueFit(){
-      cancelAnimationFrame(fitFrame);clearTimeout(fitLater);
-      fitFrame=requestAnimationFrame(fit);
-      // Some mobile webviews report their new size after the orientation event.
-      fitLater=setTimeout(fit,300);
-    }
-    rotate.addEventListener('click',()=>{manualLandscape=!manualLandscape;dismissLandscapeTip();fit();show();});
-    screen.orientation?.addEventListener?.('change',queueFit);
-    window.addEventListener('pageshow',queueFit);
-    if(window.ResizeObserver){const observer=new ResizeObserver(queueFit);observer.observe(root);observer.observe(toolbar);}
-    let turnGesture=null;
-    book.addEventListener('touchstart',event=>{
-      if(event.touches.length!==1){if(turnGesture)turnGesture.pinch=true;return;}
-      const touch=event.touches[0];
-      turnGesture={x:touch.clientX,y:touch.clientY,turned:root.classList.contains('km-reader-turned'),pinch:false};
-    },{capture:true,passive:true});
-    book.addEventListener('touchmove',event=>{if(turnGesture&&event.touches.length>1)turnGesture.pinch=true;},{capture:true,passive:true});
-    book.addEventListener('touchend',event=>{
-      const gesture=turnGesture;if(!gesture?.turned)return;
-      event.stopImmediatePropagation();
-      if(event.touches.length)return;
-      turnGesture=null;
-      if(gesture.pinch||!event.changedTouches.length)return;
-      const touch=event.changedTouches[0],dx=touch.clientY-gesture.y,dy=touch.clientX-gesture.x;
-      if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.35){
-        event.preventDefault();
-        document.getElementById(dx<0?'nextBtn':'prevBtn')?.click();
-      }
-    },{capture:true,passive:false});
-    book.addEventListener('touchcancel',()=>{turnGesture=null;},{capture:true,passive:true});
-    let timer=0;
-    function show(){root.classList.remove('reader-controls-hidden');clearTimeout(timer);timer=setTimeout(()=>{if(!toolbar.querySelector(':focus-visible')&&document.getElementById('drawer')?.getAttribute('aria-hidden')!=='false')root.classList.add('reader-controls-hidden');},2800);}
-    document.addEventListener('pointermove',show,{passive:true});document.addEventListener('pointerdown',show,{passive:true});document.addEventListener('focusin',show);document.addEventListener('keydown',show);
-    // If native fullscreen is unavailable (e.g. iPhone), the reader still fills its window.
-    async function toggleFullscreen(event){event.preventDefault();event.stopImmediatePropagation();try{if(document.fullscreenElement)await document.exitFullscreen();else if(root.requestFullscreen)await root.requestFullscreen();else if(root.webkitRequestFullscreen)await root.webkitRequestFullscreen();else root.classList.toggle('reader-focus-mode');}catch{root.classList.toggle('reader-focus-mode');}fit();show();syncFullscreen();}
-    function syncFullscreen(){const active=!!document.fullscreenElement||root.classList.contains('reader-focus-mode');full.setAttribute('aria-label',active?'Quitter le plein écran':'Plein écran');full.title=active?'Quitter le plein écran':'Plein écran';full.setAttribute('aria-pressed',String(active));}
-    full.addEventListener('click',toggleFullscreen,true);
-    document.addEventListener('fullscreenchange',()=>{fit();syncFullscreen();show();});window.addEventListener('resize',queueFit);window.visualViewport?.addEventListener('resize',queueFit);
-    document.addEventListener('keydown',e=>{if(e.key==='Escape')root.classList.remove('reader-focus-mode');});
-    fit();show();syncFullscreen();
+    const pages = byId('gridBtn');
+    pages.innerHTML = '<span aria-hidden="true">▦</span>Pages';
+    pages.title = 'Choisir une page';
+    pages.setAttribute('aria-controls', 'drawer');
+    toolbar.append(pages);
 
-    // Rotation stays under the reader's control; never request an orientation lock.
-    const portraitReading=matchMedia('(orientation: portrait)');
-    let landscapeTip=null,tipTimer=0;
-    function dismissLandscapeTip(){
-      clearTimeout(tipTimer);
-      landscapeTip?.remove();
-      landscapeTip=null;
+    const settings = document.createElement('details');
+    settings.className = 'reader-settings';
+    settings.innerHTML = '<summary aria-label="Réglages du lecteur"><span aria-hidden="true">⚙︎</span>Réglages</summary>';
+    const actions = toolbar.querySelector('.actions');
+    settings.append(actions);
+    document.body.append(settings);
+    const sound = byId('soundBtn'), full = byId('fullscreenBtn');
+    sound.title = 'Son des pages';
+    sound.setAttribute('aria-pressed', 'true');
+    const rotate = document.createElement('button');
+    rotate.type = 'button'; rotate.className = 'icon'; rotate.id = 'readerRotateBtn';
+    actions.append(rotate);
+    const summary = settings.querySelector('summary');
+    function closeSettings() { settings.open = false; }
+    document.addEventListener('pointerdown', event => {
+      if (settings.open && !settings.contains(event.target)) closeSettings();
+    });
+    document.addEventListener('focusin', event => {
+      if (settings.open && !settings.contains(event.target)) closeSettings();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && settings.open) { closeSettings(); summary.focus(); }
+    });
+    byId('zoomBtn').addEventListener('click', closeSettings);
+
+    const dock = document.createElement('nav');
+    dock.className = 'reader-dock'; dock.setAttribute('aria-label', 'Navigation dans le livre');
+    const progress = document.querySelector('.progress-wrap');
+    const label = byId('pageLabel'), range = byId('progress'), total = byId('totalLabel');
+    dock.append(byId('prevBtn'), progress, byId('nextBtn'));
+    document.body.append(dock);
+
+    // Keep the original subscription action and any guest-specific handler.
+    const offer = byId('previewEnd');
+    if (offer) {
+      const link = offer.querySelector('a');
+      if (offer.hasAttribute('data-discovery')) link.addEventListener('click', event => {
+        if (window.KMDiscovery) { event.preventDefault(); window.KMDiscovery.openUnlock(); }
+      });
+      document.body.append(offer);
     }
-    function syncOrientation(){
-      if(!portraitReading.matches)dismissLandscapeTip();
+    function syncPage() {
+      range.setAttribute('aria-valuetext', label.textContent + ' · ' + total.textContent);
+      const max = Number(range.max);
+      range.style.setProperty('--read', (max > 0 ? Number(range.value) / max * 100 : 0) + '%');
+      book.classList.toggle('is-open', byId('coverStage').hidden);
+    }
+    new MutationObserver(syncPage).observe(label, {childList:true, characterData:true, subtree:true});
+    syncPage();
+
+    let manualLandscape = false, fitFrame = 0, fitLater = 0;
+    function fit() {
+      const viewport = window.visualViewport;
+      const unzoomed = viewport && Math.abs(viewport.scale - 1) < .01;
+      const w = Math.round(unzoomed ? viewport.width : innerWidth);
+      const h = Math.round(unzoomed ? viewport.height : innerHeight);
+      if (!w || !h) return;
+      const portrait = h > w;
+      if (!portrait) manualLandscape = false;
+      const turned = portrait && manualLandscape;
+      const width = turned ? h : w, height = turned ? w : h;
+      root.classList.toggle('km-reader-turned', turned);
+      root.classList.toggle('km-reader-wide', width >= height && width >= 500);
+      root.style.setProperty('--km-reader-width', width + 'px');
+      root.style.setProperty('--km-reader-height', height + 'px');
+      const touch = navigator.maxTouchPoints > 0 || matchMedia('(pointer: coarse)').matches;
+      rotate.hidden = !portrait || (!touch && w >= 700);
+      rotate.textContent = turned ? '↶' : '↻';
+      rotate.title = turned ? 'Revenir en portrait' : 'Lire en paysage';
+      rotate.setAttribute('aria-label', rotate.title);
+      rotate.setAttribute('aria-pressed', String(turned));
+      full.hidden = !(document.fullscreenEnabled || root.webkitRequestFullscreen);
+    }
+    function queueFit() {
+      cancelAnimationFrame(fitFrame);
+      clearTimeout(fitLater);
+      fitFrame = requestAnimationFrame(fit);
+      fitLater = setTimeout(fit, 250);
+    }
+    rotate.addEventListener('click', () => {
+      manualLandscape = !manualLandscape; fit(); closeSettings(); summary.focus();
+    });
+    async function toggleFullscreen(event) {
+      event.preventDefault(); event.stopImmediatePropagation(); closeSettings();
+      try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
+        else if (root.requestFullscreen) await root.requestFullscreen();
+        else root.webkitRequestFullscreen?.();
+      } catch {}
       queueFit();
     }
-    if(portraitReading.matches&&handheld&&matchMedia('(max-width: 1024px)').matches){
-      landscapeTip=document.createElement('div');
-      landscapeTip.className='km-landscape-tip';
-      landscapeTip.innerHTML='<span role="status">Le livre ne tourne pas ? Touche « Paysage ».</span><button type="button" aria-label="Masquer le conseil paysage">×</button>';
-      landscapeTip.querySelector('button').addEventListener('click',dismissLandscapeTip);
-      document.body.append(landscapeTip);
-      // Reading starts immediately, even with rotation disabled on the phone.
-      document.querySelector('.reader').addEventListener('pointerdown',dismissLandscapeTip,{once:true,passive:true});
-      document.addEventListener('keydown',event=>{if(event.key==='Escape')dismissLandscapeTip();});
-      landscapeTip.addEventListener('focusout',dismissLandscapeTip,{once:true});
-      tipTimer=setTimeout(()=>{
-        if(!landscapeTip?.contains(document.activeElement))dismissLandscapeTip();
-      },6000);
+    function fullscreenChanged() {
+      const active = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      full.title = active ? 'Quitter le plein écran' : 'Plein écran';
+      full.setAttribute('aria-label', full.title);
+      full.setAttribute('aria-pressed', String(active));
+      queueFit();
     }
-    if(portraitReading.addEventListener)portraitReading.addEventListener('change',syncOrientation);
-    else portraitReading.addListener?.(syncOrientation);
-    window.addEventListener('resize',syncOrientation);
-    window.addEventListener('orientationchange',syncOrientation);
-    window.addEventListener('pagehide',dismissLandscapeTip);
+    full.addEventListener('click', toggleFullscreen, true);
+    document.addEventListener('fullscreenchange', fullscreenChanged);
+    document.addEventListener('webkitfullscreenchange', fullscreenChanged);
+    screen.orientation?.addEventListener?.('change', queueFit);
+    window.addEventListener('orientationchange', queueFit);
+    window.addEventListener('pageshow', queueFit);
+    window.addEventListener('resize', queueFit);
+    window.visualViewport?.addEventListener('resize', queueFit);
 
+    // In manual landscape the physical Y axis runs across the book.
+    let swipe = null;
+    book.addEventListener('touchstart', event => {
+      if (event.touches.length !== 1) { if (swipe) swipe.pinch = true; return; }
+      if (!root.classList.contains('km-reader-turned')) return;
+      const touch = event.touches[0]; swipe = {x:touch.clientX, y:touch.clientY};
+    }, {capture:true, passive:true});
+    book.addEventListener('touchmove', event => {
+      if (swipe && event.touches.length > 1) swipe.pinch = true;
+    }, {capture:true, passive:true});
+    book.addEventListener('touchend', event => {
+      if (!swipe) return;
+      event.stopImmediatePropagation();
+      if (event.touches.length) return;
+      const start = swipe; swipe = null;
+      if (start.pinch || !event.changedTouches.length) return;
+      const touch = event.changedTouches[0], dx = touch.clientY - start.y, dy = touch.clientX - start.x;
+      if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.35) {
+        event.preventDefault(); byId(dx < 0 ? 'nextBtn' : 'prevBtn').click();
+      }
+    }, {capture:true, passive:false});
+    book.addEventListener('touchcancel', () => { swipe = null; }, {capture:true, passive:true});
+    fit();
   }
-  document.addEventListener('km-reader-ready',mount);
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
+  document.addEventListener('km-reader-ready', mount);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, {once:true});
+  else mount();
 })();
