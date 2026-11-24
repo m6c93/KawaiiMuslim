@@ -39,7 +39,13 @@ html.km-reader-turned {
   overflow: hidden; background: #b8cec5;
 }
 .km-reader-clean.km-reader-turned body {
-  inset: calc(var(--km-view-y, 0px) + var(--km-reader-width)/2) auto auto calc(var(--km-view-x, 0px) + var(--km-reader-height)/2); transform: translate(-50%, -50%) rotate(90deg); transform-origin: center;
+  position: fixed !important;
+  inset: var(--km-view-y, 0px) auto auto var(--km-view-x, 0px) !important;
+  width: var(--km-reader-width) !important; height: var(--km-reader-height) !important;
+  min-width: 0 !important; min-height: 0 !important; max-width: none !important; max-height: none !important;
+  margin: 0 !important; box-sizing: border-box !important;
+  transform-origin: 0 0 !important;
+  transform: translateX(var(--km-reader-height)) rotate(90deg) !important;
 }
 .km-reader-clean .sky, .km-reader-clean .hint, .km-reader-clean .rotate-notice,
 .km-reader-clean .title, .km-reader-clean .mobile-page-controls { display: none !important; }
