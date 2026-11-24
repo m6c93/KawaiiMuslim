@@ -16,12 +16,17 @@
 <link rel="stylesheet" href="premium.css?v=3">
 <link rel="stylesheet" href="flow.css?v=tv-2">
 <link rel="stylesheet" href="house.css?v=tv-2">
-<link rel="stylesheet" href="tv-house.css?v=2">
+<link rel="stylesheet" href="tv-house.css?v=3">
 
 </head>
 <body>
+<script>
+if (window.webkit?.messageHandlers?.kmShell || window.KMApple) {
+  document.body.classList.add('native-app');
+}
+</script>
 <header class="top">
-<a id="catalog" class="nav" href="/Application.dc.html?section=apps&amp;guest=1" target="_top">← <span>Applications</span></a>
+<a id="catalog" class="nav" href="/Application.dc.html?section=apps&amp;guest=1" target="_top"><span class="catalog-arrow" aria-hidden="true">←</span><span>Applications</span></a>
 <button id="home" class="brand" type="button">Kawaii Muslim World</button>
 <button id="book" class="nav" type="button">✦ <span>Mon carnet</span></button>
 </header>
