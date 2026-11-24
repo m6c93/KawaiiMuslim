@@ -48,8 +48,107 @@
 
   const styles = document.createElement('link');
   styles.rel = 'stylesheet';
-  styles.href = '/books/reader-controls.css?v=phone-viewport-5';
+  styles.href = '/books/reader-controls.css?v=iphone-landscape-6';
   document.head.append(styles);
+
+  // The iPhone shell can also arrange the legacy reader elements. Keep the
+  // book, page controls and settings in independent, clipped layout regions.
+  function createAppleLandscape({book, dock, home, pages, settings}) {
+    const viewport = document.createElement('km-book-viewport');
+    const shadow = viewport.attachShadow({mode:'open'});
+    shadow.innerHTML = `
+      <style>
+        :host {
+          position:absolute!important; inset:0 auto auto 0!important; display:block!important;
+          width:var(--km-reader-width)!important; height:var(--km-reader-height)!important;
+          margin:0!important; padding:0!important; border:0!important; z-index:15;
+          background:#b8cec5; color:#25483d; font:700 12px/1.15 system-ui,sans-serif;
+        }
+        .layout {
+          box-sizing:border-box; width:100%; height:100%; overflow:hidden;
+          display:grid; grid-template-columns:54px minmax(0,1fr) 58px;
+          grid-template-rows:minmax(0,1fr) auto; gap:var(--dock-gap,16px) 9px;
+          padding:calc(var(--safe-top) + 7px) calc(var(--safe-right) + 7px)
+            calc(var(--safe-bottom) + 7px) calc(var(--safe-left) + 7px);
+        }
+        .art { position:relative; grid-area:1/2; min-width:0; min-height:0; display:grid; place-items:center;
+          overflow:hidden; overflow:clip; isolation:isolate; }
+        .left,.right { align-self:center; justify-self:center; display:grid; place-items:center; gap:6px; }
+        .left { grid-area:1/1; } .right { grid-area:1/3; z-index:2; position:relative; }
+        .bottom { grid-area:2/2; display:grid; justify-items:center; align-items:end; min-width:0; }
+        ::slotted([slot=art]) {
+          box-sizing:border-box!important; display:block!important; position:relative!important;
+          inset:auto!important; margin:0!important; padding:0!important; min-width:0!important; min-height:0!important;
+          width:var(--apple-spread)!important; height:calc(var(--apple-spread) / 2)!important;
+          max-width:none!important; max-height:none!important; align-self:center!important; justify-self:center!important;
+          --km-cover-limit-width:var(--apple-cover-width); --km-cover-limit-height:var(--apple-cover-height);
+        }
+        ::slotted([slot=art]:not([aria-busy=true])) { transform:none!important; }
+        ::slotted([slot=bottom]) {
+          position:static!important; display:grid!important; inset:auto!important; transform:none!important;
+          grid-area:auto!important; width:min(100%,570px)!important; max-width:100%!important;
+          margin:0!important; align-self:end!important; justify-self:center!important;
+        }
+        ::slotted([slot=left]),::slotted([slot=right]) {
+          position:relative!important; inset:auto!important; transform:none!important; margin:0!important;
+          visibility:visible!important; opacity:1!important; pointer-events:auto!important;
+        }
+        ::slotted([slot=left]) {
+          display:grid!important; align-content:center!important; justify-items:center!important; gap:1px!important;
+          box-sizing:border-box!important; width:54px!important; height:46px!important; padding:2px!important;
+          color:#25483d!important; background:#fffdf5!important; border:1px solid #91aaa0!important;
+          border-radius:12px!important; font:700 11px/1.1 system-ui,sans-serif!important; text-decoration:none!important;
+        }
+      </style>
+      <div class="layout">
+        <div class="left"><slot name="left"></slot></div>
+        <div class="art"><slot name="art"></slot></div>
+        <div class="right"><slot name="right"></slot></div>
+        <div class="bottom"><slot name="bottom"></slot></div>
+      </div>`;
+    const art = shadow.querySelector('.art');
+    const parts = [[book,'art'],[home,'left'],[pages,'left'],[settings,'right'],[dock,'bottom']];
+    const origins = new Map();
+    let active = false;
+    function size() {
+      if (!active || !art.clientWidth || !art.clientHeight) return;
+      const width = Math.min(art.clientWidth, viewport.clientWidth * .85);
+      const height = Math.min(art.clientHeight, viewport.clientHeight * .85);
+      viewport.style.setProperty('--apple-spread', Math.min(width, height*2) + 'px');
+      viewport.style.setProperty('--apple-cover-width', width + 'px');
+      viewport.style.setProperty('--apple-cover-height', height + 'px');
+    }
+    const observer = window.ResizeObserver ? new ResizeObserver(size) : null;
+    function keepTapOnPage(event) {
+      if (!active || !event.target.closest?.('.paper') || event.target.closest('button,a,input')) return;
+      event.stopPropagation();
+      if (event.cancelable) event.preventDefault();
+    }
+    book.addEventListener('click', keepTapOnPage, true);
+    book.addEventListener('dblclick', keepTapOnPage, true);
+    return enabled => {
+      if (enabled !== active) {
+        active = enabled;
+        if (active) {
+          document.body.append(viewport);
+          for (const [node, slot] of parts) {
+            const marker = document.createComment('reader control');
+            node.before(marker); origins.set(node, marker);
+            node.slot = slot; viewport.append(node);
+          }
+          root.classList.add('km-apple-landscape');
+          observer?.observe(art);
+        } else {
+          observer?.disconnect();
+          for (const [node, marker] of origins) {
+            node.removeAttribute('slot'); marker.replaceWith(node);
+          }
+          origins.clear(); viewport.remove(); root.classList.remove('km-apple-landscape');
+        }
+      }
+      size();
+    };
+  }
 
   function mount() {
     const byId = id => document.getElementById(id);
@@ -184,6 +283,11 @@
       } catch { releaseHost(); }
     }
     window.addEventListener('pagehide', releaseHost);
+    const appleDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+      Boolean(window.webkit?.messageHandlers?.kmShell || window.KMApple);
+    const layoutApple = appleDevice && window.Element?.prototype.attachShadow
+      ? createAppleLandscape({book, dock, home, pages, settings}) : null;
     let manualLandscape = false, fitFrame = 0, fitLater = 0;
     function fit() {
       const viewport = window.visualViewport;
@@ -210,6 +314,7 @@
       rotate.setAttribute('aria-label', rotate.title);
       rotate.setAttribute('aria-pressed', String(turned));
       full.hidden = !(document.fullscreenEnabled || root.webkitRequestFullscreen);
+      layoutApple?.(width > height && width >= 430);
     }
     function queueFit() {
       cancelAnimationFrame(fitFrame);

@@ -109,7 +109,7 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   const visiblePages=()=>{
     try{
       const doc=frame.contentDocument,view=frame.contentWindow;
-      return [...doc.querySelectorAll("main figure img")]
+      return [...doc.querySelectorAll("#book figure img")]
         .filter(img=>{
           const rect=img.getBoundingClientRect(),style=view.getComputedStyle(img);
           return rect.width>20&&rect.height>20&&style.display!=="none"&&style.visibility!=="hidden"&&(img.src.startsWith("data:image/")||isBookAsset(img.src))&&/^Page\s+\d+/i.test(img.alt||"");
