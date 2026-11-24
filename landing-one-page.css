@@ -310,3 +310,7 @@
   }
   .library-runway .book-cover span{display:block;line-height:1.25;padding-inline:3px}
 }
+
+@media (orientation:landscape) and (max-height:600px) {
+  .journey-book-demo .sample-real-reader { height: min(390px, calc(100dvh - 34px)); }
+}
