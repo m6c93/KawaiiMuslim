@@ -506,15 +506,6 @@ html[data-km-gender="boy"] button:focus-visible { outline-color: #287c7a; }
   margin-inline-start: auto;
   text-underline-offset: 3px;
 }
-.destination-app-logos { display: flex; align-items: center; }
-.destination-app-logos img {
-  display: block;
-  width: clamp(27px, 4vw, 41px);
-  aspect-ratio: 1;
-  border-radius: 24%;
-  border: 1px solid #ffffffcf;
-}
-.destination-app-logos img + img { margin-inline-start: -4px; }
 @media (max-width: 560px) {
   .world-destinations .child-section-title { margin-bottom: 8px; }
   .world-destinations .child-section-title h2 { font-size: 23px; }
