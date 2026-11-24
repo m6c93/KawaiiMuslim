@@ -39,13 +39,16 @@
   'use strict';
   const root = document.documentElement;
   if (!root.hasAttribute('data-picture-reader')) return;
-  let libraryFrame = false;
-  try { libraryFrame = window.frameElement?.id === 'bookFrame'; } catch {}
-  if (window.KM_BOOK_EMBED && !libraryFrame) return;
+  let libraryFrame = false, presentationFrame = false;
+  try {
+    libraryFrame = window.frameElement?.id === 'bookFrame';
+    presentationFrame = Boolean(window.frameElement?.classList.contains('sample-real-reader'));
+  } catch {}
+  if (window.KM_BOOK_EMBED && !libraryFrame && !presentationFrame) return;
 
   const styles = document.createElement('link');
   styles.rel = 'stylesheet';
-  styles.href = '/books/reader-controls.css?v=landscape-reader-4';
+  styles.href = '/books/reader-controls.css?v=phone-viewport-5';
   document.head.append(styles);
 
   function mount() {
@@ -58,9 +61,9 @@
     const home = toolbar.querySelector('.home');
     home.innerHTML = '<span aria-hidden="true">←</span>Retour';
     home.title = 'Retour à la bibliothèque';
-    if (libraryFrame) {
+    if (libraryFrame || presentationFrame) {
       home.target = '_parent';
-      if (new URLSearchParams(location.search).get('guest') === '1') home.search = '?guest=1';
+      if (presentationFrame || new URLSearchParams(location.search).get('guest') === '1') home.search = '?guest=1';
     }
     const pages = byId('gridBtn');
     pages.innerHTML = '<span aria-hidden="true">▦</span>Pages';
@@ -126,6 +129,61 @@
     }
     if (window.ResizeObserver) new ResizeObserver(measureStage).observe(stage);
     styles.addEventListener('load', measureStage, {once:true});
+    // A reader inside the library does not inherit native CSS safe-area values
+    // from the outer window. Intersect its frame with the device's safe area.
+    let hostWindow = null, edgeProbe = null;
+    function releaseHost() {
+      edgeProbe?.remove(); edgeProbe = null;
+      if (!hostWindow) return;
+      hostWindow.removeEventListener('resize', queueFit);
+      hostWindow.visualViewport?.removeEventListener('resize', queueFit);
+      hostWindow.visualViewport?.removeEventListener('scroll', queueFit);
+      hostWindow = null;
+    }
+    function readHostEdges() {
+      if (window === window.top || presentationFrame) return;
+      try {
+        const frames = [];
+        let current = window;
+        while (current !== current.top) {
+          const frame = current.frameElement;
+          if (!frame || !(frame.id === 'bookFrame' || frame.classList.contains('km-app-view'))) break;
+          frames.push(frame);
+          current = current.parent;
+        }
+        if (!frames.length || !current.document.body) return;
+        if (!edgeProbe) {
+          hostWindow = current;
+          edgeProbe = current.document.createElement('span');
+          edgeProbe.setAttribute('aria-hidden', 'true');
+          edgeProbe.style.cssText = 'position:fixed;inset:0 auto auto 0;visibility:hidden;pointer-events:none';
+          for (const side of ['top','right','bottom','left']) {
+            edgeProbe.style.setProperty('padding-'+side, 'max(env(safe-area-inset-'+side+', 0px), var(--km-safe-'+side+', 0px))');
+          }
+          current.document.body.append(edgeProbe);
+          current.addEventListener('resize', queueFit);
+          current.visualViewport?.addEventListener('resize', queueFit);
+          current.visualViewport?.addEventListener('scroll', queueFit);
+        }
+        const viewport = current.visualViewport;
+        if (viewport && Math.abs(viewport.scale - 1) >= .01) return;
+        const x = viewport?.offsetLeft || 0, y = viewport?.offsetTop || 0;
+        const edges = current.getComputedStyle(edgeProbe);
+        const safe = {left:x+parseFloat(edges.paddingLeft), top:y+parseFloat(edges.paddingTop),
+          right:x+(viewport?.width || current.innerWidth)-parseFloat(edges.paddingRight),
+          bottom:y+(viewport?.height || current.innerHeight)-parseFloat(edges.paddingBottom)};
+        let left = 0, top = 0;
+        for (const frame of frames) {
+          const rect = frame.getBoundingClientRect(); left += rect.left + frame.clientLeft; top += rect.top + frame.clientTop;
+        }
+        const insets = {left:safe.left-left, top:safe.top-top, right:left+innerWidth-safe.right, bottom:top+innerHeight-safe.bottom};
+        for (const side of Object.keys(insets)) {
+          const distance = Math.max(0, Math.ceil(insets[side]) || 0)+'px';
+          if (root.style.getPropertyValue('--reader-host-'+side)!==distance) root.style.setProperty('--reader-host-'+side, distance);
+        }
+      } catch { releaseHost(); }
+    }
+    window.addEventListener('pagehide', releaseHost);
     let manualLandscape = false, fitFrame = 0, fitLater = 0;
     function fit() {
       const viewport = window.visualViewport;
@@ -133,6 +191,9 @@
       const w = Math.round(unzoomed ? viewport.width : innerWidth);
       const h = Math.round(unzoomed ? viewport.height : innerHeight);
       if (!w || !h) return;
+      root.style.setProperty('--km-view-x', (unzoomed ? viewport.offsetLeft || 0 : 0) + 'px');
+      root.style.setProperty('--km-view-y', (unzoomed ? viewport.offsetTop || 0 : 0) + 'px');
+      readHostEdges();
       const portrait = h > w;
       if (!portrait) manualLandscape = false;
       const turned = portrait && manualLandscape;
@@ -143,7 +204,7 @@
       root.style.setProperty('--km-reader-height', height + 'px');
       measureStage();
       const touch = navigator.maxTouchPoints > 0 || matchMedia('(pointer: coarse)').matches;
-      rotate.hidden = !portrait || (!touch && w >= 700);
+      rotate.hidden = presentationFrame || !portrait || (!touch && w >= 700);
       rotate.textContent = turned ? '↶' : '↻';
       rotate.title = turned ? 'Revenir en portrait' : 'Lire en paysage';
       rotate.setAttribute('aria-label', rotate.title);
@@ -184,6 +245,7 @@
     window.addEventListener('pageshow', queueFit);
     window.addEventListener('resize', queueFit);
     window.visualViewport?.addEventListener('resize', queueFit);
+    window.visualViewport?.addEventListener('scroll', queueFit);
 
     // In manual landscape the physical Y axis runs across the book.
     let swipe = null;

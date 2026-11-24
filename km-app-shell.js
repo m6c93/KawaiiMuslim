@@ -66,12 +66,26 @@ navigate(initial,{historyMode:'replace',anchor:params.get('anchor')||''}).then(a
       return false;
     }catch{return false;}
   }
+  function fitReadingHost(){
+    const viewport=window.visualViewport;
+    if(!document.body.classList.contains('km-clean-book-reading')||!viewport)return;
+    const unzoomed=Math.abs(viewport.scale-1)<.01;
+    const rect=[unzoomed?viewport.offsetLeft:0,unzoomed?viewport.offsetTop:0,
+                unzoomed?viewport.width:innerWidth,unzoomed?viewport.height:innerHeight];
+    ['x','y','width','height'].forEach((key,i)=>{
+      const name='--reader-host-'+key,value=(rect[i]||0)+'px';
+      if(host.style.getPropertyValue(name)!==value)host.style.setProperty(name,value);
+    });
+  }
+  window.visualViewport?.addEventListener('resize',fitReadingHost);
+  window.visualViewport?.addEventListener('scroll',fitReadingHost);
   function sync(){
     const frame=host.querySelector('.km-app-view.is-active');
     const active=!!frame&&reading(frame);
     document.body.classList.toggle('km-book-reading',Boolean(active));
     const clean=active==="clean";
     document.body.classList.toggle("km-clean-book-reading",clean);
+    if(clean)fitReadingHost();
     bar.hidden=!active||clean;
     const nav=document.querySelector('.km-app-nav');
     if(nav){nav.inert=active;if(active)nav.setAttribute('aria-hidden','true');else if(!document.body.classList.contains('km-immersive-reader'))nav.setAttribute('aria-hidden','false');}
