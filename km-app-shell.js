@@ -76,6 +76,8 @@ navigate(initial,{historyMode:'replace',anchor:params.get('anchor')||'',workshop
     try{
       const win=frame.contentWindow,doc=frame.contentDocument;if(!doc)return false;
       if(/^\/Coloriage\.dc(?:\.html)?$/i.test(win.location.pathname))return 'coloring';
+      if(/^\/Atelier\.dc(?:\.html)?$/i.test(win.location.pathname)&&
+         doc.querySelector('#artViewer[open],#scanModal:not([hidden])'))return 'coloring';
       if(bookPath(win.location.pathname))return doc.documentElement.classList.contains("km-reader-clean") ? "clean" : true;
       for(const child of doc.querySelectorAll('iframe')){
         const r=child.getBoundingClientRect();
@@ -112,7 +114,19 @@ navigate(initial,{historyMode:'replace',anchor:params.get('anchor')||'',workshop
     const nav=document.querySelector('.km-app-nav');
     if(nav){nav.inert=active;if(active)nav.setAttribute('aria-hidden','true');else if(!document.body.classList.contains('km-immersive-reader'))nav.setAttribute('aria-hidden','false');}
   }
-  host.addEventListener('load',sync,true);
+  host.addEventListener('load',event=>{
+    const frame=event.target;
+    if(frame.matches?.('iframe.km-app-view')){
+      try{
+        const dialogs=frame.contentDocument?.querySelectorAll('#artViewer,#scanModal');
+        if(dialogs?.length){
+          const observer=new MutationObserver(sync);
+          dialogs.forEach(dialog=>observer.observe(dialog,{attributes:true,attributeFilter:['open','hidden']}));
+        }
+      }catch{}
+    }
+    sync();
+  },true);
   new MutationObserver(sync).observe(host,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
   window.addEventListener('pageshow',sync);window.addEventListener('resize',sync);
   // A child document can open or close a nested book without changing the host DOM.
