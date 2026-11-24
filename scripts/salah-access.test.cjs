@@ -1,16 +1,45 @@
-const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const code=fs.readFileSync('applications/salah/salah-access.js','utf8');
-function setup({session=true,status='active',role='parent',active=true,sessionError=null,profileError=null,subscriptionError=null}={}){
- const events={},attrs=new Map(),link={setAttribute:(k,v)=>attrs.set(k,v),removeAttribute:k=>attrs.delete(k),addEventListener:(n,fn)=>events['link-'+n]=fn},note={},retry={hidden:true,addEventListener:(n,fn)=>events['retry-'+n]=fn};
- const redirects=[],calls=[];
- const query={select(){return this},eq(field,id){assert.equal(field,'id');assert.equal(id,'parent-test');return this},single:async()=>({data:{role,is_active:active},error:profileError})};
- const client={auth:{getSession:async()=>({data:{session:session?{user:{id:'parent-test'}}:null},error:sessionError})},from(table){assert.equal(table,'profiles');return query},rpc(name){assert.equal(name,'get_family_subscription');calls.push(name);return{maybeSingle:async()=>({data:status?{status}:null,error:subscriptionError})}}};
- const w={KM_CONFIG:{supabaseUrl:'https://example.test',supabaseAnonKey:'public-test'},supabase:{createClient:()=>client},location:{href:'https://www.kawaiimuslimworld.com/applications/salah/decouverte.html',replace:u=>redirects.push(u)},sessionStorage:{getItem:()=> '1'},addEventListener:(n,fn)=>events[n]=fn};
- vm.runInNewContext(code,{window:w,document:{getElementById:id=>id==='salahAccessStatus'?note:retry,querySelectorAll:()=>[link]},URL,Set,Promise});
- return{w,redirects,note,retry,events,attrs,calls};
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const root='https://www.kawaiimuslimworld.com';
+const dir='applications/salah/';
+const gate=fs.readFileSync('km-access-gate.js','utf8');
+
+function browserAt(path){
+ const url=new URL(path,root),redirects=[];
+ const window={location:{href:url.href,pathname:url.pathname,search:url.search,hash:url.hash,
+  replace(href){redirects.push(href)}}};
+ return {window,redirects};
 }
-for(const status of ['active','trialing','past_due'])test(status+' subscription opens the complete app despite a stored guest flag',async()=>{const a=setup({status});await a.w.SalahAccess.refresh();assert.deepEqual(a.redirects,['https://www.kawaiimuslimworld.com/applications/salah/']);assert.match(a.note.textContent,/reconnu/)});
-test('an active staff account is recognized without a family subscription',async()=>{const a=setup({role:'admin',status:null});await a.w.SalahAccess.refresh();assert.equal(a.redirects.length,1)});
-for(const options of [{session:false},{status:null},{status:'canceled'},{active:false}])test('unsubscribed or inactive visitor keeps the free overview and subscription links: '+JSON.stringify(options),async()=>{const a=setup(options);await a.w.SalahAccess.refresh();assert.equal(a.redirects.length,0);assert.match(a.note.textContent,/découverte/);assert.equal(a.attrs.has('aria-disabled'),false)});
-test('verification failure never sends an existing member to payment and offers retry',async()=>{const a=setup({subscriptionError:Error('network')});await a.w.SalahAccess.refresh();assert.equal(a.redirects.length,0);assert.equal(a.retry.hidden,false);assert.equal(a.attrs.get('aria-disabled'),'true');let prevented=false;a.events['link-click']({preventDefault:()=>prevented=true});assert.equal(prevented,true);await a.w.SalahAccess.refresh();assert.match(a.note.textContent,/Impossible de vérifier/)});
-test('returning to an existing tab rechecks membership',async()=>{const a=setup({status:null});await a.w.SalahAccess.refresh();const n=a.calls.length;a.events.focus();await a.w.SalahAccess.refresh();assert.equal(a.calls.length,n+1);a.events.pageshow({persisted:true});await a.w.SalahAccess.refresh();assert.equal(a.calls.length,n+2)});
+
+for(const filename of ['salah-access.js','salah-discovery.js']){
+ const script=fs.readFileSync(dir+filename,'utf8');
+ for(const path of ['decouverte','decouverte.html','decouverte/']){
+  test(filename+' forwards '+path+' to the full lesson without authentication',()=>{
+   const {window,redirects}=browserAt('/'+dir+path+'?from=today&guest=1#priere');
+   const run=()=>vm.runInNewContext(script,{window,URL});
+   run();run();
+   assert.deepEqual(redirects,[root+'/'+dir+'?from=today&guest=1#priere']);
+  });
+ }
+ test(filename+' leaves the complete Salah entry unchanged',()=>{
+  const {window,redirects}=browserAt('/'+dir);
+  vm.runInNewContext(script,{window,URL});
+  assert.deepEqual(redirects,[]);
+ });
+}
+
+test('public Salah routes skip the member gate even when authentication and storage are unavailable',()=>{
+ for(const suffix of ['salah','salah/','salah/index','salah/index.html','salah/decouverte','salah/decouverte.html']){
+  const {window,redirects}=browserAt('/applications/'+suffix);
+  vm.runInNewContext(gate,{window});
+  assert.deepEqual(redirects,[]);
+ }
+});
+
+test('the discovery fallback has a working free link when scripts are disabled',()=>{
+ const fallback=fs.readFileSync(dir+'decouverte.html','utf8');
+ assert.match(fallback,/href="\/applications\/salah\/">Ouvrir Kawaii Salah gratuitement/);
+ assert.match(fallback,/<script src="salah-access\.js\?[^"]+" defer><\/script>/);
+});

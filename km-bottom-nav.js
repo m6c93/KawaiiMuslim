@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  if (!window.KMActivityProgress) { const progress=document.createElement("script"); progress.src="/km-activity-progress.js?v=1"; document.head.appendChild(progress); }
   var discoveryScript=document.createElement("script");discoveryScript.src="/km-discovery.js?v=discovery-3";document.head.appendChild(discoveryScript);
 
   var shellChild = new URLSearchParams(window.location.search).get("kmShell") === "1";

@@ -18,6 +18,31 @@ test('search supports diacritics, Arabic and exact chapter numbers',()=>{assert.
 class FakeAudio extends EventTarget {constructor(){super();this.paused=true;this.currentTime=0;this.duration=8;this.ended=false;}pause(){this.paused=true}removeAttribute(){this.src=''}load(){}async play(){this.paused=false} }
 const queue=[{id:'1:1',audio:'one'},{id:'1:2',audio:'two'}];
 test('audio sequence advances and stops at its end',async()=>{const a=new FakeAudio,p=new QuranPlayer(a,()=>{});p.start(queue);await Promise.resolve();assert.equal(p.current.id,'1:1');a.dispatchEvent(new Event('ended'));await Promise.resolve();assert.equal(p.current.id,'1:2');a.dispatchEvent(new Event('ended'));assert.equal(p.state,'ended');p.stop();assert.equal(p.current,null)});
+test('replay restarts the selected passage and all its repetition rounds',async()=>{
+ const audio=new FakeAudio(),player=new QuranPlayer(audio,()=>{});
+ player.start(queue,{repeat:2,passageRepeat:2});
+ const expected=['1:1','1:1','1:2','1:2','1:1','1:1','1:2','1:2'];
+ for(let play=0;play<2;play++){
+  for(const id of expected){
+   await Promise.resolve();assert.equal(player.current.id,id);
+   audio.dispatchEvent(new Event('ended'));
+  }
+  assert.equal(player.state,'ended');
+  if(play===0)await player.toggle();
+ }
+ player.stop();
+});
+test('retry and pause on a later verse keep the verse and repeat indices',async()=>{
+ const audio=new FakeAudio(),player=new QuranPlayer(audio,()=>{});
+ player.start(queue,{repeat:2});await Promise.resolve();
+ for(let i=0;i<3;i++){audio.dispatchEvent(new Event('ended'));await Promise.resolve()}
+ assert.deepEqual([player.current.id,player.round],['1:2',1]);
+ audio.dispatchEvent(new Event('error'));assert.equal(player.state,'error');
+ await player.toggle();assert.deepEqual([player.current.id,player.round],['1:2',1]);
+ await player.toggle();assert.equal(player.state,'paused');
+ await player.toggle();assert.deepEqual([player.current.id,player.round],['1:2',1]);
+ player.stop();
+});
 test('repetitions keep the same verse and stop; pause cancels scheduled silence',async()=>{const a=new FakeAudio,p=new QuranPlayer(a,()=>{});p.start(queue.slice(0,1),{repeat:3});await Promise.resolve();a.dispatchEvent(new Event('ended'));await Promise.resolve();assert.equal(p.round,1);a.dispatchEvent(new Event('ended'));await Promise.resolve();assert.equal(p.round,2);a.dispatchEvent(new Event('ended'));assert.equal(p.state,'ended');p.start(queue,{repeat:3,gap:true});await Promise.resolve();a.dispatchEvent(new Event('ended'));assert.equal(p.state,'gap');await p.toggle();assert.equal(p.timer,null);assert.equal(p.state,'paused');p.stop()});
 test('the automatic repetition pause is exactly two seconds',async t=>{t.mock.timers.enable({apis:['setTimeout']});const a=new FakeAudio,p=new QuranPlayer(a,()=>{});p.start(queue.slice(0,1),{repeat:2,gap:true});await Promise.resolve();p.ended();t.mock.timers.tick(1999);assert.equal(p.round,0);t.mock.timers.tick(1);assert.equal(p.round,1);p.stop()});
 test('there is no extra pause after the final repetition',async()=>{const a=new FakeAudio,p=new QuranPlayer(a,()=>{});p.start(queue.slice(0,1),{repeat:1,gap:true,gapSeconds:2});await Promise.resolve();p.ended();assert.equal(p.state,'ended');assert.equal(p.timer,null);p.stop()});

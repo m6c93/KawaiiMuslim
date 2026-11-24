@@ -97,7 +97,7 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   let context=null,activeChildId="",artworks=[],refreshTimer=null,resumeStarted=false,framePrepareAttempts=0;
 
   const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
-  const sourceKey=pageNumber=>`book-coloring:${slug}:page:${pageNumber}`;
+  const sourceKey=pageIndex=>`book-coloring:${slug}:page:${pageIndex}`;
   const selectedChild=()=>activeChildId||childSelect.value||"";
   const currentPosition=()=>{
     try{return frame.contentDocument.querySelector('input[type="range"]')?.value||"0"}catch(error){return"0"}
@@ -114,14 +114,16 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
           const rect=img.getBoundingClientRect(),style=view.getComputedStyle(img);
           return rect.width>20&&rect.height>20&&style.display!=="none"&&style.visibility!=="hidden"&&(img.src.startsWith("data:image/")||isBookAsset(img.src))&&/^Page\s+\d+/i.test(img.alt||"");
         })
-        .map((img,index)=>({
+        .map(img=>({
           imageSrc:img.src,
-          pageNumber:img.dataset.pageIndex || (img.alt.match(/\d+/)||[String(index+1)])[0],
+          // The source index identifies existing drawings; the printed number excludes the opening leaf.
+          pageIndex:img.dataset.pageIndex || img.alt.match(/\d+/)[0],
+          pageNumber:img.dataset.pageNumber || img.alt.match(/\d+/)[0],
           side:img.closest("figure")?.classList.contains("left-paper")?"gauche":"droite"
         }));
     }catch(error){return[]}
   };
-  const matchingArtwork=pageNumber=>artworks.find(item=>item.source_url===sourceKey(pageNumber));
+  const matchingArtwork=pageIndex=>artworks.find(item=>item.source_url===sourceKey(pageIndex));
   const renderActions=()=>{
     if(!selectedChild()){
       colorbar.hidden=false;
@@ -136,12 +138,12 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
     }
     colorbar.hidden=false;
     actions.innerHTML=pages.map(page=>{
-      const artwork=matchingArtwork(page.pageNumber);
+      const artwork=matchingArtwork(page.pageIndex);
       const inProgress=artwork?.status==="in_progress";
       const completed=artwork?.status==="completed";
       const label=inProgress?`✏️ Continuer la page ${page.pageNumber}`:completed?`✓ Recolorier la page ${page.pageNumber}`:`🎨 Colorier la page ${page.pageNumber}`;
       const style=inProgress?"resume":completed?"done":"";
-      return `<button class="color-page ${style}" type="button" data-page="${escapeHtml(page.pageNumber)}">${escapeHtml(label)}</button>`;
+      return `<button class="color-page ${style}" type="button" data-page="${escapeHtml(page.pageIndex)}">${escapeHtml(label)}</button>`;
     }).join("");
     tryDirectResume();
   };
@@ -154,19 +156,19 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
     clearTimeout(refreshTimer);
     refreshTimer=setTimeout(renderActions,120);
   };
-  const startColoring=(pageNumber,forcedDraft="")=>{
-    const page=visiblePages().find(item=>String(item.pageNumber)===String(pageNumber));
+  const startColoring=(pageIndex,forcedDraft="")=>{
+    const page=visiblePages().find(item=>String(item.pageIndex)===String(pageIndex));
     if(!page||!selectedChild())return;
-    const artwork=matchingArtwork(page.pageNumber);
+    const artwork=matchingArtwork(page.pageIndex);
     const position=currentPosition();
-    const returnParams=new URLSearchParams({book:slug,title,position:String(position)});
+    const returnParams=new URLSearchParams({book:slug,title,position:String(position),child:selectedChild()});
     if(guestMode){returnParams.set("guest","1");returnParams.set("previewPages",String(previewPageLimit||2))}
     const returnUrl=`LivreColoriage.dc.html?${returnParams.toString()}`;
-    const payload={slug,pageNumber:String(page.pageNumber),imageSrc:page.imageSrc,sourceKey:sourceKey(page.pageNumber),returnUrl,title};
+    const payload={slug,pageNumber:String(page.pageIndex),imageSrc:page.imageSrc,sourceKey:sourceKey(page.pageIndex),returnUrl,title};
     try{sessionStorage.setItem("km-book-coloring-page",JSON.stringify(payload))}
     catch(error){actions.innerHTML='<span class="empty-action child-empty">Cette page est trop lourde. Réessaie après avoir fermé les autres onglets.</span>';return}
     const editorTitle=`${title} · Page ${page.pageNumber}`;
-    const query=new URLSearchParams({bookColoring:"1",book:slug,page:String(page.pageNumber),child:selectedChild(),title:editorTitle,return:returnUrl});
+    const query=new URLSearchParams({bookColoring:"1",book:slug,page:String(page.pageIndex),child:selectedChild(),title:editorTitle,return:returnUrl});
     if(guestMode)query.set("guest","1");
     if(forcedDraft)query.set("draft",forcedDraft);
     else if(artwork?.status==="in_progress")query.set("draft",artwork.id);
@@ -174,7 +176,7 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
   };
   const tryDirectResume=()=>{
     if(!resumePage||resumeStarted||!selectedChild())return false;
-    const page=visiblePages().find(item=>String(item.pageNumber)===resumePage);
+    const page=visiblePages().find(item=>String(item.pageIndex)===resumePage);
     if(!page)return false;
     resumeStarted=true;
     startColoring(resumePage,resumeDraft);
@@ -284,7 +286,7 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
       }
       const observer=new MutationObserver(scheduleRefresh);
       observer.observe(doc.body,{subtree:true,childList:true,attributes:true,attributeFilter:["src","style","class","value"]});
-      if(restorePosition){
+      if(restorePosition && !doc.documentElement.hasAttribute("data-picture-reader")){
         setTimeout(()=>{
           const range=doc.querySelector('input[type="range"]');
           if(range){
@@ -316,6 +318,7 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
     ? "aya-armure-de-lumiere-demo.html"
     : allowed[slug];
   const frameUrl=new URL("books/"+frameFile,location.href);
+  if(restorePosition)frameUrl.searchParams.set("page",restorePosition);
   if(previewPageLimit){
     frameUrl.searchParams.set("embed","1");
     frameUrl.searchParams.set("guest","1");

@@ -1,16 +1,95 @@
 (()=>{'use strict';
 const duas=window.KMInvocationCards||[],grid=document.getElementById('invocationCards'),reader=document.getElementById('invocationReader'),premiumDialog=document.getElementById('premiumDialog'),status=document.getElementById('readerStatus'),listen=document.getElementById('listenDua'),download=document.getElementById('downloadDua');
 let filter='all',query='',selected=null,audio=null,busy=false,authReady=null;
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),normalize=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),groups={quotidien:'AU QUOTIDIEN',coeur:'POUR LE CŒUR',famille:'EN FAMILLE'};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),groups={quotidien:'AU QUOTIDIEN',coeur:'POUR LE CŒUR',famille:'EN FAMILLE'};
+function normalize(text) {
+  return String(text).normalize('NFKD').replace(/\p{M}|ـ/gu, '').toLowerCase().trim();
+}
 const drawings={moon:'<path d="M52 14a25 25 0 1 0 11 42A28 28 0 0 1 52 14Z"/><path d="m22 15 2-6 2 6 6 2-6 2-2 6-2-6-6-2Z"/><path d="m62 8 1 4 4 1-4 1-1 4-1-4-4-1 4-1Z"/>',sun:'<circle cx="38" cy="38" r="16"/><path d="M38 9v8m0 42v8M9 38h8m42 0h8M17 17l6 6m30 30 6 6M17 59l6-6m30-30 6-6"/>',home:'<path d="m12 35 26-22 26 22M19 30v33h38V30M32 63V44h14v19"/><path d="M25 36h6m15 0h6"/>',leaf:'<path d="M22 57C7 28 30 15 59 14 61 44 48 64 22 57Z"/><path d="m18 65 29-36M29 53l-2-16m10 7 14-1"/>',shield:'<path d="M38 10 60 19v19c0 17-22 29-22 29S16 55 16 38V19Z"/><path d="m27 38 8 8 15-18"/>',flower:'<path d="M38 23c-17-26-34 0-14 11-31 1-18 32 2 20-9 29 22 30 24 7 20 19 39-7 17-20 28-12 5-34-12-18 6-30-25-29-17 0Z" transform="translate(0 0) scale(.85)"/><path d="M34 50v20m0-9 12-6"/><circle cx="33" cy="33" r="6"/>'};
 function icon(d){let name=d.id==='sleep'?'moon':d.id==='morning'?'sun':d.id==='leaving'?'home':d.id==='children'||d.id==='trust'?'shield':d.id==='gratitude'||d.id==='good'?'flower':'leaf';return '<svg viewBox="0 0 76 76" aria-hidden="true">'+drawings[name]+'</svg>'}
-function render(){const visible=duas.filter(d=>(filter==='all'||d.group===filter)&&(!query||normalize([d.title,d.moment||"",d.translation,d.phonetic,d.source].join(' ')).includes(normalize(query))));grid.innerHTML=visible.map(d=>`<article class="inv-card" data-card="${d.id}"><div class="card-depth"><div class="flip-inner"><button class="card-face card-front" type="button" data-flip="${d.id}" aria-label="Retourner la carte : ${esc(d.title)}"><span class="card-no">${d.number}</span>${icon(d)}<h2>${esc(d.title)}</h2><span class="tiny">${d.moment?esc(d.moment):"MON INVOCATION"}</span><span class="flip-hint">Retourner la carte <span aria-hidden="true">↻</span></span></button><div class="card-face card-back" aria-hidden="true" inert><div class="back-top"><span>${esc(d.title)}</span><button type="button" class="turn-back" data-unflip="${d.id}" aria-label="Retourner au titre de la carte">↶</button></div><div class="card-reading" tabindex="0" aria-label="Texte de l’invocation"><p class="arabic" lang="ar" dir="rtl">${esc(d.arabic)}</p><div class="mini-phonetic"><span>Phonétique</span><p>${esc(d.phonetic)}</p></div><p class="mini-translation">${esc(d.translation)}</p></div><a class="mini-source" href="${esc(d.url)}" target="_blank" rel="noopener"><strong>Source :</strong> ${esc(d.source)} ↗</a><button type="button" class="open-reader" data-read="${d.id}">Lire en grand <span aria-hidden="true">↗</span></button><p class="card-hint">Audio et téléchargement avec Premium</p></div></div></div></article>`).join('');document.getElementById('emptyCards').hidden=visible.length>0;document.getElementById('resultCount').textContent=visible.length+' carte'+(visible.length>1?'s':'')+' à découvrir'}
+function render(){const visible=duas.filter(d=>(filter==='all'||d.group===filter)&&(!query||normalize([d.title,d.moment||"",d.arabic,d.translation,d.phonetic,d.source].join(' ')).includes(normalize(query))));grid.innerHTML=visible.map(d=>`<article class="inv-card" data-card="${d.id}"><div class="card-depth"><div class="flip-inner"><button class="card-face card-front" type="button" data-flip="${d.id}" aria-label="Retourner la carte : ${esc(d.title)}"><span class="card-no">${d.number}</span>${icon(d)}<h2>${esc(d.title)}</h2><span class="tiny">${d.moment?esc(d.moment):"MON INVOCATION"}</span><span class="flip-hint">Retourner la carte <span aria-hidden="true">↻</span></span></button><div class="card-face card-back" aria-hidden="true" inert><div class="back-top"><span>${esc(d.title)}</span><button type="button" class="turn-back" data-unflip="${d.id}" aria-label="Retourner au titre de la carte">↶</button></div><div class="card-reading" tabindex="0" aria-label="Texte de l’invocation"><p class="arabic" lang="ar" dir="rtl">${esc(d.arabic)}</p><div class="mini-phonetic"><span>Phonétique</span><p>${esc(d.phonetic)}</p></div><p class="mini-translation">${esc(d.translation)}</p></div><a class="mini-source" href="${esc(d.url)}" target="_blank" rel="noopener"><strong>Source :</strong> ${esc(d.source)} ↗</a><button type="button" class="open-reader" data-read="${d.id}">Lire en grand <span aria-hidden="true">↗</span></button><p class="card-hint">Audio et téléchargement avec Premium</p></div></div></div></article>`).join('');document.getElementById('emptyCards').hidden=visible.length>0;document.getElementById('resultCount').textContent=visible.length+' carte'+(visible.length>1?'s':'')+' à découvrir'}
 function flip(id,on){const card=[...grid.querySelectorAll('[data-card]')].find(x=>x.dataset.card===id);if(!card)return;pulseCard(card);const front=card.querySelector('.card-front'),back=card.querySelector('.card-back');card.classList.toggle('flipped',on);front.inert=on;front.setAttribute('aria-hidden',String(on));back.inert=!on;back.setAttribute('aria-hidden',String(!on));(on?back.querySelector('.turn-back'):front).focus({preventScroll:true})}
 function stop(){if(audio){audio.pause();audio.currentTime=0;audio=null}listen.querySelector('span:nth-child(2)').textContent='Écouter';document.getElementById('audioControls').hidden=true}
 async function entitlement(){try{if(!window.KMAuth)return false;const ctx=await window.KMAuth.getContext();if(!ctx||ctx.profile?.is_active===false)return false;const subscription=await window.KMAuth.getSubscription();if(subscription?.status!=='active')return false;const expires=Date.parse(subscription.current_period_end||'');return Number.isFinite(expires)&&expires>Date.now()}catch{return false}}
 function updateAccess(allowed){document.querySelectorAll('[data-lock]').forEach(x=>{x.hidden=allowed});document.querySelectorAll('.reader-actions button').forEach(x=>x.classList.toggle('locked',!allowed));if(allowed){const note=document.querySelector('.premium-note');note.hidden=true;const account=document.querySelector('.member-link');account.textContent='Mon compte →';account.href='Compte.dc.html'}}
-function openReader(id){const d=duas.find(x=>x.id===id);if(!d)return;stop();selected=d;document.getElementById('readerTitle').textContent=d.title;document.getElementById('readerMoment').textContent=d.moment||groups[d.group];document.getElementById('readerArabic').textContent=d.arabic;document.getElementById('readerPhonetic').textContent=d.phonetic;document.getElementById('readerTranslation').textContent=d.translation;document.getElementById('readerSource').textContent=d.source;document.getElementById('readerSource').href=d.url;status.textContent='';reader.showModal();authReady.then(updateAccess)}
-async function withPremium(action){if(busy||!selected)return;busy=true;listen.disabled=download.disabled=true;status.textContent='Vérification de ton accès…';try{const allowed=await entitlement();updateAccess(allowed);if(!allowed){stop();status.textContent='La lecture est gratuite. Le téléchargement et l’audio sont réservés aux abonnés Premium.';window.location.assign("/Inscription.dc.html?plan=family_1_child");return}status.textContent='';await action(selected)}catch{status.textContent='Cette action n’a pas pu être terminée. Réessaie dans un instant.'}finally{busy=false;listen.disabled=download.disabled=false}}
+function openReader(id){const d=duas.find(x=>x.id===id);if(!d)return;stop();selected=d;window.KMActivityProgress?.remember('/Safe%20Place.dc.html#dua-'+d.id,d.title);document.getElementById('readerTitle').textContent=d.title;document.getElementById('readerMoment').textContent=d.moment||groups[d.group];document.getElementById('readerArabic').textContent=d.arabic;document.getElementById('readerPhonetic').textContent=d.phonetic;document.getElementById('readerTranslation').textContent=d.translation;document.getElementById('readerSource').textContent=d.source;document.getElementById('readerSource').href=d.url;status.textContent='';reader.showModal();authReady.then(updateAccess)}
+const returnCardKey = 'km-invocation-return';
+const joinLink = premiumDialog.querySelector('a.primary');
+const loginLink = premiumDialog.querySelector('a.login');
+
+function rememberCard() {
+  if (!selected) return;
+  try { sessionStorage.setItem(returnCardKey, selected.id); } catch {}
+}
+
+let consumedAnchor = '';
+document.addEventListener('km-app-inactive',()=>{ consumedAnchor=''; });
+function restoreCard() {
+  if (document.visibilityState === 'hidden') return;
+  // The shell preloads the other tabs. Restore only when this tab becomes visible.
+  if (window.frameElement?.getAttribute('aria-hidden') === 'true') return;
+  let cardId;
+  try { cardId = sessionStorage.getItem(returnCardKey); } catch {}
+  let anchor=location.hash.slice(1);
+  try {
+    if (window.parent !== window && window.parent.KMAppShell) {
+      const route=new URL(window.parent.location.href);
+      if (route.searchParams.get('section')==='invocations') anchor=route.searchParams.get('anchor') || '';
+    }
+  } catch {}
+  if (!cardId && anchor.startsWith('dua-') && consumedAnchor !== anchor) cardId=anchor.slice(4);
+  if (!cardId) return;
+  consumedAnchor=anchor;
+  try { sessionStorage.removeItem(returnCardKey); } catch {}
+  if (!duas.some(card => card.id === cardId)) return;
+  if (premiumDialog.open) premiumDialog.close();
+  if (reader.open && selected?.id === cardId) return;
+  if (reader.open) reader.close();
+  filter = 'all';
+  query = '';
+  document.getElementById('cardSearch').value = '';
+  document.querySelectorAll('[data-filter]').forEach(button => {
+    const active = button.dataset.filter === filter;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+  render();
+  flip(cardId, true);
+  openReader(cardId);
+}
+
+[joinLink, loginLink].forEach(link => link.addEventListener('click', rememberCard));
+if (window.KMApple) {
+  joinLink.href = 'Compte.dc.html';
+  joinLink.textContent = 'Voir les formules Apple';
+  premiumDialog.querySelector('small').textContent = 'Les formules et leurs prix sont affichés avant la confirmation avec Apple.';
+}
+
+async function withPremium(action) {
+  if (busy || !selected) return;
+  const card = selected;
+  busy = true;
+  listen.disabled = download.disabled = true;
+  status.textContent = 'Vérification de ton accès…';
+  try {
+    const allowed = await entitlement();
+    updateAccess(allowed);
+    if (!reader.open || selected !== card) return;
+    if (!allowed) {
+      stop();
+      status.textContent = '';
+      if (!premiumDialog.open) premiumDialog.showModal();
+      return;
+    }
+    status.textContent = '';
+    await action(card);
+  } catch {
+    status.textContent = 'Cette action n’a pas pu être terminée. Réessaie dans un instant.';
+  } finally {
+    busy = false;
+    listen.disabled = download.disabled = false;
+  }
+}
 async function play(d){if(audio&&!audio.paused){stop();return}stop();audio=new Audio('audio/safe-place/'+d.id+'.mp3');audio.playbackRate=document.getElementById('slowAudio').checked?.75:1;audio.addEventListener('ended',()=>{stop();status.textContent='À toi de répéter, à ton rythme.'});audio.addEventListener('error',()=>{stop();status.textContent='L’audio est indisponible pour le moment. Réessaie.'});try{await audio.play();listen.querySelector('span:nth-child(2)').textContent='Pause';document.getElementById('audioControls').hidden=false;status.textContent='Écoute, puis répète doucement.'}catch{stop();status.textContent='L’audio n’a pas démarré. Réessaie.'}}
 function wrap(ctx,text,maxWidth){const words=text.split(/\s+/),lines=[];let line='';for(const word of words){const next=line?line+' '+word:word;if(line&&ctx.measureText(next).width>maxWidth){lines.push(line);line=word}else line=next}if(line)lines.push(line);return lines}
 async function downloadCard(d){status.textContent='Préparation de ta carte…';await document.fonts.ready;await document.fonts.load('52px "Noto Naskh Arabic"');const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'),width=1200,pad=105,max=width-pad*2;ctx.font='600 52px "Noto Naskh Arabic",serif';const arabic=wrap(ctx,d.arabic,max);ctx.font='28px Nunito,sans-serif';const phonetic=wrap(ctx,d.phonetic,max),translation=wrap(ctx,d.translation,max);ctx.font='800 52px "Baloo 2",sans-serif';const title=wrap(ctx,d.title,max);const height=Math.max(1300,400+title.length*68+arabic.length*99+phonetic.length*46+translation.length*46+200);canvas.width=width;canvas.height=height;ctx.fillStyle='#fffaf3';ctx.fillRect(0,0,width,height);ctx.strokeStyle='#decad9';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(35,35,width-70,height-70,35);ctx.stroke();ctx.textBaseline='top';ctx.textAlign='center';ctx.fillStyle='#ad8297';ctx.font='800 20px Nunito,sans-serif';ctx.fillText('KAWAII MUSLIM WORLD · MES INVOCATIONS',600,90);let y=160;ctx.fillStyle='#74566e';ctx.font='800 52px "Baloo 2",sans-serif';title.forEach(l=>{ctx.fillText(l,600,y);y+=68});y+=50;ctx.direction='rtl';ctx.textAlign='right';ctx.fillStyle='#504158';ctx.font='600 52px "Noto Naskh Arabic",serif';arabic.forEach(l=>{ctx.fillText(l,width-pad,y);y+=99});y+=40;ctx.direction='ltr';ctx.textAlign='left';ctx.fillStyle='#aa7b94';ctx.font='900 19px Nunito,sans-serif';ctx.fillText('PHONÉTIQUE',pad,y);y+=36;ctx.fillStyle='#89718b';ctx.font='28px Nunito,sans-serif';phonetic.forEach(l=>{ctx.fillText(l,pad,y);y+=46});y+=40;ctx.fillStyle='#aa9273';ctx.font='900 19px Nunito,sans-serif';ctx.fillText('LE SENS EN FRANÇAIS',pad,y);y+=36;ctx.fillStyle='#82725e';ctx.font='28px Nunito,sans-serif';translation.forEach(l=>{ctx.fillText(l,pad,y);y+=46});ctx.fillStyle='#a28d9c';ctx.font='20px Nunito,sans-serif';wrap(ctx,d.source,max).forEach((l,i)=>ctx.fillText(l,pad,height-165+i*30));ctx.textAlign='center';ctx.font='18px Nunito,sans-serif';ctx.fillText('kawaiimuslimworld.com',600,height-85);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('Image unavailable');const url=URL.createObjectURL(blob),a=document.createElement('a');a.download='invocation-'+d.id+'-kawaii-muslim.png';a.href=url;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);status.textContent='Ta carte est prête à être enregistrée en image et imprimée.'}
@@ -28,7 +107,15 @@ grid.addEventListener('pointerout',e=>{const card=e.target.closest('.inv-card');
 grid.addEventListener('animationend',e=>{if((e.animationName==='inv-card-pop'||e.animationName==='inv-card-pop-touch'))e.target.closest('.inv-card')?.classList.remove('card-pop')});
 reducedMotion.addEventListener('change',()=>{clearDepth();requestDepth()});finePointer.addEventListener('change',clearDepth);addEventListener('pagehide',clearDepth);document.addEventListener('km-app-inactive',clearDepth);document.addEventListener('visibilitychange',()=>{if(document.hidden)clearDepth();else requestDepth()});requestDepth();
 grid.addEventListener('click',e=>{const front=e.target.closest('[data-flip]'),back=e.target.closest('[data-unflip]'),read=e.target.closest('[data-read]');if(front)flip(front.dataset.flip,true);if(back)flip(back.dataset.unflip,false);if(read)openReader(read.dataset.read)});
-document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b))});render()}));document.getElementById('cardSearch').addEventListener('input',e=>{query=e.target.value.trim();render()});document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>document.getElementById(b.dataset.close).close()));reader.addEventListener('close',stop);document.addEventListener('km-app-inactive',stop);reader.addEventListener('cancel',stop);document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});window.addEventListener('pagehide',stop);listen.addEventListener('click',()=>withPremium(play));download.addEventListener('click',()=>withPremium(downloadCard));document.getElementById('stopAudio').addEventListener('click',stop);document.getElementById('slowAudio').addEventListener('change',e=>{if(audio)audio.playbackRate=e.target.checked?.75:1});render();authReady=entitlement();authReady.then(updateAccess);
+document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b))});render()}));document.getElementById('cardSearch').addEventListener('input',e=>{query=e.target.value.trim();render()});document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>document.getElementById(b.dataset.close).close()));reader.addEventListener('close',stop);document.addEventListener('km-app-inactive',stop);reader.addEventListener('cancel',stop);document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});window.addEventListener('pagehide',stop);listen.addEventListener('click',()=>withPremium(play));download.addEventListener('click',()=>withPremium(downloadCard));document.getElementById('stopAudio').addEventListener('click',stop);document.getElementById('slowAudio').addEventListener('change',e=>{if(audio)audio.playbackRate=e.target.checked?.75:1});render();
+authReady=entitlement();
+authReady.then(updateAccess);
+if (new URLSearchParams(location.search).get('guest') === '1') {
+  document.querySelector('.garden-header .brand').href = 'Aujourd%27hui.dc.html?guest=1';
+}
+restoreCard();
+window.addEventListener('pageshow', restoreCard);
+document.addEventListener('km-app-active', restoreCard);
 })();
 
 

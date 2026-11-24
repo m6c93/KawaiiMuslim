@@ -15,11 +15,12 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="../km-config.js" defer></script>
   <script src="../km-auth.js" defer></script>
-  <script src="stories.js?v=continuous-1" defer></script>
+  <script src="/km-activity-return.js?v=family-nav-1" defer></script>
+  <script src="stories.js?v=family-nav-1" defer></script>
 </head>
 <body>
   <main id="collection" class="collection" hidden>
-    <a class="back-link" href="../Aujourd%27hui.dc.html?guest=1#weeklyProphet"><span class="material-symbols-rounded" aria-hidden="true">arrow_back</span> Aujourd’hui</a>
+    <a class="back-link" data-activity-return href="/Applications.dc.html#app-prophets"><span class="material-symbols-rounded" aria-hidden="true">arrow_back</span> <span data-return-label>Applications</span></a>
     <header class="collection-heading"><p class="eyebrow">À DÉCOUVRIR EN FAMILLE</p><h1>Les prophètes</h1><p>Une histoire, une leçon à garder près de soi.</p></header>
     <label class="search"><span class="material-symbols-rounded" aria-hidden="true">search</span><input id="search" type="search" placeholder="Rechercher un prophète" aria-label="Rechercher un prophète"></label>
     <div class="story-grid" id="story-grid"></div>
@@ -39,7 +40,7 @@
       <button class="button download" id="download-map" type="button"><span class="material-symbols-rounded" aria-hidden="true">download</span> Télécharger l’image <span class="pro-badge">Pro</span></button>
     </div>
     <nav class="story-navigation" aria-label="Changer de prophète"><a id="previous" href="#"><span class="material-symbols-rounded" aria-hidden="true">arrow_back</span> Précédent</a><a id="next" href="#">Suivant <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></a></nav>
-    <a class="home-link" href="../Aujourd%27hui.dc.html?guest=1#weeklyProphet">Revenir à Aujourd’hui</a>
+    <a class="home-link" data-activity-return href="/Applications.dc.html#app-prophets">Retour · <span data-return-label>Applications</span></a>
   </main>
 
   <main id="dua" class="dua-screen" hidden>

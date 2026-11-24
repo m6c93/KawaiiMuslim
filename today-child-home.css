@@ -472,3 +472,18 @@ html[data-km-gender="boy"] button:focus-visible { outline-color: #287c7a; }
 @media(max-width:900px){.weekly-moments>.weekly-dua,.weekly-moments>.today-salat,.weekly-moments>.weekly-prophet{grid-column:1;grid-row:auto}.weekly-moments>.today-salat{order:0}.weekly-moments>.today-salat .today-salat-intro{grid-template-columns:100px minmax(0,1fr);gap:13px}.weekly-moments>.today-salat .today-salat-figure img{height:180px}.weekly-moments>.today-salat .today-salat-copy h2{font-size:27px}}
 
 .weekly-moments>.today-salat .today-salat-intro{grid-template-columns:100px minmax(0,1fr);gap:16px}.weekly-moments>.today-salat .today-salat-figure img{height:190px}.weekly-moments>.today-salat .today-salat-copy h2{font-size:29px}.weekly-moments>.today-salat .today-salat-copy>p{font-size:13px}.weekly-moments>.today-salat .today-salat-cta{font-size:13px;padding:12px 16px}.weekly-moments>.today-salat .today-salat-arabic{font-size:25px}
+
+.child-resume[hidden] { display: none; }
+.resume-symbol { display:grid; place-items:center; width:46px; height:46px; border-radius:14px; background:var(--child-pink-soft); color:var(--child-ink); }
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) {
+  .child-home { gap:18px; }
+  .child-hero { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr); min-height:0; }
+  .child-hero-copy { padding:16px 0 16px 16px; }
+  .child-hero-copy .child-eyebrow, .child-hero-copy > p:not(.child-eyebrow), .child-hero-copy .child-primary { display:none; }
+  .child-hero h1 { font-size:clamp(25px,6vw,38px); margin:0; }
+  .child-hero-art { width:35%; height:110%; right:0; bottom:-6%; object-fit:contain; object-position:center bottom; }
+  .child-section-title > p { display:none; }
+  .destination { min-height:105px; padding:12px 14px; }
+  .destination > .material-symbols-rounded:first-child { font-size:28px; }
+  .destination strong { margin-top:5px; }
+}

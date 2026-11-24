@@ -1,7 +1,9 @@
-const CACHE = "mimi-fly-responsive-v1";
+const CACHE = "mimi-fly-responsive-v2";
 const CORE = [
   "/applications/mimi/",
   "/applications/mimi/manifest.webmanifest",
+  "/applications/mimi/game-navigation.css?v=family-nav-3",
+  "/km-activity-return.js?v=family-nav-2",
   "/applications/mimi/assets/mimi-flight-cycle-8f.webp",
   "/applications/mimi/assets/mimi-waddle-cycle-8f.webp",
   "/applications/mimi/assets/mimi-world-parallax-background.webp"
@@ -13,7 +15,7 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)))));
+  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key.startsWith("mimi-fly-") && key !== CACHE).map((key) => caches.delete(key)))));
   self.clients.claim();
 });
 

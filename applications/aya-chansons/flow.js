@@ -7,11 +7,12 @@
  const icons={colors:'🌈',alphabet:'أ ب',corps:'👋',ecole:'🎒',jours:'🗓️'};
  const order=Object.keys(names);let current=null;
  const storage='kmw-aya-watch-v2';
- const read=()=>{try{return JSON.parse(localStorage.getItem(storage))||{};}catch{return {};}};
- const write=value=>{try{localStorage.setItem(storage,JSON.stringify(value));}catch{}};
+ const read=()=>{try{return JSON.parse(window.KMActivityProgress.storage.getItem(storage))||{};}catch{return {};}};
+ const write=value=>{try{window.KMActivityProgress.storage.setItem(storage,JSON.stringify(value));}catch{}};
  function mode(value){document.body.dataset.ayaView=value;}
  function leave(){document.querySelectorAll('video').forEach(v=>v.pause());window.AyaColors?.stop();dispatchEvent(new Event('aya:leave'));}
  function show(key,title){
+  window.KMActivityProgress.remember('/applications/aya-chansons/?lecon='+key);
   leave();current=key;mode('lesson');screen.hidden=key!=='colors';lesson.hidden=key==='colors';
   catalog.hidden=true;book.hidden=true;back.textContent='← Maison';back.setAttribute('aria-label','Retour à la maison');
   top.dataset.lesson=title;screen.replaceChildren();document.querySelector('#premium-content').replaceChildren();

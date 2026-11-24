@@ -41,16 +41,17 @@ test('signed-out parent stays on offers without loading private account data',as
  await vm.runInContext(prefix+'}; load();',box);
  assert.equal(rendered,1);
 });
-async function publicOffers(products,failed=false){
+async function publicOffers(products,failed=false,payBeforeAccount=false){
  const nodes=new Map();
  const node=()=>({hidden:false,textContent:'',classList:{add(){}},querySelector(){return node();}});
  const get=id=>{if(!nodes.has(id))nodes.set(id,node());return nodes.get(id);};
  const options=[1,2,3].map(limit=>{const strong=node(),small=node();return {dataset:{limit},querySelector:s=>s==='strong'?strong:small,strong,small};});
  const members=[node(),node()];
- const box=vm.createContext({document:{getElementById:get,querySelectorAll:()=>options},window:{KMApple:{products:async()=>{if(failed)throw Error('offline');return {products};}}},memberOnlyElements:members,subscriptionCard:node(),subscriptionIntro:node(),billingNote:node(),billingMessage:node()});
+ const apple={payBeforeAccount,pending:async()=>({paid:false}),products:async()=>{if(failed)throw Error('offline');return {products};}};
+ const box=vm.createContext({document:{getElementById:get,querySelectorAll:()=>options},window:{KMApple:apple},memberOnlyElements:members,subscriptionCard:node(),subscriptionIntro:node(),billingNote:node(),billingMessage:node()});
  const source=account.slice(account.indexOf('    const renderSignedOutOffer'),account.indexOf('    const load = async'));
  await vm.runInContext(source+'renderSignedOutOffer();',box);
- return {nodes,options,members};
+ return {nodes,options,members,apple,billingMessage:box.billingMessage,retry:()=>vm.runInContext('renderSignedOutOffer();',box)};
 }
 test('public native offers show Apple prices and free sign-up, with private views hidden',async()=>{
  const r=await publicOffers([{id:'com.kawaiimuslimworld.family1.monthly',price:'4,99 €'}]);
@@ -73,4 +74,76 @@ test('anonymous plan selection goes to account creation and never starts checkou
  const box=vm.createContext({context:null,event:{target:{closest:()=>({dataset:{plan:'family_2_children'}})}},window:{location:{assign:url=>{destination=url;}}},encodeURIComponent});
  await vm.runInContext('(async()=>{'+account.slice(start,end)+'})()',box);
  assert.equal(destination,'Inscription.dc.html?plan=family_2_children');
+});
+
+test('pay-first Apple offers recover from unavailable prices without allowing unpaid signup',async()=>{
+ for(const failure of [false,true]){
+  const offer=await publicOffers([],failure,true);
+  assert.ok(offer.options.every(option=>option.disabled));
+  assert.equal(offer.nodes.get('createParentAccount').hidden,true);
+  assert.equal(offer.nodes.get('appleOfferRecovery').hidden,false);
+  assert.doesNotMatch(offer.billingMessage.textContent,/créer ton compte gratuitement/);
+  offer.apple.products=async()=>({products:[{id:'com.kawaiimuslimworld.family1.monthly',price:'4,99 €'}]});
+  await offer.retry();
+  assert.equal(offer.options[0].disabled,false);
+  assert.equal(offer.nodes.get('appleOfferRecovery').hidden,true);
+  assert.equal(offer.nodes.get('createParentAccount').hidden,true);
+ }
+});
+test('failure checking an existing Apple purchase allows a retry without another purchase',async()=>{
+ const offer=await publicOffers([],false,true);
+ offer.apple.pending=async()=>{throw Error('bridge offline')};
+ await offer.retry();
+ assert.equal(offer.nodes.get('appleOfferRecovery').hidden,false);
+ assert.ok(offer.options.every(option=>option.disabled));
+ offer.apple.pending=async()=>({paid:true});
+ await offer.retry();
+ assert.equal(offer.nodes.get('appleOfferRecovery').hidden,true);
+ assert.equal(offer.nodes.get('planOptions').hidden,true);
+ assert.equal(offer.nodes.get('createParentAccount').href,'Inscription.dc.html?apple_paid=1');
+});
+test('manual logout closes the web session even if the native bridge fails and can retry',async()=>{
+ const stored=new Map([['km-active-profile-v2','parent']]);
+ const storage={getItem:key=>stored.get(key),setItem:(key,item)=>stored.set(key,item),removeItem:key=>stored.delete(key)};
+ let nativeClearCalls=0,webSignouts=0,offline=true;
+ const window={location:new URL('https://example.test/Compte.dc.html'),
+  KM_CONFIG:{supabaseUrl:'https://example.test',supabaseAnonKey:'test'},
+  KMApple:{clear:async()=>{nativeClearCalls++;if(offline)throw Error('bridge offline')}},
+  supabase:{createClient:()=>({auth:{signOut:async()=>{webSignouts++;return {}}}})}};
+ vm.runInNewContext(readFileSync(new URL('../km-auth.js',import.meta.url),'utf8'),{URLSearchParams,URL,window,localStorage:storage,sessionStorage:storage});
+ const {applePending}=await window.KMAuth.logout();
+ assert.equal(applePending,true);assert.equal(webSignouts,1);assert.equal(stored.has('km-active-profile-v2'),false);
+ assert.equal(window.KMAuth.hasPendingAppleLogout(),true);
+ offline=false;await window.KMAuth.clearNativeSession();
+ assert.equal(window.KMAuth.hasPendingAppleLogout(),false);assert.equal(nativeClearCalls,2);
+});
+test('web signup shows real trial terms before submission, and links to the published notices',()=>{
+ const html=readFileSync(new URL('../Inscription.dc.html',import.meta.url),'utf8');
+ assert.ok(html.indexOf('id="signupBillingNote"')<html.indexOf('id="submitButton"'));
+ assert.ok(html.indexOf('id="webOfferTerms"')<html.indexOf('id="submitButton"'));
+ assert.match(html,/href="presentation.html#tarifs"/);
+ assert.match(html,/href="Confidentialite.dc.html"/);
+ assert.match(html,/apple\.com\/legal\/internet-services\/itunes\/dev\/stdeula/);
+});
+
+test('leaving login opens the guest library without requiring a session, or the public parent offers',()=>{
+ assert.match(login,/id="backFromLogin"[^>]*>← Retour à la découverte<\/a>/);
+ const guestHref=login.match(/id="backFromLogin" href="([^"]+)"/)[1].replaceAll('&amp;','&');
+ const start=login.indexOf('    if (parentDestination || loginParams');
+ const block=login.slice(start,login.indexOf('    document.getElementById("forgotPassword")',start));
+ const back={href:guestHref,querySelector:()=>({})};
+ vm.runInNewContext(block,{parentDestination:false,loginParams:new URLSearchParams(),document:{getElementById:()=>back}});
+ const target=new URL(back.href,'https://example.test');
+ assert.equal(target.searchParams.get('section'),'library');
+ assert.equal(target.searchParams.get('guest'),'1');
+ const entry=readFileSync(new URL('../km-app-shell-entry.js',import.meta.url),'utf8');
+ const storage=new Map();const sessionStorage={getItem:key=>storage.get(key),setItem:(key,val)=>storage.set(key,val)};
+ const hop={href:target.href,pathname:target.pathname,search:target.search,hash:'',replace:url=>hop.next=url};
+ vm.runInNewContext(entry,{window:{webkit:{messageHandlers:{kmShell:{}}}},location:hop,URL,URLSearchParams,sessionStorage});
+ const window={location:new URL(hop.next)};
+ const gate=readFileSync(new URL('../km-access-gate.js',import.meta.url),'utf8');
+ vm.runInNewContext(gate,{window,URL,URLSearchParams,sessionStorage,document:{documentElement:{}}});
+ assert.equal(window.KM_GUEST_MODE,true);
+ vm.runInNewContext(block,{parentDestination:true,loginParams:new URLSearchParams('reason=parent&next=https://unrelated.invalid'),document:{getElementById:()=>back}});
+ assert.equal(back.href,'Compte.dc.html');
 });

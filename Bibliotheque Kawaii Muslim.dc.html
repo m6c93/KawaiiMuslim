@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
 <style id="km-app-canvas">html{background:#fffaf2!important;color-scheme:light}html[style*="visibility: hidden"]::before{content:"";position:fixed;inset:0;background:#fffaf2;visibility:visible;z-index:2147483640;pointer-events:none}.km-library-boot{background:#fffaf2!important;color:#69455a!important}.km-library-boot span{color:#8a7180!important}</style><script src="/km-app-shell-entry.js?v=continuous-1"></script>
 <script src="./km-access-gate.js?v=guest-nav-fix-20260830"></script>
@@ -37,6 +37,8 @@
   <script src="./km-bottom-nav.js?v=continuous-1"></script>
   <script src="./km-child-theme.js?v=boy-theme-2"></script>
   <link rel="stylesheet" href="./km-world-light-theme.css?v=boy-palette-1">
+  <link rel="stylesheet" href="/library-catalog.css?v=family-1">
+  <script src="/library-catalog.js?v=family-1"></script>
 </head>
 <body class="km-responsive km-library" data-km-section="library">
 <div class="km-library-boot" id="kmLibraryBoot" role="status" aria-live="polite">
@@ -234,7 +236,7 @@
 <div class="km-library-stage" style="width:100vw; height:100vh; margin:0; background:#14091a; position:relative;">
 
   <!-- ===== SCREEN ===== -->
-  <div class="km-library-screen" style="position:relative; width:100%; height:100%; overflow:hidden; font-family:'Nunito',system-ui,sans-serif; color:#fff; background:radial-gradient(130% 100% at 50% -18%, #33419A 0%, #222C66 44%, #141A3C 100%);">
+  <div class="km-library-screen {{ viewClass }}" data-library-scope="{{ viewScope }}" style="position:relative; width:100%; height:100%; overflow:hidden; font-family:'Nunito',system-ui,sans-serif; color:#fff; background:radial-gradient(130% 100% at 50% -18%, #33419A 0%, #222C66 44%, #141A3C 100%);">
 
     <!-- stars -->
     <div class="km-star-field" style="position:absolute; inset:0; pointer-events:none; opacity:.7; background-repeat:no-repeat; background-image:
@@ -264,18 +266,15 @@
       </div>
       <label class="km-library-search" for="librarySearch" style="flex:0 1 380px; display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); border-radius:30px; padding:11px 20px;">
         <span style="opacity:.7; font-size:15px;">🔍</span>
-        <input id="librarySearch" type="search" autocomplete="off" placeholder="Cherche un livre, une histoire…" aria-label="Rechercher dans la bibliothèque" style="width:100%;border:0;outline:0;background:transparent;color:#fff;font-size:14px;" />
+        <input id="librarySearch" type="search" value="{{ searchQuery }}" onChange="{{ searchBooks }}" aria-controls="libraryBooks" autocomplete="off" placeholder="Cherche un livre, une histoire…" aria-label="Rechercher dans la bibliothèque" style="width:100%;border:0;outline:0;background:transparent;color:#fff;font-size:14px;" />
       </label>
       <sc-if value="{{ subscribed }}" hint-placeholder-val="{{ false }}">
         <span class="km-premium-badge" style="display:flex; align-items:center; gap:7px; background:linear-gradient(150deg,#F0B53F,#D8932A); color:#fff; font-weight:700; font-size:12.5px; padding:9px 18px; border-radius:24px; white-space:nowrap; box-shadow:0 6px 16px rgba(216,147,42,.34);">✨ Abonné Premium</span>
       </sc-if>
-      <sc-if value="{{ notSubscribed }}" hint-placeholder-val="{{ true }}">
-        <span onClick="{{ openPaywall }}" style="cursor:pointer; display:flex; align-items:center; gap:7px; background:linear-gradient(150deg,#F0AECA,#E27FAE); color:#fff; font-family:'Baloo 2',cursive; font-weight:700; font-size:13px; padding:9px 20px; border-radius:24px; white-space:nowrap; box-shadow:0 8px 18px rgba(226,127,174,.36);">🔓 S'abonner</span>
-      </sc-if>
-      <div class="km-profile-switch" role="button" tabindex="0" aria-label="Changer de profil" onClick="{{ switchProfile }}" style="display:flex; align-items:center; gap:11px; cursor:pointer; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:30px; padding:7px 9px 7px 16px;">
+      <button type="button" class="km-profile-switch" aria-label="Changer de profil" onClick="{{ switchProfile }}" style="display:flex; align-items:center; gap:11px; cursor:pointer; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:30px; padding:7px 9px 7px 16px;">
         <div style="text-align:right; line-height:1.1;"><p style="font-size:13px; font-weight:700; margin:0;">{{ profileName }}</p><p style="font-size:10px; color:#CFD0E8; margin:1px 0 0;">changer</p></div>
         <div style="width:38px; height:38px; border-radius:50%; background:linear-gradient(150deg,#F0AECA,#E27FAE); display:flex; align-items:center; justify-content:center; font-size:18px;">{{ profileEmoji }}</div>
-      </div>
+      </button>
     </div>
 
     <!-- ===== SCROLL BODY ===== -->
@@ -291,17 +290,6 @@
         <img class="km-world-hero-art km-library-hero-art km-gender-boy" src="brand/assets/adam-mimi-library.webp" alt="Adam et Mimi lisent une histoire ensemble">
       </div>
 
-      <!-- SUBSCRIBE BANNER (non-abonnés) -->
-      <sc-if value="{{ notSubscribed }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:20px; background:linear-gradient(120deg, rgba(240,181,63,.18), rgba(226,127,174,.16)); border:1px solid rgba(240,181,63,.4); border-radius:20px; padding:16px 24px; margin-bottom:24px;">
-          <div style="display:flex; align-items:center; gap:14px;">
-            <span style="font-size:26px;">🌟</span>
-            <p style="font-size:14px; color:#EDEFFb; margin:0; line-height:1.5;"><strong style="color:#fff;">Débloque toute la bibliothèque.</strong> Découvre d’abord une partie de l’application gratuitement, sans carte bancaire.</p>
-          </div>
-          <span onClick="{{ openPaywall }}" style="cursor:pointer; flex-shrink:0; font-family:'Baloo 2',cursive; font-weight:700; font-size:14px; color:#fff; background:linear-gradient(150deg,#F0B53F,#D8932A); padding:11px 24px; border-radius:24px; white-space:nowrap; box-shadow:0 8px 18px rgba(216,147,42,.34);">Voir l’accès complet</span>
-        </div>
-      </sc-if>
-
       <!-- CONTINUE READING HERO -->
       <div class="km-reading-hero" data-km-reveal style="display:flex; gap:26px; align-items:stretch; background:linear-gradient(135deg, rgba(226,127,174,.22), rgba(51,65,154,.20)); border:1px solid rgba(255,255,255,.12); border-radius:26px; padding:22px; margin-bottom:30px; backdrop-filter:blur(4px);">
         <div class="km-reading-cover" style="flex:0 0 200px; border-radius:14px; overflow:hidden; box-shadow:0 18px 40px rgba(0,0,0,.45); position:relative;">
@@ -311,30 +299,26 @@
           <span style="font-weight:800; font-size:11px; letter-spacing:2px; color:#F0B53F; text-transform:uppercase;">{{ readingHeadline }}</span>
           <h2 style="font-family:'Baloo 2',cursive; font-weight:800; font-size:30px; margin:8px 0 4px;">Tawakkul</h2>
           <p style="font-size:14px; color:#C9CBE6; margin:0 0 18px; max-width:460px; line-height:1.55;">La confiance en Allah ﷻ, racontée tout en douceur à Aya par sa petite Mimi.</p>
-          <sc-if value="{{ notGuest }}"><div style="display:flex; align-items:center; gap:14px; margin-bottom:20px; max-width:420px;">
-            <div style="flex:1; height:8px; border-radius:4px; background:rgba(255,255,255,.15); overflow:hidden;"><div class="km-progress-fill" style="width:42%; height:100%; background:linear-gradient(90deg,#F0AECA,#E27FAE);"></div></div>
-            <span style="font-size:12px; font-weight:700; color:#C9CBE6;">page 8 / 20</span>
-          </div></sc-if>
           <sc-if value="{{ readingAccess }}" hint-placeholder-val="{{ false }}">
-            <a class="km-reading-button" href="{{ readingUrl }}" style="align-self:flex-start; text-decoration:none; display:flex; align-items:center; gap:10px; background:linear-gradient(150deg,#F0AECA,#E27FAE); color:#fff; font-family:'Baloo 2',cursive; font-weight:700; font-size:16px; padding:13px 30px; border-radius:30px; box-shadow:0 12px 26px rgba(226,127,174,.4);">
+            <a class="km-reading-button" data-library-target="featured" href="{{ readingUrl }}" style="align-self:flex-start; text-decoration:none; display:flex; align-items:center; gap:10px; background:linear-gradient(150deg,#F0AECA,#E27FAE); color:#fff; font-family:'Baloo 2',cursive; font-weight:700; font-size:16px; padding:13px 30px; border-radius:30px; box-shadow:0 12px 26px rgba(226,127,174,.4);">
               <span style="font-size:15px;">▶</span> {{ readingButton }}
             </a>
           </sc-if>
           <sc-if value="{{ readingLocked }}" hint-placeholder-val="{{ true }}">
-            <span class="km-reading-button" onClick="{{ openPaywall }}" style="align-self:flex-start; cursor:pointer; display:flex; align-items:center; gap:10px; background:linear-gradient(150deg,#F0AECA,#E27FAE); color:#fff; font-family:'Baloo 2',cursive; font-weight:700; font-size:16px; padding:13px 30px; border-radius:30px; box-shadow:0 12px 26px rgba(226,127,174,.4);">
+            <button type="button" class="km-reading-button" onClick="{{ openPaywall }}" style="align-self:flex-start; cursor:pointer; display:flex; align-items:center; gap:10px; background:linear-gradient(150deg,#F0AECA,#E27FAE); color:#fff; font-family:'Baloo 2',cursive; font-weight:700; font-size:16px; padding:13px 30px; border-radius:30px; box-shadow:0 12px 26px rgba(226,127,174,.4);">
               <span style="font-size:15px;">🔒</span> Débloquer avec l'abonnement
-            </span>
+            </button>
           </sc-if>
         </div>
       </div>
 
       <sc-if value="{{ announcement }}" hint-placeholder-val="{{ false }}">
-        <div style="margin-bottom:22px; padding:13px 18px; border:1px solid rgba(240,181,63,.45); border-radius:16px; color:#fff5cf; background:rgba(240,181,63,.13); font-size:13px; font-weight:700;">📣 {{ announcement }}</div>
+        <div class="km-library-announcement" style="margin-bottom:22px; padding:13px 18px; border:1px solid rgba(240,181,63,.45); border-radius:16px; color:#fff5cf; background:rgba(240,181,63,.13); font-size:13px; font-weight:700;">📣 {{ announcement }}</div>
       </sc-if>
 
       <!-- PARENT SPACE -->
       <sc-if value="{{ parentSpace }}" hint-placeholder-val="{{ false }}">
-        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:30px;">
+        <div class="km-library-parent-summary" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:30px;">
           <div style="background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:20px 24px;"><p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:26px; color:#F0B53F; margin:0;">3 livres</p><p style="font-size:12.5px; color:#C9CBE6; margin:6px 0 0;">lus cette semaine par Aya</p></div>
           <div style="background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:20px 24px;"><p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:26px; color:#F0AECA; margin:0;">42 min</p><p style="font-size:12.5px; color:#C9CBE6; margin:6px 0 0;">de lecture partagée</p></div>
           <a href="Boutique.dc.html" style="display:block;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:20px 24px;text-decoration:none;color:inherit;transition:transform .2s,border-color .2s;"><p style="font-family:'Baloo 2',cursive;font-weight:800;font-size:26px;color:#8FD2E4;margin:0;">⭐ {{ starBalance }}</p><p style="font-size:12.5px;color:#C9CBE6;margin:6px 0 0;">étoiles de {{ starChildName }} · Voir la boutique</p></a>
@@ -342,7 +326,7 @@
       </sc-if>
 
       <!-- FILTERS -->
-      <div data-km-reveal style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+      <div class="km-library-categories" data-km-reveal style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
         <span class="km-filter-chip" style="background:#E27FAE; color:#fff; font-weight:700; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Tous les livres</span>
         <a class="km-filter-chip" href="{{ coloringChooser }}" style="text-decoration:none; background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:700; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Coloriages</a>
         <a class="km-filter-chip" href="Safe%20Place.dc.html" style="text-decoration:none; cursor:pointer; background:rgba(255,255,255,.08); color:#C9CBE6; font-weight:600; font-size:13px; padding:9px 20px; border-radius:22px; white-space:nowrap;">Safe Place</a>
@@ -352,9 +336,13 @@
       </div>
 
       <!-- SHELF -->
-      <div class="km-book-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px;">
+      <div class="km-library-results">
+        <p role="status" aria-atomic="true">{{ searchStatus }}</p>
+        <sc-if value="{{ searching }}"><button type="button" onClick="{{ resetSearch }}">Effacer la recherche</button></sc-if>
+      </div>
+      <div id="libraryBooks" class="km-book-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px;">
         <sc-for list="{{ books }}" as="book" hint-placeholder-count="8">
-          <div class="km-book-item" data-km-reveal style="position:relative;">
+          <div class="km-book-item" id="{{ book.cardId }}" data-km-reveal style="position:relative;">
             <div class="km-book-cover" style="position:relative; border-radius:16px; overflow:hidden; aspect-ratio:1/1; background:#fff; box-shadow:0 16px 34px rgba(0,0,0,.4);">
               <sc-if value="{{ book.coverImg }}" hint-placeholder-val="{{ false }}">
                 <img src="{{ book.coverImg }}" alt="{{ book.title }}" style="width:100%; height:100%; object-fit:{{ book.coverFit }}; object-position:{{ book.coverPosition }}; display:block;" />
@@ -369,7 +357,7 @@
                 <span style="position:absolute; top:10px; right:10px; background:linear-gradient(135deg,#F0B53F,#D8932A); color:#fff; font-weight:900; font-size:10.5px; letter-spacing:.55px; padding:7px 12px; border-radius:14px; text-transform:uppercase; box-shadow:0 7px 18px rgba(216,147,42,.38);">Bientôt disponible</span>
               </sc-if>
               <sc-if value="{{ book.canRead }}" hint-placeholder-val="{{ true }}">
-                <a class="km-book-link" href="{{ book.url }}" aria-label="Lire {{ book.title }}" style="position:absolute; inset:0; display:block;"></a>
+                <a class="km-book-link" data-library-target="{{ book.title }}" href="{{ book.url }}" aria-label="Lire {{ book.title }}" style="position:absolute; inset:0; display:block;"></a>
                 <sc-if value="{{ book.isColoringBook }}" hint-placeholder-val="{{ false }}">
                   <span class="km-read-label" style="position:absolute; bottom:10px; left:10px; background:linear-gradient(135deg,#7d72df,#ef6f9f); color:#fff; font-weight:800; font-size:10.5px; letter-spacing:.35px; padding:6px 11px; border-radius:14px; text-transform:uppercase; box-shadow:0 6px 16px rgba(32,25,82,.3);">🎨 Lire & colorier</span>
                 </sc-if>
@@ -381,21 +369,27 @@
                 </sc-if>
               </sc-if>
               <sc-if value="{{ book.locked }}" hint-placeholder-val="{{ false }}">
-                    <div onClick="{{ openLockedBook }}" style="position:absolute; inset:0; cursor:{{ lockedBookCursor }}; background:rgba(20,26,60,.5); display:flex; align-items:center; justify-content:center;">
+                    <button type="button" class="km-library-lock" aria-label="Accès Premium pour {{ book.title }}" onClick="{{ openPaywall }}" style="position:absolute; inset:0; cursor:pointer; background:rgba(20,26,60,.5); display:flex; align-items:center; justify-content:center;">
                   <span style="width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,.92); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 6px 16px rgba(0,0,0,.3);">🔒</span>
-                </div>
+                </button>
                 <span style="position:absolute; bottom:10px; left:10px; background:rgba(240,181,63,.95); color:#3a2b06; font-weight:700; font-size:10.5px; letter-spacing:.5px; padding:5px 11px; border-radius:14px; text-transform:uppercase;">Premium</span>
                 <sc-if value="{{ book.isColoringBook }}" hint-placeholder-val="{{ false }}">
                   <span style="position:absolute; top:10px; left:10px; z-index:2; background:linear-gradient(135deg,#7d72df,#ef6f9f); color:#fff; font-weight:900; font-size:10.5px; letter-spacing:.35px; padding:6px 11px; border-radius:14px; text-transform:uppercase; box-shadow:0 6px 16px rgba(32,25,82,.3);">🎨 Coloriage</span>
                 </sc-if>
               </sc-if>
             </div>
-            <p style="font-family:'Baloo 2',cursive; font-weight:700; font-size:14.5px; margin:12px 0 2px;">{{ book.title }}</p>
-            <p style="font-size:12px; color:#9fa2c8; margin:0;">{{ book.sub }}</p>
+            <p style="font-family:'Baloo 2',cursive; font-weight:700; font-size:14.5px; margin:12px 0 2px;"><sc-for list="{{ book.titleParts }}" as="part"><span class="{{ part.style }}">{{ part.text }}</span></sc-for></p>
+            <p style="font-size:12px; color:#9fa2c8; margin:0;"><sc-for list="{{ book.subParts }}" as="part"><span class="{{ part.style }}">{{ part.text }}</span></sc-for></p>
           </div>
         </sc-for>
       </div>
 
+      <sc-if value="{{ notSubscribed }}">
+        <aside class="km-library-offer" aria-label="Abonnement famille">
+          <div><strong>Toute la bibliothèque en famille</strong><p>Les livres complets et les activités sont inclus dans l’abonnement.</p></div>
+          <button type="button" onClick="{{ openPaywall }}">Voir l’accès complet</button>
+        </aside>
+      </sc-if>
       <!-- COLORIAGES -->
       <div id="coloriages" data-km-reveal style="display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin:40px 0 18px; scroll-margin-top:20px;">
         <div>
@@ -422,9 +416,9 @@
                 <span style="position:absolute; bottom:10px; left:10px; background:rgba(125,130,165,.9); color:#fff; font-weight:700; font-size:10.5px; padding:5px 11px; border-radius:14px; text-transform:uppercase;">Bientôt</span>
               </sc-if>
               <sc-if value="{{ page.locked }}" hint-placeholder-val="{{ false }}">
-                <div onClick="{{ openPaywall }}" style="position:absolute; inset:0; cursor:pointer; background:rgba(20,26,60,.45); display:flex; align-items:center; justify-content:center;">
+                <button type="button" class="km-library-lock" aria-label="Accès Premium pour {{ page.title }}" onClick="{{ openPaywall }}" style="position:absolute; inset:0; cursor:pointer; background:rgba(20,26,60,.45); display:flex; align-items:center; justify-content:center;">
                   <span style="width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,.92); display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 6px 16px rgba(0,0,0,.3);">🔒</span>
-                </div>
+                </button>
               </sc-if>
             </div>
             <p style="font-family:'Baloo 2',cursive; font-weight:700; font-size:13.5px; margin:10px 0 0; text-align:center;">{{ page.title }}</p>
@@ -441,28 +435,28 @@
         <h2 style="font-family:'Baloo 2',cursive; font-weight:800; font-size:34px; margin:0 0 8px; text-align:center;">Qui lit ce soir ? 🌙</h2>
         <p style="font-size:15px; color:#C9CBE6; margin:0 0 36px; text-align:center;">Choisis ton profil pour ouvrir la bibliothèque.</p>
         <div class="km-profile-choices" style="display:flex; gap:26px;">
-          <div class="km-profile-card" onClick="{{ chooseEnfant }}" style="cursor:pointer; width:240px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.16); border-radius:26px; padding:32px; text-align:center; transition:transform .15s;" style-hover="transform:translateY(-6px); background:rgba(255,255,255,.12);">
+          <button type="button" class="km-profile-card" onClick="{{ chooseEnfant }}" style="cursor:pointer; width:240px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.16); border-radius:26px; padding:32px; text-align:center; transition:transform .15s;" style-hover="transform:translateY(-6px); background:rgba(255,255,255,.12);">
             <div style="width:104px; height:104px; border-radius:50%; margin:0 auto 18px; background:linear-gradient(150deg,#FBDDEA,#F0AECA); display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 12px 28px rgba(226,127,174,.4);"><img src="brand/assets/mascot-nour.png" alt="enfant" style="width:124px; height:auto; margin-top:8px;" /></div>
             <p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:22px; margin:0 0 4px;">Aya</p>
             <p style="font-size:12.5px; color:#C9CBE6; margin:0;">Espace enfant</p>
-          </div>
-          <div class="km-profile-card" onClick="{{ chooseMaman }}" style="cursor:pointer; width:240px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.16); border-radius:26px; padding:32px; text-align:center; transition:transform .15s;" style-hover="transform:translateY(-6px); background:rgba(255,255,255,.12);">
+          </button>
+          <button type="button" class="km-profile-card" onClick="{{ chooseMaman }}" style="cursor:pointer; width:240px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.16); border-radius:26px; padding:32px; text-align:center; transition:transform .15s;" style-hover="transform:translateY(-6px); background:rgba(255,255,255,.12);">
             <div style="width:104px; height:104px; border-radius:50%; margin:0 auto 18px; background:linear-gradient(150deg,#C9D2FF,#7C8BE0); display:flex; align-items:center; justify-content:center; font-size:48px; box-shadow:0 12px 28px rgba(124,139,224,.4);">🌸</div>
             <p style="font-family:'Baloo 2',cursive; font-weight:800; font-size:22px; margin:0 0 4px;">Maman</p>
             <p style="font-size:12.5px; color:#C9CBE6; margin:0;">Espace parent</p>
-          </div>
+          </button>
         </div>
       </div>
     </sc-if>
 
     <!-- ===== PAYWALL / ABONNEMENT ===== -->
     <sc-if value="{{ showPaywall }}" hint-placeholder-val="{{ false }}">
-      <div style="position:absolute; inset:0; z-index:30; background:radial-gradient(130% 100% at 50% -10%, rgba(51,65,154,.9), rgba(20,26,60,.97)); backdrop-filter:blur(9px); display:flex; align-items:center; justify-content:center; padding:36px;">
+      <dialog id="libraryOffer" aria-labelledby="libraryOfferTitle" onCancel="{{ closePaywall }}" style="position:fixed; inset:0; z-index:30; background:radial-gradient(130% 100% at 50% -10%, rgba(51,65,154,.9), rgba(20,26,60,.97)); backdrop-filter:blur(9px); display:flex; align-items:center; justify-content:center; padding:36px;">
         <div style="width:760px; max-width:100%; background:linear-gradient(165deg,#222C66,#141A3C); border:1px solid rgba(255,255,255,.14); border-radius:30px; padding:42px 46px; position:relative; box-shadow:0 40px 90px rgba(0,0,0,.5);">
-          <span onClick="{{ closePaywall }}" style="position:absolute; top:20px; right:24px; cursor:pointer; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; font-size:16px; color:#C9CBE6;">✕</span>
+          <button type="button" class="km-library-close" aria-label="Fermer" onClick="{{ closePaywall }}" style="position:absolute; top:20px; right:24px; cursor:pointer; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; font-size:16px; color:#C9CBE6;">✕</button>
           <div style="text-align:center; margin-bottom:30px;">
             <div style="width:64px; height:64px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; margin:0 auto 14px; box-shadow:0 0 0 3px rgba(240,181,63,.4);"><img src="brand/assets/mascot-nour.png" alt="Mimi" style="width:80px; height:auto; margin-top:5px;" /></div>
-            <h2 style="font-family:'Baloo 2',cursive; font-weight:800; font-size:30px; color:#fff; margin:0 0 8px;">Ouvre toute la bibliothèque ✨</h2>
+            <h2 id="libraryOfferTitle" style="font-family:'Baloo 2',cursive; font-weight:800; font-size:30px; color:#fff; margin:0 0 8px;">Ouvre toute la bibliothèque ✨</h2>
             <p style="font-size:14.5px; color:#C9CBE6; margin:0;">Lecture illimitée, nouveaux livres chaque mois, pour toute la famille.</p>
           </div>
 
@@ -490,10 +484,10 @@
             <span style="font-size:13px; color:#C9CBE6;">✅ Nouveautés chaque mois</span>
           </div>
 
-          <div onClick="{{ subscribe }}" style="cursor:pointer; text-align:center; font-family:'Baloo 2',cursive; font-weight:700; font-size:18px; color:#fff; background:linear-gradient(150deg,#F0AECA,#E27FAE); padding:16px; border-radius:30px; box-shadow:0 14px 30px rgba(226,127,174,.4);">Choisir cette formule</div>
-          <p onClick="{{ closePaywall }}" style="cursor:pointer; text-align:center; font-size:13px; color:#9fa2c8; margin:16px 0 0;">Peut-être plus tard</p>
+          <button type="button" class="km-library-subscribe" onClick="{{ subscribe }}" style="cursor:pointer; text-align:center; font-family:'Baloo 2',cursive; font-weight:700; font-size:18px; color:#fff; background:linear-gradient(150deg,#F0AECA,#E27FAE); padding:16px; border-radius:30px; box-shadow:0 14px 30px rgba(226,127,174,.4);">Choisir cette formule</button>
+          <button type="button" class="km-library-later" onClick="{{ closePaywall }}" style="cursor:pointer; text-align:center; font-size:13px; color:#9fa2c8; margin:16px 0 0;">Peut-être plus tard</button>
         </div>
-      </div>
+      </dialog>
     </sc-if>
 
   </div>
@@ -501,14 +495,23 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1312,&quot;height&quot;:872},&quot;defaultProfile&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;demander&quot;,&quot;enfant&quot;,&quot;maman&quot;],&quot;default&quot;:&quot;demander&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;},&quot;parentSpace&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;},&quot;subscribed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bibliothèque&quot;}}">
 class Component extends DCLogic {
-            state = { profile: null, profileName: '', profileEmoji: '', subscribed: false, guestMode: false, showPaywall: false, catalog: null, announcement: '', requestedChildren: 1, starBalance: 0, starChildName: 'Mon enfant' };
+            state = { searchQuery: '', profile: null, profileName: '', profileEmoji: '', subscribed: false, guestMode: false, showPaywall: false, catalog: null, announcement: '', requestedChildren: 1, starBalance: 0, starChildName: 'Mon enfant' };
+
+  openLibrary(scope, values) {
+    const saved = window.KMLibraryCatalog.takeReturn(scope);
+    this.viewScope = scope;
+    this.setState({ ...values, searchQuery: saved?.query || '' }, () => {
+      if (saved) window.KMLibraryCatalog.restoreView(saved);
+      else window.KMLibraryCatalog.focusAnchor();
+    });
+  }
 
   componentDidMount() {
     const localDesignPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)
       && new URLSearchParams(window.location.search).get('preview') === '1';
     const guestMode = new URLSearchParams(window.location.search).get('guest') === '1';
     if (localDesignPreview || guestMode) {
-      this.setState({
+      this.openLibrary(guestMode ? 'guest' : 'preview', {
         profile: 'enfant',
         profileName: guestMode ? 'Découverte' : 'Toto',
         profileEmoji: '🐤',
@@ -541,7 +544,7 @@ class Component extends DCLogic {
       const starShop = starChild
         ? await window.KMAuth.getStarShop(starChild.id).catch(() => ({ balance: 0 }))
         : { balance: 0 };
-      this.setState({
+      this.openLibrary(active.type + ':' + (active.id || context.profile.id), {
         profile: active.type === 'child' ? 'enfant' : 'maman',
         profileName: active.name || (active.type === 'child' ? 'Mon enfant' : 'Maman'),
         profileEmoji: active.avatar || (active.type === 'child' ? '🐤' : '🌸'),
@@ -643,12 +646,14 @@ class Component extends DCLogic {
       }
       const discoveryId = isInvocationsBook(b) ? 'invocations' : normalizedTitle === 'tawakkul' ? 'tawakkul' : isMiraclesBook ? 'miracles' : coloringSlug === 'hijabi-girls' ? 'hijabi' : '';
       const isDiscovery = (discoveryId === 'invocations' ? !subscribed : guestMode) && Boolean(discoveryId);
+      const alphabetPreview = guestMode && isAlphabetBook;
       const isPreview = Boolean(b.preview);
       return {
         ...b,
-        sub: isDiscovery ? (discoveryId === "invocations" ? "10 premières pages offertes · la suite avec Premium" : discoveryId === "hijabi" ? "3 coloriages offerts · à garder sur cet appareil" : "5 premières pages offertes") : b.sub,
+        cardId: 'livre-' + normalizedTitle.replace(/ +/g, '-'),
+        sub: alphabetPreview ? '3 lettres offertes · écouter, tracer et colorier' : isDiscovery ? (discoveryId === "invocations" ? "10 premières pages offertes · la suite avec Premium" : discoveryId === "hijabi" ? "3 coloriages offerts · à garder sur cet appareil" : "5 premières pages offertes") : b.sub,
         url: guestMode && isPreview ? "Safe%20Place.dc.html?guest=1" : isDiscovery ? `books/${discoveryId}-decouverte.html?guest=1` : isAlphabetBook
-          ? 'books/colorie-ecris-apprends.html'
+          ? 'books/colorie-ecris-apprends.html?' + (alphabetPreview ? 'guest=1&' : '') + 'from=library'
           : isMiraclesBook
           ? 'books/miracles-du-coran.html'
           : isColoringBook
@@ -663,8 +668,8 @@ class Component extends DCLogic {
         coverPosition: isAlphabetBook ? 'right center' : 'center',
         available: isAlphabetBook || isMiraclesBook || b.available,
         soon: isPreview ? !guestMode : (isAlphabetBook || isMiraclesBook) ? false : b.soon,
-        canRead: isDiscovery || isPreview || ((isAlphabetBook || isMiraclesBook || b.available) && subscribed),
-        locked: !isDiscovery && !isPreview && (isAlphabetBook || isMiraclesBook || b.available) && !subscribed,
+        canRead: alphabetPreview || isDiscovery || isPreview || ((isAlphabetBook || isMiraclesBook || b.available) && subscribed),
+        locked: !alphabetPreview && !isDiscovery && !isPreview && (isAlphabetBook || isMiraclesBook || b.available) && !subscribed,
         isColoringBook,
         isPreview,
         isRegularBook: !isColoringBook && !isPreview,
@@ -718,15 +723,23 @@ class Component extends DCLogic {
       return page;
     });
 
+    const searchQuery = this.state.searchQuery;
+    const catalog = window.KMLibraryCatalog.search(books, searchQuery);
     return {
+      viewScope: this.viewScope || '',
+      searchQuery,
+      viewClass: catalog.searching ? 'km-library-searching' : '',
+      searching: catalog.searching,
+      searchStatus: catalog.status,
+      searchBooks: event => this.setState({ searchQuery: event.target.value }),
+      resetSearch: () => this.setState({ searchQuery: '' }, () => document.getElementById('librarySearch')?.focus()),
       showGate: !profile,
       isMaman,
       subscribed,
-      notGuest: !guestMode,
       readingAccess: subscribed || guestMode,
       readingLocked: !subscribed && !guestMode,
-      readingHeadline: guestMode ? 'Une histoire à découvrir' : 'On reprend ce soir',
-      readingButton: guestMode ? 'Lire les 5 pages offertes' : 'Reprendre la lecture',
+      readingHeadline: 'Une histoire à découvrir',
+      readingButton: guestMode ? 'Lire les 5 pages offertes' : 'Lire Tawakkul',
       readingUrl: guestMode ? 'books/tawakkul-decouverte.html?guest=1' : 'books/tawakkul.html',
       notSubscribed: !subscribed,
       showPaywall: this.state.showPaywall,
@@ -740,25 +753,22 @@ class Component extends DCLogic {
       announcement: this.state.announcement,
       starBalance: this.state.starBalance,
       starChildName: this.state.starChildName,
-      books,
+      books: catalog.books,
       colorings,
       coloringChooser: workshopUrl + '#choisir',
       coloringGallery: workshopUrl + '#galerie',
       chooseEnfant: () => { window.location.href = 'Profils.dc.html'; },
       chooseMaman: () => { window.location.href = 'Profils.dc.html'; },
       switchProfile: () => { window.location.href = guestMode ? 'Connexion.dc.html' : 'Profils.dc.html'; },
-                    openPaywall: () => {
-                        if (guestMode) {
-                            window.KMDiscovery.openUnlock();
-                            return;
-                        }
-                        this.setState({ showPaywall: true });
-                    },
-                    openLockedBook: () => {
-                        if (guestMode) window.KMDiscovery.openUnlock(); else this.setState({ showPaywall: true });
-                    },
-                    lockedBookCursor: 'pointer',
-      closePaywall: () => this.setState({ showPaywall: false }),
+      openPaywall: event => {
+        if (guestMode) return window.KMDiscovery.openUnlock();
+        this.offerTrigger = event.currentTarget;
+        this.setState({ showPaywall: true }, () => document.getElementById('libraryOffer')?.showModal());
+      },
+      closePaywall: () => {
+        document.getElementById('libraryOffer')?.close();
+        this.setState({ showPaywall: false }, () => this.offerTrigger?.focus());
+      },
       chooseOneChild: () => this.setState({ requestedChildren: 1 }),
       chooseTwoChildren: () => this.setState({ requestedChildren: 2 }),
       chooseThreeChildren: () => this.setState({ requestedChildren: 3 }),
@@ -769,34 +779,7 @@ class Component extends DCLogic {
 </script>
 <script>
   (function () {
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     document.documentElement.classList.add('km-motion-ready');
-
-    document.addEventListener('click', (event) => {
-      const link = event.target.closest('a.km-book-link, a.km-filter-chip');
-      if (!link || reduceMotion || event.defaultPrevented || event.button !== 0) return;
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target === '_blank') return;
-      const destination = link.getAttribute('href');
-      if (!destination || destination === '#') return;
-      event.preventDefault();
-      const cover = link.closest('.km-book-cover');
-      if (cover) cover.classList.add('km-opening');
-      else document.body.classList.add('km-page-leaving');
-      window.setTimeout(() => { window.location.href = destination; }, cover ? 260 : 180);
-    });
-    document.addEventListener('input', (event) => {
-      if (event.target.id !== 'librarySearch') return;
-      const query = event.target.value.trim().toLocaleLowerCase('fr');
-      document.querySelectorAll('.km-book-item').forEach((item) => {
-        item.hidden = Boolean(query) && !item.textContent.toLocaleLowerCase('fr').includes(query);
-      });
-    });
-    document.addEventListener('keydown', (event) => {
-      const switcher = event.target.closest('.km-profile-switch');
-      if (!switcher || !['Enter',' '].includes(event.key)) return;
-      event.preventDefault();
-      window.location.href = 'Profils.dc.html';
-    });
   })();
 </script>
 </body>

@@ -25,6 +25,9 @@ function mountPictureReader(config) {
   document.body.insertAdjacentHTML("beforeend", pictureReaderLayout);
   const book = byId("book"), cover = byId("coverStage"), spread = byId("spread");
   const range = byId("progress"), drawer = byId("drawer"), zoom = byId("zoomDialog");
+  range.dataset.readingSlug = config.progressSlug || slug;
+  range.dataset.readingTitle = config.title;
+  if (config.discovery) range.dataset.readingPreview = "true";
   const coverImage = cover.querySelector(".cover-image");
   let profileId = "parent";
   try { profileId = JSON.parse(localStorage.getItem("km-active-profile-v2"))?.id || profileId; } catch {}
@@ -107,6 +110,7 @@ function mountPictureReader(config) {
     const content = imageFor(index);
     content.id = side ? "rightPage" : "leftPage";
     content.dataset.pageIndex = index;
+    content.dataset.pageNumber = pageNumber(index);
     paper.append(content);
     if (config.pageAction) {
       const button = document.createElement("button");
@@ -142,6 +146,7 @@ function mountPictureReader(config) {
       try { localStorage.setItem(key, String(position)); } catch {}
     }
     for (const thumb of byId("thumbs").children) thumb.classList.toggle("active", Number(thumb.dataset.spread) === position);
+    range.dispatchEvent(new Event("km-reader-position"));
     config.onPosition?.(position, lastSpread);
     if (position && !config.loadImage && position < lastSpread) {
       for (const i of indices(position + 1)) { if (pages[i - 1]) new Image().src = pages[i - 1]; }

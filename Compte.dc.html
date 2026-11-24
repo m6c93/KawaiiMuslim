@@ -38,7 +38,7 @@
         <h2>Suivi de mes enfants</h2>
         <p class="children-overview-intro">Retrouve ici, dès l’ouverture, les livres commencés et l’avancée de chaque enfant.</p>
         <div class="profile-list" id="children"><p class="loading">Chargement…</p></div>
-        <p class="form-message" id="message"></p>
+        <p class="form-message" id="message" role="status"></p>
       </section>
 
       <section class="dash-card full quran-parent-card" data-member-only hidden>
@@ -84,6 +84,10 @@
             <button class="plan-option" type="button" data-plan="family_3_children" data-limit="3">
               <span class="plan-children">3 enfants</span><strong>6,97€</strong><small>par mois après 7 jours gratuits</small>
             </button>
+          </div>
+          <div id="appleOfferRecovery" hidden>
+            <button class="secondary-button" id="retryAppleOffer" type="button">Réessayer de charger les formules</button>
+            <a class="secondary-button" id="appleOfferBack" href="Application.dc.html?section=today&amp;guest=1">Retour à la découverte</a>
           </div>
           <button class="secondary-button" id="restoreApple" type="button" hidden>Restaurer mes achats Apple</button>
           <p id="appleTerms" hidden>L’abonnement se renouvelle automatiquement chaque mois, sauf annulation dans les réglages Apple au moins 24 heures avant le renouvellement. Le paiement est débité sur ton compte Apple. <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Conditions d’utilisation</a> · <a href="Confidentialite.dc.html">Confidentialité</a></p>
@@ -146,7 +150,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=apple-pay-first-1"></script>
+  <script src="./km-auth.js?v=parent-access-2"></script>
   <script src="./account-deletion.js?v=1" defer></script>
   <script>
     let context = null;
@@ -242,6 +246,7 @@
       document.getElementById("subscriptionStatus").textContent = "Les formules famille";
       document.getElementById("familyBreakdown").textContent = "Les livres complets, les coloriages et les activités éducatives.";
       billingMessage.textContent = "";
+      document.getElementById("appleOfferRecovery").hidden = true;
       if (!window.KMApple) {
         subscriptionIntro.textContent = "Choisis une formule pour découvrir les conditions de l’essai et créer ton compte.";
         return;
@@ -256,7 +261,14 @@
         document.getElementById("createParentAccount").hidden = true;
         subscriptionIntro.textContent = "Choisis ta formule, confirme le paiement Apple, puis crée ton compte famille. La découverte gratuite reste accessible sans abonnement.";
         billingNote.textContent = "Paiement sécurisé par Apple · Création du compte après l’achat";
-        const pending = await window.KMApple.pending();
+        let pending;
+        try { pending = await window.KMApple.pending(); }
+        catch {
+          setApplePlanState("Indisponible");
+          document.getElementById("appleOfferRecovery").hidden = false;
+          billingMessage.textContent = "Impossible de vérifier si tu as déjà un achat Apple sur cet appareil.";
+          return;
+        }
         if (pending.paid) {
           const resume = document.getElementById("createParentAccount");
           resume.hidden = false;resume.textContent = "Terminer la création de mon compte";resume.href = "Inscription.dc.html?apple_paid=1";
@@ -265,12 +277,24 @@
           return;
         }
       }
+      await loadAppleProducts();
+    };
+
+    const setApplePlanState = label => {
       const options = [...document.querySelectorAll(".plan-option")];
-      options.forEach(option => {
+      for (const option of options) {
         option.disabled = true;
-        option.querySelector("strong").textContent = "Chargement…";
+        option.querySelector("strong").textContent = label;
         option.querySelector("small").textContent = "par mois";
-      });
+      }
+      return options;
+    };
+
+    const loadAppleProducts = async (subscription = null) => {
+      const recovery = document.getElementById("appleOfferRecovery");
+      recovery.hidden = true;
+      billingMessage.textContent = "";
+      const options = setApplePlanState("Chargement…");
       try {
         const {products} = await window.KMApple.products();
         options.forEach(option => {
@@ -278,11 +302,15 @@
           option.disabled = !product;
           option.querySelector("strong").textContent = product?.price || "Indisponible";
         });
-        if (!products.length) billingMessage.textContent = "Les formules Apple sont momentanément indisponibles. Tu peux quand même créer ton compte gratuitement.";
+        const current = products.find(item => item.id === subscription?.price_id);
+        if (current) document.getElementById("familyPrice").textContent = current.price + " / mois";
+        if (options.some(option => !option.disabled)) return;
+        billingMessage.textContent = "Les formules Apple sont momentanément indisponibles.";
       } catch (error) {
         options.forEach(option => { option.querySelector("strong").textContent = "Indisponible"; });
-        billingMessage.textContent = "Impossible de charger les prix Apple pour le moment. Tu peux quand même créer ton compte gratuitement.";
+        billingMessage.textContent = "Impossible de charger les prix Apple pour le moment.";
       }
+      recovery.hidden = false;
     };
 
     const load = async () => {
@@ -339,19 +367,11 @@
         subscriptionIntro.textContent = subscribed ? "Ton accès famille est actif. Retrouve tes livres et activités avec tes profils enfants." : "Débloque les histoires complètes, les coloriages et les activités pour tes enfants.";
         billingNote.textContent = context.subscription?.provider === "stripe" ? "Abonnement souscrit sur le site · Gestion depuis ton espace parent sur le site" : "Paiement Apple · Renouvellement mensuel · Annulation dans tes réglages Apple";
         document.getElementById("familyPrice").textContent = subscribed ? "Accès famille actif" : "Choisis ta formule Apple";
-        const options = [...document.querySelectorAll(".plan-option")];
-        options.forEach(option => { option.disabled = true; option.querySelector("strong").textContent = "Chargement…"; option.querySelector("small").textContent = "par mois"; });
-        try {
-          const {products} = await window.KMApple.products();
-          options.forEach(option => {
-            const product = products.find(item => item.id === `com.kawaiimuslimworld.family${option.dataset.limit}.monthly`);
-            option.disabled = !product;
-            option.querySelector("strong").textContent = product?.price || "Indisponible";
-          });
-          const current = products.find(item => item.id === context.subscription?.price_id);
-          if (current) document.getElementById("familyPrice").textContent = `${current.price} / mois`;
-          if (!subscribed && !products.length) billingMessage.textContent = "Les abonnements Apple arrivent bientôt. La découverte gratuite reste disponible.";
-        } catch (error) { billingMessage.textContent = KMAuth.friendlyError(error); }
+        const back = document.getElementById("appleOfferBack");
+        back.href = "Profils.dc.html";
+        back.textContent = "Retour aux profils";
+        await loadAppleProducts(context.subscription);
+
       }
       if (!subscribed) return;
 
@@ -404,6 +424,15 @@
         quranMessage.className = "form-message";
         quranMessage.textContent = KMAuth.friendlyError(error);
       }
+    });
+
+    document.getElementById("retryAppleOffer").addEventListener("click", async event => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      try {
+        if (context) await loadAppleProducts(context.subscription);
+        else await renderSignedOutOffer();
+      } finally { button.disabled = false; }
     });
 
     document.getElementById("planOptions").addEventListener("click", async event => {
@@ -550,11 +579,19 @@
       }
     });
 
-    document.getElementById("logout").addEventListener("click", async () => {
-      await KMAuth.logout();
-      window.location.href = "Connexion.dc.html";
+    document.getElementById("logout").addEventListener("click", async event => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      try {
+        const { applePending } = await KMAuth.logout();
+        window.location.replace(applePending ? "Connexion.dc.html?logout=apple" : "Connexion.dc.html");
+      } catch {
+        message.textContent = "La déconnexion n’a pas abouti. Vérifie ta connexion et appuie de nouveau sur Déconnexion.";
+        button.disabled = false;
+      }
     });
 
+    if (window.KMApple) setApplePlanState("Chargement…");
     load().catch(error => {
       children.innerHTML = "";
       message.textContent = "Une partie de ton espace n’a pas pu être chargée. Actualise la page ou réessaie dans quelques instants.";

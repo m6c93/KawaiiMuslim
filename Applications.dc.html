@@ -24,10 +24,11 @@
   .arabic{background:linear-gradient(155deg,#fff9eb,#f8eee0)}.arabic .visual{background:radial-gradient(circle at 18% 12%,#ffd09b 0,transparent 32%),linear-gradient(145deg,#f49a89,#3f9187)}.arabic .visual img{width:245px!important;height:245px!important;object-fit:contain!important;border:0;border-radius:0;box-shadow:none;rotate:0deg}.arabic .card-body h2{color:#174f51}.arabic .card-body p{color:#6e625b}.arabic .meta span{background:#fff5e4;color:#386b66;border:1px solid #efdbc2}.arabic .launch{background:linear-gradient(135deg,#e56f64,#db9560);box-shadow:0 12px 25px #c56f4d35}.mimi .visual img{width:245px!important;height:245px!important;object-fit:contain!important;border-radius:25px}.arabic .visual img,.mimi .visual img{filter:drop-shadow(0 14px 13px rgba(34,42,58,.3));transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .45s ease}.arabic:hover .visual img{transform:translateY(-6px) rotate(-2deg) scale(1.035);filter:drop-shadow(0 22px 17px rgba(24,67,63,.38))}.mimi:hover .visual img{transform:translateY(-6px) rotate(2deg) scale(1.035);filter:drop-shadow(0 22px 17px rgba(90,54,132,.38))}.coran .visual img{transition:transform .65s cubic-bezier(.2,.8,.2,1),filter .65s ease;filter:saturate(1.02) drop-shadow(0 12px 16px rgba(28,87,62,.22))}.coran:hover .visual img{transform:scale(1.045) rotate(-.6deg);filter:saturate(1.12) brightness(1.035) drop-shadow(0 20px 20px rgba(28,87,62,.3))}@media(max-width:760px){.arabic .visual img,.mimi .visual img{width:210px!important;height:210px!important}}@media(prefers-reduced-motion:reduce){.arabic .visual img,.mimi .visual img,.coran .visual img{transition:none}.arabic:hover .visual img,.mimi:hover .visual img,.coran:hover .visual img{transform:none}}
 .prophets .visual{background:linear-gradient(145deg,#e2efda,#e5f1f9);padding:18px}.prophets-cover{width:min(280px,85%);height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:white;border:2px solid #c7d8be;border-radius:24px;box-shadow:0 12px 22px #5b765426;transform:rotate(-2deg)}.prophets-title{width:88%;height:35%;object-fit:contain}.prophets-art{width:75%;height:60%;object-fit:contain}.prophets .launch{background:linear-gradient(135deg,#648950,#739c85);box-shadow:0 12px 25px #638b5035}.prophets .card-body h2{color:#416a48}.prophets .meta span{background:#edf5e7;color:#56764c}.prophets:hover .prophets-cover{transform:translateY(-4px) rotate(0deg);transition:transform .3s}@media(prefers-reduced-motion:reduce){.prophets:hover .prophets-cover{transform:none;transition:none}}
 </style>
+  <script src="/km-activity-progress.js?v=1"></script>
   <script src="./km-bottom-nav.js?v=continuous-1"></script>
   <script src="./km-child-theme.js?v=boy-theme-2"></script>
   <link rel="stylesheet" href="./km-world-light-theme.css?v=boy-palette-1">
-<link rel="stylesheet" href="app-illustrations.css?v=3">
+<link rel="stylesheet" href="app-illustrations.css?v=catalogue-4">
 </head>
 <body data-km-section="apps">
   <main class="shell">
@@ -36,19 +37,17 @@
       <a class="back" href="Aujourd%27hui.dc.html">← Aujourd’hui</a>
     </header>
     <section class="hero">
-      <p class="eyebrow">Apprendre en s’amusant</p>
       <h1>Mes applications</h1>
-      <p>Des expériences douces et ludiques pour découvrir l’arabe, découvrir les prophètes et jouer avec Mimi.</p>
     </section>
     <section class="apps" aria-label="Applications disponibles">
       <article class="app-card chansons">
         <div class="visual"><span class="badge">Couleurs gratuites · 4 leçons Premium</span><img class="app-illustration" src="brand/app-illustrations/chansons.webp?v=1" width="640" height="640" alt="Aya chante avec son microphone" loading="eager"></div>
-        <div class="card-body"><h2>L’arabe en chansons avec Aya</h2><p>Écoute Aya, répète un mot et joue. Commence avec les couleurs !</p><a class="launch" href="applications/aya-chansons/" target="_top">Jouer avec Aya <span aria-hidden="true">→</span></a></div>
+        <div class="card-body"><h2>L’arabe en chansons avec Aya</h2><p>Chante les couleurs et répète les mots avec Aya.</p><a class="launch" href="applications/aya-chansons/" target="_top">Chanter avec Aya <span aria-hidden="true">→</span></a></div>
       </article>
 
-      <article class="app-card salah">
+      <article class="app-card salah" id="app-salah">
         <div class="visual"><span class="badge">Entièrement gratuit</span><img class="app-illustration" src="brand/app-illustrations/salah.webp?v=1" width="640" height="640" alt="Un tapis de prière devant une petite mosquée" loading="eager"></div>
-        <div class="card-body"><h2>Kawaii Salah</h2><p>Apprends la prière pas à pas : mouvements, voix guidée, sourates et ablutions. Tous les parcours sont gratuits.</p><div class="meta"><span>🕌 Positions illustrées</span><span>🧩 Jeux</span><span>🌷 En famille</span></div><a class="launch" style="background:#35735e" href="applications/salah/">Apprendre la prière <span aria-hidden="true">→</span></a></div>
+        <div class="card-body"><h2>Kawaii Salah</h2><p>Découvre les gestes et répète les paroles de la prière.</p><div class="meta"><span>🕌 Positions illustrées</span><span>🧩 Jeux</span><span>🌷 En famille</span></div><a class="launch" style="background:#35735e" href="applications/salah/?from=apps">Apprendre la prière <span aria-hidden="true">→</span></a></div>
       </article>
       <article class="app-card coran">
         <div class="visual"><span class="badge">114 sourates</span><img class="app-illustration" src="brand/app-illustrations/coran.webp?v=1" width="640" height="640" alt="Le Coran sur son support en bois" loading="lazy"></div>
@@ -56,22 +55,46 @@
       </article>
       <article class="app-card arabic">
         <div class="visual"><span class="badge">Dès 4 ans</span><img class="app-illustration" src="brand/app-illustrations/lettres.webp?v=1" width="640" height="640" alt="Des lettres arabes sur des cubes et un crayon" loading="lazy"></div>
-        <div class="card-body"><h2>J’apprends les lettres arabes</h2><p>Découvre les 28 lettres, écoute leur prononciation, entraîne-toi à les écrire puis colorie-les.</p><div class="meta"><span>🔊 Écouter</span><span>✏️ Écrire</span><span>🎨 Colorier</span></div><a class="launch" href="books/colorie-ecris-apprends.html">Commencer <span aria-hidden="true">→</span></a></div>
+        <div class="card-body"><h2>J’apprends les lettres arabes</h2><p>Découvre les 28 lettres, écoute leur prononciation, entraîne-toi à les écrire puis colorie-les.</p><div class="meta"><span>🔊 Écouter</span><span>✏️ Écrire</span><span>🎨 Colorier</span></div><a class="launch" href="books/colorie-ecris-apprends.html">Tracer une lettre <span aria-hidden="true">→</span></a></div>
       </article>
       <article class="app-card arabic reading">
         <div class="visual"><span class="badge">Nouveau · 16 escales</span><img class="app-illustration" src="brand/app-illustrations/lecture.webp?v=1" width="640" height="640" alt="Une barque part vers une île" loading="lazy"></div>
-        <div class="card-body"><h2>Kawaii Lis l’Arabe</h2><p>Embarque pour quatre îles : découvre les lettres, joue avec les sons et assemble tes premiers mots. Ta barque accompagne tes progrès.</p><div class="meta"><span>⛵ 4 îles</span><span>🔤 16 étapes</span><span>🌱 À ton rythme</span></div><a class="launch" href="applications/lis-arabe/">Commencer mon voyage <span aria-hidden="true">→</span></a></div>
+        <div class="card-body"><h2>Kawaii Lis l’Arabe</h2><p>Associe les lettres aux sons et assemble tes premiers mots.</p><div class="meta"><span>⛵ 4 îles</span><span>🔤 16 étapes</span><span>🌱 À ton rythme</span></div><a class="launch" href="applications/lis-arabe/">Apprendre à lire <span aria-hidden="true">→</span></a></div>
       </article>
-      <article class="app-card mimi">
+      <article class="app-card mimi" id="app-mimi">
         <div class="visual"><span class="badge">Mimi Fly · Gratuit en entier</span><img class="app-illustration" src="brand/app-illustrations/mimi.webp?v=1" width="640" height="640" alt="Mimi vole avec la lettre Bâ" loading="lazy"></div>
-        <div class="card-body"><h2>Le voyage des lettres avec Mimi</h2><p>Vole avec Mimi dans un monde enchanté, franchis les obstacles et découvre les lettres arabes en jouant.</p><div class="meta"><span>🐦 Voler</span><span>🔤 Apprendre</span><span>✨ Explorer</span></div><a class="launch" href="applications/mimi/">Commencer le voyage <span aria-hidden="true">→</span></a></div>
+        <div class="card-body"><h2>Le voyage des lettres avec Mimi</h2><p>Vole avec Mimi dans un monde enchanté, franchis les obstacles et découvre les lettres arabes en jouant.</p><div class="meta"><span>🐦 Voler</span><span>🔤 Apprendre</span><span>✨ Explorer</span></div><a class="launch" href="applications/mimi/?from=apps">Jouer avec Mimi <span aria-hidden="true">→</span></a></div>
       </article>
-      <article class="app-card prophets">
+      <article class="app-card prophets" id="app-prophets">
         <div class="visual"><span class="badge">Les 25 prophètes · Gratuit en entier</span><img class="app-illustration" src="brand/app-illustrations/prophetes.webp?v=1" width="640" height="640" alt="Un livre ouvert devant un arbre et un chemin" loading="lazy"></div>
         <div class="card-body"><h2>Les 25 prophètes</h2><p>Retourne les cartes, découvre leurs histoires et leurs leçons, puis retrouve leurs invocations du Coran.</p><div class="meta"><span>25 cartes</span><span>Histoires et leçons</span><span>Invocations sourcées</span></div><a class="launch" href="prophetes/?from=apps">Découvrir les prophètes <span aria-hidden="true">→</span></a></div>
       </article>
     </section>
-    <p class="soon"><b>D’autres applications arrivent bientôt :</b> quiz, invocations et nouveaux jeux éducatifs.</p>
   </main>
+<script>
+  const activityLinks = [...document.querySelectorAll('.apps .launch')].map(link => ({
+    link, originalUrl: link.href, label: link.firstChild.textContent.trim()
+  }));
+
+  function updateResumeLink() {
+    const last = window.KMActivityProgress?.recent();
+    const recent = last && new URL(last.href, location.href);
+    for (const {link, originalUrl, label} of activityLinks) {
+      const base = new URL(originalUrl);
+      const resume = recent && recent.origin === base.origin && recent.pathname === base.pathname;
+      const destination = resume ? new URL(recent.href) : base;
+      if (base.searchParams.get('from') === 'apps') destination.searchParams.set('from', 'apps');
+      if (new URLSearchParams(location.search).get('guest') === '1') destination.searchParams.set('guest', '1');
+      link.href = destination.href;
+      link.firstChild.textContent = resume ? 'Reprendre ' : label + ' ';
+      if (resume) link.setAttribute('aria-label', 'Reprendre ' + last.title);
+      else link.removeAttribute('aria-label');
+    }
+  }
+
+  updateResumeLink();
+  window.addEventListener('pageshow', updateResumeLink);
+  document.addEventListener('km-app-active', updateResumeLink);
+</script>
 </body>
 </html>

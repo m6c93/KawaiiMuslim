@@ -1,5 +1,5 @@
 import {RECITER,STEPS,STARTER,GOALS,cleanProgress,validRef,nextRef,createSession,completeVerse,earnTree,matches,parentPlan,splitBasmala} from './model.mjs?v=discovery-1';
-import {QuranPlayer} from './audio.mjs?v=2';
+import {QuranPlayer} from './audio.mjs?v=replay-3';
 import {createGarden} from './juz-garden.mjs?v=discovery-1';
 import {withAdminDemoProgress} from './admin-demo.mjs?v=1';
 let grove=null;

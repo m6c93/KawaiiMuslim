@@ -29,7 +29,13 @@
   const authScript='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
   let clientPromise, access='unknown', current, request, objectUrl;
   let awarded=[];
-  try {const saved=JSON.parse(localStorage.getItem('kmw-aya-premium-stamps')||'[]');if(Array.isArray(saved))awarded=Object.keys(topics).filter(k=>saved.includes(k));} catch {}
+  document.addEventListener('km-activity-restored',event=>{
+    if(event.detail.key==='kmw-aya-premium-stamps'){
+      awarded=Object.keys(topics).filter(k=>event.detail.value?.includes(k));
+      window.AyaColors?.refreshCarnet();
+    }
+  });
+  try {const saved=JSON.parse(window.KMActivityProgress.storage.getItem('kmw-aya-premium-stamps')||'[]');if(Array.isArray(saved))awarded=Object.keys(topics).filter(k=>saved.includes(k));} catch {}
 
   function loadScript(src) {
     return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.onload=resolve;script.onerror=reject;document.head.append(script);});
@@ -105,7 +111,7 @@
     window.AyaFlow.mode('game');
     const t=topics[key];
     if(index>=t.questions.length){
-      if(!awarded.includes(key)){awarded.push(key);try{localStorage.setItem('kmw-aya-premium-stamps',JSON.stringify(awarded));}catch{}}
+      if(!awarded.includes(key)){awarded.push(key);try{window.KMActivityProgress.storage.setItem('kmw-aya-premium-stamps',JSON.stringify(awarded));}catch{}}
       panel.innerHTML=`<div class="premium-intro"><span class="premium-reward" aria-hidden="true">${t.icon}</span><h3>Bravo !</h3><p>Tu as terminé la leçon.</p><button type="button" class="primary" id="premium-finish">Chanson suivante →</button><button type="button" class="text-back" id="premium-home">Accueil</button></div>`;
       panel.querySelector('#premium-finish').onclick=()=>window.AyaFlow.next(key);panel.querySelector('#premium-home').onclick=()=>window.AyaFlow.home();snap();return;
     }
@@ -122,6 +128,8 @@
     });
     next.onclick=()=>quiz(key,index+1);
   }
-  window.AyaPremium={open,topics};
+  window.AyaPremium={open,topics,client,stickers:()=>Object.entries(topics).map(([id,topic])=>({
+    name:topic.name,stamp:topic.icon,earned:awarded.includes(id)
+  }))};
   window.AyaFlow.init();
 })();

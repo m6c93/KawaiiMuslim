@@ -1,122 +1,99 @@
-/* One illustration collection across the application catalogue. */
-body[data-km-section="apps"] .apps .visual {
-  height: 294px;
-  min-height: 294px;
-  padding: 42px 16px 8px;
-  background: #fff7e9 !important;
-  overflow: hidden;
-}
-body[data-km-section="apps"] .apps .visual::before,
-body[data-km-section="apps"] .apps .visual::after { display: none; }
-body[data-km-section="apps"] .apps .visual .app-illustration {
-  display: block;
-  width: 244px !important;
-  height: 244px !important;
-  max-width: 100%;
-  object-fit: contain !important;
-  object-position: center;
-  border: 0;
-  border-radius: 22px;
-  box-shadow: none;
-  filter: none;
-  rotate: none;
-  transform: none;
-  animation: none;
-  transition: none;
-}
-body[data-km-section="apps"] .apps .visual .badge {
-  top: 14px;
-  left: 14px;
-  max-width: calc(100% - 28px);
-  color: #705346;
-  background: #fffdf6;
-  border: 1px solid #e9d7c4;
-  box-shadow: none;
-}
-@media(max-width:760px) {
-  body[data-km-section="apps"] .apps .visual {
-    height: 254px;
-    min-height: 254px;
-    padding-top: 42px;
-  }
-  body[data-km-section="apps"] .apps .visual .app-illustration {
-    width: 204px !important;
-    height: 204px !important;
-  }
-}
-
-/* Brighter colour, with a calmer editorial presentation. */
-body[data-km-section="apps"] .apps > article { --art-bg:#f6deda; --app-accent:#9e4964; }
-body[data-km-section="apps"] .apps > .salah { --art-bg:#dcece3; --app-accent:#36705d; }
-body[data-km-section="apps"] .apps > .coran { --art-bg:#e3ecd8; --app-accent:#506f40; }
-body[data-km-section="apps"] .apps > .arabic { --art-bg:#f6e6c8; --app-accent:#8b6334; }
-body[data-km-section="apps"] .apps > .reading { --art-bg:#dcebf0; --app-accent:#3e7182; }
-body[data-km-section="apps"] .apps > .mimi { --art-bg:#e8e1f2; --app-accent:#75548e; }
-body[data-km-section="apps"] .apps > .prophets { --art-bg:#e0ebe0; --app-accent:#4c7055; }
-body[data-km-section="apps"] .apps .visual { background:var(--art-bg)!important; height:324px; min-height:324px; }
-body[data-km-section="apps"] .apps .visual .app-illustration {
-  width:274px!important; height:274px!important;
-  mix-blend-mode:multiply;
-  filter:brightness(1.13) contrast(1.12) saturate(1.12);
-  border-radius:0;
-}
-body[data-km-section="apps"] .apps .app-card {
-  border-radius:22px; background:#fffdfa;
-  box-shadow:0 6px 20px #503a3010;
-  border:1px solid #e8dfd7;
-}
-body[data-km-section="apps"] .apps .app-card:hover {
-  transform:translateY(-2px); box-shadow:0 9px 24px #503a3018;
-}
-body[data-km-section="apps"] .apps .card-body h2 {
-  font-family:Nunito,system-ui,sans-serif; font-size:26px;
-  font-weight:800; line-height:1.18; color:#393c3a; letter-spacing:-.035em;
-}
-body[data-km-section="apps"] .apps .launch {
-  background:var(--app-accent)!important; box-shadow:none;
-  border-radius:12px; font-family:Nunito,system-ui,sans-serif;
-}
-body[data-km-section="apps"] .apps .visual .badge {
-  border:0; border-radius:8px; background:#ffffffb8; color:#424941;
-  font-weight:800; font-size:11px;
+body[data-km-section="apps"] .hero {
+  min-height: 0;
+  margin: 12px 0 18px;
+  padding: 17px 22px;
+  text-align: left;
 }
 body[data-km-section="apps"] .hero::before,
-body[data-km-section="apps"] .hero::after { display:none; }
+body[data-km-section="apps"] .hero::after { display: none; }
 body[data-km-section="apps"] .hero h1 {
-  font-family:Nunito,system-ui,sans-serif; font-weight:800;
-  font-size:clamp(36px,5vw,54px); letter-spacing:-.045em;
+  margin: 0;
+  font: 800 clamp(28px, 4vw, 42px)/1.12 Nunito, system-ui, sans-serif;
+  letter-spacing: -.035em;
 }
-@media(max-width:760px) {
-  body[data-km-section="apps"] .apps .visual { height:284px; min-height:284px; }
-  body[data-km-section="apps"] .apps .visual .app-illustration { width:234px!important; height:234px!important; }
-  body[data-km-section="apps"] .apps .card-body h2 { font-size:23px; }
-}
-@media(prefers-reduced-motion:reduce) {
-  body[data-km-section="apps"] .apps .app-card:hover { transform:none; }
-}
-
-/* Rounded illustration tiles with a small, soft lift. */
-body[data-km-section="apps"] .apps .visual {
-  margin:12px 12px 0;
-  border-radius:24px;
-  box-shadow:inset 0 1px 0 #ffffffb3;
-  padding-bottom:18px;
-}
-body[data-km-section="apps"] .apps .visual .app-illustration {
-  width:254px!important;
-  height:254px!important;
-  border-radius:32px;
-  mix-blend-mode:normal;
-  box-shadow:0 10px 20px #674b3c22,0 3px 5px #674b3c12;
-  border:1px solid #ffffffc9;
-}
+body[data-km-section="apps"] .apps > article { --art-bg: #f6deda; --app-accent: #9e4964; }
+body[data-km-section="apps"] .apps > .salah { --art-bg: #dcece3; --app-accent: #36705d; }
+body[data-km-section="apps"] .apps > .coran { --art-bg: #e3ecd8; --app-accent: #506f40; }
+body[data-km-section="apps"] .apps > .arabic { --art-bg: #f6e6c8; --app-accent: #8b6334; }
+body[data-km-section="apps"] .apps > .reading { --art-bg: #dcebf0; --app-accent: #3e7182; }
+body[data-km-section="apps"] .apps > .mimi { --art-bg: #e8e1f2; --app-accent: #75548e; }
+body[data-km-section="apps"] .apps > .prophets { --art-bg: #e0ebe0; --app-accent: #4c7055; }
 body[data-km-section="apps"] .apps .app-card {
-  border-radius:28px;
-  box-shadow:0 8px 22px #503a3014;
+  min-height: 0;
+  border: 1px solid #e8dfd7;
+  border-radius: 24px;
+  background: #fffdfa;
+  box-shadow: 0 6px 18px #503a3014;
 }
-@media(max-width:760px) {
-  body[data-km-section="apps"] .apps .visual { margin:10px 10px 0; border-radius:22px; }
-  body[data-km-section="apps"] .apps .visual .app-illustration {
-    width:214px!important; height:214px!important; border-radius:28px;
+body[data-km-section="apps"] .apps .visual {
+  height: clamp(128px, 20vh, 190px);
+  min-height: 0;
+  padding: 8px;
+  margin: 10px 10px 0;
+  border-radius: 18px;
+  background: var(--art-bg) !important;
+}
+body[data-km-section="apps"] .visual::before,
+body[data-km-section="apps"] .visual::after { display: none; }
+body[data-km-section="apps"] .apps .visual .app-illustration {
+  width: auto !important;
+  height: 100% !important;
+  max-width: 100%;
+  object-fit: contain !important;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: none;
+  rotate: none;
+  filter: none;
+  transform: none;
+  animation: none;
+}
+body[data-km-section="apps"] .apps .visual .badge {
+  top: 9px;
+  left: 9px;
+  max-width: calc(100% - 18px);
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: #fffdf8;
+  color: #4b4544;
+  box-shadow: none;
+  font-size: 11px;
+}
+body[data-km-section="apps"] .card-body { padding: 16px 20px 18px; }
+body[data-km-section="apps"] .apps .card-body h2 {
+  color: #393c3a;
+  font: 800 clamp(19px, 2.3vw, 25px)/1.18 Nunito, system-ui, sans-serif;
+}
+body[data-km-section="apps"] .card-body p { margin: 6px 0 13px; }
+body[data-km-section="apps"] .apps .launch {
+  min-height: 46px;
+  margin-top: auto;
+  border-radius: 12px;
+  background: var(--app-accent) !important;
+  color: white;
+  box-shadow: none;
+  font-family: Nunito, system-ui, sans-serif;
+}
+body[data-km-section="apps"] .card-body .meta { display: none; }
+@media (max-width: 760px) {
+  body[data-km-section="apps"] .shell { width: calc(100% - 24px); }
+  body[data-km-section="apps"] .hero { padding: 12px 16px; margin: 6px 0 12px; }
+  body[data-km-section="apps"] .apps { gap: 14px; }
+  body[data-km-section="apps"] .apps .visual { height: clamp(100px, 19vh, 152px); }
+  body[data-km-section="apps"] .apps .visual .badge { font-size: 10px; }
+  body[data-km-section="apps"] .card-body { padding: 12px 15px 15px; }
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  body[data-km-section="apps"] .hero { margin: 4px 0 8px; padding: 8px 14px; }
+  body[data-km-section="apps"] .hero h1 { font-size: 24px; }
+  body[data-km-section="apps"] .apps { grid-template-columns: 1fr; gap: 8px; }
+  body[data-km-section="apps"] .apps .app-card {
+    display: grid;
+    grid-template-columns: minmax(106px, 25%) 1fr;
+    align-items: stretch;
   }
+  body[data-km-section="apps"] .apps .visual { margin: 8px; height: 108px; }
+  body[data-km-section="apps"] .apps .visual .badge { display: none; }
+  body[data-km-section="apps"] .card-body { padding: 10px; }
+  body[data-km-section="apps"] .card-body p { margin: 4px 0 6px; }
 }
