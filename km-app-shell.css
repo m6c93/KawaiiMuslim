@@ -29,9 +29,13 @@ body.km-clean-book-reading #kmAppViews {
 }
 
 /* The editor supplies its own exit and palette. Give it the visible viewport. */
+body.km-learning-open .km-app-nav,
+body.km-learning-open .km-guest-actions,
+body.km-learning-open .km-guest-pill,
 body.km-coloring-open .km-app-nav,
 body.km-coloring-open .km-guest-actions,
 body.km-coloring-open .km-guest-pill { display:none!important }
+body.km-learning-open #kmAppViews,
 body.km-coloring-open #kmAppViews {
   inset:var(--reader-host-y,0px) auto auto var(--reader-host-x,0px)!important;
   width:var(--reader-host-width,100%)!important;

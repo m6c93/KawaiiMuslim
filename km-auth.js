@@ -19,6 +19,17 @@
 /* Kawaii Muslim — authentification Supabase sécurisée */
 window.KMAuth = (() => {
   const ACTIVE_PROFILE_KEY = "km-active-profile-v2";
+  const APPLE_LOGOUT_PENDING = "km-apple-logout-pending";
+  const hasPendingAppleLogout = () => {
+    try { return Boolean(window.KMApple) && sessionStorage.getItem(APPLE_LOGOUT_PENDING) === "1"; }
+    catch { return false; }
+  };
+  const clearNativeSession = async () => {
+    if (!window.KMApple) return;
+    await window.KMApple.clear();
+    try { sessionStorage.removeItem(APPLE_LOGOUT_PENDING); } catch {}
+  };
+
   const INACTIVITY_LIMIT = 30 * 60 * 1000;
   let clientInstance = null;
   let inactivityTimer = null;
@@ -187,6 +198,7 @@ window.KMAuth = (() => {
     return { session, child };
   };
 
+  let contextOwnerId = null;
   const getContext = async () => {
     const session = await getSession();
     if (!session) return null;
@@ -199,6 +211,7 @@ window.KMAuth = (() => {
       throw new Error("Ce compte est actuellement désactivé. Contacte Kawaii Muslim.");
     }
     const children = await getChildren(session.user.id);
+    contextOwnerId = session.user.id;
     startInactivityGuard();
     return { session, user: session.user, profile, children };
   };
@@ -257,8 +270,9 @@ window.KMAuth = (() => {
   const setActiveProfile = selection => {
     const clean = selection?.type === "child"
       ? { type: "child", id: String(selection.id), name: String(selection.name || ""), avatar: String(selection.avatar || "🐤"), gender: childGender(selection) }
-      : { type: "parent", id: null, name: String(selection?.name || ""), avatar: String(selection?.avatar || "🌸") };
+      : { type: "parent", id: null, ownerId: contextOwnerId, name: String(selection?.name || ""), avatar: String(selection?.avatar || "🌸") };
     localStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(clean));
+    window.dispatchEvent(new Event("km-profile-selected"));
     return clean;
   };
 
@@ -546,6 +560,7 @@ window.KMAuth = (() => {
     },
 
     login: async ({ email, password }) => {
+      if (hasPendingAppleLogout()) await clearNativeSession();
       const data = requireSuccess(await client().auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password
@@ -563,10 +578,18 @@ window.KMAuth = (() => {
       }));
     },
 
+    hasPendingAppleLogout,
+    clearNativeSession,
     logout: async () => {
-      if (window.KMApple) await window.KMApple.clear();
+      let applePending = false;
+      try { await clearNativeSession(); }
+      catch {
+        applePending = true;
+        try { sessionStorage.setItem(APPLE_LOGOUT_PENDING, "1"); } catch {}
+      }
       localStorage.removeItem(ACTIVE_PROFILE_KEY);
       requireSuccess(await client().auth.signOut());
+      return { applePending };
     },
 
     resetPassword: async email => {

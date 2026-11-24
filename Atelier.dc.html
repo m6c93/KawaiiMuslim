@@ -354,6 +354,23 @@
     };
 
     const bookPage = source => String(source || "").match(/^book-coloring:([a-z0-9-]+):page:(\d+)$/);
+    // These albums start with a blank leaf. The stored page index still opens the original drawing.
+    const albumPageNumber = source => {
+      const index = Number(bookPage(source)?.[2]);
+      return index > 1 ? index - 1 : null;
+    };
+    const galleryTitle = item => {
+      const title = item.drawing_data?.memory?.title || item.title;
+      const page = albumPageNumber(item.source_url);
+      if (!page) return title;
+      const original = " · Page " + (page + 1);
+      if (title !== item.title || !title.endsWith(original)) return title;
+      const albumTitle = title.slice(0,-original.length);
+      const titleKey = text => text.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()
+        .split(/[^a-z0-9]+/).filter(word => word && !["les","le","l","de","et"].includes(word)).join("-");
+      return titleKey(albumTitle) === titleKey(bookPage(item.source_url)[1])
+        ? albumTitle + " · Page " + page : title;
+    };
     const resumeLink = item => {
       const book = bookPage(item.source_url);
       if (!book) return editorLink(item.source_url,item.title,item.id);
@@ -427,11 +444,11 @@
       gallery.innerHTML = shown.map(item => {
         const isDraft = item.status === "in_progress";
         const memory = item.drawing_data?.memory || {};
-        const title = memory.title || item.title;
+        const title = galleryTitle(item);
         const image = galleryImage(item);
         const choice = choices.find(choice => choice.source === item.source_url);
         const preview = image || choice?.image;
-        const page = bookPage(item.source_url)?.[2];
+        const page = albumPageNumber(item.source_url);
         const action = isDraft ? `<a class="art-button" href="${escapeHtml(resumeLink(item))}">Continuer</a>`
           : `<button class="art-button" type="button" data-view="${escapeHtml(item.id)}">${image ? "Voir mon dessin" : "Mon dessin"}</button>`;
         return `<article class="art-card">
@@ -532,7 +549,7 @@
         const item = artworks.find(art => String(art.id) === view.dataset.view);
         if (!item) return;
         viewedArtwork = item;
-        const title = item.drawing_data?.memory?.title || item.title;
+        const title = galleryTitle(item);
         document.getElementById("viewTitle").textContent = title;
         document.getElementById("artName").value = title;
         document.getElementById("renameMessage").textContent = "";
@@ -541,7 +558,7 @@
         const image = galleryImage(item);
         document.getElementById("viewImage").hidden = !image;
         if (image) document.getElementById("viewImage").src = image;
-        document.getElementById("viewImage").alt = item.title;
+        document.getElementById("viewImage").alt = title;
         artViewer.showModal();
         return;
       }

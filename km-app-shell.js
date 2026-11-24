@@ -53,7 +53,16 @@ addEventListener('message',event=>{if(event.origin!==location.origin||!event.dat
  if(event.data.type==='km-reader-mode'&&entry.key===active){document.body.classList.toggle('km-immersive-reader',!!event.data.active);try{entry.frame.contentDocument.body.classList.toggle('km-app-reading',!!event.data.active)}catch{}document.querySelector('.km-app-nav')?.setAttribute('aria-hidden',String(!!event.data.active))}});
 addEventListener('popstate',()=>{const key=new URLSearchParams(location.search).get('section')||'today';navigate(key,{historyMode:'none',anchor:new URL(location.href).searchParams.get('anchor')||'',workshopUrl:key==='workshop'?new URL(location.href):null})});retry.addEventListener('click',()=>navigate(wanted||'today',{historyMode:'replace',force:true}));
 const initial=items.some(i=>i[0]===params.get('section'))?params.get('section'):'today';document.body.dataset.kmSection=initial;
-navigate(initial,{historyMode:'replace',anchor:params.get('anchor')||'',workshopUrl:initial==='workshop'?new URL(location.href):null}).then(async()=>{if(!active)return;for(const item of items){if(item[0]===initial)continue;await new Promise(r=>setTimeout(r,160));try{await load(item[0]).promise}catch{}}});
+const loadOnDemand=window.matchMedia?.('(pointer: coarse), (max-width: 1024px), (orientation: landscape) and (max-height: 600px)') || {matches:window.innerWidth<=1024};
+navigate(initial,{historyMode:'replace',anchor:params.get('anchor')||'',workshopUrl:initial==='workshop'?new URL(location.href):null}).then(async()=>{
+ if(!active||loadOnDemand.matches)return;
+ for(const item of items){
+  if(item[0]===initial)continue;
+  await new Promise(resolve=>setTimeout(resolve,160));
+  if(loadOnDemand.matches)break;
+  try{await load(item[0]).promise}catch{}
+ }
+});
 })();
 
 /* Keep the application navigation outside the book, including nested readers. */
@@ -75,6 +84,8 @@ navigate(initial,{historyMode:'replace',anchor:params.get('anchor')||'',workshop
     if(depth>4||!visible(frame))return false;
     try{
       const win=frame.contentWindow,doc=frame.contentDocument;if(!doc)return false;
+      if(/^\/applications\/mimi(?:\/(?:index(?:\.html)?)?)?\/?$/i.test(win.location.pathname))return 'game';
+      if(/^\/(?:applications\/salah|prophetes)(?:\/(?:index(?:\.html)?)?)?\/?$/i.test(win.location.pathname))return 'activity';
       if(/^\/Coloriage\.dc(?:\.html)?$/i.test(win.location.pathname))return 'coloring';
       if(/^\/Atelier\.dc(?:\.html)?$/i.test(win.location.pathname)&&
          doc.querySelector('#artViewer[open],#scanModal:not([hidden])'))return 'coloring';
@@ -90,7 +101,7 @@ navigate(initial,{historyMode:'replace',anchor:params.get('anchor')||'',workshop
   }
   function fitReadingHost(){
     const viewport=window.visualViewport;
-    if(!document.body.matches('.km-clean-book-reading,.km-coloring-open')||!viewport)return;
+    if(!document.body.matches('.km-clean-book-reading,.km-coloring-open,.km-learning-open')||!viewport)return;
     const unzoomed=Math.abs(viewport.scale-1)<.01;
     const rect=[unzoomed?viewport.offsetLeft:0,unzoomed?viewport.offsetTop:0,
                 unzoomed?viewport.width:innerWidth,unzoomed?viewport.height:innerHeight];
@@ -105,12 +116,16 @@ navigate(initial,{historyMode:'replace',anchor:params.get('anchor')||'',workshop
     const frame=host.querySelector('.km-app-view.is-active');
     const active=!!frame&&reading(frame);
     const coloring=active==='coloring';
+    const game=active==='game';
+    const activity=game||active==='activity';
+    document.body.classList.toggle('km-learning-open',activity);
+    document.body.classList.toggle('km-game-open',game);
     document.body.classList.toggle('km-coloring-open',coloring);
-    document.body.classList.toggle('km-book-reading',Boolean(active)&&!coloring);
+    document.body.classList.toggle('km-book-reading',Boolean(active)&&!coloring&&!activity);
     const clean=active==="clean";
     document.body.classList.toggle("km-clean-book-reading",clean);
-    if(clean||coloring)fitReadingHost();
-    bar.hidden=!active||clean||coloring;
+    if(clean||coloring||activity)fitReadingHost();
+    bar.hidden=!active||clean||coloring||activity;
     const nav=document.querySelector('.km-app-nav');
     if(nav){nav.inert=active;if(active)nav.setAttribute('aria-hidden','true');else if(!document.body.classList.contains('km-immersive-reader'))nav.setAttribute('aria-hidden','false');}
   }

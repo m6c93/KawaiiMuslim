@@ -27,3 +27,20 @@ test('old reset links preserve recovery fragment but never automatically enter p
  const location={origin:'https://www.kawaiimuslimworld.com',search:'?reset=1',hash:'#access_token=synthetic&type=recovery',replace:x=>destination=x};const window={};
  vm.runInNewContext(script,{location,window,URL,URLSearchParams});assert.equal(window.__kmPasswordRecoveryRedirect,true);assert.equal(destination,'/Reinitialiser-mot-de-passe.dc.html#access_token=synthetic&type=recovery');
 });
+
+test('the completed recovery offers an actionable parent login in web and native contexts',async()=>{
+ const html=await readFile(new URL('../Reinitialiser-mot-de-passe.dc.html',import.meta.url),'utf8');
+ const script=await readFile(new URL('../password-recovery.js',import.meta.url),'utf8');
+ assert.match(html,/id="recoveryLogin" href="Connexion.dc.html\?reason=parent&amp;next=%2FCompte.dc.html">Se connecter sur le site/);
+ for(const native of [false,true]){
+  const nodes=new Map(),events=new Map();
+  const get=id=>{if(!nodes.has(id))nodes.set(id,{hidden:true,value:'test-password',addEventListener:(event,fn)=>events.set(event,fn)});return nodes.get(id)};
+  get('recoveryLogin').textContent='Se connecter sur le site';
+  const context={document:{getElementById:get},window:native?{webkit:{messageHandlers:{kmShell:{}}}}:{},recoveryToken:'test',
+   KMAuth:{getPasswordRecoverySession:async()=>({user:{email:'test@example.org'}}),updatePassword:async()=>{},friendlyError:e=>e.message}};
+  vm.runInNewContext(script,context);await new Promise(resolve=>setImmediate(resolve));
+  await events.get('submit')({preventDefault(){}});
+  assert.equal(get('done').hidden,false);
+  assert.equal(get('recoveryLogin').textContent,native?'Se connecter dans KMW':'Se connecter sur le site');
+ }
+});

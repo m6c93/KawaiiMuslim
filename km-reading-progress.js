@@ -7,6 +7,8 @@
   const disabled = window.KM_BOOK_EMBED || window.KM_GUEST_MODE || params.get("guest") === "1" || params.has("previewPages");
   let clientPromise = null;
   let saveTimer = null;
+  let writes = Promise.resolve();
+  const connected = new WeakSet();
 
   const activeChild = () => {
     try {
@@ -95,25 +97,66 @@
     }
   };
 
-  const queueSave = payload => {
+  // Serialize writes so an earlier slow request cannot replace the final page.
+  const flush = (payload, childId) => {
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => save(payload), 450);
+    saveTimer = null;
+    writes = writes.then(() => {
+      if (childId && activeChild()?.id === childId) return save(payload);
+    }).catch(error => console.warn("Progression de lecture non synchronisée", error));
+    return writes;
+  };
+
+  const queueSave = (payload, childId = activeChild()?.id) => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => flush(payload, childId), 450);
   };
 
   const connectRangeReader = async () => {
     const range = document.getElementById("progress");
-    if (disabled || !activeChild() || !range || range.tagName !== "INPUT") return;
-    const payload = () => ({ position: Number(range.value), total: Number(range.max) || 1 });
-    ["input", "change"].forEach(eventName => range.addEventListener(eventName, () => queueSave(payload())));
-    ["prevBtn", "nextBtn", "openBtn"].forEach(id => document.getElementById(id)?.addEventListener("click", () => setTimeout(() => queueSave(payload()), 80)));
-    window.addEventListener("pagehide", () => save(payload()));
+    const childId = activeChild()?.id;
+    if (disabled || !childId || !range || range.tagName !== "INPUT" || connected.has(range)) return;
+    if (range.dataset.readingPreview === "true") return;
+    connected.add(range);
+    const picture = Boolean(range.dataset.readingSlug);
+    const payload = () => ({
+      slug: range.dataset.readingSlug || bookSlug(),
+      title: range.dataset.readingTitle || bookTitle(),
+      position: Number(range.value),
+      total: Number(range.max) || 1
+    });
+    let moved = false;
+    let restoring = true;
+    let lastSent = null;
+    const changed = () => {
+      moved = true;
+      if (!restoring) queueSave(payload(), childId);
+    };
+    if (picture) {
+      // All controls, page turns and swipes report the position after it is actually rendered.
+      range.addEventListener("km-reader-position", changed);
+    } else {
+      ["input", "change"].forEach(eventName => range.addEventListener(eventName, changed));
+      ["prevBtn", "nextBtn", "openBtn"].forEach(id => document.getElementById(id)?.addEventListener("click", () => setTimeout(changed, 80)));
+    }
+    const finish = () => {
+      if (restoring && !moved) return;
+      const state = payload();
+      if (lastSent === state.position && !saveTimer) return;
+      lastSent = state.position;
+      flush(state, childId);
+    };
+    window.addEventListener("pagehide", finish);
+    document.addEventListener("visibilitychange", () => { if (document.hidden) finish(); });
 
-    const remote = await restore();
-    if (remote && Number(remote.position) > Number(range.value)) {
+    const remote = await restore({slug:payload().slug});
+    restoring = false;
+    if (childId !== activeChild()?.id) return;
+    if (!moved && !params.has("page") && remote && Number(remote.position) > Number(range.value)) {
       range.value = Math.min(Number(range.max) || 1, Number(remote.position));
       range.dispatchEvent(new Event("input", { bubbles: true }));
-    } else {
-      queueSave(payload());
+    } else if (moved || !remote || Number(remote.position) !== Number(range.value)) {
+      queueSave(payload(), childId);
     }
   };
 
@@ -148,6 +191,7 @@
     connectRangeReader();
     connectBookFallback();
   };
+  document.addEventListener("km-reader-ready", connectRangeReader);
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", connect, { once: true });
   else connect();
 })();

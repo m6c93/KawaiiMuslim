@@ -1,8 +1,20 @@
 const PDFJS_BASE = "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/";
+const PDFJS_BUILD = PDFJS_BASE + "legacy/build/";
 const params = new URLSearchParams(location.search);
 const title = (params.get("title") || "Mon livre").slice(0, 160);
 const status = document.getElementById("pdfStatus");
 const message = status.querySelector("p");
+
+function showReaderError() {
+  document.body.prepend(status);
+  status.style.zIndex = "2147483647";
+  status.hidden = false;
+  const fallback = status.querySelector("[data-pdf-fallback]");
+  if (fallback) fallback.hidden = false;
+  message.textContent = fallback
+    ? "Le lecteur n’a pas pu afficher ce livre. Tu peux ouvrir le PDF original sur cet appareil."
+    : "Le livre n’a pas pu être ouvert. Réessaie depuis la bibliothèque.";
+}
 
 async function sourceURL(source) {
   if (source.startsWith("private://content-books/")) source = await window.KMAuth.bookFileUrl(source);
@@ -22,8 +34,15 @@ async function start() {
   }
   const active = window.KMAuth.validateActiveProfile(context);
   const url = await sourceURL(params.get("src") || "");
-  const pdfjs = await import(PDFJS_BASE + "build/pdf.min.mjs");
-  pdfjs.GlobalWorkerOptions.workerSrc = PDFJS_BASE + "build/pdf.worker.min.mjs";
+  // Make the authorized source available if the device cannot run the PDF renderer.
+  const originalFallback = document.createElement("a");
+  originalFallback.href = url.href;
+  originalFallback.textContent = "Ouvrir le PDF original";
+  originalFallback.dataset.pdfFallback = "";
+  originalFallback.hidden = true;
+  status.insertBefore(originalFallback, status.querySelector("a"));
+  const pdfjs = await import(PDFJS_BUILD + "pdf.min.mjs");
+  pdfjs.GlobalWorkerOptions.workerSrc = PDFJS_BUILD + "pdf.worker.min.mjs";
   const loading = pdfjs.getDocument({url:url.href, cMapUrl:PDFJS_BASE + "cmaps/", cMapPacked:true,
     standardFontDataUrl:PDFJS_BASE + "standard_fonts/", wasmUrl:PDFJS_BASE + "wasm/"});
   loading.onProgress = ({loaded, total}) => { if (total) message.textContent = "Ouverture du livre · " + Math.min(100, Math.round(loaded * 100 / total)) + " %"; };
@@ -52,7 +71,10 @@ async function start() {
   }
   async function paint(img, index, thumb) {
     try { img.src = await pageSource(index, thumb); }
-    catch { img.alt = "Cette page n’a pas pu être chargée."; }
+    catch {
+      img.alt = "Cette page n’a pas pu être chargée.";
+      if (!thumb && img.isConnected) showReaderError();
+    }
   }
   const thumbnails = new IntersectionObserver(entries => {
     for (const entry of entries) if (entry.isIntersecting) {
@@ -60,8 +82,12 @@ async function start() {
     }
   });
   status.hidden = true; document.title = title + " — Kawaii Muslim";
+  const storagePath = url.pathname.split("/content-books/").pop();
+  // Signed download URLs can change. The object path identifies this PDF across devices.
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(storagePath));
+  const progressSlug = "pdf:" + Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
   mountPictureReader({
-    title, pageSource, slug:"pdf:" + url.pathname.split("/content-books/").pop(), numberOffset:1,
+    title, pageSource, slug:"pdf:" + storagePath, progressSlug, numberOffset:1,
     pages:Array.from({length:pdf.numPages - 1}, (_, i) => i + 2),
     loadImage(img, index, thumb) {
       if (!thumb) { paint(img, index, false); return; }
@@ -84,7 +110,4 @@ async function start() {
   original.textContent = "⇩"; original.setAttribute("aria-label", "Ouvrir le PDF original"); original.title = "Ouvrir le PDF original";
   document.querySelector(".actions").append(original);
 }
-start().catch(() => {
-  status.hidden = false;
-  message.textContent = "Le livre n’a pas pu être ouvert. Réessaie depuis la bibliothèque.";
-});
+start().catch(showReaderError);

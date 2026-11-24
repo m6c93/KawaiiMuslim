@@ -53,10 +53,16 @@
           </div>
 
 
+          <p class="privacy-note" id="signupBillingNote">0 € pendant 7 jours. Une carte sera demandée à l’étape suivante. Sans annulation, le premier paiement aura lieu au 8ᵉ jour.</p>
+          <details id="webOfferTerms">
+            <summary>Conditions de l’offre et de l’essai</summary>
+            <p>Tu peux annuler depuis l’espace parent avant le 8ᵉ jour. Ensuite, l’abonnement est renouvelé chaque mois au tarif de ta formule.</p>
+            <a href="presentation.html#tarifs" target="_blank" rel="noopener">Voir les formules et les conditions de l’essai</a>
+          </details>
+          <p class="privacy-note"><a id="appleEula" href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" target="_blank" rel="noopener" hidden>Conditions d’utilisation de l’application Apple</a>
+            <a href="Confidentialite.dc.html" target="_blank" rel="noopener">Politique de confidentialité</a></p>
           <button class="primary-button pink" id="submitButton" type="submit">Continuer vers l’essai gratuit</button>
           <p class="form-message" id="message" role="status" aria-live="polite"></p>
-          <p class="privacy-note">0 € aujourd’hui. Une carte bancaire sera demandée à l’étape suivante. L’abonnement démarre automatiquement au 8ᵉ jour, sauf annulation avant la fin de l’essai. En créant ton compte, tu acceptes les conditions d’utilisation et la politique de confidentialité.</p>
-        <p class="km-privacy-link" style="text-align:center;font-size:14px;margin:18px 0"><a href="Confidentialite.dc.html">Confidentialité et données personnelles</a></p>
         </form>
       </section>
     </main>
@@ -64,7 +70,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=apple-pay-first-1"></script>
+  <script src="./km-auth.js?v=parent-access-2"></script>
   <script>
     const form = document.getElementById("signupForm");
     const message = document.getElementById("message");
@@ -88,10 +94,14 @@
       : legacyPlan || "family_1_child";
     selectedPlan.innerHTML = `<span>Offre choisie</span><strong>${planOptions[planCode].label}</strong><small>0 € aujourd’hui · puis ${planOptions[planCode].price} après 7 jours · annulable avant la fin de l’essai</small>`;
 
+    const billingNote = document.getElementById("signupBillingNote");
+    billingNote.textContent = `0 € pendant 7 jours. Une carte bancaire sera demandée. Sans annulation avant le 8ᵉ jour, l’abonnement se renouvelle à ${planOptions[planCode].price}.`;
     if (window.KMApple) {
+      document.getElementById("webOfferTerms").hidden = true;
+      document.getElementById("appleEula").hidden = false;
       document.querySelector('h2').textContent = "Créer mon espace famille";
       submitButton.textContent = "Créer mon compte";
-      document.querySelector('.privacy-note').textContent = "La création du compte est gratuite. Tu pourras ensuite choisir un abonnement avec le paiement Apple. En créant ton compte, tu acceptes les conditions d’utilisation et la politique de confidentialité.";
+      billingNote.textContent = "La création de ton compte est gratuite. Tu pourras ensuite choisir un abonnement Apple.";
       document.querySelector('.nav-link').href = "Compte.dc.html";
       selectedPlan.innerHTML = "<span>Bienvenue dans KMW</span><strong>Ton compte parent</strong><small>Création gratuite · Tu pourras choisir un abonnement Apple ensuite.</small>";
     }
@@ -101,7 +111,7 @@
           if (!pending.paid) { window.location.replace("Compte.dc.html");return; }
           document.querySelector('h2').textContent = "Ton achat est confirmé 🌸";
           selectedPlan.innerHTML = "<strong>Bienvenue dans la famille KMW</strong><small>Crée ton compte pour retrouver tes livres et activités. Aucun nouveau paiement.</small>";
-          document.querySelector('.privacy-note').textContent = "Ton achat Apple est enregistré sur cet iPhone. Après la création du compte, confirme ton e-mail puis reviens dans KMW pour activer ton accès. En créant ton compte, tu acceptes les conditions d’utilisation et la politique de confidentialité.";
+          billingNote.textContent = "Ton achat Apple est enregistré sur cet appareil. Après la création du compte, confirme ton e-mail puis reviens dans KMW pour activer ton accès.";
           if (session) { await KMAuth.completeAppleSignup();window.location.replace("Profils.dc.html"); }
         });
       }

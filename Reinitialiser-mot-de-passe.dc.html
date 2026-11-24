@@ -32,14 +32,15 @@
     <p class="form-message" id="message" role="status" aria-live="polite"></p>
     <section id="done" hidden>
       <p>Ton mot de passe est enregistré.</p>
-      <p>Reviens dans <strong>l’application KMW</strong> et connecte-toi avec ton e-mail et ce nouveau mot de passe. Ton achat Apple reste conservé sur ton iPhone. Ne paie pas à nouveau.</p>
+      <p id="recoveryReturnNote">Tu peux te connecter au site avec ton nouveau mot de passe. Si tu as demandé ce lien depuis l’application KMW, tu peux aussi la rouvrir pour te connecter.</p>
+      <a class="primary-button" id="recoveryLogin" href="Connexion.dc.html?reason=parent&amp;next=%2FCompte.dc.html">Se connecter sur le site</a>
     </section>
     <p id="requestNew" hidden><a href="Connexion.dc.html?reason=parent&amp;next=%2FCompte.dc.html">Demander un nouveau lien</a></p>
   </main>
   <script>const recoveryToken = new URLSearchParams(location.hash.slice(1)).get("access_token");</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=password-recovery-1"></script>
-  <script src="./password-recovery.js?v=1"></script>
+  <script src="./km-auth.js?v=parent-access-2"></script>
+  <script src="./password-recovery.js?v=parent-access-2"></script>
 </body>
 </html>

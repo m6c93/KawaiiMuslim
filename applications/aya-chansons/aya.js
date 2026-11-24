@@ -17,11 +17,16 @@
   ];
   const key = 'kmw-aya-chansons-v1';
   let done = [];
-  try {const data=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(data))done=packs.map((_,i)=>i).filter(i=>data.includes(i));} catch {}
+  try {const data=JSON.parse(window.KMActivityProgress.storage.getItem(key)||'[]');if(Array.isArray(data))done=packs.map((_,i)=>i).filter(i=>data.includes(i));} catch {}
   const screen = document.querySelector('#screen');
   const clip = new Audio();
   let pack=0,step=0,questions=[],mistakes=0,answerFound=false;
   let currentView='home';
+  document.addEventListener('km-activity-restored',event=>{
+    if(event.detail.key!==key)return;
+    done=packs.map((_,i)=>i).filter(i=>event.detail.value?.includes(i));
+    refreshCarnet();
+  });
   const nextPack=()=>packs.findIndex((_,i)=>!done.includes(i));
   const title=s=>s[0].toUpperCase()+s.slice(1);
   const shuffle=items=>{const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
@@ -79,18 +84,34 @@
     next.addEventListener('click',()=>{if(++step<questions.length)question(review);else reward(review);});
   }
   function reward(review){
-    if(!review&&!done.includes(pack)){done.push(pack);try{localStorage.setItem(key,JSON.stringify(done));}catch{}}
+    if(!review&&!done.includes(pack)){done.push(pack);try{window.KMActivityProgress.storage.setItem(key,JSON.stringify(done));}catch{}}
     const next=nextPack();
     render(`<section class="reward view"><img src="media/aya-bravo.webp" alt="Aya sourit"><h1>Bravo !</h1><span class="sticker" aria-hidden="true">${review?'✦':packs[pack].stamp}</span><p>${review?'Tu as retrouvé les couleurs !':'Un autocollant dans ton carnet !'}</p><button class="primary" id="reward-next" type="button">${next>=0?'Encore des couleurs':'Ouvrir mon carnet'} →</button><button class="text-back" type="button" id="back-home">Retour à Aya</button></section>`,'reward');
     screen.querySelector('#reward-next').textContent='Chanson suivante →';button('#reward-next',()=>window.AyaFlow.open('alphabet'));button('#back-home',home);
   }
+  function allStickers(){
+    return [...packs.map((pack,i)=>({...pack,earned:done.includes(i)})),...(window.AyaPremium?.stickers()||[])];
+  }
+  function refreshCarnet(){
+    if(screen.hidden || !screen.querySelector('.carnet')) return;
+    const collection=allStickers();
+    for(const [i,sticker] of screen.querySelectorAll('.carnet .sticker').entries()){
+      const {earned,name,stamp}=collection[i];
+      sticker.classList.toggle('locked',!earned);
+      sticker.setAttribute('aria-label',(earned?'Gagné':'À gagner')+' : '+name);
+      sticker.textContent=earned?stamp:'☆';
+    }
+    screen.querySelector('[data-sticker-count]').textContent=collection.filter(item=>item.earned).length+' / '+collection.length+' autocollants';
+    screen.querySelector('#carnet-play').textContent=(nextPack()<0?'Réviser les couleurs':'Jouer aux couleurs')+' →';
+  }
   function carnet(){
-    render(`<section class="carnet view"><p class="eyebrow">Mes couleurs avec Aya</p><h1>Mon carnet</h1><div class="stickers">${packs.map(({name,stamp},i)=>`<div class="stamp"><span class="sticker ${done.includes(i)?'':'locked'}" role="img" aria-label="${done.includes(i)?'Gagné':'À gagner'} : ${name}">${done.includes(i)?stamp:'☆'}</span><small>${name}</small></div>`).join('')}</div><p>${done.length} / ${packs.length} autocollants</p><button class="primary" type="button" id="carnet-play">${nextPack()<0?'Réviser les couleurs':'Jouer aux couleurs'} →</button><button class="text-back" type="button" id="carnet-back">Retour à Aya</button></section>`,'carnet');
+    render(`<section class="carnet view"><p class="eyebrow">Mes chansons avec Aya</p><h1>Mon carnet</h1><div class="stickers">${allStickers().map(({name})=>`<div class="stamp"><span class="sticker" role="img"></span><small>${name}</small></div>`).join('')}</div><p data-sticker-count></p><button class="primary" type="button" id="carnet-play"></button><button class="text-back" type="button" id="carnet-back">Retour à Aya</button></section>`,'carnet');
+    refreshCarnet();
     button('#carnet-play',startNext);button('#carnet-back',home);
   }
   
-  document.querySelector('#book').addEventListener('click',()=>currentView==='carnet'?home():carnet());
+  document.querySelector('#book').addEventListener('click',()=>screen.querySelector('.carnet')?home():carnet());
   const catalog=document.querySelector('#catalog');
   try {const ref=new URL(document.referrer);if(ref.origin===location.origin&&/^\/(?:Applications|Application)\.dc(?:\.html)?$/i.test(ref.pathname)&&ref.searchParams.get('guest')!=='1'&&sessionStorage.getItem('km-guest-mode')!=='1')catalog.href='/Application.dc.html?section=apps';}catch{}
-  window.AyaColors={video:colorsVideo,game:startNext,questions:directQuestions,stop};
+  window.AyaColors={video:colorsVideo,game:startNext,questions:directQuestions,stop,refreshCarnet};
 })();

@@ -29,7 +29,7 @@
 
   if (window.KMReadingProgress || document.querySelector('script[src*="km-reading-progress.js"]')) return;
   var script = document.createElement("script");
-  script.src = "/km-reading-progress.js?v=family-reading-2";
+  script.src = "/km-reading-progress.js?v=family-reading-3";
   script.defer = true;
   document.head.appendChild(script);
 })();

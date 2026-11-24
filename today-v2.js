@@ -48,6 +48,35 @@
     if (starUnit) starUnit.textContent = " étoile" + (count > 1 ? "s" : "");
   }
 
+  var latestBook = null;
+  function renderRecent() {
+    var panel = document.getElementById("recentSection");
+    if (!panel || !window.KMActivityProgress) return;
+    var recent = KMActivityProgress.recent();
+    if (latestBook && (!recent || latestBook.time > recent.time)) recent = latestBook;
+    panel.hidden = !recent;
+    if (!recent) return;
+    var link = document.getElementById("recentActivity");
+    link.href = recent.href;
+    link.querySelector("strong").textContent = recent.title;
+  }
+  async function restoreRecent(childId) {
+    renderRecent();
+    if (!childId || !window.KMActivityProgress) return;
+    try {
+      var rows = await KMAuth.listReadingProgress(childId);
+      if (activeChildId !== childId) return;
+      // Only built-in readers have a persistent URL derived from their database slug.
+      var slugs = ['tawakkul','vers-allah','invocations-aya-ali','miracles-du-coran','aliments-dans-le-coran','animaux-du-coran','aya-armure-de-lumiere','bubble-tea-time-hijabi','hijabi-girls','exploration-espace','colorie-ecris-apprends'];
+      var book = rows.find(row => row.child_profile_id === childId && slugs.includes(row.book_slug) && Number.isFinite(Date.parse(row.last_read_at)));
+      latestBook = book ? {title:book.book_title || book.book_slug,href:'/books/'+book.book_slug+'.html',time:Date.parse(book.last_read_at)} : null;
+      renderRecent();
+    } catch { /* The most recent activity on this device stays available offline. */ }
+  }
+  window.addEventListener('storage',renderRecent);
+  window.addEventListener('pageshow',renderRecent);
+  document.addEventListener('km-app-active',()=>restoreRecent(isLocalPreview() ? null : activeChildId));
+
   function prayerStorageKey() {
     return "km-prayer-city:" + activeProfileKey;
   }
@@ -60,7 +89,7 @@
     if (!prayerCityForm) return;
     prayerCityForm.hidden = !open;
     if (open) {
-      prayerCityInput.value = localStorage.getItem(prayerStorageKey()) || localStorage.getItem("km-prayer-city") || "";
+      prayerCityInput.value = localStorage.getItem(prayerStorageKey()) || "";
       setTimeout(function () { prayerCityInput.focus(); }, 20);
     }
   }
@@ -156,7 +185,7 @@
 
   function initPrayer() {
     if (!prayerCard) return;
-    var savedCity = localStorage.getItem(prayerStorageKey()) || localStorage.getItem("km-prayer-city") || (isLocalPreview() ? "Casablanca, Maroc" : "");
+    var savedCity = localStorage.getItem(prayerStorageKey()) || (isLocalPreview() ? "Casablanca, Maroc" : "");
     loadPrayerTimes(savedCity);
   }
 
@@ -188,9 +217,14 @@
   async function loadProfile() {
     if (isLocalPreview()) {
       activeChildId = "preview-child";
-      activeProfileKey = "preview-child";
       var guest = new URLSearchParams(location.search).get("guest") === "1";
+      activeProfileKey = guest ? "guest" : "preview-child";
       setProfile(guest ? "Découverte" : "toto", guest ? "d" : "t", guest ? 0 : (Number(localStorage.getItem("km-preview-star-balance")) || 12));
+      if (guest) {
+        var greeting = document.getElementById("childWelcomeTitle");
+        if (greeting) greeting.textContent = "Bienvenue dans ton monde";
+      }
+      renderRecent();
       reveal();
       initPrayer();
       return;
@@ -207,7 +241,7 @@
         return;
       }
       var active = KMAuth.validateActiveProfile(context);
-      activeProfileKey = active.id || active.type || "family";
+      activeProfileKey = active.id || ("parent:" + context.user.id);
       activeChildId = active.type === "child" ? active.id : "";
       var name = active.name || (active.type === "child" ? "Mon enfant" : "Maman");
       var child = active.type === "child" ? active : context.children[0];
@@ -217,6 +251,7 @@
         balance = Number(shop && shop.balance) || 0;
       }
       setProfile(name, active.avatar || name.charAt(0).toLowerCase(), balance);
+      restoreRecent(activeChildId);
       reveal();
       initPrayer();
     } catch (error) {
@@ -231,7 +266,6 @@
     var city = prayerCityInput.value.trim();
     if (!city) return;
     localStorage.setItem(prayerStorageKey(), city);
-    localStorage.setItem("km-prayer-city", city);
     setCityEditor(false);
     loadPrayerTimes(city);
   });

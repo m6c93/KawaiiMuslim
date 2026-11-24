@@ -16,7 +16,21 @@ export class QuranPlayer{
   const more=this.round+1<this.repeat||this.position+1<this.queue.length||this.passageRound+1<this.passageRepeat;
   if(this.gap&&more){this.state='gap';this.emit();this.timer=setTimeout(advance,this.gapSeconds===null?2000:Math.max(0,Math.min(30,this.gapSeconds))*1000)}else advance();
  }
- async toggle(){if(!this.current)return;if(['playing','loading','gap'].includes(this.state)){this.token++;clearTimeout(this.timer);clearTimeout(this.loadTimer);this.timer=null;this.audio.pause();this.state='paused';this.emit();return}if(['ended','error'].includes(this.state)||this.audio.ended){this.round=0;this.load();return}const token=++this.token;try{await this.audio.play();if(token===this.token){this.state='playing';this.emit()}}catch{if(token===this.token){this.state='error';this.emit()}}}
+ async toggle(){
+  if(!this.current)return;
+  if(['playing','loading','gap'].includes(this.state)){
+   this.token++;clearTimeout(this.timer);clearTimeout(this.loadTimer);this.timer=null;
+   this.audio.pause();this.state='paused';this.emit();return;
+  }
+  if(this.state==='ended'){
+   this.position=0;this.passageRound=0;this.round=0;
+   await this.load();return;
+  }
+  if(this.state==='error'||this.audio.ended){await this.load();return}
+  const token=++this.token;
+  try{await this.audio.play();if(token===this.token){this.state='playing';this.emit()}}
+  catch{if(token===this.token){this.state='error';this.emit()}}
+ }
  move(delta){const pos=this.position+delta;if(pos<0||pos>=this.queue.length)return;this.audio.pause();this.position=pos;this.round=0;this.load()}
  seek(seconds){if(Number.isFinite(this.audio.duration))this.audio.currentTime=Math.max(0,Math.min(this.audio.duration,seconds))}
  setRate(value){if(![.75,1].includes(value))return;this.rate=value;this.audio.playbackRate=value;this.emit()}

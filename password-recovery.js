@@ -2,6 +2,10 @@
   const form = document.getElementById("recoveryForm");
   const message = document.getElementById("message");
   const button = document.getElementById("savePassword");
+  if (window.KMApple || window.webkit?.messageHandlers?.kmShell) {
+    document.getElementById("recoveryReturnNote").textContent = "Connecte-toi avec ton e-mail et ton nouveau mot de passe pour retrouver ton espace parent dans KMW.";
+    document.getElementById("recoveryLogin").textContent = "Se connecter dans KMW";
+  }
   let ready = false;
   KMAuth.getPasswordRecoverySession(recoveryToken).then(({ user }) => {
     document.getElementById("identity").textContent = user.email;

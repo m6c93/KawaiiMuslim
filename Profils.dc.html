@@ -100,13 +100,13 @@
         </div>
         <div class="team-grid" id="teamProfile"></div>
       </section>
-      <p class="form-message" id="message"></p>
+      <p class="form-message" id="message" role="status"></p>
     </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=child-gender-1"></script>
+  <script src="./km-auth.js?v=parent-access-2"></script>
   <script>
     const profiles = document.getElementById("profiles");
     const teamZone = document.getElementById("teamZone");
@@ -303,9 +303,16 @@
       if (event.target.closest("[data-admin]")) window.location.href = "Admin.dc.html";
     });
 
-    document.getElementById("logout").addEventListener("click", async () => {
-      await KMAuth.logout();
-      window.location.href = "Connexion.dc.html";
+    document.getElementById("logout").addEventListener("click", async event => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      try {
+        const { applePending } = await KMAuth.logout();
+        window.location.replace(applePending ? "Connexion.dc.html?logout=apple" : "Connexion.dc.html");
+      } catch {
+        message.textContent = "La déconnexion n’a pas abouti. Vérifie ta connexion et appuie de nouveau sur Déconnexion.";
+        button.disabled = false;
+      }
     });
   </script>
   <script src="./km-launch-intro.js?v=after-login-2"></script>

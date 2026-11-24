@@ -31,7 +31,7 @@
         <img src="brand/assets/mascot-nour.png" alt="Mimi">
         <strong>Kawaii Muslim</strong>
       </a>
-      <a class="nav-link" href="Bibliotheque%20Kawaii%20Muslim.dc.html">← <span>Bibliothèque</span></a>
+      <a class="nav-link" id="backFromLogin" href="Application.dc.html?section=library&amp;guest=1">← Retour à la découverte</a>
     </nav>
 
     <main class="auth-layout">
@@ -60,6 +60,10 @@
             <button class="password-toggle" id="togglePassword" type="button" aria-label="Afficher le mot de passe">👁️</button>
           </div>
 
+          <div id="appleLogoutNotice" hidden>
+            <p class="form-message" id="appleLogoutMessage" role="status">La session du site est fermée. Termine la déconnexion Apple sur cet appareil.</p>
+            <button class="tiny-link" id="retryAppleLogout" type="button">Terminer la déconnexion Apple</button>
+          </div>
           <div class="form-row">
             <span></span>
             <button class="tiny-link" id="forgotPassword" type="button">Mot de passe oublié ?</button>
@@ -76,7 +80,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./km-config.js"></script>
-  <script src="./km-auth.js?v=password-recovery-1"></script>
+  <script src="./km-auth.js?v=parent-access-2"></script>
   <script>
     const form = document.getElementById("loginForm");
     const message = document.getElementById("message");
@@ -94,7 +98,7 @@
       }
     } catch {}
     if (loginParams.get("reason") === "parent") {
-      message.textContent = "Connecte-toi à ton compte parent pour voir les formules Apple et gérer ton abonnement.";
+      message.textContent = "Connecte-toi à ton compte parent pour retrouver ton espace famille et gérer ton abonnement.";
     }
     const staffRoles = ["admin", "support", "content_admin"];
 
@@ -123,6 +127,12 @@
     document.getElementById("togglePassword").addEventListener("click", () => {
       password.type = password.type === "password" ? "text" : "password";
     });
+
+    if (parentDestination || loginParams.get("reason") === "parent") {
+      const back = document.getElementById("backFromLogin");
+      back.href = "Compte.dc.html";
+      back.textContent = "← Retour aux offres famille";
+    }
 
     document.getElementById("forgotPassword").addEventListener("click", async () => {
       const email = document.getElementById("email").value.trim();
@@ -161,6 +171,25 @@
       }
     });
 
+    const appleLogoutNotice = document.getElementById("appleLogoutNotice");
+    if (window.KMApple && (KMAuth.hasPendingAppleLogout() || loginParams.get("logout") === "apple")) {
+      appleLogoutNotice.hidden = false;
+      document.getElementById("retryAppleLogout").addEventListener("click", async event => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        try {
+          await KMAuth.clearNativeSession();
+          appleLogoutNotice.hidden = true;
+          message.textContent = "La déconnexion Apple est terminée.";
+          const url = new URL(location.href);
+          url.searchParams.delete("logout");
+          history.replaceState(null, "", url.pathname + url.search + url.hash);
+        } catch {
+          document.getElementById("appleLogoutMessage").textContent = "L’application n’a pas pu terminer la déconnexion. Réessaie dans un instant.";
+          button.disabled = false;
+        }
+      });
+    }
     KMAuth.getSession().then(session => {
       if (session) return continueAfterAuthentication();
     }).catch(() => {});

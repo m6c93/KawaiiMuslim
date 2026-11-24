@@ -19,7 +19,7 @@
     card.querySelector('[data-prophet-title]').alt=names[i]+' — Que la paix soit sur lui';
     card.querySelector('[data-prophet-art]').src='./prophetes/assets/art-'+i+'.webp';
     card.querySelector('[data-prophet-lesson]').textContent=lessons[i];
-    card.querySelector('[data-prophet-link]').href='./prophetes/?prophet='+i;
+    card.querySelector('[data-prophet-link]').href='./prophetes/?from=today&prophet='+i;
   }
   refresh();
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
