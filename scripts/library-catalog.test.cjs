@@ -49,8 +49,9 @@ function setup(embedded = false) {
 test('catalogue invité, recherche accentuée, surbrillance et effacement', () => {
   const {Component, search} = setup();
   const app = new Component();
-  app.openLibrary('guest', {profile:'enfant', guestMode:true});
+  app.openLibrary('guest', {profile:'enfant', profileName:'Découverte', guestMode:true});
   let view = app.renderVals();
+  assert.equal(view.sub, 'Quel livre veux-tu lire ?');
   assert.equal(view.books.length, 11);
   assert.equal(view.books.filter(b => b.canRead).length, 5);
   const arabic = view.books.find(b => b.title.includes('apprends'));
@@ -96,8 +97,9 @@ for (const embedded of [false,true]) test('retour avec recherche, focus et défi
 test('les droits du catalogue abonné et l’offre découverte sont distincts', () => {
   const {Component} = setup();
   const app = new Component();
-  app.openLibrary('child:test', {profile:'enfant',guestMode:false,subscribed:true});
+  app.openLibrary('child:test', {profile:'enfant',profileName:'Nour',guestMode:false,subscribed:true});
   let view = app.renderVals();
+  assert.equal(view.sub, 'Quel livre lit-on ce soir, Nour ?');
   assert.equal(view.books.filter(b=>b.canRead).length,11);
   assert(!view.books.some(b=>b.url.includes('guest=1')));
   app.setState({subscribed:false});
