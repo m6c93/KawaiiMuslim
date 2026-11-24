@@ -747,7 +747,9 @@ class Component extends DCLogic {
       familyPrice,
       parentSpace: (this.props.parentSpace ?? true) && isMaman,
       greeting: isMaman ? 'Assalamou alaykoum \uD83C\uDF38' : 'Assalamou alaykoum, petit lecteur ! \uD83C\uDF19',
-      sub: isMaman ? "L'espace lecture de votre famille." : `Quel livre lit-on ce soir, ${this.state.profileName || 'petit lecteur'} ?`,
+      sub: isMaman ? "L'espace lecture de votre famille."
+        : guestMode ? "Quel livre veux-tu lire ?"
+        : `Quel livre lit-on ce soir, ${this.state.profileName || 'petit lecteur'} ?`,
       profileName: this.state.profileName || (isMaman ? 'Maman' : 'Invité'),
       profileEmoji: this.state.profileEmoji || (isMaman ? '🌸' : '🐤'),
       announcement: this.state.announcement,
