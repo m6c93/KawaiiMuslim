@@ -239,10 +239,11 @@ function mountPictureReader(config) {
   byId("zoomBtn").onclick = () => openZoom(indices(position)); byId("zoomClose").onclick = () => zoom.close();
   byId("fullscreenBtn").onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.(); };
   let gesture = null, lastSwipe = -1000;
-  for (const [side, paper] of papers.entries()) paper.addEventListener("click", () => {
-    if (performance.now() - lastSwipe < 450) return;
-    if (matchMedia("(max-width:1024px), (pointer:coarse)").matches) openZoom([indices(position)[side]]);
-    else move(position + (side ? 1 : -1));
+  for (const [side, paper] of papers.entries()) paper.addEventListener("click", event => {
+    if (event.pointerType === "touch" || event.pointerType === "pen" || performance.now() - lastSwipe < 450) return;
+    // Touch readers keep the spread still on a tap; swipes and arrows turn it.
+    if (matchMedia("(max-width:1024px), (pointer:coarse)").matches) return;
+    move(position + (side ? 1 : -1));
   });
   book.addEventListener("touchstart", e => { gesture = e.touches.length === 1 ? e.touches[0] : null; }, {passive:true});
   book.addEventListener("touchmove", e => { if (e.touches.length > 1) gesture = null; }, {passive:true});

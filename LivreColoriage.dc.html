@@ -235,9 +235,11 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
       framePrepareAttempts=0;
       loading.hidden=true;
       document.body.classList.add("book-ready");
-      const responsiveStyle=doc.createElement("style");
-      responsiveStyle.textContent="html,body{width:100%;max-width:100%;overflow-x:hidden} @media(max-width:650px){header{min-width:0} main{min-width:0} figure{max-width:100%}}";
-      doc.head.appendChild(responsiveStyle);
+      if (!doc.documentElement.hasAttribute('data-picture-reader')) {
+        const responsiveStyle=doc.createElement("style");
+        responsiveStyle.textContent="html,body{width:100%;max-width:100%;overflow-x:hidden} @media(max-width:650px){header{min-width:0} main{min-width:0} figure{max-width:100%}}";
+        doc.head.appendChild(responsiveStyle);
+      }
       if(previewPageLimit){
         const view=frame.contentWindow;
         const progress=doc.getElementById("progress");
