@@ -252,7 +252,7 @@ html.direct-resume .direct-resume-screen{position:fixed;inset:0;z-index:100;disp
           if(progress.max!==limit)progress.max=limit;
           if(Number(progress.value)>Number(limit))progress.value=limit;
           nextButton.disabled=atLimit();
-          if(gridButton)gridButton.hidden=true;
+          if(gridButton && !doc.documentElement.hasAttribute("data-picture-reader"))gridButton.hidden=true;
         };
         nextButton?.addEventListener("click",event=>{
           if(atLimit()){event.preventDefault();event.stopImmediatePropagation()}

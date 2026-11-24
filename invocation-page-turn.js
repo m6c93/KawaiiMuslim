@@ -93,7 +93,7 @@
     let width, height, padding, ratio;
     return {
       canvas,
-      prepare(front, back, pageWidth, pageHeight, frontIsCover = false, backIsCover = false, trimPages = true, wrapCover = false) {
+      prepare(front, back, pageWidth, pageHeight, frontIsCover = false, backIsCover = false, trimPages = true, wrapCover = false, coverFront = null) {
         width = pageWidth; height = pageHeight; padding = Math.ceil(height * .22);
         ratio = Math.min(devicePixelRatio || 1, 2);
         const cw = width * 2 + padding * 2, ch = height + padding * 2;
@@ -106,13 +106,13 @@
           context.fillStyle = '#fffdf9'; context.fillRect(0, 0, face.width, face.height);
           if (image) {
             const cover = i === 0 ? frontIsCover : backIsCover;
-            if (cover && wrapCover) {
-              const width = image.naturalWidth / 2;
-              context.drawImage(image, width, 0, width, image.naturalHeight, 0, 0, face.width, face.height);
-            } else if (cover || !trimPages) {
-              const fit = Math.min(face.width / image.naturalWidth, face.height / image.naturalHeight);
-              const w = image.naturalWidth * fit, h = image.naturalHeight * fit;
-              context.drawImage(image, (face.width - w) / 2, (face.height - h) / 2, w, h);
+            if (cover || !trimPages) {
+              const left = cover ? (coverFront?.left ?? (wrapCover ? image.naturalWidth / 2 : 0)) : 0;
+              const width = image.naturalWidth - left;
+              const fit = Math.min(face.width / width, face.height / image.naturalHeight);
+              const w = width * fit, h = image.naturalHeight * fit;
+              context.drawImage(image, left, 0, width, image.naturalHeight,
+                (face.width - w) / 2, (face.height - h) / 2, w, h);
             } else {
               const crop = pageImageRect(image.naturalWidth, image.naturalHeight, pageWidth, pageHeight);
               context.drawImage(image, crop.x, crop.y, crop.width, crop.height, 0, 0, face.width, face.height);
@@ -164,7 +164,7 @@
       .km-natural-book .spread{box-shadow:0 16px 34px #19382f45,0 2px 5px #19382f38;outline:1px solid #49645840;border-radius:8px}
       .km-natural-book .cover-stage{box-shadow:0 16px 34px #19382f50,0 2px 5px #19382f38;outline:1px solid #49645840}
       .km-natural-book .paper img{user-select:none;-webkit-user-drag:none}.km-print-trim .paper img{object-fit:cover;transform:scale(${1 / (1 - PAGE_TRIM * 2)});transform-origin:center}
-      html:has(.km-print-trim) #zoomPages img,html:has(.km-print-trim) .thumb img{clip-path:inset(${PAGE_TRIM * 100}%)}
+      html:has(.km-print-trim) #zoomPages > img,html:has(.km-print-trim) .thumb > img{clip-path:inset(${PAGE_TRIM * 100}%)}
       .km-natural-book .binding{width:28px;background:linear-gradient(90deg,transparent,#271e1014 35%,#271e1038 49%,#fff9e84d 53%,#271e100a 68%,transparent)}
       .km-natural-book .km-paper-leaf{position:absolute;display:block;z-index:40;pointer-events:none;opacity:1;mix-blend-mode:normal}
       .km-paper-cast{position:absolute;top:1%;height:98%;width:50%;z-index:25;pointer-events:none;background:radial-gradient(ellipse at center,#21170945,transparent 73%);filter:blur(11px);opacity:0;will-change:opacity,transform}
@@ -245,13 +245,20 @@
         // portrait-only host rotates the whole reader into landscape.
         const width = book.clientWidth / 2, height = book.clientHeight;
         if (!width || !height) { done(); return; }
+        const coverAtRest = (opening || closing) && reader.coverPlacement
+          ? reader.coverPlacement() : {scale:1, offsetY:0};
+        const positionCover = amount => {
+          const scale = 1 + (coverAtRest.scale - 1) * amount;
+          book.style.transform = `translate(${-width / 2 * amount * scale}px, ${coverAtRest.offsetY * amount}px) scale(${scale})`;
+        };
         paperRenderer ||= createPaperRenderer();
-        paperRenderer.prepare(front, back, width, height, opening, closing, reader.trimPages, reader.wrapCover);
+        paperRenderer.prepare(front, back, width, height, opening, closing, reader.trimPages, reader.wrapCover, reader.coverFront);
         paperRenderer.draw(0, forward, opening || closing);
         leaf = paperRenderer.canvas;
         cast = document.createElement('div'); cast.className = 'km-paper-cast'; cast.setAttribute('aria-hidden', 'true');
         book.append(cast, leaf);
         if (opening) {
+          positionCover(1);
           els.cover.hidden = true; els.spread.hidden = false; els.leftPaper.style.opacity = '0';
           paintSide('right', targetRight);
         } else if (closing) {
@@ -271,7 +278,7 @@
           catch (_) { paperRenderer = null; done(); return; }
           cast.style.opacity = lift * 0.7;
           cast.style.transform = `translateX(${width * (forward ? 1 - p : p)}px) scaleX(${0.5 + lift * 0.6})`;
-          if (opening || closing) book.style.transform = `translateX(${-width / 2 * (opening ? 1 - p : p)}px)`;
+          if (opening || closing) positionCover(opening ? 1 - p : p);
           if (elapsed < 1) frame = requestAnimationFrame(draw); else done();
         }
         frame = requestAnimationFrame(draw);

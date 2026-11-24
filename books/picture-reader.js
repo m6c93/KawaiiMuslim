@@ -42,14 +42,29 @@ function mountPictureReader(config) {
 
   document.querySelector(".title strong").textContent = config.title;
   coverImage.setAttribute("aria-label", "Couverture du livre " + config.title);
-  const coverArt = new Image(); coverArt.alt = ""; coverArt.className = config.wrap ? "wrap-art" : "";
-  if (config.loadImage) config.loadImage(coverArt, 0, false);
-  else coverArt.src = config.cover;
-  if (config.wrapSize) {
-    coverArt.style.width = config.wrapSize + "%";
-    coverArt.style.marginLeft = (100 - config.wrapSize) + "%";
+  // Clip only the back and binding of a printed wrap. Every presentation uses
+  // the same front rectangle, with its original proportions inside the page.
+  function coverArtwork(thumbnail = false) {
+    const frame = document.createElement("span");
+    frame.className = "cover-front";
+    const clip = document.createElement("span");
+    clip.className = "cover-front-clip";
+    const image = new Image(); image.alt = ""; image.draggable = false;
+    const front = config.coverFront;
+    if (front) {
+      const ratio = front.width / front.height;
+      clip.style.width = Math.min(1, ratio) * 100 + "%";
+      clip.style.height = Math.min(1, 1 / ratio) * 100 + "%";
+      image.style.width = (front.left + front.width) / front.width * 100 + "%";
+    } else if (config.wrap) {
+      image.style.width = (config.wrapSize || 200) + "%";
+    }
+    if (config.loadImage) config.loadImage(image, 0, thumbnail);
+    else image.src = config.cover;
+    clip.append(image); frame.append(clip);
+    return frame;
   }
-  coverImage.append(coverArt);
+  coverImage.append(coverArtwork());
   const home = document.querySelector(".home");
   if (config.discovery) home.search = "?guest=1";
   // In the colouring workspace the close button returns the whole view to the shelf.
@@ -146,7 +161,17 @@ function mountPictureReader(config) {
   }
   const paper = window.KMPicturePaper?.attach({
     els: { book, cover, spread, leftPaper:papers[0], rightPaper:papers[1] },
-    trimPages:Boolean(config.trimPages), wrapCover:Boolean(config.wrap), maxPosition:() => lastSpread,
+    trimPages:Boolean(config.trimPages), coverFront:config.coverFront, wrapCover:Boolean(config.wrap),
+    coverPlacement() {
+      // Read in book coordinates even when the iPhone shell rotates the view.
+      const hidden = cover.hidden;
+      cover.hidden = false;
+      const scale = book.clientWidth ? cover.offsetWidth / (book.clientWidth / 2) : 1;
+      const offsetY = cover.offsetTop - book.clientHeight / 2;
+      cover.hidden = hidden;
+      return {scale:scale || 1, offsetY};
+    },
+    maxPosition:() => lastSpread,
     pagesFor:indices, render, pageSound:rustle,
     get position() { return position; },
     set position(value) { position = bound(value); },
@@ -162,8 +187,13 @@ function mountPictureReader(config) {
   }
   function openZoom(ids) {
     const selectedImages = ids.filter(Boolean);
-    if (!selectedImages.length) return;
-    byId("zoomPages").replaceChildren(...selectedImages.map(i => imageFor(i)));
+    if (!selectedImages.length && position) return;
+    const images = selectedImages.length ? selectedImages.map(i => imageFor(i)) : [coverArtwork()];
+    if (!selectedImages.length) {
+      images[0].setAttribute("role", "img");
+      images[0].setAttribute("aria-label", "Couverture du livre " + config.title);
+    }
+    byId("zoomPages").replaceChildren(...images);
     if (!zoom.open) zoom.showModal();
   }
   function closeDrawer() {
@@ -179,8 +209,7 @@ function mountPictureReader(config) {
         const target = Math.ceil(i / 2); b.dataset.spread = target;
         const label = i ? pageLabel(i) : "Couverture"; b.setAttribute("aria-label", label);
         const badge = document.createElement("span"); badge.textContent = i ? pageNumber(i) || "Ouverture" : label;
-        const art = i ? imageFor(i, true) : coverArt.cloneNode();
-        if (!i && config.loadImage) config.loadImage(art, 0, true);
+        const art = i ? imageFor(i, true) : coverArtwork(true);
         b.append(art, badge); b.classList.toggle("active", target === position);
         b.onclick = () => { move(target, false); closeDrawer(); }; fragment.append(b);
       }
