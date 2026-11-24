@@ -166,3 +166,8 @@ html.km-reader-turned {
   user-select: none;
   touch-action: manipulation;
 }
+
+/* The landscape viewport owns the art and the controls while it is mounted. */
+html.km-apple-landscape .reader, html.km-apple-landscape .topbar { display:none!important; }
+.km-apple-landscape km-book-viewport [slot=left] > span { font:bold 21px/1 system-ui,sans-serif; }
+.km-apple-landscape km-book-viewport .paper img { pointer-events:none; -webkit-touch-callout:none; }
