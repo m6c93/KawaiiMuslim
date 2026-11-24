@@ -28,6 +28,7 @@ body[data-km-section="apps"] .apps .app-card {
 body[data-km-section="apps"] .apps .visual {
   height: clamp(128px, 20vh, 190px);
   min-height: 0;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   padding: 8px;
   margin: 10px 10px 0;
   border-radius: 18px;
@@ -36,9 +37,11 @@ body[data-km-section="apps"] .apps .visual {
 body[data-km-section="apps"] .visual::before,
 body[data-km-section="apps"] .visual::after { display: none; }
 body[data-km-section="apps"] .apps .visual .app-illustration {
-  width: auto !important;
+  width: 100% !important;
   height: 100% !important;
+  min-height: 0;
   max-width: 100%;
+  max-height: 100%;
   object-fit: contain !important;
   border: 0;
   border-radius: 14px;
@@ -48,9 +51,9 @@ body[data-km-section="apps"] .apps .visual .app-illustration {
   transform: none;
   animation: none;
 }
-body[data-km-section="apps"] .apps .visual .badge {
-  top: 9px;
-  left: 9px;
+body[data-km-section="apps"] .apps .card-body .badge {
+  top: 19px;
+  left: 19px;
   max-width: calc(100% - 18px);
   padding: 4px 8px;
   border-radius: 8px;
@@ -75,25 +78,93 @@ body[data-km-section="apps"] .apps .launch {
   font-family: Nunito, system-ui, sans-serif;
 }
 body[data-km-section="apps"] .card-body .meta { display: none; }
-@media (max-width: 760px) {
-  body[data-km-section="apps"] .shell { width: calc(100% - 24px); }
-  body[data-km-section="apps"] .hero { padding: 12px 16px; margin: 6px 0 12px; }
-  body[data-km-section="apps"] .apps { gap: 14px; }
-  body[data-km-section="apps"] .apps .visual { height: clamp(100px, 19vh, 152px); }
-  body[data-km-section="apps"] .apps .visual .badge { font-size: 10px; }
-  body[data-km-section="apps"] .card-body { padding: 12px 15px 15px; }
-}
-@media (orientation: landscape) and (max-height: 500px) {
-  body[data-km-section="apps"] .hero { margin: 4px 0 8px; padding: 8px 14px; }
-  body[data-km-section="apps"] .hero h1 { font-size: 24px; }
-  body[data-km-section="apps"] .apps { grid-template-columns: 1fr; gap: 8px; }
-  body[data-km-section="apps"] .apps .app-card {
-    display: grid;
-    grid-template-columns: minmax(106px, 25%) 1fr;
-    align-items: stretch;
+@media (max-width: 760px), (orientation: landscape) and (max-height: 500px) {
+  body[data-km-section="apps"] .shell {
+    width: min(calc(100% - 24px), 900px);
+    padding-top: 8px;
   }
-  body[data-km-section="apps"] .apps .visual { margin: 8px; height: 108px; }
-  body[data-km-section="apps"] .apps .visual .badge { display: none; }
-  body[data-km-section="apps"] .card-body { padding: 10px; }
-  body[data-km-section="apps"] .card-body p { margin: 4px 0 6px; }
+  body[data-km-section="apps"] .brand img { width: 34px; height: 34px; }
+  body[data-km-section="apps"] .hero {
+    margin: 5px 0 9px;
+    padding: 5px 3px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  body[data-km-section="apps"] .hero h1 { font-size: 26px; }
+  body[data-km-section="apps"] .apps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  body[data-km-section="apps"] .apps .app-card {
+    grid-column: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 6px 8px;
+    border-radius: 18px;
+    text-align: center;
+  }
+  body[data-km-section="apps"] .apps .visual {
+    --icon-size: clamp(62px, 19vw, 80px);
+    flex: none;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    padding: 0;
+    margin: 0;
+    border-radius: 18px;
+  }
+  body[data-km-section="apps"] .apps .card-body {
+    position: static;
+    width: 100%;
+    padding: 6px 2px 0;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 3px;
+  }
+  body[data-km-section="apps"] .apps .card-body h2 {
+    margin: 0;
+    font-size: clamp(14px, 3.6vw, 17px);
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+  }
+  body[data-km-section="apps"] .apps .card-body p { display: none; }
+  body[data-km-section="apps"] .apps .card-body .badge {
+    position: static;
+    display: block;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    color: #685e64;
+    background: transparent;
+    border: 0;
+    font: 700 11px/1.2 Nunito, system-ui, sans-serif;
+  }
+  body[data-km-section="apps"] .apps .launch {
+    position: static;
+    min-height: 0;
+    padding: 2px 0 0;
+    margin: auto 0 0;
+    color: var(--app-accent);
+    background: transparent !important;
+    font-size: 12px;
+    line-height: 1.25;
+  }
+  body[data-km-section="apps"] .apps .launch::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+  }
+  body[data-km-section="apps"] .apps .app-card:focus-within {
+    outline: 3px solid var(--app-accent);
+    outline-offset: 2px;
+  }
+}
+@media (min-width: 560px) and (max-width: 760px) {
+  body[data-km-section="apps"] .apps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 640px) and (orientation: landscape) and (max-height: 500px) {
+  body[data-km-section="apps"] .apps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  body[data-km-section="apps"] .apps .visual { --icon-size: 60px; }
 }

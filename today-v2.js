@@ -325,7 +325,7 @@
       .from(".today-header > *", { autoAlpha: 0, y: -18, duration: .55, stagger: .08 })
       .from(".child-hero", { autoAlpha: 0, y: 24, scale: .975, duration: .72 }, "-=.25")
       .from(".child-eyebrow", { autoAlpha: 0, y: 12, duration: .38 }, "-=.38")
-      .from(".child-hero h1", { autoAlpha: 0, y: 25, clipPath: "inset(0 0 100% 0)", duration: .62 }, "-=.24")
+      .from(".child-hero h2", { autoAlpha: 0, y: 25, clipPath: "inset(0 0 100% 0)", duration: .62 }, "-=.24")
       .from(".child-hero-copy > p:not(.child-eyebrow)", { autoAlpha: 0, y: 12, duration: .4 }, "-=.27")
       .from(".child-primary", { autoAlpha: 0, y: 12, scale: .94, duration: .45 }, "-=.22")
       .from(".child-hero-art", { autoAlpha: 0, x: 58, y: 25, scale: .9, rotation: 2.5, duration: .82 }, "-=.62");

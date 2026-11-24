@@ -30,3 +30,55 @@ body[data-km-section=today] .resume-row>*,body[data-km-section=today] .child-hom
 @media(min-width:681px){body[data-km-section=today] .today-shell{padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right))}}
 @media(max-width:420px){.dua-actions{grid-template-columns:minmax(0,1fr)}.weekly-dua .dua-weekly-heading{font-size:23px}.dua-ritual-heading{align-items:flex-start}.dua-arabic{font-size:28px}.dua-options{justify-content:space-between}.dua-dialog .actions{grid-template-columns:minmax(0,1fr)}}
 @media(max-height:500px) and (orientation:landscape){.dua-dialog{max-height:calc(100dvh - 16px);margin:8px auto}.dua-dialog .dua-words{padding:4px 0}}
+
+.child-home > .weekly-dua { margin: 0; }
+.weekly-dua .dua-weekly-heading {
+  color: #805369;
+  font: 800 clamp(22px, 3vw, 32px)/1.15 "Baloo 2", system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.weekly-dua .dua-illustration { max-width: 320px; margin: 0 0 14px; }
+.weekly-dua .dua-status:empty { display: none; }
+.dua-extras { margin-top: 8px; }
+.dua-extras summary {
+  display: list-item;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  padding: 12px 4px;
+  cursor: pointer;
+  color: #725268;
+  font-size: 13px;
+  font-weight: 800;
+}
+.dua-extras summary:focus-visible { outline: 3px solid #ad7794; outline-offset: 2px; }
+.dua-extras > p { font-size: 13px; color: #725d69; line-height: 1.5; }
+@media (max-width: 1023px) {
+  .child-home > .weekly-dua { gap: 10px; padding: 14px; }
+  .weekly-dua .dua-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-content: center;
+    align-items: center;
+    column-gap: 10px;
+  }
+  .weekly-dua .dua-illustration {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    width: clamp(64px, 19vw, 124px);
+    margin: 0;
+    border-radius: 14px;
+  }
+  .weekly-dua .dua-weekly-heading, .weekly-dua #duaTitle, .weekly-dua #duaWeek { grid-column: 1; }
+  .weekly-dua .dua-weekly-heading { font-size: clamp(19px, 4.8vw, 27px); }
+  .weekly-dua #duaTitle { font-size: 17px; margin: 3px 0; }
+  .weekly-dua #duaWeek { font-size: 12px; margin: 0; }
+  .weekly-dua .dua-sheet { padding: 12px; }
+  .weekly-dua .dua-arabic { margin: 0 0 4px; line-height: 1.6; }
+  .weekly-dua .dua-phonetic { margin: 0 0 4px; line-height: 1.4; }
+  .weekly-dua .dua-translation { margin: 0 auto 12px; line-height: 1.4; }
+  .weekly-dua .dua-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .weekly-dua .dua-actions button { min-height: 44px; padding: 7px; }
+}

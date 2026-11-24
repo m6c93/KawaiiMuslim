@@ -30,7 +30,13 @@ test('the family home keeps activity links and the prayer card visible before th
   try {
     window.eval(readFileSync('today-v2.js', 'utf8'));
     await new Promise(resolve => window.addEventListener('load', resolve, { once: true }));
-    const links = document.querySelectorAll('#worldDestinations a');
+    const home = document.querySelector('main.child-home');
+    assert.equal(home.firstElementChild.id, 'weeklyDua');
+    assert.equal(home.children[1].id, 'worldDestinations');
+    for (const selector of ['.dua-arabic', '[data-listen]', '[data-train]']) {
+      assert.equal(home.firstElementChild.querySelector(selector).closest('details'), null);
+    }
+    const links = document.querySelectorAll('#worldDestinations .destination-grid a');
     assert.equal(links.length, 4);
     for (const element of [...links, document.querySelector('#prayerCard')]) {
       assert.equal(window.getComputedStyle(element).visibility, 'visible', element.textContent.trim());
