@@ -340,34 +340,6 @@
       delay: .8
     });
 
-    var destinations = gsap.utils.toArray(".destination");
-    gsap.from(destinations, {
-      autoAlpha: 0,
-      y: 34,
-      scale: .94,
-      duration: .58,
-      stagger: .09,
-      ease: "back.out(1.25)",
-      scrollTrigger: window.ScrollTrigger ? {
-        trigger: ".destination-grid",
-        start: "clamp(top 88%)",
-        once: true
-      } : undefined
-    });
-
-    gsap.from([".child-resume", ".child-prayer"], {
-      autoAlpha: 0,
-      y: 30,
-      duration: .62,
-      stagger: .12,
-      ease: "power3.out",
-      scrollTrigger: window.ScrollTrigger ? {
-        trigger: ".child-resume",
-        start: "clamp(top 88%)",
-        once: true
-      } : undefined
-    });
-
     var hero = document.querySelector(".child-hero");
     var heroArt = document.querySelector(".child-hero-art");
     if (hero && heroArt && window.matchMedia("(hover:hover) and (pointer:fine)").matches) {
@@ -386,7 +358,7 @@
         moveArt(0);
       });
 
-      destinations.forEach(function (card) {
+      gsap.utils.toArray(".destination").forEach(function (card) {
         card.addEventListener("pointermove", function (event) {
           var rect = card.getBoundingClientRect();
           var x = (event.clientX - rect.left) / rect.width;
