@@ -22,84 +22,45 @@
   text-decoration: none;
 }
 #kmGameExit:focus-visible { outline: 3px solid #267761; outline-offset: 2px }
+/* The native shell owns the close button; standalone players use Quitter. */
+html.km-mimi-native #kmGameExit { display: none !important }
 @media (max-width: 700px), (orientation: landscape) and (max-height: 600px) {
-  .km-mimi-layout .page-shell {
-    box-sizing: border-box;
-    height: 100svh;
-    height: 100dvh;
-    min-height: 0;
-    padding: var(--game-top) var(--game-right) var(--game-bottom) var(--game-left);
-    place-items: stretch center;
+  html.km-mimi.km-mimi-layout .page-shell,
+  html.km-mimi.km-mimi-layout .game-column,
+  html.km-mimi.km-mimi-layout .game-frame {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
-  .km-mimi-layout .game-column {
-    width: min(100%, 570px);
-    min-width: 0;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
+  html.km-mimi.km-mimi-layout .page-shell { position: fixed !important }
+  html.km-mimi.km-mimi-layout .game-frame {
+    border: 0; border-radius: 0; box-shadow: none; aspect-ratio: auto !important;
   }
-  .km-mimi-layout .game-header { min-height: 46px; margin: 0; padding-left: 114px; align-items: center }
-  .km-mimi-layout .game-header .eyebrow { display: none }
-  .km-mimi-layout .game-header h1 { font-size: clamp(19px, 5vw, 28px) }
-  .km-mimi-layout .record { padding: 2px 9px; min-width: 64px }
-  .km-mimi-layout .record strong { font-size: 17px }
-  .km-mimi-layout .mode-picker { margin: 0 }
-  .km-mimi-layout .mode-picker button { min-height: 44px }
-  .km-mimi-layout .game-frame { flex: 1; min-height: 0; border-radius: 16px; box-shadow: 3px 3px var(--ink) }
-  .km-mimi-layout .game-frame canvas { width: 100%; height: 100%; aspect-ratio: auto }
-  .km-mimi-layout .instructions { margin: 0; padding: 2px 3px }
-  .km-mimi-layout .instructions p { font-size: 12px }
-  .km-mimi-layout .tap-mark { display: none }
-}
-@media (orientation: landscape) and (max-height: 600px) {
-  .km-mimi-layout .game-column {
-    width: 100%;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) clamp(150px, 22vw, 220px);
-    grid-template-rows: 46px auto auto 1fr;
-    grid-template-areas: "game back" "game header" "game modes" "game help";
-    gap: 8px 14px;
-    align-items: start;
+  .km-mimi-layout .game-frame::after { display: none }
+  html.km-mimi.km-mimi-layout .game-frame canvas {
+    display: block; width: 100% !important; height: 100% !important; aspect-ratio: auto !important;
   }
-  .km-mimi-layout #kmGameExit { left: auto; right: var(--game-right) }
-  .km-mimi-layout .game-frame { grid-area: game; height: 100%; align-self: stretch }
-  .km-mimi-layout .game-header { padding: 0; grid-area: header; min-height: 0; flex-wrap: wrap; gap: 6px }
-  .km-mimi-layout .mode-picker { grid-area: modes; display: flex; flex-wrap: wrap; gap: 5px }
-  .km-mimi-layout .mode-picker button { flex: 1; padding: 0 6px }
+  html.km-mimi.km-mimi-layout .game-header {
+    display: flex !important; position: absolute; z-index: 2;
+    top: var(--game-top); right: var(--game-right); margin: 0;
+    pointer-events: none;
+  }
+  .km-mimi-layout .game-header > :first-child,
+  .km-mimi-layout .instructions { display: none !important }
+  .km-mimi-layout .record {
+    padding: 4px 10px; border-radius: 12px; background: #fffaf1eb;
+  }
+  html.km-mimi.km-mimi-layout .mode-picker {
+    display: flex !important; position: absolute !important; z-index: 2;
+    inset: auto auto var(--game-bottom) 50% !important; transform: translateX(-50%);
+    gap: 8px; margin: 0; width: max-content;
+  }
+  .km-mimi-layout .mode-picker button { min-height: 44px; padding: 0 14px }
   .km-mimi-layout .mode-picker span { display: none }
-  .km-mimi-layout .instructions { grid-area: help }
-}
-
-/* Keep the webview's canvas inside its grid cell when its host requests
-   full-screen canvas styles. The shell supplies its safe area in CSS pixels. */
-@media (max-width: 700px), (orientation: landscape) and (max-height: 600px) {
-  html.km-mimi.km-mimi-layout.km-mimi-native .page-shell {
-    inset: 0 !important; width: 100% !important; height: 100dvh !important;
-    display: grid !important; box-sizing: border-box !important;
-    padding: var(--game-top) var(--game-right) var(--game-bottom) var(--game-left) !important;
-  }
-  html.km-mimi.km-mimi-layout.km-mimi-native .game-column {
-    position: relative !important; inset: auto !important; min-height: 0 !important;
-    width: 100% !important; height: 100% !important;
-  }
-  html.km-mimi.km-mimi-layout.km-mimi-native .game-frame {
-    position: relative !important; inset: auto !important; width: 100% !important;
-    min-height: 0 !important; max-height: 100% !important; aspect-ratio: auto !important;
-  }
-  html.km-mimi.km-mimi-layout.km-mimi-native .game-frame canvas {
-    position: absolute !important; inset: 0 !important;
-    width: 100% !important; height: 100% !important; aspect-ratio: auto !important;
-  }
-  html.km-mimi.km-mimi-layout.km-mimi-native .game-header { display: flex !important }
-  html.km-mimi.km-mimi-layout.km-mimi-native .mode-picker { position: static !important; display: flex !important }
-  html.km-mimi.km-mimi-layout.km-mimi-native .mode-picker button { flex: 1 }
-}
-@media (orientation: portrait) and (max-width: 700px) {
-  html.km-mimi.km-mimi-layout.km-mimi-native .game-column { display: flex !important }
-  html.km-mimi.km-mimi-layout.km-mimi-native .game-frame { height: auto !important; flex: 1 !important }
-}
-@media (orientation: landscape) and (max-height: 600px) {
-  html.km-mimi.km-mimi-layout.km-mimi-native .game-column { display: grid !important }
-  html.km-mimi.km-mimi-layout.km-mimi-native .game-frame { height: 100% !important }
 }

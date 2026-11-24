@@ -1,8 +1,8 @@
-const CACHE = "mimi-fly-responsive-v2";
+const CACHE = "mimi-fly-responsive-v3";
 const CORE = [
   "/applications/mimi/",
   "/applications/mimi/manifest.webmanifest",
-  "/applications/mimi/game-navigation.css?v=family-nav-3",
+  "/applications/mimi/game-navigation.css?v=edge-4",
   "/km-activity-return.js?v=family-nav-2",
   "/applications/mimi/assets/mimi-flight-cycle-8f.webp",
   "/applications/mimi/assets/mimi-waddle-cycle-8f.webp",
