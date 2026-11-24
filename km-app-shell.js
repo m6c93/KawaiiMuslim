@@ -56,19 +56,21 @@ navigate(initial,{historyMode:'replace',anchor:params.get('anchor')||''}).then(a
     if(depth>4||!visible(frame))return false;
     try{
       const win=frame.contentWindow,doc=frame.contentDocument;if(!doc)return false;
-      if(bookPath(win.location.pathname))return true;
-      return [...doc.querySelectorAll('iframe')].some(child=>{
+      if(bookPath(win.location.pathname))return doc.documentElement.classList.contains("km-reader-clean") ? "clean" : true;
+      for(const child of doc.querySelectorAll('iframe')){
         const r=child.getBoundingClientRect();
         // Small book previews in the catalogue do not enter immersive reading.
-        return r.width>=win.innerWidth*.65&&r.height>=win.innerHeight*.6&&reading(child,depth+1);
-      });
+        const libraryBook=child.id==='bookFrame'&&/^\/LivreColoriage\.dc(?:\.html)?$/i.test(win.location.pathname);
+        if(libraryBook||(r.width>=win.innerWidth*.65&&r.height>=win.innerHeight*.6)){const mode=reading(child,depth+1);if(mode)return mode;}
+      }
+      return false;
     }catch{return false;}
   }
   function sync(){
     const frame=host.querySelector('.km-app-view.is-active');
     const active=!!frame&&reading(frame);
-    document.body.classList.toggle('km-book-reading',active);
-    let clean=false;try{clean=active&&frame.contentDocument.documentElement.classList.contains("km-reader-clean")}catch{}
+    document.body.classList.toggle('km-book-reading',Boolean(active));
+    const clean=active==="clean";
     document.body.classList.toggle("km-clean-book-reading",clean);
     bar.hidden=!active||clean;
     const nav=document.querySelector('.km-app-nav');

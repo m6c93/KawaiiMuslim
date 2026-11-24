@@ -45,7 +45,7 @@
 
   const styles = document.createElement('link');
   styles.rel = 'stylesheet';
-  styles.href = '/books/reader-controls.css?v=reader-navigation-3';
+  styles.href = '/books/reader-controls.css?v=landscape-reader-4';
   document.head.append(styles);
 
   function mount() {
@@ -118,6 +118,14 @@
     new MutationObserver(syncPage).observe(label, {childList:true, characterData:true, subtree:true});
     syncPage();
 
+    const stage = document.querySelector('.reader');
+    function measureStage() {
+      // clientHeight follows the grid rows even when their parent is rotated.
+      const size = stage.clientHeight + 'px';
+      if (root.style.getPropertyValue('--km-stage-height') !== size) root.style.setProperty('--km-stage-height', size);
+    }
+    if (window.ResizeObserver) new ResizeObserver(measureStage).observe(stage);
+    styles.addEventListener('load', measureStage, {once:true});
     let manualLandscape = false, fitFrame = 0, fitLater = 0;
     function fit() {
       const viewport = window.visualViewport;
@@ -133,6 +141,7 @@
       root.classList.toggle('km-reader-wide', width >= height && width >= 500);
       root.style.setProperty('--km-reader-width', width + 'px');
       root.style.setProperty('--km-reader-height', height + 'px');
+      measureStage();
       const touch = navigator.maxTouchPoints > 0 || matchMedia('(pointer: coarse)').matches;
       rotate.hidden = !portrait || (!touch && w >= 700);
       rotate.textContent = turned ? '↶' : '↻';

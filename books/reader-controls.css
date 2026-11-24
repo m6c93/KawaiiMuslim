@@ -7,18 +7,18 @@ html.km-reader-clean {
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: max(env(safe-area-inset-right, 0px), var(--km-safe-right, 0px));
   --stage-top: calc(var(--safe-top) + 62px);
-  --stage-bottom: calc(var(--safe-bottom) + 62px);
+  --dock-gap: 16px;
+  --dock-bottom: calc(var(--safe-bottom) + 6px);
   --side-gap: max(var(--safe-left), var(--safe-right));
   --km-cover-limit-width: min(calc(var(--km-reader-width) * .85), calc(var(--km-reader-width) - 2 * var(--side-gap)));
-  --km-cover-limit-height: min(calc(var(--km-reader-height) * .85), calc(var(--km-reader-height) - var(--stage-top) - var(--stage-bottom)));
+  --km-cover-limit-height: min(calc(var(--km-reader-height) * .85), var(--km-stage-height, calc(var(--km-reader-height) - var(--stage-top) - var(--dock-bottom) - 68px)));
   --km-page-width: min(var(--km-cover-limit-width), calc(var(--km-cover-limit-height) * 2));
   --ink: #25483d;
   --control-bg: #fffdf5;
   width: 100%; height: 100%; overflow: hidden; background: #b8cec5;
 }
 html.km-reader-wide {
-  --stage-top: calc(var(--safe-top) + 4px);
-  --stage-bottom: calc(var(--safe-bottom) + 52px);
+  --stage-top: calc(var(--safe-top) + 6px);
   --side-gap: calc(max(var(--safe-left), var(--safe-right)) + 61px);
 }
 html.km-reader-turned {
@@ -28,7 +28,9 @@ html.km-reader-turned {
   --safe-right: env(safe-area-inset-bottom, 0px);
 }
 .km-reader-clean body {
-  position: fixed; inset: 0 auto auto 0; display: block; margin: 0;
+  position: fixed; inset: 0 auto auto 0; display: grid; margin: 0; box-sizing: border-box;
+  grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr) auto;
+  row-gap: var(--dock-gap); padding: var(--stage-top) 0 var(--dock-bottom);
   width: var(--km-reader-width); height: var(--km-reader-height); min-height: 0;
   overflow: hidden; background: #b8cec5;
 }
@@ -38,15 +40,25 @@ html.km-reader-turned {
 .km-reader-clean .sky, .km-reader-clean .hint, .km-reader-clean .rotate-notice,
 .km-reader-clean .title, .km-reader-clean .mobile-page-controls { display: none !important; }
 .km-reader-clean .reader {
-  position: absolute; inset: 0; display: block; width: 100%; height: 100%; margin: 0; padding: 0;
+  position: relative; inset: auto; display: block; grid-area: 1 / 1;
+  width: 100%; height: 100%; min-height: 0; margin: 0; padding: 0;
+  overflow: hidden; overflow: clip;
 }
 .km-reader-clean .book-shell {
-  position: absolute; inset: var(--stage-top) 0 var(--stage-bottom); display: grid; place-items: center;
+  position: absolute; inset: 0; display: grid; place-items: center;
   width: 100%; height: auto; min-height: 0; margin: 0; padding: 0; gap: 0;
 }
 .km-reader-clean .book {
   width: var(--km-page-width) !important; height: calc(var(--km-page-width) / 2) !important;
-  aspect-ratio: 2 / 1; max-width: none; max-height: none; padding: 0; margin: 0;
+  aspect-ratio: 2 / 1; max-width: none; max-height: none; padding: 0; margin: 0; touch-action: manipulation;
+}
+/* Refit in the same layout pass when Safari resizes its bars or text. */
+@supports (height: 1cqh) {
+  .km-reader-clean .reader { container-type: size; }
+  .km-reader-clean .book {
+    --km-cover-limit-height: min(calc(var(--km-reader-height) * .85), 100cqh);
+    --km-page-width: min(var(--km-cover-limit-width), calc(var(--km-cover-limit-height) * 2));
+  }
 }
 .km-reader-clean .topbar, .km-reader-clean .reader-settings {
   position: absolute; z-index: 24; top: calc(var(--safe-top) + 6px); bottom: auto;
@@ -91,7 +103,7 @@ html.km-reader-turned {
 .km-reader-clean #soundBtn[aria-pressed="false"] { text-decoration: line-through; }
 .km-reader-clean :is(.home,button,summary,a.pdf-original,input[type=range]):focus-visible { outline: 3px solid #91552f; outline-offset: 2px; }
 .km-reader-clean .reader-dock {
-  position: absolute; z-index: 22; bottom: calc(var(--safe-bottom) + 4px); left: 50%; transform: translateX(-50%);
+  position: relative; z-index: 22; grid-area: 2 / 1; justify-self: center; align-self: end;
   box-sizing: border-box; display: grid; grid-template-columns: 44px minmax(0,1fr) 44px; align-items: center; gap: 4px;
   width: min(570px, calc(100% - max(var(--safe-left), var(--safe-right)) * 2 - 14px));
   padding: 1px 3px; background: var(--control-bg); border: 1px solid #91aaa0; border-radius: 16px; color: var(--ink);
