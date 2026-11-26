@@ -313,6 +313,7 @@ button:focus-visible {
 .prayer-location-actions .prayer-city { min-height: 44px; overflow-wrap: anywhere; text-align: left; }
 .prayer-locate { min-height: 44px; padding: 7px 12px; border: 1px solid #dfc9d4; border-radius: 999px; background: #fffaf5; color: #76445d; font: 800 12px/1.2 "Nunito", sans-serif; cursor: pointer; }
 .prayer-locate:disabled { cursor: wait; opacity: .7; }
+.prayer-estimate { grid-column: 1 / -1; justify-self: start; }
 .prayer-status { grid-column: 1 / -1; margin: 0; color: #76505f; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
 .prayer-status:empty { display: none; }
 .child-prayer .prayer-city-form { color: #66545e; border-color: #e3d4d5; }

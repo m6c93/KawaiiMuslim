@@ -17,6 +17,7 @@
   var prayerCityInput = document.getElementById("prayerCityInput");
   var prayerCityCancel = document.getElementById("prayerCityCancel");
   var prayerLocateButton = document.getElementById("prayerLocateButton");
+  var prayerApproxButton = document.getElementById("prayerApproxButton");
   var prayerStatus = document.getElementById("prayerStatus");
   var prayerCountdown = document.getElementById("prayerCountdown");
   var prayerDone = document.getElementById("prayerDone");
@@ -31,6 +32,7 @@
   var prayerController = null;
   var prayerLocation = null;
   var prayerPending = false;
+  var prayerEstimatePending = false;
   var prayerInitialized = false;
   var prayerStarted = false;
   var prayerAutomatic = false;
@@ -126,13 +128,22 @@
     prayerLocateButton.setAttribute("aria-busy", String(busy));
   }
 
+  function setApproxBusy(busy) {
+    if (!prayerApproxButton) return;
+    prayerApproxButton.disabled = busy;
+    prayerApproxButton.textContent = busy ? "Recherche de la ville…" : "Estimer ma ville";
+    prayerApproxButton.setAttribute("aria-busy", String(busy));
+  }
+
   function cancelPrayerRequest() {
     clearTimeout(prayerRefreshTimer);
     clearTimeout(prayerLocationTimer);
     if (prayerController) prayerController.abort();
     prayerController = null;
     prayerPending = false;
+    prayerEstimatePending = false;
     setLocateBusy(false);
+    setApproxBusy(false);
     return ++prayerRequestId;
   }
 
@@ -142,6 +153,7 @@
     prayerReward.textContent = "";
     prayerCountdown.textContent = "";
     prayerStatus.textContent = "";
+    if (prayerApproxButton) prayerApproxButton.hidden = true;
     prayerCard.classList.remove("is-rewarded");
     prayerEyebrow.textContent = "HORAIRES DE PRIÈRE";
     prayerTitle.textContent = message;
@@ -291,21 +303,31 @@
       cancelPrayerRequest();
       prayerMode(prayerPreference(prayerStorageKey()) ? "manual" : "off");
       resetPrayer("Choisis ta ville");
-      prayerStatus.textContent = error && error.code === 1
-        ? "Localisation refusée. Tu peux l’autoriser dans les réglages de l’appareil ou choisir ta ville."
-        : "Position indisponible. Réessaie avec « Me localiser » ou choisis ta ville.";
+      var code = Number(error && error.code);
+      var reason = error && error.reason;
+      if (code === 1) {
+        prayerStatus.textContent = "Localisation refusée. Autorise-la dans les réglages de l’appareil ou saisis ta ville.";
+      } else {
+        var message = reason === "unsupported" ? "La localisation GPS n’est pas disponible dans cet écran."
+          : reason === "prompt_wait_timeout" ? "La demande de localisation n’a pas reçu de réponse. Si une autorisation apparaît, accepte-la puis réessaie."
+          : code === 3 ? "Le téléphone a mis trop de temps à trouver sa position."
+          : code === 2 ? "Le téléphone n’a pas pu fournir sa position."
+          : "La position n’a pas pu être obtenue.";
+        prayerStatus.textContent = message + " Tu peux aussi saisir ta ville ou demander une estimation par Internet.";
+        if (prayerApproxButton) prayerApproxButton.hidden = false;
+      }
       setCityEditor(true, false);
     }
 
-    if (!navigator.geolocation || !navigator.geolocation.getCurrentPosition) { fail(); return; }
+    if (!navigator.geolocation || !navigator.geolocation.getCurrentPosition) { fail({ reason: "unsupported" }); return; }
     // Also bound time spent waiting for an ignored system permission prompt.
-    prayerLocationTimer = setTimeout(function () { fail({ code: 3 }); }, 20000);
+    prayerLocationTimer = setTimeout(function () { fail({ reason: "prompt_wait_timeout" }); }, 20000);
     try {
       navigator.geolocation.getCurrentPosition(function (position) {
         if (requestId !== prayerRequestId) return;
         var latitude = position.coords && position.coords.latitude;
         var longitude = position.coords && position.coords.longitude;
-        if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) { fail(); return; }
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) { fail({ reason: "invalid_position" }); return; }
         clearTimeout(prayerLocationTimer);
         prayerAutomatic = true;
         prayerLastLocated = Date.now();
@@ -315,6 +337,53 @@
         loadPrayerTimes({ kind: "auto", label: "Ma position", latitude: Number(latitude.toFixed(3)), longitude: Number(longitude.toFixed(3)) });
       }, fail, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
     } catch (error) { fail(error); }
+  }
+
+  async function estimatePrayerCity() {
+    // This estimate is requested explicitly and must be confirmed before use.
+    var requestId = cancelPrayerRequest();
+    prayerStarted = true;
+    prayerAutomatic = false;
+    prayerLocation = null;
+    prayerEditing = false;
+    prayerPending = true;
+    prayerEstimatePending = true;
+    resetPrayer("Recherche de ta ville…");
+    setCityEditor(true, false);
+    if (prayerApproxButton) prayerApproxButton.hidden = false;
+    setApproxBusy(true);
+    prayerStatus.textContent = "Ta connexion Internet permet de proposer une ville approximative. Tu pourras la vérifier avant d’afficher les horaires.";
+    var controller = new AbortController();
+    prayerController = controller;
+    var timeout = setTimeout(function () { controller.abort(); }, 8000);
+    try {
+      var response = await fetch("/api/prayer-city", { headers: { Accept: "application/json" }, credentials: "same-origin", cache: "no-store", signal: controller.signal });
+      var data = await response.json();
+      if (requestId !== prayerRequestId) return;
+      if (!response.ok || !data || data.approximate !== true || typeof data.city !== "string"
+          || !data.city.trim() || data.city.length > 80 || !/^[A-Z]{2}$/.test(data.countryCode || "")) throw new Error("city_unavailable");
+      var country = data.countryCode;
+      try { country = new Intl.DisplayNames(["fr"], { type: "region" }).of(data.countryCode) || country; } catch (error) { /* Keep the country code on older iPhones. */ }
+      var suggestion = data.city.trim() + ", " + country;
+      prayerCityInput.value = suggestion;
+      prayerTitle.textContent = "Confirme ta ville";
+      prayerCityLabel.textContent = "Ville à confirmer";
+      prayerStatus.textContent = "Ville estimée via ta connexion : " + suggestion + ". Vérifie-la, puis appuie sur « Afficher ».";
+      prayerEditing = true;
+    } catch (error) {
+      if (requestId !== prayerRequestId) return;
+      resetPrayer("Choisis ta ville");
+      if (prayerApproxButton) prayerApproxButton.hidden = false;
+      prayerStatus.textContent = "L’estimation n’a pas abouti. Indique ta ville et ton pays pour afficher les horaires.";
+    } finally {
+      clearTimeout(timeout);
+      if (requestId === prayerRequestId) {
+        prayerPending = false;
+        prayerEstimatePending = false;
+        prayerController = null;
+        setApproxBusy(false);
+      }
+    }
   }
 
   function startPrayer() {
@@ -430,12 +499,20 @@
     setCityEditor(true, true);
   });
   if (prayerLocateButton) prayerLocateButton.addEventListener("click", locatePrayer);
+  if (prayerApproxButton) prayerApproxButton.addEventListener("click", estimatePrayerCity);
   if (prayerCityCancel) prayerCityCancel.addEventListener("click", function () {
+    var wasPending = prayerPending;
+    cancelPrayerRequest();
     prayerEditing = false;
     setCityEditor(false);
     if (prayerLocation) loadPrayerTimes(prayerLocation);
+    else if (wasPending) resetPrayer("Choisis ta ville");
   });
   if (prayerCityInput) prayerCityInput.addEventListener("input", function () {
+    if (prayerEstimatePending) {
+      cancelPrayerRequest();
+      resetPrayer("Choisis ta ville");
+    }
     prayerEditing = true;
     clearTimeout(prayerRefreshTimer);
   });

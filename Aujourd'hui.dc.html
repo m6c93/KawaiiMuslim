@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Noto+Naskh+Arabic:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,600,1,0&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./km-bottom-nav.css?v=continuous-1">
-  <link rel="stylesheet" href="./today-v2.css?v=prayer-geolocation-1">
+  <link rel="stylesheet" href="./today-v2.css?v=prayer-location-recovery-2">
   <link rel="stylesheet" href="./today-child-home.css?v=weekly-cover-2">
   <script src="./km-bottom-nav.js?v=continuous-1"></script>
   <script src="./km-child-theme.js?v=boy-theme-2"></script>
@@ -155,12 +155,13 @@
           <span class="prayer-countdown" id="prayerCountdown"></span><button class="prayer-done" id="prayerDone" type="button" hidden>J’ai prié</button><span class="prayer-reward" id="prayerReward" aria-live="polite"></span>
         </div>
         <p class="prayer-status" id="prayerStatus" role="status" aria-live="polite"></p>
-        <form class="prayer-city-form" id="prayerCityForm" hidden><label for="prayerCityInput">Dans quelle ville es-tu ?</label><div><input id="prayerCityInput" type="text" maxlength="80" placeholder="Ex. Saint-Denis, France" autocomplete="address-level2" required><button type="submit">Afficher</button><button class="prayer-cancel" id="prayerCityCancel" type="button">Annuler</button></div></form>
+        <button class="prayer-locate prayer-estimate" id="prayerApproxButton" type="button" aria-describedby="prayerStatus" hidden>Estimer ma ville</button>
+        <form class="prayer-city-form" id="prayerCityForm" hidden><label for="prayerCityInput">Dans quelle ville es-tu ?</label><div><input id="prayerCityInput" type="text" maxlength="160" placeholder="Ex. Saint-Denis, France" autocomplete="address-level2" required><button type="submit">Afficher</button><button class="prayer-cancel" id="prayerCityCancel" type="button">Annuler</button></div></form>
       </section>
     </main>
   </div>
 
-  <script src="./today-v2.js?v=prayer-geolocation-1"></script>
+  <script src="./today-v2.js?v=prayer-location-recovery-2"></script>
 <dialog class="dua-dialog" id="duaPractice" aria-labelledby="duaPracticeTitle"><button type="button" class="close" aria-label="Fermer">×</button><p class="part"></p><h2 id="duaPracticeTitle">Écoute l’invocation</h2><p class="dua-coach"></p><div class="dua-words"><p class="dua-arabic" lang="ar" dir="rtl">بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا</p><p class="dua-phonetic">Bismika Allâhoumma amoutou wa ahyâ</p><p class="dua-translation">En Ton nom, ô Allah, je meurs et je vis.</p></div><button type="button" data-reveal aria-pressed="false">Sans les mots</button><div class="actions"><button type="button" id="duaPrevious" hidden>Précédent</button><button type="button" data-listen>▶ Écouter et répéter</button><button type="button" class="main">Continuer</button></div><p class="dua-status" role="status" aria-live="polite"></p></dialog>
 <script src="./weekly-invocation.js?v=child-progress-1" defer></script>
 <script src="./dua-ritual.js?v=child-progress-1" defer></script>

@@ -24,7 +24,7 @@ function element(id) {
   const attributes = new Map();
   const classes = new Set();
   return Object.assign(target(), {
-    id, textContent: '', value: '', hidden: id === 'prayerCityForm' || id === 'prayerDone',
+    id, textContent: '', value: '', hidden: ['prayerCityForm', 'prayerDone', 'prayerApproxButton'].includes(id),
     disabled: false, dataset: {}, style: { setProperty() {} }, offsetWidth: 100,
     classList: {
       add(...names) { names.forEach(name => classes.add(name)); },
@@ -98,7 +98,7 @@ function setup({ stored = {}, geolocation = true, permission = 'prompt', inactiv
   const fetch = (url, options) => new Promise((resolve, reject) => {
     // Deliberately permit late completion after abort: request ordering must also
     // guard an already fulfilled response whose .json() is still pending.
-    requests.push({ url: new URL(url), options, resolve, reject });
+    requests.push({ url: new URL(url, location.href), options, resolve, reject });
   });
   const window = Object.assign(target(), {
     location, document, navigator, localStorage,
@@ -153,6 +153,7 @@ function setup({ stored = {}, geolocation = true, permission = 'prompt', inactiv
     await settle();
   }
   const prayerRequests = () => requests.filter(request => request.url.hostname === 'api.aladhan.com');
+  const cityRequests = () => requests.filter(request => request.url.origin === location.origin && request.url.pathname === '/api/prayer-city');
   async function position(index = gps.length - 1, latitude = 48.9362, longitude = 2.3574) {
     assert.ok(gps[index], 'A position request should exist');
     gps[index].success({ coords: { latitude, longitude, accuracy: 100 }, timestamp: now });
@@ -182,7 +183,18 @@ function setup({ stored = {}, geolocation = true, permission = 'prompt', inactiv
     get('prayerCityInput').value = value;
     await emit(get('prayerCityForm'), 'submit');
   }
-  return { get, storage, gps, requests, awards, prayerRequests, document, window, emit, advance, position, deny, answer, city };
+  async function suggest() {
+    await emit(get('prayerApproxButton'), 'click');
+    assert.equal(cityRequests().length, 1, 'City estimation should only be requested by its explicit control');
+    return cityRequests()[0];
+  }
+  async function answerCity(request = cityRequests().at(-1), payload = { city: 'Paris', countryCode: 'FR', approximate: true }, ok = true) {
+    assert.ok(request, 'A city estimation request should exist');
+    request.resolve({ ok, status: ok ? 200 : 503, json: async () => payload });
+    await settle();
+  }
+  return { get, storage, gps, requests, awards, prayerRequests, cityRequests, document, window,
+    emit, advance, position, deny, answer, city, suggest, answerCity };
 }
 
 test('a new guest requests their position and never loads the former Casablanca default', async () => {
@@ -190,6 +202,7 @@ test('a new guest requests their position and never loads the former Casablanca 
   await settle();
   assert.equal(app.gps.length, 1);
   assert.equal(app.prayerRequests().length, 0);
+  assert.equal(app.get('prayerApproxButton').hidden, true);
   assert.doesNotMatch(app.get('prayerCityLabel').textContent, /Casablanca|Maroc/);
 });
 
@@ -220,6 +233,8 @@ for (const code of [1, 2, 3]) {
     assert.equal(app.get('prayerLocateButton').disabled, false);
     assert.equal(app.get('prayerDone').hidden, true);
     assert.equal(app.prayerRequests().length, 0);
+    assert.equal(app.requests.length, 0, 'GPS failure must not trigger city estimation automatically');
+    assert.equal(app.get('prayerApproxButton').hidden, code === 1);
     assert.doesNotMatch(app.get('prayerCityLabel').textContent, /Casablanca|Maroc/);
   });
 }
@@ -232,6 +247,12 @@ test('an unresponsive native location request eventually releases the location c
   assert.equal(app.get('prayerCityForm').hidden, false);
   assert.ok(app.get('prayerStatus').textContent.trim());
   assert.equal(app.prayerRequests().length, 0);
+  assert.equal(app.requests.length, 0);
+  const timedOut = setup();
+  await settle();
+  await timedOut.deny(3);
+  assert.notEqual(app.get('prayerStatus').textContent, timedOut.get('prayerStatus').textContent,
+    'Waiting for an unanswered permission prompt must not be reported as an actual GPS timeout');
 });
 
 test('a browser without GPS offers manual city selection', async () => {
@@ -239,6 +260,8 @@ test('a browser without GPS offers manual city selection', async () => {
   await settle();
   assert.equal(app.get('prayerCityForm').hidden, false);
   assert.ok(app.get('prayerStatus').textContent.trim());
+  assert.equal(app.get('prayerApproxButton').hidden, false);
+  assert.equal(app.requests.length, 0);
   await app.city('Saint-Denis, France');
   const request = app.prayerRequests().at(-1);
   assert.match(request.url.pathname, /\/timingsByAddress(?:\/|$)/);
@@ -429,4 +452,74 @@ test('the request switches calendar day when the detected timezone has already p
   await app.answer(undefined, { zone: 'Europe/Paris', date: '27-11-2026' });
   assert.match(app.get('prayerTitle').textContent, /Fajr.*06:47/);
   assert.equal(app.get('prayerEyebrow').textContent, 'PROCHAINE PRIÈRE');
+});
+
+test('an estimated city is requested explicitly and requires confirmation before loading prayer times', async () => {
+  const app = setup();
+  await settle();
+  await app.deny(2);
+  const saved = [...app.storage];
+  assert.equal(app.cityRequests().length, 0);
+  await app.suggest();
+  await app.answerCity();
+  assert.equal(app.get('prayerCityInput').value, 'Paris, France');
+  assert.equal(app.get('prayerCityForm').hidden, false);
+  assert.match(app.get('prayerStatus').textContent, /estimée/i);
+  assert.match(app.get('prayerStatus').textContent, /vérifie/i);
+  assert.match(app.get('prayerStatus').textContent, /Afficher/i);
+  assert.equal(app.prayerRequests().length, 0);
+  assert.deepEqual([...app.storage], saved);
+  await app.emit(app.get('prayerCityForm'), 'submit');
+  assert.equal(app.prayerRequests().length, 1);
+  assert.equal(app.prayerRequests()[0].url.searchParams.get('address'), 'Paris, France');
+  await app.answer();
+  assert.equal(app.storage.get('km-prayer-city:guest'), 'Paris, France');
+  assert.equal(app.get('prayerCityLabel').textContent, 'Paris, France');
+});
+
+test('a delayed city suggestion cannot overwrite text the user has begun typing', async () => {
+  const app = setup();
+  await settle();
+  await app.deny(2);
+  const saved = [...app.storage];
+  await app.suggest();
+  app.get('prayerCityInput').value = 'Saint-Denis, France';
+  await app.emit(app.get('prayerCityInput'), 'input');
+  await app.answerCity();
+  assert.equal(app.get('prayerCityInput').value, 'Saint-Denis, France');
+  assert.equal(app.get('prayerCityForm').hidden, false);
+  assert.equal(app.prayerRequests().length, 0);
+  assert.deepEqual([...app.storage], saved);
+  assert.doesNotMatch(app.get('prayerStatus').textContent, /Paris/);
+});
+
+test('a delayed city suggestion cannot replace a city already submitted by the user', async () => {
+  const app = setup();
+  await settle();
+  await app.deny(3);
+  await app.suggest();
+  await app.city('Lyon, France');
+  await app.answer();
+  await app.answerCity();
+  assert.equal(app.get('prayerCityLabel').textContent, 'Lyon, France');
+  assert.equal(app.storage.get('km-prayer-city:guest'), 'Lyon, France');
+  assert.equal(app.prayerRequests().length, 1);
+  assert.equal(app.get('prayerCityForm').hidden, true);
+  assert.doesNotMatch(app.get('prayerStatus').textContent, /Paris/);
+});
+
+test('an unavailable city estimation service keeps the manual fallback usable', async () => {
+  const app = setup({ geolocation: false });
+  await settle();
+  const saved = [...app.storage];
+  await app.suggest();
+  await app.answerCity(undefined, { error: 'city_unavailable' }, false);
+  assert.equal(app.get('prayerCityForm').hidden, false);
+  assert.equal(app.get('prayerApproxButton').disabled, false);
+  assert.ok(app.get('prayerStatus').textContent.trim());
+  assert.equal(app.prayerRequests().length, 0);
+  assert.deepEqual([...app.storage], saved);
+  await app.city('Saint-Denis, France');
+  await app.answer();
+  assert.equal(app.get('prayerCityLabel').textContent, 'Saint-Denis, France');
 });
