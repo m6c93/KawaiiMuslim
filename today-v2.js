@@ -18,6 +18,7 @@
   var prayerCityCancel = document.getElementById("prayerCityCancel");
   var prayerLocateButton = document.getElementById("prayerLocateButton");
   var prayerApproxButton = document.getElementById("prayerApproxButton");
+  var prayerRetryButton = document.getElementById("prayerRetryButton");
   var prayerStatus = document.getElementById("prayerStatus");
   var prayerCountdown = document.getElementById("prayerCountdown");
   var prayerDone = document.getElementById("prayerDone");
@@ -154,6 +155,7 @@
     prayerCountdown.textContent = "";
     prayerStatus.textContent = "";
     if (prayerApproxButton) prayerApproxButton.hidden = true;
+    if (prayerRetryButton) prayerRetryButton.hidden = true;
     prayerCard.classList.remove("is-rewarded");
     prayerEyebrow.textContent = "HORAIRES DE PRIÈRE";
     prayerTitle.textContent = message;
@@ -214,7 +216,7 @@
       prayerTitle.textContent = active.name + " · " + active.label;
       prayerCountdown.textContent = next ? "Prochaine : " + next.name + " à " + next.label : "Dernière prière du jour";
       // L’aperçu doit toujours permettre de tester le bouton après un rechargement.
-      var alreadyDone = !isLocalPreview() && localStorage.getItem(rewardStorageKey(currentPrayer)) === "1";
+      var alreadyDone = !isLocalPreview() && prayerPreference(rewardStorageKey(currentPrayer)) === "1";
       prayerDone.hidden = !activeChildId || alreadyDone;
       if (alreadyDone) prayerReward.textContent = "Prière accomplie · +2 étoiles";
     } else {
@@ -243,24 +245,28 @@
     resetPrayer("Chargement…", place.label);
     var controller = new AbortController();
     prayerController = controller;
-    var timeout = setTimeout(function () { controller.abort(); }, 15000);
+    var timeout = setTimeout(function () { controller.abort(); }, 18000);
     try {
       var date = timeParts(place.timeZone).date;
       var data;
       // The selected place can have a different calendar day from the device.
       for (var attempt = 0; attempt < 2; attempt++) {
-        var params = new URLSearchParams({ method: "3" });
+        var query = { date: date };
         if (place.kind === "auto") {
-          params.set("latitude", String(place.latitude));
-          params.set("longitude", String(place.longitude));
-        } else params.set("address", place.city);
-        var endpoint = place.kind === "auto" ? "timings" : "timingsByAddress";
-        var url = "https://api.aladhan.com/v1/" + endpoint + "/" + date.split("-").reverse().join("-") + "?" + params;
-        var response = await fetch(url, { headers: { Accept: "application/json" }, signal: controller.signal, cache: "no-store" });
+          query.latitude = place.latitude;
+          query.longitude = place.longitude;
+        } else query.city = place.city;
+        // Keep the mobile app on its own domain. Location is never put in a URL.
+        var response = await fetch("/api/prayer-times", {
+          method: "POST", credentials: "same-origin", cache: "no-store",
+          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify(query), signal: controller.signal
+        });
         var payload = await response.json();
         if (requestId !== prayerRequestId) return;
-        if (!response.ok || Number(payload.code) !== 200 || !payload.data) throw new Error("timings_unavailable");
+        if (!response.ok || !payload || Number(payload.code) !== 200 || !payload.data) throw new Error(payload && payload.error || "timings_unavailable");
         data = payload.data;
+        if (!data.date || !data.date.gregorian || data.date.gregorian.date !== date.split("-").reverse().join("-")) throw new Error("date_mismatch");
         var localDate = timeParts(data.meta && data.meta.timezone).date;
         if (localDate === date) break;
         if (attempt === 1) throw new Error("date_mismatch");
@@ -272,9 +278,12 @@
     } catch (error) {
       if (requestId !== prayerRequestId) return;
       resetPrayer("Horaires indisponibles", place.label);
-      prayerStatus.textContent = place.kind === "auto"
-        ? "Position détectée. Les horaires n’ont pas pu être chargés. Réessaie ou choisis ta ville."
-        : "Les horaires n’ont pas pu être chargés. Vérifie ta connexion et indique la ville avec son pays.";
+      prayerStatus.textContent = error.message === "location_not_found"
+        ? "Cette ville n’a pas été trouvée. Précise son nom et son pays, puis appuie sur « Afficher »."
+        : controller.signal.aborted || error.message === "timings_timeout"
+          ? "Le chargement des horaires a pris trop de temps. Appuie sur « Réessayer »."
+          : "Le service des horaires est momentanément indisponible. Appuie sur « Réessayer » dans un instant.";
+      if (prayerRetryButton) prayerRetryButton.hidden = false;
       setCityEditor(true, false);
     } finally {
       clearTimeout(timeout);
@@ -500,6 +509,12 @@
   });
   if (prayerLocateButton) prayerLocateButton.addEventListener("click", locatePrayer);
   if (prayerApproxButton) prayerApproxButton.addEventListener("click", estimatePrayerCity);
+  if (prayerRetryButton) prayerRetryButton.addEventListener("click", function () {
+    if (!prayerLocation) return;
+    prayerEditing = false;
+    setCityEditor(false);
+    loadPrayerTimes(prayerLocation);
+  });
   if (prayerCityCancel) prayerCityCancel.addEventListener("click", function () {
     var wasPending = prayerPending;
     cancelPrayerRequest();

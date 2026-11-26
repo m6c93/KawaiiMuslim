@@ -24,7 +24,7 @@ function element(id) {
   const attributes = new Map();
   const classes = new Set();
   return Object.assign(target(), {
-    id, textContent: '', value: '', hidden: ['prayerCityForm', 'prayerDone', 'prayerApproxButton'].includes(id),
+    id, textContent: '', value: '', hidden: ['prayerCityForm', 'prayerDone', 'prayerApproxButton', 'prayerRetryButton'].includes(id),
     disabled: false, dataset: {}, style: { setProperty() {} }, offsetWidth: 100,
     classList: {
       add(...names) { names.forEach(name => classes.add(name)); },
@@ -51,12 +51,13 @@ async function settle() {
 }
 
 function setup({ stored = {}, geolocation = true, permission = 'prompt', inactiveFrame = false,
-  authenticated = false, nowISO = '2026-11-26T12:00:00Z' } = {}) {
+  authenticated = false, blockedRewardStorage = false, nowISO = '2026-11-26T12:00:00Z' } = {}) {
   let now = Date.parse(nowISO);
   let nextTimer = 0;
   const timers = new Map();
   const nodes = new Map();
   const storage = new Map(Object.entries(stored));
+  const storageReads = [];
   const requests = [];
   const gps = [];
   const awards = [];
@@ -74,7 +75,11 @@ function setup({ stored = {}, geolocation = true, permission = 'prompt', inactiv
   const location = new URL('https://kawaiimuslimworld.com/Aujourd%27hui.dc.html' + (authenticated ? '' : '?guest=1'));
   location.replace = () => assert.fail('The prayer card must not redirect the user away');
   const localStorage = {
-    getItem: key => storage.get(key) ?? null,
+    getItem: key => {
+      storageReads.push(key);
+      if (blockedRewardStorage && key.startsWith('km-prayer-done:')) throw new Error('Storage access denied');
+      return storage.get(key) ?? null;
+    },
     setItem: (key, value) => storage.set(key, String(value)),
     removeItem: key => storage.delete(key)
   };
@@ -98,7 +103,8 @@ function setup({ stored = {}, geolocation = true, permission = 'prompt', inactiv
   const fetch = (url, options) => new Promise((resolve, reject) => {
     // Deliberately permit late completion after abort: request ordering must also
     // guard an already fulfilled response whose .json() is still pending.
-    requests.push({ url: new URL(url, location.href), options, resolve, reject });
+    requests.push({ url: new URL(url, location.href), options,
+      body: options?.body ? JSON.parse(options.body) : null, resolve, reject });
   });
   const window = Object.assign(target(), {
     location, document, navigator, localStorage,
@@ -152,7 +158,7 @@ function setup({ stored = {}, geolocation = true, permission = 'prompt', inactiv
     now = until;
     await settle();
   }
-  const prayerRequests = () => requests.filter(request => request.url.hostname === 'api.aladhan.com');
+  const prayerRequests = () => requests.filter(request => request.url.origin === location.origin && request.url.pathname === '/api/prayer-times');
   const cityRequests = () => requests.filter(request => request.url.origin === location.origin && request.url.pathname === '/api/prayer-city');
   async function position(index = gps.length - 1, latitude = 48.9362, longitude = 2.3574) {
     assert.ok(gps[index], 'A position request should exist');
@@ -165,13 +171,13 @@ function setup({ stored = {}, geolocation = true, permission = 'prompt', inactiv
     await settle();
   }
   async function answer(request = prayerRequests().at(-1), {
-    zone = 'Europe/Paris', dhuhr = '12:37', asr = '14:43', date = '26-11-2026'
+    zone = 'Europe/Paris', dhuhr = '12:37', asr = '14:43', date = '26-11-2026', timings
   } = {}) {
     assert.ok(request, 'An API request should exist');
     request.resolve({ ok: true, status: 200, json: async () => ({
       code: 200,
       data: {
-        timings: { Fajr: '06:47', Dhuhr: dhuhr, Asr: asr, Maghrib: '16:58', Isha: '18:32' },
+        timings: timings || { Fajr: '06:47', Dhuhr: dhuhr, Asr: asr, Maghrib: '16:58', Isha: '18:32' },
         meta: { timezone: zone },
         date: { gregorian: { date } }
       }
@@ -183,6 +189,11 @@ function setup({ stored = {}, geolocation = true, permission = 'prompt', inactiv
     get('prayerCityInput').value = value;
     await emit(get('prayerCityForm'), 'submit');
   }
+  async function failPrayer(status, error, request = prayerRequests().at(-1)) {
+    assert.ok(request, 'A prayer time request should exist');
+    request.resolve({ ok: false, status, json: async () => ({ code: status, error }) });
+    await settle();
+  }
   async function suggest() {
     await emit(get('prayerApproxButton'), 'click');
     assert.equal(cityRequests().length, 1, 'City estimation should only be requested by its explicit control');
@@ -193,8 +204,8 @@ function setup({ stored = {}, geolocation = true, permission = 'prompt', inactiv
     request.resolve({ ok, status: ok ? 200 : 503, json: async () => payload });
     await settle();
   }
-  return { get, storage, gps, requests, awards, prayerRequests, cityRequests, document, window,
-    emit, advance, position, deny, answer, city, suggest, answerCity };
+  return { get, storage, storageReads, gps, requests, awards, prayerRequests, cityRequests, document, window,
+    emit, advance, position, deny, answer, city, suggest, answerCity, failPrayer };
 }
 
 test('a new guest requests their position and never loads the former Casablanca default', async () => {
@@ -206,16 +217,22 @@ test('a new guest requests their position and never loads the former Casablanca 
   assert.doesNotMatch(app.get('prayerCityLabel').textContent, /Casablanca|Maroc/);
 });
 
-test('GPS success uses the detected coordinates and renders the local prayer time', async () => {
+test('GPS success posts coordinates privately to the same-origin endpoint and renders the local prayer time', async () => {
   const app = setup();
   await settle();
   await app.position();
   const request = app.prayerRequests().at(-1);
-  assert.match(request.url.pathname, /^\/v1\/timings\/\d{2}-\d{2}-\d{4}$/);
-  assert.ok(Math.abs(Number(request.url.searchParams.get('latitude')) - 48.9362) < 0.001);
-  assert.ok(Math.abs(Number(request.url.searchParams.get('longitude')) - 2.3574) < 0.001);
-  assert.equal(request.url.searchParams.get('method'), '3');
-  assert.equal(request.url.searchParams.has('address'), false);
+  assert.equal(request.url.href, 'https://kawaiimuslimworld.com/api/prayer-times');
+  assert.equal(request.options.method, 'POST');
+  assert.equal(request.options.credentials, 'same-origin');
+  assert.equal(request.options.cache, 'no-store');
+  assert.match(new Headers(request.options.headers).get('Content-Type'), /^application\/json/);
+  assert.equal(new Headers(request.options.headers).get('Accept'), 'application/json');
+  assert.equal(request.body.date, '2026-11-26');
+  assert.ok(Math.abs(Number(request.body.latitude) - 48.9362) < 0.001);
+  assert.ok(Math.abs(Number(request.body.longitude) - 2.3574) < 0.001);
+  assert.equal(Object.hasOwn(request.body, 'city'), false);
+  assert.equal(app.requests.some(item => item.url.hostname === 'api.aladhan.com'), false);
   await app.answer();
   assert.match(app.get('prayerTitle').textContent, /Dhohr.*12:37/);
   assert.equal(app.get('prayerCityForm').hidden, true);
@@ -264,8 +281,12 @@ test('a browser without GPS offers manual city selection', async () => {
   assert.equal(app.requests.length, 0);
   await app.city('Saint-Denis, France');
   const request = app.prayerRequests().at(-1);
-  assert.match(request.url.pathname, /\/timingsByAddress(?:\/|$)/);
-  assert.equal(request.url.searchParams.get('address'), 'Saint-Denis, France');
+  assert.equal(request.url.pathname, '/api/prayer-times');
+  assert.equal(request.options.method, 'POST');
+  assert.equal(request.body.city, 'Saint-Denis, France');
+  assert.equal(request.body.date, '2026-11-26');
+  assert.equal(Object.hasOwn(request.body, 'latitude'), false);
+  assert.equal(request.url.search, '');
   await app.answer();
   assert.equal(app.get('prayerCityLabel').textContent, 'Saint-Denis, France');
   assert.equal(app.storage.get('km-prayer-city:guest'), 'Saint-Denis, France');
@@ -281,7 +302,7 @@ test('an explicit manual city remains selected on the next visit', async () => {
   await settle();
   assert.equal(second.gps.length, 0);
   const request = second.prayerRequests().at(-1);
-  assert.equal(request.url.searchParams.get('address'), 'Lyon, France');
+  assert.equal(request.body.city, 'Lyon, France');
   await second.answer();
   assert.equal(second.get('prayerCityLabel').textContent, 'Lyon, France');
 });
@@ -334,7 +355,7 @@ test('the location button lets a manual-city user switch back to GPS', async () 
   await app.emit(app.get('prayerLocateButton'), 'click');
   assert.equal(app.gps.length, 2);
   await app.position(1, 43.2965, 5.3698);
-  assert.ok(Math.abs(Number(app.prayerRequests().at(-1).url.searchParams.get('latitude')) - 43.2965) < 0.001);
+  assert.ok(Math.abs(Number(app.prayerRequests().at(-1).body.latitude) - 43.2965) < 0.001);
   await app.answer();
   assert.notEqual(app.get('prayerCityLabel').textContent, 'Lyon, France');
 });
@@ -412,7 +433,7 @@ test('editing pauses automatic refreshes and cancelling restores the selected lo
   await app.emit(app.get('prayerCityCancel'), 'click');
   assert.equal(app.get('prayerCityForm').hidden, true);
   assert.equal(app.prayerRequests().length, 2);
-  assert.equal(app.prayerRequests()[1].url.searchParams.has('latitude'), true);
+  assert.equal(Object.hasOwn(app.prayerRequests()[1].body, 'latitude'), true);
   await app.answer();
   assert.match(app.get('prayerTitle').textContent, /Dhohr.*12:37/);
 });
@@ -445,10 +466,10 @@ test('the request switches calendar day when the detected timezone has already p
   const app = setup({ nowISO: '2026-11-26T23:30:00Z' });
   await settle();
   await app.position();
-  assert.equal(app.prayerRequests()[0].url.pathname, '/v1/timings/26-11-2026');
+  assert.equal(app.prayerRequests()[0].body.date, '2026-11-26');
   await app.answer(undefined, { zone: 'Europe/Paris', date: '26-11-2026' });
   assert.equal(app.prayerRequests().length, 2);
-  assert.equal(app.prayerRequests()[1].url.pathname, '/v1/timings/27-11-2026');
+  assert.equal(app.prayerRequests()[1].body.date, '2026-11-27');
   await app.answer(undefined, { zone: 'Europe/Paris', date: '27-11-2026' });
   assert.match(app.get('prayerTitle').textContent, /Fajr.*06:47/);
   assert.equal(app.get('prayerEyebrow').textContent, 'PROCHAINE PRIÈRE');
@@ -471,7 +492,7 @@ test('an estimated city is requested explicitly and requires confirmation before
   assert.deepEqual([...app.storage], saved);
   await app.emit(app.get('prayerCityForm'), 'submit');
   assert.equal(app.prayerRequests().length, 1);
-  assert.equal(app.prayerRequests()[0].url.searchParams.get('address'), 'Paris, France');
+  assert.equal(app.prayerRequests()[0].body.city, 'Paris, France');
   await app.answer();
   assert.equal(app.storage.get('km-prayer-city:guest'), 'Paris, France');
   assert.equal(app.get('prayerCityLabel').textContent, 'Paris, France');
@@ -522,4 +543,85 @@ test('an unavailable city estimation service keeps the manual fallback usable', 
   await app.city('Saint-Denis, France');
   await app.answer();
   assert.equal(app.get('prayerCityLabel').textContent, 'Saint-Denis, France');
+});
+
+for (const [status, error] of [[422, 'location_not_found'], [502, 'timings_unavailable'], [504, 'timings_timeout']]) {
+  test(`a prayer server error ${status} allows a manual retry without exposing technical errors`, async () => {
+    const app = setup();
+    await settle();
+    await app.deny(2);
+    await app.city('Montreuil');
+    await app.failPrayer(status, error);
+    assert.equal(app.get('prayerCityForm').hidden, false);
+    assert.equal(app.get('prayerDone').hidden, true);
+    assert.ok(app.get('prayerStatus').textContent.trim());
+    assert.doesNotMatch(app.get('prayerStatus').textContent, /timings_|location_not_found|api\.aladhan|502|504/);
+    await app.city('Montreuil, France');
+    assert.equal(app.prayerRequests().length, 2);
+    assert.equal(app.prayerRequests()[1].body.city, 'Montreuil, France');
+    assert.equal(app.prayerRequests()[1].options.method, 'POST');
+    await app.answer();
+    assert.match(app.get('prayerTitle').textContent, /Dhohr.*12:37/);
+    assert.equal(app.get('prayerCityLabel').textContent, 'Montreuil, France');
+    assert.equal(app.get('prayerStatus').textContent, '');
+    assert.equal(app.get('prayerCityForm').hidden, true);
+  });
+}
+
+for (const [name, timings] of [
+  ['invalid hour', { Fajr: '25:00', Dhuhr: '12:37', Asr: '14:43', Maghrib: '16:58', Isha: '18:32' }],
+  ['missing prayer', { Fajr: '06:47', Dhuhr: '12:37', Asr: '14:43', Maghrib: '16:58' }]
+]) {
+  test(`a successful HTTP response with ${name} cannot display a usable prayer schedule`, async () => {
+    const app = setup();
+    await settle();
+    await app.position();
+    await app.answer(undefined, { timings });
+    assert.equal(app.get('prayerTitle').textContent, 'Horaires indisponibles');
+    assert.equal(app.get('prayerDone').hidden, true);
+    assert.equal(app.get('prayerCityForm').hidden, false);
+    assert.ok(app.get('prayerStatus').textContent.trim());
+  });
+}
+
+test('a response for a different date is not presented as today’s prayer schedule', async () => {
+  const app = setup();
+  await settle();
+  await app.position();
+  assert.equal(app.prayerRequests()[0].body.date, '2026-11-26');
+  await app.answer(undefined, { date: '25-11-2026' });
+  assert.equal(app.get('prayerTitle').textContent, 'Horaires indisponibles');
+  assert.equal(app.get('prayerDone').hidden, true);
+  assert.equal(app.get('prayerCityForm').hidden, false);
+  assert.ok(app.get('prayerStatus').textContent.trim());
+});
+
+test('the retry button reuses the detected coordinates without requesting GPS again', async () => {
+  const app = setup();
+  await settle();
+  await app.position();
+  const initialPayload = app.prayerRequests()[0].body;
+  await app.failPrayer(502, 'timings_unavailable');
+  assert.equal(app.get('prayerRetryButton').hidden, false);
+  await app.emit(app.get('prayerRetryButton'), 'click');
+  assert.equal(app.gps.length, 1);
+  assert.equal(app.prayerRequests().length, 2);
+  assert.deepEqual(app.prayerRequests()[1].body, initialPayload);
+  assert.equal(app.get('prayerCityForm').hidden, true);
+  await app.answer();
+  assert.match(app.get('prayerTitle').textContent, /Dhohr.*12:37/);
+  assert.equal(app.get('prayerStatus').textContent, '');
+  assert.equal(app.get('prayerRetryButton').hidden, true);
+});
+
+test('blocked access to saved prayer rewards does not hide otherwise valid prayer times', async () => {
+  const app = setup({ authenticated: true, blockedRewardStorage: true });
+  await settle();
+  await app.position();
+  await app.answer();
+  assert.ok(app.storageReads.some(key => key.startsWith('km-prayer-done:')));
+  assert.match(app.get('prayerTitle').textContent, /Dhohr.*12:37/);
+  assert.equal(app.get('prayerDone').hidden, false);
+  assert.equal(app.get('prayerStatus').textContent, '');
+  assert.equal(app.get('prayerCityForm').hidden, true);
 });
