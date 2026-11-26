@@ -16,6 +16,7 @@
   var prayerCityForm = document.getElementById("prayerCityForm");
   var prayerCityInput = document.getElementById("prayerCityInput");
   var prayerCityCancel = document.getElementById("prayerCityCancel");
+  var prayerLocateButton = document.getElementById("prayerLocateButton");
   var prayerStatus = document.getElementById("prayerStatus");
   var prayerCountdown = document.getElementById("prayerCountdown");
   var prayerDone = document.getElementById("prayerDone");
@@ -25,6 +26,18 @@
   var currentBalance = 0;
   var currentPrayer = null;
   var prayerRefreshTimer = 0;
+  var prayerLocationTimer = 0;
+  var prayerRequestId = 0;
+  var prayerController = null;
+  var prayerLocation = null;
+  var prayerPending = false;
+  var prayerInitialized = false;
+  var prayerStarted = false;
+  var prayerAutomatic = false;
+  var prayerEditing = false;
+  var prayerLastLocated = 0;
+  var prayerLastRequest = 0;
+  var prayerSectionActive = !window.frameElement || window.frameElement.getAttribute("aria-hidden") !== "true";
   var prayerNames = { Fajr: "Fajr", Dhuhr: "Dhohr", Asr: "Asr", Maghrib: "Maghrib", Isha: "Icha" };
 
   function setDate() {
@@ -81,17 +94,62 @@
     return "km-prayer-city:" + activeProfileKey;
   }
 
-  function rewardStorageKey(prayer) {
-    return "km-prayer-done:" + activeProfileKey + ":" + prayer.date + ":" + prayer.key;
+  function prayerPreference(key, value) {
+    try {
+      if (value !== undefined) localStorage.setItem(key, value);
+      return localStorage.getItem(key) || "";
+    } catch (error) { return ""; }
   }
 
-  function setCityEditor(open) {
+  function prayerMode(value) {
+    return prayerPreference("km-prayer-mode:" + activeProfileKey, value);
+  }
+
+  function rewardStorageKey(prayer, profileKey) {
+    return "km-prayer-done:" + (profileKey || activeProfileKey) + ":" + prayer.date + ":" + prayer.key;
+  }
+
+  function setCityEditor(open, focus) {
     if (!prayerCityForm) return;
     prayerCityForm.hidden = !open;
+    prayerCityButton.setAttribute("aria-expanded", String(open));
     if (open) {
-      prayerCityInput.value = localStorage.getItem(prayerStorageKey()) || "";
-      setTimeout(function () { prayerCityInput.focus(); }, 20);
+      if (focus || !prayerCityInput.value) prayerCityInput.value = prayerPreference(prayerStorageKey());
+      if (focus) setTimeout(function () { prayerCityInput.focus(); }, 20);
     }
+  }
+
+  function setLocateBusy(busy) {
+    if (!prayerLocateButton) return;
+    prayerLocateButton.disabled = busy;
+    prayerLocateButton.textContent = busy ? "Localisation…" : "Me localiser";
+    prayerLocateButton.setAttribute("aria-busy", String(busy));
+  }
+
+  function cancelPrayerRequest() {
+    clearTimeout(prayerRefreshTimer);
+    clearTimeout(prayerLocationTimer);
+    if (prayerController) prayerController.abort();
+    prayerController = null;
+    prayerPending = false;
+    setLocateBusy(false);
+    return ++prayerRequestId;
+  }
+
+  function resetPrayer(message, label) {
+    currentPrayer = null;
+    prayerDone.hidden = true;
+    prayerReward.textContent = "";
+    prayerCountdown.textContent = "";
+    prayerStatus.textContent = "";
+    prayerCard.classList.remove("is-rewarded");
+    prayerEyebrow.textContent = "HORAIRES DE PRIÈRE";
+    prayerTitle.textContent = message;
+    prayerCityLabel.textContent = label || "Choisir ma ville";
+  }
+
+  function prayerVisible() {
+    return prayerSectionActive && !document.hidden;
   }
 
   function timeParts(timeZone) {
@@ -111,7 +169,7 @@
 
   function cleanPrayerTime(value) {
     var match = String(value || "").match(/^(\d{1,2}):(\d{2})/);
-    return match ? { label: match[1].padStart(2, "0") + ":" + match[2], minutes: Number(match[1]) * 60 + Number(match[2]) } : null;
+    return match && Number(match[1]) < 24 && Number(match[2]) < 60 ? { label: match[1].padStart(2, "0") + ":" + match[2], minutes: Number(match[1]) * 60 + Number(match[2]) } : null;
   }
 
   function markPrayerDone(message) {
@@ -123,7 +181,7 @@
     prayerCard.classList.add("is-rewarded");
   }
 
-  function renderPrayer(data, city) {
+  function renderPrayer(data, place) {
     clearTimeout(prayerRefreshTimer);
     var zone = data.meta && data.meta.timezone ? data.meta.timezone : Intl.DateTimeFormat().resolvedOptions().timeZone;
     var clock = timeParts(zone);
@@ -136,7 +194,7 @@
     var active = started[started.length - 1] || null;
     currentPrayer = active ? { key: active.key, name: active.name, date: clock.date } : null;
 
-    prayerCityLabel.textContent = city;
+    prayerCityLabel.textContent = place.label;
     prayerStatus.textContent = "";
     prayerReward.textContent = "";
     if (active) {
@@ -153,41 +211,146 @@
       prayerCountdown.textContent = "";
       prayerDone.hidden = true;
     }
-    prayerRefreshTimer = setTimeout(function () { loadPrayerTimes(city); }, 60000);
+    schedulePrayerRefresh();
   }
 
-  async function loadPrayerTimes(city) {
-    if (!city) {
-      prayerEyebrow.textContent = "HORAIRES DE PRIÈRE";
-      prayerTitle.textContent = "Choisis ta ville";
-      prayerCityLabel.textContent = "Ajouter ma ville";
-      prayerDone.hidden = true;
-      setCityEditor(true);
-      return;
-    }
-    prayerEyebrow.textContent = "HORAIRES DE PRIÈRE";
-    prayerTitle.textContent = "Chargement…";
-    prayerCityLabel.textContent = city;
-    prayerDone.hidden = true;
+  function schedulePrayerRefresh() {
+    clearTimeout(prayerRefreshTimer);
+    if (prayerVisible() && !prayerEditing && prayerLocation) prayerRefreshTimer = setTimeout(function () {
+      if (!prayerVisible() || prayerEditing) return;
+      if (prayerAutomatic && Date.now() - prayerLastLocated >= 300000) locatePrayer();
+      else loadPrayerTimes(prayerLocation);
+    }, Math.max(1000, 60000 - (Date.now() - prayerLastRequest)));
+  }
+
+  async function loadPrayerTimes(place) {
+    var requestId = cancelPrayerRequest();
+    prayerLocation = place;
+    prayerPending = true;
+    prayerLastRequest = Date.now();
+    resetPrayer("Chargement…", place.label);
+    var controller = new AbortController();
+    prayerController = controller;
+    var timeout = setTimeout(function () { controller.abort(); }, 15000);
     try {
-      var url = "https://api.aladhan.com/v1/timingsByAddress?method=3&address=" + encodeURIComponent(city);
-      var response = await fetch(url, { headers: { Accept: "application/json" } });
-      var payload = await response.json();
-      if (!response.ok || Number(payload.code) !== 200 || !payload.data) throw new Error("city_not_found");
-      renderPrayer(payload.data, city);
+      var date = timeParts(place.timeZone).date;
+      var data;
+      // The selected place can have a different calendar day from the device.
+      for (var attempt = 0; attempt < 2; attempt++) {
+        var params = new URLSearchParams({ method: "3" });
+        if (place.kind === "auto") {
+          params.set("latitude", String(place.latitude));
+          params.set("longitude", String(place.longitude));
+        } else params.set("address", place.city);
+        var endpoint = place.kind === "auto" ? "timings" : "timingsByAddress";
+        var url = "https://api.aladhan.com/v1/" + endpoint + "/" + date.split("-").reverse().join("-") + "?" + params;
+        var response = await fetch(url, { headers: { Accept: "application/json" }, signal: controller.signal, cache: "no-store" });
+        var payload = await response.json();
+        if (requestId !== prayerRequestId) return;
+        if (!response.ok || Number(payload.code) !== 200 || !payload.data) throw new Error("timings_unavailable");
+        data = payload.data;
+        var localDate = timeParts(data.meta && data.meta.timezone).date;
+        if (localDate === date) break;
+        if (attempt === 1) throw new Error("date_mismatch");
+        date = localDate;
+      }
+      if (!["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].every(function (key) { return cleanPrayerTime(data.timings && data.timings[key]); })) throw new Error("invalid_timings");
+      place.timeZone = data.meta && data.meta.timezone;
+      renderPrayer(data, place);
     } catch (error) {
-      prayerTitle.textContent = "Ville introuvable";
-      prayerCountdown.textContent = "Vérifie le nom de la ville";
-      prayerDone.hidden = true;
-      setCityEditor(true);
+      if (requestId !== prayerRequestId) return;
+      resetPrayer("Horaires indisponibles", place.label);
+      prayerStatus.textContent = place.kind === "auto"
+        ? "Position détectée. Les horaires n’ont pas pu être chargés. Réessaie ou choisis ta ville."
+        : "Les horaires n’ont pas pu être chargés. Vérifie ta connexion et indique la ville avec son pays.";
+      setCityEditor(true, false);
+    } finally {
+      clearTimeout(timeout);
+      if (requestId === prayerRequestId) {
+        prayerPending = false;
+        prayerController = null;
+      }
     }
+  }
+
+  function locatePrayer() {
+    var requestId = cancelPrayerRequest();
+    prayerEditing = false;
+    setCityEditor(false);
+    prayerStarted = true;
+    prayerPending = true;
+    prayerAutomatic = false;
+    prayerLocation = null;
+    prayerLastRequest = Date.now();
+    resetPrayer("Recherche de ta position…", "Ma position");
+    setLocateBusy(true);
+    prayerStatus.textContent = "Autorise la localisation pour afficher les horaires près de toi, ou choisis ta ville.";
+
+    function fail(error) {
+      if (requestId !== prayerRequestId) return;
+      cancelPrayerRequest();
+      prayerMode(prayerPreference(prayerStorageKey()) ? "manual" : "off");
+      resetPrayer("Choisis ta ville");
+      prayerStatus.textContent = error && error.code === 1
+        ? "Localisation refusée. Tu peux l’autoriser dans les réglages de l’appareil ou choisir ta ville."
+        : "Position indisponible. Réessaie avec « Me localiser » ou choisis ta ville.";
+      setCityEditor(true, false);
+    }
+
+    if (!navigator.geolocation || !navigator.geolocation.getCurrentPosition) { fail(); return; }
+    // Also bound time spent waiting for an ignored system permission prompt.
+    prayerLocationTimer = setTimeout(function () { fail({ code: 3 }); }, 20000);
+    try {
+      navigator.geolocation.getCurrentPosition(function (position) {
+        if (requestId !== prayerRequestId) return;
+        var latitude = position.coords && position.coords.latitude;
+        var longitude = position.coords && position.coords.longitude;
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) { fail(); return; }
+        clearTimeout(prayerLocationTimer);
+        prayerAutomatic = true;
+        prayerLastLocated = Date.now();
+        prayerMode("auto");
+        setCityEditor(false);
+        // City-level precision is sufficient; coordinates stay in memory only.
+        loadPrayerTimes({ kind: "auto", label: "Ma position", latitude: Number(latitude.toFixed(3)), longitude: Number(longitude.toFixed(3)) });
+      }, fail, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
+    } catch (error) { fail(error); }
+  }
+
+  function startPrayer() {
+    prayerStarted = true;
+    var mode = prayerMode();
+    var savedCity = prayerPreference(prayerStorageKey());
+    if (savedCity && mode !== "auto") {
+      prayerAutomatic = false;
+      loadPrayerTimes({ kind: "manual", city: savedCity, label: savedCity });
+    } else if (mode === "off" || mode === "manual") {
+      resetPrayer("Choisis ta ville");
+      setCityEditor(true, false);
+    } else locatePrayer();
+  }
+
+  function resumePrayer() {
+    if (!prayerInitialized || !prayerVisible() || prayerPending || prayerEditing) return;
+    if (!prayerStarted) { startPrayer(); return; }
+    if (Date.now() - prayerLastRequest < 60000) { schedulePrayerRefresh(); return; }
+    if (prayerAutomatic) locatePrayer();
+    else if (prayerLocation) loadPrayerTimes(prayerLocation);
   }
 
   function initPrayer() {
     if (!prayerCard) return;
-    var savedCity = localStorage.getItem(prayerStorageKey()) || (isLocalPreview() ? "Casablanca, Maroc" : "");
-    loadPrayerTimes(savedCity);
+    prayerInitialized = true;
+    if (prayerVisible()) startPrayer();
   }
+
+  window.addEventListener("pageshow", resumePrayer);
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) clearTimeout(prayerRefreshTimer);
+    else resumePrayer();
+  });
+  document.addEventListener("km-app-active", function () { prayerSectionActive = true; resumePrayer(); });
+  document.addEventListener("km-app-inactive", function () { prayerSectionActive = false; clearTimeout(prayerRefreshTimer); });
 
   function reveal() {
     if (loading) loading.classList.add("is-hidden");
@@ -259,37 +422,62 @@
     }
   }
 
-  if (prayerCityButton) prayerCityButton.addEventListener("click", function () { setCityEditor(true); });
-  if (prayerCityCancel) prayerCityCancel.addEventListener("click", function () { setCityEditor(false); });
+  if (prayerCityButton) prayerCityButton.addEventListener("click", function () {
+    var wasPending = prayerPending;
+    cancelPrayerRequest();
+    prayerEditing = true;
+    if (wasPending) resetPrayer("Choisis ta ville", prayerLocation && prayerLocation.label);
+    setCityEditor(true, true);
+  });
+  if (prayerLocateButton) prayerLocateButton.addEventListener("click", locatePrayer);
+  if (prayerCityCancel) prayerCityCancel.addEventListener("click", function () {
+    prayerEditing = false;
+    setCityEditor(false);
+    if (prayerLocation) loadPrayerTimes(prayerLocation);
+  });
+  if (prayerCityInput) prayerCityInput.addEventListener("input", function () {
+    prayerEditing = true;
+    clearTimeout(prayerRefreshTimer);
+  });
   if (prayerCityForm) prayerCityForm.addEventListener("submit", function (event) {
     event.preventDefault();
     var city = prayerCityInput.value.trim();
     if (!city) return;
-    localStorage.setItem(prayerStorageKey(), city);
+    prayerPreference(prayerStorageKey(), city);
+    prayerMode("manual");
+    prayerAutomatic = false;
+    prayerEditing = false;
+    prayerStarted = true;
     setCityEditor(false);
-    loadPrayerTimes(city);
+    loadPrayerTimes({ kind: "manual", city: city, label: city });
   });
   if (prayerDone) prayerDone.addEventListener("click", async function () {
     if (!currentPrayer || !activeChildId) return;
+    var completedPrayer = currentPrayer;
+    var completedProfileKey = activeProfileKey;
+    function stillCurrent() {
+      return currentPrayer && activeProfileKey === completedProfileKey
+        && currentPrayer.date === completedPrayer.date && currentPrayer.key === completedPrayer.key;
+    }
     prayerDone.disabled = true;
     prayerDone.textContent = "Validation…";
     try {
       var result;
       if (isLocalPreview()) {
-        var previewAlreadyAwarded = localStorage.getItem(rewardStorageKey(currentPrayer)) === "1";
+        var previewAlreadyAwarded = localStorage.getItem(rewardStorageKey(completedPrayer, completedProfileKey)) === "1";
         result = { awarded: previewAlreadyAwarded ? 0 : 2, balance: currentBalance + (previewAlreadyAwarded ? 0 : 2), reason: previewAlreadyAwarded ? "already_awarded" : "earned" };
       } else {
         result = await KMAuth.awardChildStars({
           childId: activeChildId,
           eventType: "prayer_complete",
-          sourceKey: "prayer:" + currentPrayer.date + ":" + currentPrayer.key,
-          description: "Prière de " + currentPrayer.name + " accomplie"
+          sourceKey: "prayer:" + completedPrayer.date + ":" + completedPrayer.key,
+          description: "Prière de " + completedPrayer.name + " accomplie"
         });
       }
       if (result.reason === "daily_limit") {
-        prayerReward.textContent = "Les 5 prières sont déjà récompensées aujourd’hui.";
+        if (stillCurrent()) prayerReward.textContent = "Les 5 prières sont déjà récompensées aujourd’hui.";
       } else {
-        localStorage.setItem(rewardStorageKey(currentPrayer), "1");
+        localStorage.setItem(rewardStorageKey(completedPrayer, completedProfileKey), "1");
         if (Number(result.balance) >= 0) {
           setProfile(profileName.textContent, avatar.textContent, Number(result.balance));
           if (isLocalPreview()) {
@@ -297,15 +485,15 @@
             if (Number(result.awarded) === 2) {
               var previewHistory = [];
               try { previewHistory = JSON.parse(localStorage.getItem("km-preview-star-history") || "[]"); } catch (historyError) { previewHistory = []; }
-              previewHistory.unshift({ amount: 2, description: "Prière de " + currentPrayer.name + " accomplie", created_at: new Date().toISOString() });
+              previewHistory.unshift({ amount: 2, description: "Prière de " + completedPrayer.name + " accomplie", created_at: new Date().toISOString() });
               localStorage.setItem("km-preview-star-history", JSON.stringify(previewHistory.slice(0, 20)));
             }
           }
         }
-        markPrayerDone(Number(result.awarded) === 2 ? "Bravo · +2 étoiles" : "Prière déjà validée");
+        if (stillCurrent()) markPrayerDone(Number(result.awarded) === 2 ? "Bravo · +2 étoiles" : "Prière déjà validée");
       }
     } catch (error) {
-      prayerReward.textContent = "Impossible de valider pour le moment.";
+      if (stillCurrent()) prayerReward.textContent = "Impossible de valider pour le moment.";
     } finally {
       prayerDone.disabled = false;
       prayerDone.textContent = "J’ai prié";

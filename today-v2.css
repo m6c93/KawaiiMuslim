@@ -309,7 +309,15 @@ button:focus-visible {
 }
 .prayer-city-form button { min-height: 44px; padding: 9px 15px; border: 0; border-radius: 13px; color: #2c2858; background: var(--today-gold); font-weight: 900; cursor: pointer; }
 .prayer-city-form .prayer-cancel { color: #e8e5f5; background: rgba(255,255,255,.1); }
-.prayer-city-form > p { min-height: 16px; margin: 6px 0 0; color: #ffd0e5; font-size: 11px; }
+.prayer-location-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; }
+.prayer-location-actions .prayer-city { min-height: 44px; overflow-wrap: anywhere; text-align: left; }
+.prayer-locate { min-height: 44px; padding: 7px 12px; border: 1px solid #dfc9d4; border-radius: 999px; background: #fffaf5; color: #76445d; font: 800 12px/1.2 "Nunito", sans-serif; cursor: pointer; }
+.prayer-locate:disabled { cursor: wait; opacity: .7; }
+.prayer-status { grid-column: 1 / -1; margin: 0; color: #76505f; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.prayer-status:empty { display: none; }
+.child-prayer .prayer-city-form { color: #66545e; border-color: #e3d4d5; }
+.child-prayer .prayer-city-form input { border-color: #d6c4cf; font-size: 16px; }
+.child-prayer .prayer-city-form .prayer-cancel { color: #66545e; background: #ece2e8; }
 
 .faith-journey {
   position: relative;

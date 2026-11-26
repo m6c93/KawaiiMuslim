@@ -13,7 +13,7 @@ function copyWorkshopFields(from,to){
   if(from?.searchParams.has(key))to.searchParams.set(key,from.searchParams.get(key));
  }
 }
-function source(item,workshopUrl){const u=new URL(item[2],location.href);u.searchParams.set('kmShell','1');if(item[0]==='workshop')copyWorkshopFields(workshopUrl,u);if(item[0]==='today')u.searchParams.set('v','salat-desktop-right-20261021');if(guest)u.searchParams.set('guest','1');for(const name of ['preview','theme'])if(params.has(name))u.searchParams.set(name,params.get(name));return u}
+function source(item,workshopUrl){const u=new URL(item[2],location.href);u.searchParams.set('kmShell','1');if(item[0]==='workshop')copyWorkshopFields(workshopUrl,u);if(item[0]==='today')u.searchParams.set('v','prayer-geolocation-1');if(guest)u.searchParams.set('guest','1');for(const name of ['preview','theme'])if(params.has(name))u.searchParams.set(name,params.get(name));return u}
 function externalAccount(url){return /\/(?:Connexion|Inscription|Compte|Profils|MFA)\.dc(?:\.html)?$/i.test(url.pathname)}
 function notice(message,error=false){status.querySelector('span').textContent=message;status.hidden=!message;retry.hidden=!error}
 function markNav(){const index=items.findIndex(i=>i[0]===active);document.body.dataset.kmSection=active||wanted||'today';const nav=document.querySelector('.km-app-nav');if(!nav)return;nav.style.setProperty('--km-nav-index',Math.max(0,index));nav.querySelectorAll('a[data-km-nav-index]').forEach(a=>{const key=items[Number(a.dataset.kmNavIndex)][0];if(key===active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');a.classList.toggle('is-pending',key===wanted&&wanted!==active)})}
@@ -23,7 +23,7 @@ function load(key,replace=false,workshopUrl){const item=items.find(i=>i[0]===key
   if(entry.ready||!requestedChild||entry.child===requestedChild)return entry;
  }
  if(entry){entry.frame.remove();records.delete(key)}
- const frame=document.createElement('iframe');frame.className='km-app-view';frame.title=item[1];frame.allowFullscreen=true;frame.setAttribute('allow','autoplay; fullscreen');frame.setAttribute('aria-hidden','true');frame.inert=true;
+ const frame=document.createElement('iframe');frame.className='km-app-view';frame.title=item[1];frame.allowFullscreen=true;frame.setAttribute('allow',item[0]==='today'?"autoplay; fullscreen; geolocation 'self'":'autoplay; fullscreen');frame.setAttribute('aria-hidden','true');frame.inert=true;
  entry={key,frame,child:workshopUrl?.searchParams.get('child'),ready:false,promise:null};records.set(key,entry);
  entry.promise=new Promise((resolve,reject)=>{let deadline=setTimeout(()=>{clearInterval(poll);reject(Error('timeout'))},25000),poll=0;
  function inspect(){let doc,url;try{doc=frame.contentDocument;url=new URL(frame.contentWindow.location.href)}catch{return}if(!doc||url.href==='about:blank')return;if(externalAccount(url)){if(wanted===key||active===key)location.assign(url.href);return}if(doc.readyState!=='complete'||getComputedStyle(doc.documentElement).visibility==='hidden')return;
