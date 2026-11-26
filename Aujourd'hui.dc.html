@@ -23,7 +23,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
   <script src="./km-config.js"></script>
   <script src="./km-auth.js?v=child-gender-1"></script>
-  <link rel="stylesheet" href="./weekly-invocation.css?v=weekly-cover-2">
+  <link rel="stylesheet" href="./weekly-invocation.css?v=gentle-training-1">
   <link rel="stylesheet" href="./weekly-prophet.css?v=20261014-2">
 
 </head>
@@ -52,47 +52,52 @@
         <figure class="dua-illustration">
           <img src="./brand/assets/invocation-leaving-aya-mimi.webp" width="1536" height="1024" alt="Aya sort de la maison avec Mimi à ses côtés, prête à commencer sa journée." fetchpriority="high" decoding="async">
         </figure>
-        <div class="dua-intro">
-          <h1 id="duaWeeklyHeading" class="dua-weekly-heading">Invocation de la semaine</h1>
-          <h2 id="duaTitle">En sortant de la maison</h2>
-          <p id="duaWeek" class="dua-note"></p>
-        </div>
-        <div class="dua-sheet">
-          <p class="dua-arabic" lang="ar" dir="rtl">بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ</p>
-          <p class="dua-phonetic">Bismi-llâh, tawakkaltu ‘ala-llâh, lâ hawla wa lâ quwwata illâ bi-llâh.</p>
-          <p class="dua-translation">Au nom d’Allah, je place ma confiance en Allah. Il n’y a de force ni de puissance qu’en Allah.</p>
+        <div class="dua-content">
+          <div class="dua-intro">
+            <h1 id="duaWeeklyHeading" class="dua-weekly-heading">Invocation de la semaine</h1>
+            <h2 id="duaTitle">En sortant de la maison</h2>
+          </div>
           <audio preload="none" src="./audio/safe-place/leaving.mp3"></audio>
-          <div class="dua-actions">
-            <button type="button" class="main" data-listen>▶ Écouter et répéter</button>
-            <button type="button" data-train>J’apprends →</button>
+          <div class="dua-training" id="duaRitual" aria-labelledby="duaRitualTitle">
+            <div class="dua-training-heading">
+              <h3 id="duaRitualTitle" data-training-label>Mon entraînement</h3>
+              <span data-ritual-progress>0 jour sur 7</span>
+            </div>
+            <div class="dua-ritual-stars" data-ritual-stars role="img" aria-label="0 jour de pratique sur 7">
+              <span class="dua-day" data-day="1"><span class="material-symbols-rounded" aria-hidden="true">star</span><small>1</small></span>
+              <span class="dua-day" data-day="2"><span class="material-symbols-rounded" aria-hidden="true">star</span><small>2</small></span>
+              <span class="dua-day" data-day="3"><span class="material-symbols-rounded" aria-hidden="true">star</span><small>3</small></span>
+              <span class="dua-day" data-day="4"><span class="material-symbols-rounded" aria-hidden="true">star</span><small>4</small></span>
+              <span class="dua-day" data-day="5"><span class="material-symbols-rounded" aria-hidden="true">star</span><small>5</small></span>
+              <span class="dua-day" data-day="6"><span class="material-symbols-rounded" aria-hidden="true">star</span><small>6</small></span>
+              <span class="dua-day" data-day="7"><span class="material-symbols-rounded" aria-hidden="true">star</span><small>7</small></span>
+            </div>
+            <p class="dua-day-goal" data-day-goal>Je découvre les mots.</p>
+            <button type="button" class="main dua-start" data-train>Commencer mon entraînement</button>
+            <button type="button" class="dua-quiet" data-outside>Je l’ai déjà récitée aujourd’hui</button>
+            <p class="dua-ritual-note" data-ritual-note>À ton rythme. Tes étoiles restent, même si tu fais une pause.</p>
           </div>
           <div class="dua-status" role="status" aria-live="polite"></div>
-          <details class="dua-extras">
-            <summary>Mon rituel et les options d’écoute</summary>
+          <details class="dua-confidence" data-confidence hidden>
+            <summary data-confidence-label>Comment je la récite</summary>
+            <div class="dua-confidence-choices" role="group" aria-label="Comment je récite l’invocation">
+              <button type="button" data-confidence-choice="help" aria-pressed="false">Avec de l’aide</button>
+              <button type="button" data-confidence-choice="alone" aria-pressed="false">Je peux la réciter seul</button>
+            </div>
+          </details>
+          <details class="dua-reference" id="duaReference">
+            <summary>Lire et écouter</summary>
+            <div class="dua-reference-content">
+              <p class="dua-arabic" lang="ar" dir="rtl">بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ</p>
+              <p class="dua-phonetic">Bismi-llâh, tawakkaltu ‘ala-llâh, lâ hawla wa lâ quwwata illâ bi-llâh.</p>
+              <p class="dua-translation">Au nom d’Allah, je place ma confiance en Allah. Il n’y a de force ni de puissance qu’en Allah.</p>
+              <button type="button" class="dua-reference-listen" data-listen>Écouter l’invocation</button>
             <div class="dua-options">
-              <label>
-                <input type="checkbox" id="duaSlow" checked> Écoute lente</label>
+              <label><input type="checkbox" id="duaSlow" checked> Écoute lente</label>
               <a href="./audio/safe-place/leaving.mp3" target="_blank" rel="noopener">Ouvrir l’audio ↗</a>
             </div>
-            <button type="button" class="known">☆ Je la connais !</button>
-            <div class="dua-ritual" id="duaRitual" aria-labelledby="duaRitualTitle">
-              <div class="dua-ritual-heading">
-                <h3 id="duaRitualTitle">🏡 Mon petit rituel</h3>
-                <span data-ritual-progress>0 jours validés sur 7</span>
-              </div>
-              <div class="dua-ritual-stars" data-ritual-stars role="img" aria-label="0 étoiles sur 7"></div>
-              <label class="dua-ritual-check">
-                <input type="checkbox" aria-describedby="duaRitualHint">
-                <span data-ritual-label>Je l’ai récitée aujourd’hui</span>
-              </label>
-              <p data-ritual-note>Pas besoin de 7 jours à la suite. Tes étoiles restent acquises.</p>
-              <p id="duaRitualHint" class="dua-ritual-hint">Une case par jour après l’avoir récitée, même avec l’audio. Ce n’est pas un test de mémorisation.</p>
-              <p class="dua-ritual-hint">Progression enregistrée sur cet appareil.</p>
-              <p role="status" aria-live="polite"></p>
+              <p class="dua-source">Source : <a href="https://sunnah.com/abudawud:5095" target="_blank" rel="noopener">Sunan Abi Dawud · 5095</a></p>
             </div>
-            <p>La même invocation toute la semaine.<br>Un petit pas chaque jour, à ton rythme.</p>
-            <p class="dua-note">Source : <a href="https://sunnah.com/abudawud:5095" target="_blank" rel="noopener">Sunan Abi Dawud · 5095</a>
-            </p>
           </details>
         </div>
       </section>
@@ -175,9 +180,32 @@
   </div>
 
   <script src="./today-v2.js?v=calm-prayers-1"></script>
-<dialog class="dua-dialog" id="duaPractice" aria-labelledby="duaPracticeTitle"><button type="button" class="close" aria-label="Fermer">×</button><p class="part"></p><h2 id="duaPracticeTitle">Écoute l’invocation</h2><p class="dua-coach"></p><div class="dua-words"><p class="dua-arabic" lang="ar" dir="rtl">بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ</p><p class="dua-phonetic">Bismi-llâh, tawakkaltu ‘ala-llâh, lâ hawla wa lâ quwwata illâ bi-llâh.</p><p class="dua-translation">Au nom d’Allah, je place ma confiance en Allah. Il n’y a de force ni de puissance qu’en Allah.</p></div><button type="button" data-reveal aria-pressed="false">Sans les mots</button><div class="actions"><button type="button" id="duaPrevious" hidden>Précédent</button><button type="button" data-listen>▶ Écouter et répéter</button><button type="button" class="main">Continuer</button></div><p class="dua-status" role="status" aria-live="polite"></p></dialog>
-<script src="./weekly-invocation.js?v=weekly-leaving-1" defer></script>
-<script src="./dua-ritual.js?v=weekly-leaving-1" defer></script>
+<dialog class="dua-dialog" id="duaPractice" aria-labelledby="duaPracticeTitle" aria-describedby="duaPracticeCoach">
+  <button type="button" class="close" aria-label="Fermer l’entraînement">×</button>
+  <p class="part"></p>
+  <h2 id="duaPracticeTitle" tabindex="-1">Écoute l’invocation</h2>
+  <p class="dua-coach" id="duaPracticeCoach"></p>
+  <div class="dua-words" id="duaPracticeWords">
+    <p class="dua-arabic" lang="ar" dir="rtl">بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ</p>
+    <p class="dua-phonetic">Bismi-llâh, tawakkaltu ‘ala-llâh, lâ hawla wa lâ quwwata illâ bi-llâh.</p>
+    <p class="dua-translation">Au nom d’Allah, je place ma confiance en Allah. Il n’y a de force ni de puissance qu’en Allah.</p>
+  </div>
+  <button type="button" class="dua-quiet" data-reveal aria-controls="duaPracticeWords" aria-pressed="false">Afficher les mots</button>
+  <div class="dua-confidence-choices" data-dialog-confidence role="group" aria-label="Comment je récite l’invocation" hidden>
+    <button type="button" data-confidence-choice="help" aria-pressed="false">Avec de l’aide</button>
+    <button type="button" data-confidence-choice="alone" aria-pressed="false">Je peux la réciter seul</button>
+  </div>
+  <div class="actions">
+    <button type="button" data-listen>Écouter l’invocation</button>
+    <button type="button" class="main" data-next hidden>Continuer</button>
+  </div>
+  <p class="dua-status" role="status" aria-live="polite"></p>
+  <a class="dua-audio-link" data-audio-link href="./audio/safe-place/leaving.mp3" target="_blank" rel="noopener" hidden>Ouvrir l’audio ↗</a>
+  <button type="button" class="dua-quiet" data-listened-elsewhere hidden>J’ai écouté avec un adulte</button>
+  <button type="button" class="dua-quiet" id="duaPrevious" hidden>Retour</button>
+</dialog>
+<script src="./dua-ritual.js?v=gentle-training-1" defer></script>
+<script src="./weekly-invocation.js?v=gentle-training-1" defer></script>
 <script src="./weekly-prophet.js?v=20261126-yusuf" defer></script>
 </body>
 </html>

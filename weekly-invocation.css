@@ -1,95 +1,183 @@
-.weekly-dua{--dua-ink:#433958;--dua-muted:#786f84;position:relative;margin:28px 0;padding:30px;border:1px solid #e3dcee;border-radius:30px;background:linear-gradient(135deg,#f4effb,#fff9f0);display:grid;grid-template-columns:minmax(180px,.8fr) minmax(0,1.3fr);gap:30px;align-items:center;color:var(--dua-ink);overflow:hidden}.dua-intro{position:relative}.dua-moon{position:relative;width:70px;height:70px;margin:4px 0 22px;border-radius:24px;background:#e8e0f2;display:grid;place-items:center}.dua-moon svg{width:44px;height:44px}.dua-moon:after{content:'✦';position:absolute;right:-10px;top:-8px;font-size:23px;color:#b18fbe}.weekly-dua .label{font-size:10px;letter-spacing:1.6px;font-weight:800;color:#817091}.weekly-dua h2{font-size:clamp(25px,3vw,34px);line-height:1.14;margin:12px 0;color:var(--dua-ink)}.weekly-dua .dua-intro>p{font-size:14px;line-height:1.7;color:var(--dua-muted);max-width:260px}.dua-sheet{min-width:0;border:1px solid #fff;border-radius:23px;background:#ffffffbf;padding:24px;box-shadow:0 8px 30px #49315906}.dua-arabic{font:clamp(29px,3.5vw,38px)/1.95 'Geeza Pro','Traditional Arabic',serif;text-align:center;color:#433958;margin:4px 0 12px;overflow-wrap:break-word}.dua-phonetic{text-align:center;color:#836787;font-size:14px;line-height:1.8;margin:0 0 10px}.dua-translation{text-align:center;color:#736b7b;font-size:14px;line-height:1.7;margin:0 auto 23px;max-width:330px}.dua-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.weekly-dua button,.dua-dialog button{font:inherit;font-size:14px;font-weight:750;min-height:46px;padding:12px 17px;border-radius:14px;border:1px solid #d9cde3;background:white;color:#665276;cursor:pointer;transition:transform .15s,background .15s}.weekly-dua button.main,.dua-dialog button.main{background:#78608d;color:#fff;border-color:#78608d}.weekly-dua button:hover,.dua-dialog button:hover{transform:translateY(-1px)}.weekly-dua button:focus-visible,.dua-dialog button:focus-visible,.weekly-dua a:focus-visible,.weekly-dua input:focus-visible{outline:3px solid #b899cc;outline-offset:3px}.dua-options{display:flex;align-items:center;justify-content:center;gap:18px;margin:15px 0;font-size:12px;color:#7b6c87;flex-wrap:wrap}.dua-options label{display:flex;align-items:center;gap:7px;cursor:pointer;min-height:28px}.dua-options input{accent-color:#78608d;width:16px;height:16px}.dua-options a{color:inherit;text-underline-offset:3px}.weekly-dua .known{display:block;margin:8px auto 0;background:none;border:0;font-size:13px;min-height:40px}.dua-note{font-size:11px!important;color:#8b7c95!important;line-height:1.6}.dua-note a{color:inherit;text-underline-offset:3px}.dua-status{font-size:12px;line-height:1.6;text-align:center;color:#65725d;min-height:20px;margin:6px 0}.dua-progress{text-align:center;margin:0}.is-playing .dua-moon{animation:dua-breathe 1.5s ease-in-out infinite alternate}.dua-dialog{box-sizing:border-box;width:min(490px,calc(100vw - 28px));max-height:85dvh;overflow:auto;padding:28px;border:1px solid #ded4e8;border-radius:27px;background:#fffaf5;color:#433958}.dua-dialog::backdrop{background:#30243c80;backdrop-filter:blur(5px)}.dua-dialog .close{display:block;margin-left:auto;border:0;font-size:23px;padding:4px 12px}.dua-dialog .part{font-size:10px;font-weight:800;letter-spacing:1.5px;color:#967ba4}.dua-dialog h2{font-size:25px;margin:10px 0}.dua-coach{font-size:14px;color:#81738b;line-height:1.6}.dua-dialog .actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:22px}.dua-dialog [data-reveal]{display:block;margin:22px auto}.dua-dialog [hidden]{display:none!important}.dua-dialog .dua-words{padding:15px 0}@keyframes dua-breathe{to{box-shadow:0 0 0 8px #e8e0f255}}@media(max-width:640px){.weekly-dua{grid-template-columns:1fr;padding:21px;gap:20px;border-radius:25px}.dua-moon{float:right;width:56px;height:56px;margin:0 0 12px 12px}.weekly-dua .dua-intro>p{max-width:none;margin-bottom:6px}.dua-sheet{padding:20px 14px}.dua-actions>button{flex:1;white-space:nowrap}.dua-arabic{font-size:30px}.dua-dialog{padding:22px}}@media(prefers-reduced-motion:reduce){.weekly-dua *,.dua-dialog *{animation:none!important;transition:none!important}}
-
-.dua-stars{text-align:center;color:#b48a42;letter-spacing:7px;font-size:22px;line-height:1.6;margin-top:6px;overflow-wrap:anywhere}.dua-dialog [data-reveal]{background:#f0eaf6;font-size:12px;min-height:40px;margin:12px auto}.dua-actions>[data-listen]{flex:1}.weekly-dua #duaWeek{font-size:12px;margin:8px 0 12px}
-
-/* Illustration choisie par le propriétaire : proportions intégrales. */
-.weekly-dua{background:linear-gradient(135deg,#fff0ee,#fff9f2);border-color:#efdadb;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center}.dua-illustration{margin:0 0 22px;overflow:hidden;border-radius:20px;border:1px solid #eed6d3;background:#ffe5e0}.dua-illustration img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:contain}.weekly-dua .dua-intro>p{max-width:none}.weekly-dua .label{color:#a5697d}.weekly-dua .dua-sheet{border-color:#fff6f3}.weekly-dua button.main{background:#a4627d;border-color:#a4627d}.weekly-dua .dua-options input{accent-color:#a4627d}@media(max-width:760px){.weekly-dua{grid-template-columns:1fr}.dua-illustration{margin-bottom:18px}.weekly-dua .dua-intro{min-width:0}}
-
-.dua-ritual{margin-top:17px;padding:19px 16px 12px;border:1px solid #efddd4;border-radius:20px;background:#fff9ef}.dua-ritual-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.dua-ritual h3{font-size:15px;margin:0;color:#72515f}.dua-ritual-heading>span{font-size:12px;font-weight:750;color:#947357}.dua-ritual-stars{display:flex;justify-content:center;gap:clamp(5px,1vw,12px);margin:14px 0;color:#cbbcaf;font-size:clamp(23px,3vw,30px)}.dua-ritual-stars .filled{color:#c39232}.dua-ritual-check{display:flex;gap:11px;align-items:center;padding:12px;border-radius:13px;background:#fff;border:1px solid #ebd5db;cursor:pointer;min-height:48px;font-size:14px;font-weight:750;color:#80566b}.dua-ritual-check input{width:23px;height:23px;flex:0 0 23px;accent-color:#a4627d;cursor:pointer}.dua-ritual-check:focus-within{outline:3px solid #b899cc;outline-offset:2px}.dua-ritual p{font-size:12px;line-height:1.6;color:#846b73;margin:10px 0 0}.dua-ritual .dua-ritual-hint{font-size:11px;color:#8e8183}.dua-ritual [role=status]{color:#637352;min-height:19px;text-align:center}
-
-.weekly-dua .dua-weekly-heading{grid-column:1/-1;margin:0;padding:0 0 16px;border-bottom:1px solid #ead5d9;font-size:clamp(23px,3vw,30px);line-height:1.25;color:#805369}.weekly-dua #duaTitle{font-size:clamp(25px,3vw,34px);line-height:1.14;margin:12px 0;color:var(--dua-ink)}
-
-/* Phone, tablet portrait / landscape, and text zoom. */
-.weekly-dua,.weekly-dua *,.dua-dialog,.dua-dialog *{box-sizing:border-box}
-.weekly-dua{padding:clamp(16px,3vw,30px);gap:clamp(18px,3vw,30px);max-width:100%;overflow:visible}
-.weekly-dua>*,.dua-sheet,.dua-intro,.dua-ritual,.dua-ritual-heading>*{min-width:0}
-.dua-sheet{padding:clamp(14px,2.4vw,24px)}
-.dua-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
-.dua-actions>button,.dua-dialog .actions>button{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.4;min-height:48px;touch-action:manipulation}
-.dua-options{gap:8px 16px}.dua-options label,.dua-options a{min-height:44px;display:inline-flex;align-items:center}
-.dua-ritual{padding:16px clamp(10px,2vw,16px) 12px}.dua-ritual-stars{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;width:100%;text-align:center;font-size:clamp(21px,3vw,29px)}
-.dua-ritual-check{min-height:52px;padding:12px 10px}.dua-ritual-check span{min-width:0;overflow-wrap:anywhere}
-.dua-phonetic,.dua-translation,.dua-status,.dua-ritual p,.weekly-dua h2,.weekly-dua h3{overflow-wrap:anywhere}
-.dua-dialog{width:min(490px,calc(100% - 24px));max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);padding:clamp(16px,4vw,28px);overscroll-behavior:contain;scrollbar-gutter:stable}
-.dua-dialog .actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,120px),1fr))}
-.dua-dialog .close{position:sticky;top:0;z-index:1;background:#fffaf5;min-width:44px;min-height:44px}
-body[data-km-section=today] .today-shell{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right));padding-bottom:calc(126px + env(safe-area-inset-bottom))}
-body[data-km-section=today] .today-header{gap:10px;flex-wrap:wrap}
-body[data-km-section=today] .resume-row>*,body[data-km-section=today] .child-home>*{min-width:0}
-@media(max-width:1023px){.weekly-dua{grid-template-columns:minmax(0,1fr)}.dua-illustration{max-width:640px;margin-inline:auto}.weekly-dua .dua-sheet{width:100%}.dua-arabic{font-size:clamp(28px,4.5vw,38px)}}
-@media(min-width:681px){body[data-km-section=today] .today-shell{padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right))}}
-@media(max-width:420px){.dua-actions{grid-template-columns:minmax(0,1fr)}.weekly-dua .dua-weekly-heading{font-size:23px}.dua-ritual-heading{align-items:flex-start}.dua-arabic{font-size:28px}.dua-options{justify-content:space-between}.dua-dialog .actions{grid-template-columns:minmax(0,1fr)}}
-@media(max-height:500px) and (orientation:landscape){.dua-dialog{max-height:calc(100dvh - 16px);margin:8px auto}.dua-dialog .dua-words{padding:4px 0}}
-
+/* A quiet daily learning space. The full text stays one tap away. */
+.weekly-dua,
+.weekly-dua *,
+.dua-dialog,
+.dua-dialog * { box-sizing: border-box; }
+.weekly-dua,
+.dua-dialog {
+  --dua-ink: #604452;
+  --dua-muted: #7d6671;
+  --dua-accent: #975c75;
+  --dua-border: #e8d9de;
+  color: var(--dua-ink);
+}
 .child-home > .weekly-dua {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(24px, 3.5vw, 48px);
   margin: 0;
-  padding: 0 0 14px;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "illustration" "intro" "recitation";
-  gap: 14px;
-}
-.weekly-dua .dua-illustration {
-  grid-area: illustration;
-  align-self: start;
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  border: 0;
-  border-radius: 28px 28px 0 0;
-}
-.weekly-dua .dua-intro { grid-area: intro; margin-inline: 14px; }
-.weekly-dua .dua-sheet { grid-area: recitation; margin-inline: 14px; width: auto; }
-.weekly-dua .dua-weekly-heading {
-  color: #805369;
-  font: 800 clamp(22px, 3vw, 32px)/1.15 "Baloo 2", system-ui, sans-serif;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-.weekly-dua .dua-status:empty { display: none; }
-.dua-extras { margin-top: 8px; }
-.dua-extras summary {
-  display: list-item;
-  width: fit-content;
+  padding: clamp(22px, 3vw, 36px);
+  border: 1px solid var(--dua-border);
+  border-radius: 30px;
+  background: #fffaf7;
   max-width: 100%;
-  margin-inline: auto;
-  padding: 12px 4px;
+}
+.weekly-dua > *, .dua-content > * { min-width: 0; }
+.dua-illustration { margin: 0; overflow: hidden; border-radius: 22px; background: #fbe7e1; }
+.dua-illustration img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: contain; }
+.dua-content { padding-block: 6px; }
+.weekly-dua .dua-weekly-heading {
+  margin: 0 0 8px;
+  color: var(--dua-accent);
+  font: 800 14px/1.5 Nunito, system-ui, sans-serif;
+}
+.weekly-dua #duaTitle {
+  margin: 0;
+  color: var(--dua-ink);
+  font: 800 clamp(26px, 2.7vw, 34px)/1.18 'Baloo 2', system-ui, sans-serif;
+  text-wrap: balance;
+}
+.dua-training { margin-top: 28px; }
+.dua-training-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; }
+.dua-training-heading h3 { margin: 0; font: 800 15px/1.5 Nunito, system-ui, sans-serif; }
+.dua-training-heading [data-ritual-progress] { font-size: 13px; color: var(--dua-muted); }
+.dua-ritual-stars { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin: 16px 0 22px; max-width: 380px; }
+.dua-day { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; color: #9c8991; }
+.dua-day .material-symbols-rounded { display: grid; place-items: center; width: 39px; height: 39px; max-width: 100%; border-radius: 50%; font-size: 29px; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 32; }
+.dua-day small { font-size: 11px; font-weight: 800; line-height: 1.5; }
+.dua-day.is-earned { color: #a67623; }
+.dua-day.is-earned .material-symbols-rounded { font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 32; }
+.dua-day.is-current .material-symbols-rounded { color: var(--dua-accent); background: #f4e5ec; }
+.dua-day.is-current small { color: var(--dua-accent); }
+.dua-day-goal { margin: 0 0 18px; font-size: 17px; line-height: 1.5; font-weight: 800; text-wrap: balance; }
+.weekly-dua button,
+.dua-dialog button {
+  appearance: none;
+  min-height: 48px;
+  max-width: 100%;
+  padding: 12px 18px;
+  border: 1px solid #cfb6c2;
+  border-radius: 15px;
+  background: #fff;
+  color: var(--dua-accent);
+  font: 800 15px/1.5 Nunito, system-ui, sans-serif;
+  white-space: normal;
+  overflow-wrap: anywhere;
   cursor: pointer;
-  color: #725268;
-  font-size: 13px;
-  font-weight: 800;
+  touch-action: manipulation;
+  transition: background-color .15s, border-color .15s;
 }
-.dua-extras summary:focus-visible { outline: 3px solid #ad7794; outline-offset: 2px; }
-.dua-extras > p { font-size: 13px; color: #725d69; line-height: 1.5; }
-@media (max-width: 1023px) {
-  .weekly-dua .dua-weekly-heading { font-size: clamp(22px, 5.5vw, 28px); }
-  .weekly-dua #duaTitle { font-size: 19px; margin: 3px 0; }
-  .weekly-dua #duaWeek { font-size: 12px; margin: 0; }
-  .weekly-dua .dua-sheet { padding: 12px; }
-  .weekly-dua .dua-arabic { margin: 0 0 4px; line-height: 1.6; }
-  .weekly-dua .dua-phonetic { margin: 0 0 4px; line-height: 1.4; }
-  .weekly-dua .dua-translation { margin: 0 auto 12px; line-height: 1.4; }
-  .weekly-dua .dua-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-  .weekly-dua .dua-actions button { min-height: 44px; padding: 7px; }
+.weekly-dua button.main,
+.dua-dialog button.main { min-height: 52px; background: var(--dua-accent); border-color: var(--dua-accent); color: #fff; }
+.weekly-dua button:hover,
+.dua-dialog button:hover { border-color: var(--dua-accent); background: #faf0f5; }
+.weekly-dua button.main:hover,
+.dua-dialog button.main:hover { background: #814b62; border-color: #814b62; }
+.weekly-dua button:disabled,
+.dua-dialog button:disabled { opacity: .55; cursor: default; }
+.weekly-dua button:focus-visible,
+.dua-dialog button:focus-visible,
+.weekly-dua a:focus-visible,
+.dua-dialog a:focus-visible,
+.weekly-dua summary:focus-visible,
+.weekly-dua input:focus-visible { outline: 3px solid #9b6f91; outline-offset: 4px; }
+.dua-start { display: block; width: 100%; }
+.weekly-dua .dua-quiet,
+.dua-dialog .dua-quiet { display: block; width: fit-content; margin: 8px auto 0; padding: 10px 6px; min-height: 44px; border-color: transparent; border-radius: 10px; background: transparent; font-size: 13px; font-weight: 700; }
+.weekly-dua .dua-quiet:hover,
+.dua-dialog .dua-quiet:hover { background: #f8edf2; }
+.dua-ritual-note { margin: 15px 0 0; color: var(--dua-muted); font-size: 13px; line-height: 1.6; }
+.dua-status { margin: 14px 0 0; color: #4f705c; font-size: 14px; line-height: 1.6; text-align: center; }
+.dua-status:empty { display: none; }
+.dua-reference { margin-top: 22px; border-top: 1px solid var(--dua-border); }
+.dua-reference summary,
+.dua-confidence summary { width: 100%; padding: 16px 2px; min-height: 52px; color: var(--dua-accent); font-size: 14px; font-weight: 800; cursor: pointer; }
+.dua-reference summary::marker,
+.dua-confidence summary::marker { font-size: .75em; }
+.dua-reference-content { padding-top: 8px; }
+.dua-arabic { margin: 0 0 18px; color: var(--dua-ink); font: 500 clamp(28px, 3vw, 34px)/1.85 'Noto Naskh Arabic', 'Geeza Pro', 'Traditional Arabic', serif; text-align: center; overflow-wrap: break-word; }
+.dua-phonetic { margin: 0 0 14px; color: #765a73; font-size: 14px; line-height: 1.75; text-align: center; }
+.dua-translation { margin: 0 auto 24px; max-width: 420px; color: var(--dua-muted); font-size: 14px; line-height: 1.75; text-align: center; }
+.dua-reference-listen { display: block; margin: 0 auto; width: 100%; }
+.dua-options { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 14px; margin: 12px 0; font-size: 13px; color: var(--dua-muted); }
+.dua-options label,
+.dua-options a { display: inline-flex; align-items: center; min-height: 44px; gap: 8px; }
+.dua-options input { width: 18px; height: 18px; accent-color: var(--dua-accent); }
+.dua-options a,
+.dua-source a,
+.dua-audio-link { color: inherit; text-underline-offset: 4px; }
+.dua-source { margin: 10px 0 0; color: var(--dua-muted); font-size: 12px; line-height: 1.7; text-align: center; }
+.dua-source a { display: inline-block; padding-block: 8px; }
+.dua-confidence { margin-top: 16px; }
+.dua-confidence-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 10px 0 20px; }
+.dua-confidence-choices button { font-size: 14px; }
+.dua-confidence-choices button[aria-pressed='true'] { background: #f4e5ec; border-color: var(--dua-accent); color: #754457; box-shadow: inset 0 0 0 1px var(--dua-accent); }
+.weekly-dua [hidden], .dua-dialog [hidden] { display: none !important; }
+
+/* One action at a time, with room to read and no timed repetition. */
+.dua-dialog {
+  position: fixed;
+  width: min(530px, calc(100% - 32px));
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  padding: 30px;
+  margin: auto;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--dua-border);
+  border-radius: 28px;
+  background: #fffaf7;
+  scrollbar-width: thin;
 }
-@media (min-width: 960px), (min-width: 640px) and (orientation: landscape) and (max-height: 600px) {
-  .child-home > .weekly-dua {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    grid-template-areas: "illustration intro" "illustration recitation";
-    gap: 12px clamp(14px, 2vw, 24px);
-    padding: clamp(12px, 2vw, 24px);
-  }
-  .weekly-dua .dua-illustration { align-self: center; border-radius: 19px; }
-  .weekly-dua .dua-intro { align-self: end; margin: 0; }
-  .weekly-dua .dua-sheet { align-self: start; margin: 0; }
+.dua-dialog::backdrop { background: #49324170; backdrop-filter: blur(4px); }
+.dua-dialog .close { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; min-height: 44px; padding: 0; border: 0; background: transparent; font: 400 28px/1 Nunito, system-ui, sans-serif; }
+.dua-dialog .part { margin: 5px 30px 12px; color: var(--dua-accent); font-size: 12px; line-height: 1.5; font-weight: 800; text-align: center; }
+.dua-dialog h2 { margin: 0 12px 12px; font: 800 29px/1.2 'Baloo 2', system-ui, sans-serif; text-align: center; text-wrap: balance; }
+.dua-dialog h2:focus { outline: none; }
+.dua-coach { margin: 0 auto 22px; max-width: 390px; color: var(--dua-muted); font-size: 15px; line-height: 1.65; text-align: center; text-wrap: pretty; }
+.dua-dialog .dua-words { margin: 0 0 12px; padding: 12px 0 0; }
+.dua-dialog .dua-translation { margin-bottom: 14px; }
+.dua-dialog [data-reveal] { margin-top: 0; margin-bottom: 14px; }
+.dua-dialog .actions { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+.dua-dialog .actions > button { width: 100%; }
+.dua-dialog .actions > .main { order: -1; }
+.dua-dialog .actions > [data-listen]:not(.main) { min-height: 44px; padding: 8px 14px; border-color: transparent; background: transparent; font-size: 14px; }
+.dua-dialog .actions > [data-listen]:not(.main):hover { background: #f8edf2; }
+.dua-audio-link { display: block; width: fit-content; margin: 10px auto 0; padding-block: 10px; min-height: 44px; color: var(--dua-accent); font-size: 13px; }
+.dua-dialog #duaPrevious { margin-top: 4px; }
+
+/* Space for the application navigation outside the training dialog. */
+body[data-km-section=today] .today-shell { padding-left: max(14px, env(safe-area-inset-left)); padding-right: max(14px, env(safe-area-inset-right)); padding-bottom: calc(126px + env(safe-area-inset-bottom)); }
+body[data-km-section=today] .today-header { gap: 10px; flex-wrap: wrap; }
+body[data-km-section=today] .resume-row > *,
+body[data-km-section=today] .child-home > * { min-width: 0; }
+@media (min-width: 681px) {
+  body[data-km-section=today] .today-shell { padding-left: max(24px, env(safe-area-inset-left)); padding-right: max(24px, env(safe-area-inset-right)); }
+}
+@media (max-width: 859px) {
+  .child-home > .weekly-dua { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0; border-radius: 26px; }
+  .dua-illustration { border-radius: 25px 25px 0 0; }
+  .dua-content { padding: 24px; }
+  .weekly-dua #duaTitle { font-size: 28px; }
+  .dua-training { margin-top: 24px; }
+  .dua-ritual-stars { max-width: none; }
+  .dua-reference { margin-top: 20px; }
+  .dua-reference summary { padding-bottom: 4px; }
+  .dua-reference[open] summary { padding-bottom: 16px; }
+}
+@media (max-width: 380px) {
+  .dua-content { padding: 22px 18px; }
+  .weekly-dua #duaTitle { font-size: 26px; }
+  .dua-day .material-symbols-rounded { width: 34px; height: 34px; font-size: 27px; }
+  .dua-start { padding-inline: 12px; }
+  .dua-dialog { width: calc(100% - 24px); padding: 26px 20px; }
+  .dua-dialog h2 { font-size: 26px; }
+  .dua-confidence-choices { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  .dua-dialog { max-height: calc(100dvh - 16px); width: min(640px, calc(100% - 32px)); padding: 22px 30px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .weekly-dua *, .dua-dialog * { animation: none !important; transition: none !important; }
 }

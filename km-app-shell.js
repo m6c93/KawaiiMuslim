@@ -86,6 +86,8 @@ navigate(initial,{historyMode:'replace',anchor:params.get('anchor')||'',workshop
       const win=frame.contentWindow,doc=frame.contentDocument;if(!doc)return false;
       if(/^\/applications\/mimi(?:\/(?:index(?:\.html)?)?)?\/?$/i.test(win.location.pathname))return 'game';
       if(/^\/(?:applications\/salah|prophetes)(?:\/(?:index(?:\.html)?)?)?\/?$/i.test(win.location.pathname))return 'activity';
+      // The invocation dialog owns its close control and must fill the visible app.
+      if(doc.querySelector('#duaPractice[open]'))return 'activity';
       if(/^\/Coloriage\.dc(?:\.html)?$/i.test(win.location.pathname))return 'coloring';
       if(/^\/Atelier\.dc(?:\.html)?$/i.test(win.location.pathname)&&
          doc.querySelector('#artViewer[open],#scanModal:not([hidden])'))return 'coloring';
@@ -134,7 +136,7 @@ navigate(initial,{historyMode:'replace',anchor:params.get('anchor')||'',workshop
     const frame=event.target;
     if(frame.matches?.('iframe.km-app-view')){
       try{
-        const dialogs=frame.contentDocument?.querySelectorAll('#artViewer,#scanModal');
+        const dialogs=frame.contentDocument?.querySelectorAll('#artViewer,#scanModal,#duaPractice');
         if(dialogs?.length){
           const observer=new MutationObserver(sync);
           dialogs.forEach(dialog=>observer.observe(dialog,{attributes:true,attributeFilter:['open','hidden']}));
