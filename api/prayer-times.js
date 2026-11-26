@@ -4,6 +4,7 @@ const PRAYERS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 const REQUEST_KEYS = new Set(['date', 'city', 'cityId', 'latitude', 'longitude']);
 const GMP_CALENDAR = require('../data/prayer-gmp-2026-11.json');
 const FRENCH_CITIES = require('../data/prayer-fr-cities.json');
+const officialCalendar = require('../lib/prayer-gmp-calendar.js');
 const CITIES_BY_ID = new Map(FRENCH_CITIES.cities.map(city => ['fr:' + city[0], city]));
 const GMP_DEPARTMENTS = new Set(['75', '92', '93', '94']);
 const GMP_CENTRES = FRENCH_CITIES.cities.filter(city => GMP_DEPARTMENTS.has(city[2]));
@@ -12,6 +13,36 @@ const CALCULATED_SOURCE = {
   label: 'Horaires calculés · Ligue islamique mondiale',
   url: 'https://aladhan.com/calculation-methods'
 };
+
+function normalizeCity(value) {
+  return value.normalize('NFKD').toLowerCase().replace(/\p{M}/gu, '')
+    .replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/[^\p{L}\p{N}]+/gu, ' ').trim()
+    .replace(/\bst\b/g, 'saint').replace(/\bste\b/g, 'sainte');
+}
+
+const CITIES_BY_NAME = new Map();
+const CITIES_BY_LABEL = new Map();
+for (const city of FRENCH_CITIES.cities) {
+  const name = normalizeCity(city[1]);
+  if (!CITIES_BY_NAME.has(name)) CITIES_BY_NAME.set(name, []);
+  CITIES_BY_NAME.get(name).push(city);
+  CITIES_BY_LABEL.set(normalizeCity(city[1] + ' · ' + FRENCH_CITIES.departments[city[2]]
+    + ' (' + city[2] + '), France'), city);
+}
+
+// Migrate older, free-text preferences only when the commune is certain.
+// A shared name such as Saint-Denis still requires the user's explicit choice.
+function resolveFrenchCity(value) {
+  let name = normalizeCity(value);
+  const labelled = CITIES_BY_LABEL.get(name);
+  if (labelled) return [labelled];
+  name = name.replace(/(?:^| )(?:france|fr)$/, '').trim();
+  const codeMatch = name.match(/(?:^| )(\d{2}|\d{5})$/);
+  const code = codeMatch ? codeMatch[1] : '';
+  if (codeMatch) name = name.slice(0, codeMatch.index).trim();
+  const candidates = name ? (CITIES_BY_NAME.get(name) || []) : code ? FRENCH_CITIES.cities : [];
+  return code ? candidates.filter(city => code.length === 2 ? city[2] === code : city[6].includes(code)) : candidates;
+}
 
 function isSameOrigin(headers) {
   const site = headers['sec-fetch-site'];
@@ -74,14 +105,17 @@ function withinThreeKilometres(latitude, longitude, city) {
   return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(Math.max(0, 1 - a))) <= 3;
 }
 
+function usesParisCalendar(input) {
+  if (input.city !== undefined) return false;
+  return input.cityId
+    ? GMP_DEPARTMENTS.has(input.department)
+    : GMP_CENTRES.some(city => withinThreeKilometres(input.latitude, input.longitude, city));
+}
+
 function publishedTimings(input) {
   if (input.isoDate < GMP_CALENDAR.source.validFrom || input.isoDate > GMP_CALENDAR.source.validUntil) return null;
   const row = GMP_CALENDAR.days[input.isoDate];
-  if (!row || input.city !== undefined) return null;
-  const covered = input.cityId
-    ? GMP_DEPARTMENTS.has(input.department)
-    : GMP_CENTRES.some(city => withinThreeKilometres(input.latitude, input.longitude, city));
-  if (!covered) return null;
+  if (!row || !usesParisCalendar(input)) return null;
   const timings = Object.fromEntries(PRAYERS.map(key => [key, row[GMP_CALENDAR.columns.indexOf(key)]]));
   const { id, label, url, validUntil } = GMP_CALENDAR.source;
   return {
@@ -131,8 +165,31 @@ module.exports = async function prayerTimes(req, res) {
     || !/^application\/json(?:\s*;|\s*$)/i.test(headers['content-type'])) return fail(400, 'invalid_request');
   const input = readRequest(req.body);
   if (!input) return fail(400, 'invalid_request');
+  if (input.city !== undefined) {
+    const matches = resolveFrenchCity(input.city);
+    if (matches.length > 1) return fail(422, 'location_ambiguous');
+    if (matches.length === 1) {
+      const city = matches[0];
+      delete input.city;
+      Object.assign(input, { cityId: 'fr:' + city[0], department: city[2], latitude: city[4], longitude: city[3] });
+    }
+  }
   const published = publishedTimings(input);
   if (published) return res.status(200).json({ code: 200, data: published });
+  if (usesParisCalendar(input)) {
+    // The official source publishes monthly images, not a public timings API.
+    // Show its current poster after the verified transcription ends, rather than
+    // silently replacing the requested mosque with an unrelated calculation.
+    const calendar = await officialCalendar(input.isoDate);
+    return res.status(200).json({ code: 200, data: {
+      presentation: 'official-calendar', calendar,
+      meta: { timezone: 'Europe/Paris', source: {
+        id: 'gmp-calendar', label: 'Grande Mosquée de Paris · calendrier officiel',
+        url: GMP_CALENDAR.source.url, ...(calendar ? { validUntil: calendar.validUntil } : {})
+      } },
+      date: { gregorian: { date: input.date } }
+    } });
+  }
 
   const manual = input.city !== undefined;
   const url = new URL('https://api.aladhan.com/v1/' + (manual ? 'timingsByAddress/' : 'timings/') + input.date);

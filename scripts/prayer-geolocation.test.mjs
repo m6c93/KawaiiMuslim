@@ -832,6 +832,55 @@ test('editing a selected city discards its coordinates before a free-text submis
   assert.equal(Object.hasOwn(reloaded.prayerRequests().at(-1).body, 'cityId'), false);
 });
 
+test('unresolved free text preserves the last confirmed city until valid timings are returned', async () => {
+  const app = setup({ geolocation: false });
+  await settle();
+  await selectSaintDenis(app);
+  await app.answer();
+  const confirmed = Object.fromEntries(app.storage);
+  await app.emit(app.get('prayerCityButton'), 'click');
+  await app.typeCity('Ville introuvable, France');
+  await app.submitFreeCity();
+  assert.deepEqual(Object.fromEntries(app.storage), confirmed, 'A pending lookup must not replace the saved city');
+  await app.failPrayer(422, 'location_not_found');
+  assert.deepEqual(Object.fromEntries(app.storage), confirmed, 'A rejected city must leave the last valid preference intact');
+  const reloaded = setup({ stored: Object.fromEntries(app.storage) });
+  await settle();
+  assert.equal(reloaded.gps.length, 0);
+  assert.equal(reloaded.prayerRequests().at(-1).body.cityId, saintDenis93.id);
+
+  await app.typeCity('Rabat, Maroc');
+  await app.submitFreeCity();
+  assert.deepEqual(Object.fromEntries(app.storage), confirmed);
+  await app.answer(undefined, { zone: 'Africa/Casablanca' });
+  assert.equal(JSON.parse(app.storage.get('km-prayer-place:v1')).city, 'Rabat, Maroc');
+  assert.equal(app.storage.get('km-prayer-city:guest'), 'Rabat, Maroc');
+  assert.equal(app.storage.get('km-prayer-location-mode:v1'), 'manual');
+});
+
+test('an ambiguous legacy city opens department choices without saving an arbitrary location', async () => {
+  const legacy = { 'km-prayer-city:guest': 'Saint-Denis, France', 'km-prayer-mode:guest': 'manual' };
+  const app = setup({ stored: legacy });
+  await settle();
+  assert.equal(app.gps.length, 0);
+  assert.equal(app.prayerRequests()[0].body.city, 'Saint-Denis, France');
+  assert.deepEqual(Object.fromEntries(app.storage), legacy);
+  await app.failPrayer(422, 'location_ambiguous');
+  assert.equal(app.get('prayerCityForm').hidden, false);
+  assert.equal(app.get('prayerTitle').textContent, 'Choisis ta ville');
+  assert.match(app.get('prayerStatus').textContent, /département/);
+  assert.equal(app.get('prayerRetryButton').hidden, true);
+  assert.deepEqual(app.searchRequests().at(-1).body, { query: 'Saint-Denis, France', scope: 'fr' });
+  await app.answerSearch([saintDenis93, saintDenisReunion]);
+  assert.equal(app.suggestionButtons().length, 2);
+  assert.deepEqual(Object.fromEntries(app.storage), legacy);
+  const choice = app.suggestionButtons().find(button => button.textContent.includes('Seine-Saint-Denis'));
+  await app.emit(choice, 'click');
+  assert.equal(app.prayerRequests().at(-1).body.cityId, saintDenis93.id);
+  assert.equal(JSON.parse(app.storage.get('km-prayer-place:v1')).cityId, saintDenis93.id,
+    'A real catalogue choice is remembered before the prayer service responds');
+});
+
 for (const available of [true, false]) {
   test(`free-text submission still loads prayer times when city search ${available ? 'has no results' : 'is unavailable'}`, async () => {
     const app = setup({ geolocation: false });
@@ -864,3 +913,39 @@ test('the other-countries control switches the explicit search scope and can ret
   assert.match(app.get('prayerCityWorld').textContent, /Autres pays/);
   assert.equal(app.prayerRequests().length, 0);
 });
+
+for (const hasCurrentPoster of [true, false]) {
+  test(`a new official month ${hasCurrentPoster ? 'displays its published poster' : 'offers the official link when not published'} and keeps the chosen city`, async () => {
+    const savedPlace = { version: 1, kind: 'manual', city: saintDenis93.label, label: saintDenis93.label,
+      latitude: saintDenis93.latitude, longitude: saintDenis93.longitude, cityId: saintDenis93.id };
+    const app = setup({ nowISO: '2026-12-01T12:00:00Z', stored: {
+      'km-prayer-place:v1': JSON.stringify(savedPlace), 'km-prayer-location-mode:v1': 'manual'
+    } });
+    await settle();
+    const imageUrl = 'https://static.wixstatic.com/media/official_calendar_fixture.jpg';
+    app.prayerRequests()[0].resolve({ ok: true, status: 200, json: async () => ({ code: 200, data: {
+      presentation: 'official-calendar',
+      calendar: hasCurrentPoster ? { imageUrl, month: '2026-12', label: 'décembre 2026',
+        validFrom: '2026-12-01', validUntil: '2026-12-31' } : null,
+      meta: { timezone: 'Europe/Paris', source: { id: 'gmp-calendar', label: 'Grande Mosquée de Paris · calendrier officiel' } },
+      date: { gregorian: { date: '01-12-2026' } }
+    } }) });
+    await settle();
+    assert.equal(app.gps.length, 0);
+    assert.equal(app.get('prayerCityLabel').textContent, saintDenis93.label);
+    assert.equal(app.get('prayerTitle').textContent, 'Horaires de la mosquée');
+    assert.equal(app.get('prayerDone').hidden, true, 'No invented current prayer or reward without verified numeric times');
+    assert.equal(app.get('prayerCountdown').textContent, '');
+    assert.equal(app.get('prayerCalendar').hidden, !hasCurrentPoster);
+    assert.equal(app.get('prayerSource').querySelector('a').href, 'https://www.grandemosqueedeparis.fr/horaire-des-prieres-paris');
+    assert.equal(app.get('prayerCityForm').hidden, true, 'Changing month does not make users choose their city again');
+    assert.equal(JSON.parse(app.storage.get('km-prayer-place:v1')).cityId, saintDenis93.id);
+    if (hasCurrentPoster) {
+      assert.equal(app.get('prayerCalendar').querySelector('img').src, imageUrl);
+      assert.match(app.get('prayerStatus').textContent, /décembre 2026/);
+    } else {
+      assert.equal(app.get('prayerCalendar').querySelector('img'), null);
+      assert.match(app.get('prayerStatus').textContent, /pas encore disponible/);
+    }
+  });
+}

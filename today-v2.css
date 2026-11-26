@@ -321,6 +321,10 @@ button:focus-visible {
 .child-prayer .prayer-city-form .prayer-cancel { color: #66545e; background: #ece2e8; }
 .prayer-source { grid-column: 1 / -1; margin: 0; font-size: 11px; line-height: 1.5; color: #76505f; }
 .prayer-source a { color: inherit; text-underline-offset: 3px; }
+.prayer-calendar { grid-column: 1 / -1; width: min(100%, 560px); margin: 8px auto; }
+.prayer-calendar[hidden] { display: none; }
+.prayer-calendar a { display: block; border-radius: 14px; overflow: hidden; background: #fff; }
+.prayer-calendar img { display: block; width: 100%; height: auto; }
 .prayer-city-search-tools { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 5px; }
 .prayer-city-search-tools span, .prayer-city-search-status { font-size: 12px; line-height: 1.5; }
 .prayer-city-search-tools button { flex: none; padding: 5px 2px; background: transparent; color: #76445d; font-size: 12px; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }

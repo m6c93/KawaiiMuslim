@@ -7,7 +7,7 @@ const handler = require('../api/prayer-times.js');
 const catalogue = require('../data/prayer-fr-cities.json');
 const publishedCalendar = require('../data/prayer-gmp-2026-11.json');
 const host = 'www.kawaiimuslimworld.com';
-const input = { date: '2026-11-26', city: 'Montreuil, France' };
+const input = { date: '2026-11-26', city: 'Rabat, Maroc' };
 const expectedTimes = { Fajr: '06:23', Dhuhr: '12:38', Asr: '14:41', Maghrib: '16:59', Isha: '18:46' };
 const calculatedSource = {
   id: 'aladhan-mwl', label: 'Horaires calculés · Ligue islamique mondiale', url: 'https://aladhan.com/calculation-methods'
@@ -57,7 +57,7 @@ function assertPrivate(response) {
 
 test('a confirmed city uses the fixed provider and returns only validated timings, timezone and date', async t => {
   const fetch = t.mock.method(globalThis, 'fetch', async () => upstream());
-  const response = await invoke({ body: JSON.stringify({ ...input, city: '  Montreuil, France  ' }) });
+  const response = await invoke({ body: JSON.stringify({ ...input, city: '  Rabat, Maroc  ' }) });
   assert.equal(response.code, 200);
   assert.deepEqual(response.body, { code: 200, data: {
     timings: expectedTimes, meta: { timezone: 'Europe/Paris', source: calculatedSource }, date: { gregorian: { date: '26-11-2026' } }
@@ -67,7 +67,7 @@ test('a confirmed city uses the fixed provider and returns only validated timing
   const parsed = new URL(url);
   assert.equal(parsed.origin, 'https://api.aladhan.com');
   assert.equal(parsed.pathname, '/v1/timingsByAddress/26-11-2026');
-  assert.deepEqual(Object.fromEntries(parsed.searchParams), { method: '3', address: 'Montreuil, France' });
+  assert.deepEqual(Object.fromEntries(parsed.searchParams), { method: '3', address: 'Rabat, Maroc' });
   assert.deepEqual(options.headers, { Accept: 'application/json' });
   assert.equal(options.redirect, 'error');
   assert.equal(options.cache, 'no-store');
@@ -119,7 +119,7 @@ test('rejects malformed dates, bodies, mixed locations and invalid coordinates b
 
 test('preserves international city names and accepts a real leap date', async t => {
   const fetch = t.mock.method(globalThis, 'fetch', async url => upstream(payload(new URL(url).pathname.split('/').at(-1))));
-  for (const city of ['الرباط, المغرب', '東京, 日本', 'L’Haÿ-les-Roses, France', 'Sa\u0303o Paulo, Brasil']) {
+  for (const city of ['الرباط, المغرب', '東京, 日本', 'L’Île-Perrot, Canada', 'Sa\u0303o Paulo, Brasil']) {
     const response = await invoke({ body: { date: '2028-02-29', city } });
     assert.equal(response.code, 200, city);
     const url = new URL(fetch.mock.calls.at(-1).arguments[0]);
@@ -291,26 +291,29 @@ test('the official image transcription preserves verified values on 10, 17 and 3
   }
   assert.equal(publishedCalendar.days['2026-11-03'][1], '07:40');
   assert.equal(publishedCalendar.days['2026-11-17'][1], '08:02');
+  assert.equal(publishedCalendar.days['2026-11-23'][1], '08:11');
   assert.equal(publishedCalendar.days['2026-11-28'][1], '08:18');
   assert.equal(Object.keys(publishedCalendar.days).length, 30);
 });
 
-test('the published reference never repeats into another month or year and calculated fallback remains labelled', async t => {
-  const fetch = t.mock.method(globalThis, 'fetch', async url => upstream(payload(new URL(url).pathname.split('/').at(-1))));
+test('Paris stays with the official source after a month change and never substitutes calculated times', async t => {
+  const fetch = t.mock.method(globalThis, 'fetch', async () => ({ ok: false, status: 503 }));
   for (const date of ['2026-10-31', '2026-12-01', '2025-11-26', '2027-11-26']) {
     const response = await invoke({ body: chosenCity('75056', date) });
     assert.equal(response.code, 200);
-    assert.deepEqual(response.body.data.meta.source, calculatedSource);
+    assert.equal(response.body.data.meta.source.id, 'gmp-calendar');
+    assert.equal(response.body.data.presentation, 'official-calendar');
+    assert.equal(response.body.data.calendar, null);
+    assert.equal(response.body.data.timings, undefined, 'Never recycle last month or invent official timings');
     assert.equal(response.body.data.date.gregorian.date, date.split('-').reverse().join('-'));
-    const url = new URL(fetch.mock.calls.at(-1).arguments[0]);
-    assert.equal(url.searchParams.get('method'), '3');
-    assert.equal(url.pathname, '/v1/timings/' + date.split('-').reverse().join('-'));
   }
-  assert.equal(fetch.mock.callCount(), 4);
+  assert.ok(fetch.mock.callCount() >= 1);
+  for (const call of fetch.mock.calls) assert.equal(call.arguments[0], publishedSource.url);
+  const count = fetch.mock.callCount();
   const start = await invoke({ body: chosenCity('75056', '2026-11-01') });
   assert.equal(start.body.data.meta.source.id, 'gmp-calendar');
   assert.equal(start.body.data.timings.Fajr, '06:01');
-  assert.equal(fetch.mock.callCount(), 4);
+  assert.equal(fetch.mock.callCount(), count);
 });
 
 test('city IDs are resolved against the catalogue rather than accepting a supplied location or a department prefix', async t => {
@@ -338,11 +341,34 @@ test('GPS uses the published reference only near a covered commune and never app
     { date: input.date, latitude: 45.764, longitude: 4.836 },
     { date: input.date, latitude: 48.85, longitude: 2.9 },
     chosenCity('97411'),
-    { date: input.date, city: 'Paris, France' }
+    { date: input.date, city: 'Paris, Texas, États-Unis' }
   ]) {
     const response = await invoke({ body });
     assert.equal(response.code, 200);
     assert.deepEqual(response.body.data.meta.source, calculatedSource);
   }
-  assert.equal(fetch.mock.callCount(), 4, 'Unresolved free text must not be matched to Paris just by its name');
+  assert.equal(fetch.mock.callCount(), 4, 'A foreign homonym must not receive Paris times');
+});
+
+test('older text preferences resolve an exact French commune and use its official source', async t => {
+  const fetch = t.mock.method(globalThis, 'fetch', () => assert.fail('Known Paris-area communes use the official timetable'));
+  for (const city of ['Paris, France', ' paris ', 'Saint Denis 93200, France', 'st denis 93',
+    '93200', 'Saint-Denis · Seine-Saint-Denis (93), France', 'L’Haÿ-les-Roses, France']) {
+    const response = await invoke({ body: { date: input.date, city } });
+    assert.equal(response.code, 200, city);
+    assert.equal(response.body.data.meta.source.id, 'gmp-calendar', city);
+    assert.equal(response.body.data.timings.Isha, '18:30', city);
+  }
+  assert.equal(fetch.mock.callCount(), 0);
+});
+
+test('an ambiguous older preference requires a commune choice and never guesses Saint-Denis 93 or Réunion', async t => {
+  const fetch = t.mock.method(globalThis, 'fetch', () => assert.fail('Ambiguous names must not use an arbitrary geocoder result'));
+  for (const city of ['Saint-Denis, France', 'saint denis', 'st denis', 'Montreuil, France']) {
+    const response = await invoke({ body: { date: input.date, city } });
+    assert.equal(response.code, 422, city);
+    assert.deepEqual(response.body, { code: 422, error: 'location_ambiguous' });
+    assertPrivate(response);
+  }
+  assert.equal(fetch.mock.callCount(), 0);
 });

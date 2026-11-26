@@ -23,6 +23,7 @@
   var prayerCityHelp = document.getElementById("prayerCityHelp");
   var prayerCityAttribution = document.getElementById("prayerCityAttribution");
   var prayerSource = document.getElementById("prayerSource");
+  var prayerCalendar = document.getElementById("prayerCalendar");
   var prayerLocateButton = document.getElementById("prayerLocateButton");
   var prayerApproxButton = document.getElementById("prayerApproxButton");
   var prayerRetryButton = document.getElementById("prayerRetryButton");
@@ -163,7 +164,9 @@
   }
 
   function usePrayerPlace(place) {
-    savePrayerPlace(place);
+    // Catalogue choices are confirmed places. Free text must resolve before it
+    // can replace the last saved city, including when suggestions are offline.
+    if (Number.isFinite(place.latitude) && Number.isFinite(place.longitude)) savePrayerPlace(place);
     prayerAutomatic = false;
     prayerEditing = false;
     prayerStarted = true;
@@ -298,6 +301,7 @@
     prayerCountdown.textContent = "";
     prayerStatus.textContent = "";
     if (prayerSource) { prayerSource.textContent = ""; prayerSource.hidden = true; }
+    if (prayerCalendar) { prayerCalendar.textContent = ""; prayerCalendar.hidden = true; }
     if (prayerApproxButton) prayerApproxButton.hidden = true;
     if (prayerRetryButton) prayerRetryButton.hidden = true;
     prayerCard.classList.remove("is-rewarded");
@@ -339,6 +343,61 @@
     prayerCard.classList.add("is-rewarded");
   }
 
+  function renderPrayerSource(data) {
+    if (!prayerSource) return;
+    var source = data.meta && data.meta.source;
+    var sourceLinks = {
+      "gmp-calendar": "https://www.grandemosqueedeparis.fr/horaire-des-prieres-paris",
+      "aladhan-mwl": "https://aladhan.com/calculation-methods"
+    };
+    prayerSource.textContent = "";
+    prayerSource.hidden = !source || !sourceLinks[source.id];
+    if (prayerSource.hidden) return;
+    var sourceLink = document.createElement("a");
+    sourceLink.textContent = source.label;
+    sourceLink.href = sourceLinks[source.id];
+    sourceLink.target = "_blank";
+    sourceLink.rel = "noopener noreferrer";
+    prayerSource.appendChild(sourceLink);
+  }
+
+  function renderOfficialPrayerCalendar(data, place, date) {
+    resetPrayer("Horaires de la mosquée", place.label);
+    prayerEyebrow.textContent = "GRANDE MOSQUÉE DE PARIS";
+    renderPrayerSource(data);
+    var calendar = data.calendar;
+    var valid = calendar && calendar.month === date.slice(0, 7)
+      && typeof calendar.label === "string" && calendar.label.length <= 40
+      && calendar.validFrom <= date && calendar.validUntil >= date
+      && /^https:\/\/static\.wixstatic\.com\/media\/[a-zA-Z0-9_~.-]+\.(?:jpe?g|png|webp)$/.test(calendar.imageUrl || "");
+    if (valid && prayerCalendar) {
+      var link = document.createElement("a");
+      link.href = calendar.imageUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.setAttribute("aria-label", "Agrandir le calendrier officiel de " + calendar.label);
+      var poster = document.createElement("img");
+      poster.src = calendar.imageUrl;
+      poster.alt = "Horaires de Paris et sa banlieue — Grande Mosquée de Paris — " + calendar.label;
+      poster.loading = "lazy";
+      poster.referrerPolicy = "no-referrer";
+      poster.addEventListener("error", function () {
+        if (!prayerCalendar.contains || prayerCalendar.contains(poster)) {
+          prayerCalendar.hidden = true;
+          prayerStatus.textContent = "Le calendrier ne s’affiche pas. Consulte les horaires sur le site de la mosquée ci-dessous.";
+        }
+      });
+      link.appendChild(poster);
+      prayerCalendar.appendChild(link);
+      prayerCalendar.hidden = false;
+      prayerStatus.textContent = "Calendrier officiel de " + calendar.label + ". Touche l’image pour l’agrandir.";
+    } else {
+      prayerStatus.textContent = "Le calendrier de ce mois n’est pas encore disponible dans l’application. Consulte les horaires actualisés sur le site de la mosquée.";
+    }
+    if (prayerSource && prayerSource.firstChild) prayerSource.firstChild.textContent = "Consulter les horaires de la Grande Mosquée de Paris ↗";
+    schedulePrayerRefresh();
+  }
+
   function renderPrayer(data, place) {
     clearTimeout(prayerRefreshTimer);
     var zone = data.meta && data.meta.timezone ? data.meta.timezone : Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -354,23 +413,7 @@
 
     prayerCityLabel.textContent = place.label;
     prayerStatus.textContent = "";
-    if (prayerSource) {
-      var source = data.meta && data.meta.source;
-      var sourceLinks = {
-        "gmp-calendar": "https://www.grandemosqueedeparis.fr/horaire-des-prieres-paris",
-        "aladhan-mwl": "https://aladhan.com/calculation-methods"
-      };
-      prayerSource.textContent = "";
-      prayerSource.hidden = !source || !sourceLinks[source.id];
-      if (!prayerSource.hidden) {
-        var sourceLink = document.createElement("a");
-        sourceLink.textContent = source.label;
-        sourceLink.href = sourceLinks[source.id];
-        sourceLink.target = "_blank";
-        sourceLink.rel = "noopener noreferrer";
-        prayerSource.appendChild(sourceLink);
-      }
-    }
+    renderPrayerSource(data);
     prayerReward.textContent = "";
     if (active) {
       prayerEyebrow.textContent = "PRIÈRE EN COURS";
@@ -434,19 +477,38 @@
         if (attempt === 1) throw new Error("date_mismatch");
         date = localDate;
       }
+      if (data.presentation === "official-calendar" && data.meta && data.meta.timezone === "Europe/Paris"
+          && data.meta.source && data.meta.source.id === "gmp-calendar") {
+        place.timeZone = "Europe/Paris";
+        if (place.kind === "manual") savePrayerPlace(place);
+        renderOfficialPrayerCalendar(data, place, date);
+        return;
+      }
       if (!["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].every(function (key) { return cleanPrayerTime(data.timings && data.timings[key]); })) throw new Error("invalid_timings");
       place.timeZone = data.meta && data.meta.timezone;
+      if (place.kind === "manual") savePrayerPlace(place);
       renderPrayer(data, place);
     } catch (error) {
       if (requestId !== prayerRequestId) return;
       resetPrayer("Horaires indisponibles", place.label);
       prayerStatus.textContent = error.message === "location_not_found"
         ? "Cette ville n’a pas été trouvée. Précise son nom et son pays, puis appuie sur « Afficher »."
+        : error.message === "location_ambiguous"
+          ? "Plusieurs villes portent ce nom. Choisis la bonne commune dans la liste, avec son département."
         : controller.signal.aborted || error.message === "timings_timeout"
           ? "Le chargement des horaires a pris trop de temps. Appuie sur « Réessayer »."
           : "Le service des horaires est momentanément indisponible. Appuie sur « Réessayer » dans un instant.";
-      if (prayerRetryButton) prayerRetryButton.hidden = false;
+      if (prayerRetryButton) prayerRetryButton.hidden = error.message === "location_ambiguous";
       setCityEditor(true, false);
+      if (error.message === "location_ambiguous") {
+        prayerTitle.textContent = "Choisis ta ville";
+        prayerEditing = true;
+        prayerCitySelection = null;
+        prayerCityScope = "fr";
+        prayerCityInput.value = place.city || place.label;
+        updateCityScope();
+        searchPrayerCities();
+      }
     } finally {
       clearTimeout(timeout);
       if (requestId === prayerRequestId) {
@@ -573,7 +635,6 @@
     } else if (savedCity && mode !== "auto") {
       prayerAutomatic = false;
       var legacyPlace = { kind: "manual", city: savedCity, label: savedCity };
-      savePrayerPlace(legacyPlace);
       loadPrayerTimes(legacyPlace);
     } else if (mode === "off" || mode === "manual") {
       resetPrayer("Choisis ta ville");
