@@ -1,19 +1,26 @@
 (()=>{'use strict';
 const card=document.querySelector('#weeklyDua'),dialog=document.querySelector('#duaPractice');if(!card||!dialog)return;
 const audio=card.querySelector('audio'),status=card.querySelector('.dua-status'),known=card.querySelector('.known'),buttons=[...document.querySelectorAll('#weeklyDua [data-listen],#duaPractice [data-listen]')];
+const duaId=card.dataset.duaId==='leaving'?'leaving':'sleep',stateKey='kmw-weekly-dua-preview-v1';
+const isObject=value=>value&&typeof value==='object'&&!Array.isArray(value);
 let state={learned:[],practices:{}},step=0,active=null,ticket=0,pauseTimer=null;
-try{const old=JSON.parse(window.KMActivityProgress.storage.getItem('kmw-weekly-dua-preview-v1'));if(old&&Array.isArray(old.learned))state={learned:old.learned,practices:old.practices||{}}}catch{}
-function save(){try{window.KMActivityProgress.storage.setItem('kmw-weekly-dua-preview-v1',JSON.stringify(state))}catch{status.textContent='Ta progression ne peut pas être sauvegardée sur cet appareil.'}}
+function readState(){let value=state;try{const stored=JSON.parse(window.KMActivityProgress.storage.getItem(stateKey)||'{}');if(isObject(stored))value=stored}catch{}return {...value,learned:Array.isArray(value.learned)?value.learned:[],practices:isObject(value.practices)?value.practices:{}}}
+state=readState();
+// Both the learning flow and the daily ritual share this cloud-supported record.
+// Read before every change so one control never overwrites the other's progress.
+function save(change){state=readState();change(state);try{window.KMActivityProgress.storage.setItem(stateKey,JSON.stringify(state));return true}catch{return false}}
 function weekAt(date){const p=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);const v=t=>Number(p.find(x=>x.type===t).value);const t=Date.UTC(v('year'),v('month')-1,v('day'));return t-((new Date(t).getUTCDay()+6)%7)*86400000}
-const week=weekAt(new Date()),weekKey='kmw-dua-sleep-week-'+week;let sessions=0;try{sessions=Math.max(0,parseInt(window.KMActivityProgress.storage.getItem(weekKey),10)||0)}catch{}
+const week=weekAt(new Date()),weekKey='kmw-dua-sleep-week-'+week;
+const count=value=>Number.isFinite(Number(value))?Math.max(0,Math.floor(Number(value))):0;
+function readSessions(){if(duaId!=='sleep')return count(state.weeklySessions?.[duaId]?.[week]?.tries);try{return count(window.KMActivityProgress.storage.getItem(weekKey))}catch{return 0}}
+let sessions=readSessions();
 const fmt=new Intl.DateTimeFormat('fr-FR',{timeZone:'UTC',day:'numeric',month:'long'});card.querySelector('#duaWeek').textContent='Du '+fmt.format(week)+' au '+fmt.format(week+6*86400000);
-function badge(){const learned=state.learned.includes('sleep');known.textContent=learned?'✓ Je la connais · Je continue à réviser':'☆ Je la connais !';known.setAttribute('aria-pressed',String(learned));}badge();
+function badge(){const learned=state.learned.includes(duaId);known.textContent=learned?'✓ Je la connais · Je continue à réviser':'☆ Je la connais !';known.setAttribute('aria-pressed',String(learned));}badge();
 document.addEventListener('km-activity-restored',({detail:{key,value}})=>{
-  if(key==='kmw-weekly-dua-preview-v1') {
-    state={learned:Array.isArray(value?.learned)?value.learned:[],practices:value?.practices||{}};
-    badge();
+  if(key===stateKey) {
+    state=readState();badge();sessions=readSessions();
   }
-  if(key===weekKey) sessions=Math.max(0,Number(value)||0);
+  if(duaId==='sleep'&&key===weekKey) sessions=count(value);
 });
 function reset(){buttons.forEach(b=>{b.textContent=b.dataset.rest;b.setAttribute('aria-pressed','false')});card.classList.remove('is-playing');active=null}
 function stop(){ticket++;clearInterval(pauseTimer);pauseTimer=null;audio.pause();audio.currentTime=0;reset()}
@@ -21,6 +28,14 @@ buttons.forEach(b=>{b.dataset.rest=b.textContent;b.setAttribute('aria-pressed','
 audio.addEventListener('ended',()=>{const out=(active?.closest('dialog,section')||card).querySelector('.dua-status');let remaining=6;card.classList.remove('is-playing');if(active)active.textContent='■ Arrêter la pause';out.textContent='À toi de répéter · '+remaining+' s de silence';clearInterval(pauseTimer);pauseTimer=setInterval(()=>{remaining--;if(remaining<=0){clearInterval(pauseTimer);pauseTimer=null;reset();out.textContent='Bien joué. Tu peux réécouter ou continuer à ton rythme.'}else out.textContent='À toi de répéter · '+remaining+' s de silence'},1000);});audio.addEventListener('error',()=>{const out=(active?.closest('dialog,section')||card).querySelector('.dua-status');reset();out.textContent='Audio indisponible. Vérifie ta connexion puis réessaie.'});card.querySelector('#duaSlow').onchange=e=>{audio.playbackRate=e.target.checked?.8:1};
 const labels=['Écoute l’invocation','Répète à voix douce','Essaie de mémoire'];
 function render(){dialog.querySelector('.part').textContent='ÉTAPE '+(step+1)+' SUR 3';dialog.querySelector('h2').textContent=labels[step];dialog.querySelector('.dua-words').hidden=step===2;dialog.querySelector('[data-reveal]').textContent=step===2?'Afficher les mots':'Sans les mots';dialog.querySelector('[data-reveal]').setAttribute('aria-pressed',String(step===2));dialog.querySelector('.main').textContent=step===2?'J’ai terminé':'Continuer';dialog.querySelector('#duaPrevious').hidden=step===0;dialog.querySelector('.dua-status').textContent='';dialog.querySelector('.dua-coach').textContent=['Écoute une fois, sans te presser.','Lis l’invocation et répète-la tranquillement.','Tu peux réafficher les mots si tu en as besoin.'][step]}
-card.querySelector('[data-train]').onclick=()=>{window.KMActivityProgress.remember('/Aujourd%27hui.dc.html#weeklyDua');stop();step=Math.min(sessions,2);render();dialog.showModal()};dialog.querySelector('.close').onclick=()=>dialog.close();dialog.addEventListener('close',stop);dialog.addEventListener('cancel',stop);dialog.querySelector('[data-reveal]').onclick=e=>{const words=dialog.querySelector('.dua-words');words.hidden=!words.hidden;e.target.textContent=words.hidden?'Afficher les mots':'Sans les mots';e.target.setAttribute('aria-pressed',String(words.hidden))};dialog.querySelector('#duaPrevious').onclick=()=>{stop();step=Math.max(0,step-1);render()};dialog.querySelector('.main').onclick=()=>{stop();if(step<2){step++;render()}else{dialog.close();state.practices.sleep=(Number(state.practices.sleep)||0)+1;save();sessions++;try{window.KMActivityProgress.storage.setItem(weekKey,String(sessions))}catch{}badge();status.textContent='Bravo ! Ce soir, récite-la avant de dormir, puis coche ton petit rituel 🌙.'}};
-known.onclick=()=>{if(!state.learned.includes('sleep'))state.learned.push('sleep');save();badge();status.textContent='Continue à la revoir doucement chaque soir.'};document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});window.addEventListener('pagehide',stop);
+card.querySelector('[data-train]').onclick=()=>{window.KMActivityProgress.remember('/Aujourd%27hui.dc.html#weeklyDua');state=readState();sessions=readSessions();stop();step=Math.min(sessions,2);render();dialog.showModal()};dialog.querySelector('.close').onclick=()=>dialog.close();dialog.addEventListener('close',stop);dialog.addEventListener('cancel',stop);dialog.querySelector('[data-reveal]').onclick=e=>{const words=dialog.querySelector('.dua-words');words.hidden=!words.hidden;e.target.textContent=words.hidden?'Afficher les mots':'Sans les mots';e.target.setAttribute('aria-pressed',String(words.hidden))};dialog.querySelector('#duaPrevious').onclick=()=>{stop();step=Math.max(0,step-1);render()};dialog.querySelector('.main').onclick=()=>{stop();if(step<2){step++;render()}else{dialog.close();let saved=save(value=>{
+  value.practices={...value.practices,[duaId]:count(value.practices[duaId])+1};
+  if(duaId!=='sleep'){
+    const all=isObject(value.weeklySessions)?value.weeklySessions:{},weeks=isObject(all[duaId])?all[duaId]:{},entry=isObject(weeks[week])?weeks[week]:{};
+    sessions=count(entry.tries)+1;
+    // The existing cloud synchronizer adds concurrent counters named "tries".
+    value.weeklySessions={...all,[duaId]:{...weeks,[week]:{...entry,tries:sessions}}};
+  }
+});if(duaId==='sleep'){sessions++;try{window.KMActivityProgress.storage.setItem(weekKey,String(sessions))}catch{saved=false}}badge();status.textContent=(duaId==='leaving'?'Bravo ! À ta prochaine sortie, récite-la avant de quitter la maison, puis coche ton petit rituel.':'Bravo ! Ce soir, récite-la avant de dormir, puis coche ton petit rituel 🌙.')+(saved?'':' Ta progression ne peut pas être sauvegardée sur cet appareil.')}};
+known.onclick=()=>{const saved=save(value=>{if(!value.learned.includes(duaId))value.learned=[...value.learned,duaId]});badge();status.textContent=(duaId==='leaving'?'Continue à la revoir doucement avant de sortir de la maison.':'Continue à la revoir doucement chaque soir.')+(saved?'':' Ta progression ne peut pas être sauvegardée sur cet appareil.')};document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});window.addEventListener('pagehide',stop);
 })();

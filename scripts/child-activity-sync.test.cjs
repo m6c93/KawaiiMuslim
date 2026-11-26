@@ -128,6 +128,20 @@ test('an accepted write with a lost reply replays after restart without doubling
   b.wake();await b.tick();assert.equal(b.read('kmw-salah-session-v2'),null);
 });
 
+test('weekly invocation changes keep separate histories while merging concurrent recitations and rituals',async()=>{
+  const key='kmw-weekly-dua-preview-v1', week='1795478400000';
+  const server=database(),a=device(server,'amal'),b=device(server,'amal');
+  a.write(key,{learned:['sleep'],practices:{sleep:3}});await a.tick();await b.tick();
+  a.write(key,{learned:['sleep','leaving'],practices:{sleep:3,leaving:1},ritualDays:{leaving:['2026-11-26']},weeklySessions:{leaving:{[week]:{tries:1}}}});
+  b.write(key,{learned:['sleep'],practices:{sleep:3,leaving:1},ritualDays:{leaving:['2026-11-27']},weeklySessions:{leaving:{[week]:{tries:1}}}});
+  await a.tick();await b.tick();a.wake();await a.tick();
+  const restored=a.read(key);
+  assert.deepEqual(restored.learned,['sleep','leaving']);
+  assert.deepEqual(restored.practices,{sleep:3,leaving:2});
+  assert.deepEqual(restored.ritualDays.leaving,['2026-11-26','2026-11-27']);
+  assert.equal(restored.weeklySessions.leaving[week].tries,2);
+});
+
 test('missing schema keeps local progress; a future connection sends it, guest mode never queries it',async()=>{
   const server=database();server.available=false;
   const a=device(server,'amal');
