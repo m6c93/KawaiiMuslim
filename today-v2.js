@@ -5,8 +5,6 @@
   var profileName = document.getElementById("todayProfileName");
   var welcomeName = document.getElementById("todayWelcomeName");
   var avatar = document.getElementById("todayAvatar");
-  var starBalance = document.getElementById("todayStarBalance");
-  var starUnit = document.getElementById("todayStarUnit");
   var dateLabel = document.getElementById("todayDate");
   var prayerCard = document.getElementById("prayerCard");
   var prayerEyebrow = document.getElementById("prayerEyebrow");
@@ -24,6 +22,8 @@
   var prayerCityAttribution = document.getElementById("prayerCityAttribution");
   var prayerSource = document.getElementById("prayerSource");
   var prayerCalendar = document.getElementById("prayerCalendar");
+  var prayerSchedule = document.getElementById("prayerSchedule");
+  var prayerDate = document.getElementById("prayerDate");
   var prayerLocateButton = document.getElementById("prayerLocateButton");
   var prayerApproxButton = document.getElementById("prayerApproxButton");
   var prayerRetryButton = document.getElementById("prayerRetryButton");
@@ -33,7 +33,6 @@
   var prayerReward = document.getElementById("prayerReward");
   var activeChildId = "";
   var activeProfileKey = "family";
-  var currentBalance = 0;
   var currentPrayer = null;
   var prayerRefreshTimer = 0;
   var prayerLocationTimer = 0;
@@ -67,15 +66,11 @@
     dateLabel.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
   }
 
-  function setProfile(name, avatarValue, stars) {
+  function setProfile(name, avatarValue) {
     var safeName = name || "Maman";
-    var count = Number(stars) || 0;
-    currentBalance = count;
     if (profileName) profileName.textContent = safeName;
     if (welcomeName) welcomeName.textContent = safeName;
     if (avatar) avatar.textContent = avatarValue || safeName.charAt(0).toLowerCase();
-    if (starBalance) starBalance.textContent = count;
-    if (starUnit) starUnit.textContent = " étoile" + (count > 1 ? "s" : "");
   }
 
   var latestBook = null;
@@ -248,7 +243,7 @@
     }
   }
 
-  function rewardStorageKey(prayer, profileKey) {
+  function prayerCompletionKey(prayer, profileKey) {
     return "km-prayer-done:" + (profileKey || activeProfileKey) + ":" + prayer.date + ":" + prayer.key;
   }
 
@@ -302,12 +297,65 @@
     prayerStatus.textContent = "";
     if (prayerSource) { prayerSource.textContent = ""; prayerSource.hidden = true; }
     if (prayerCalendar) { prayerCalendar.textContent = ""; prayerCalendar.hidden = true; }
+    if (prayerSchedule) { prayerSchedule.textContent = ""; prayerSchedule.hidden = true; }
+    if (prayerDate) { prayerDate.textContent = ""; prayerDate.hidden = true; }
     if (prayerApproxButton) prayerApproxButton.hidden = true;
     if (prayerRetryButton) prayerRetryButton.hidden = true;
-    prayerCard.classList.remove("is-rewarded");
+    prayerCard.classList.remove("is-completed");
     prayerEyebrow.textContent = "HORAIRES DE PRIÈRE";
     prayerTitle.textContent = message;
-    prayerCityLabel.textContent = label || "Choisir ma ville";
+    setPrayerCityLabel(prayerLocation && label === prayerLocation.label ? prayerLocation : { label: label || "Choisir ma ville" });
+  }
+
+  function setPrayerCityLabel(place) {
+    var fullLabel = place.label;
+    var displayLabel = fullLabel;
+    if (place.kind === "manual" && /^fr:[0-9A-Z]{5}$/i.test(place.cityId || "")) {
+      var match = fullLabel.match(/^(.+?)\s+·\s+.+\s+\((\d{2,3}|2[AB])\),\s*France$/i);
+      if (match && place.cityId.slice(3).toUpperCase().indexOf(match[2].toUpperCase()) === 0) {
+        displayLabel = match[1] + " (" + match[2] + ")";
+      }
+    }
+    prayerCityLabel.textContent = displayLabel;
+    prayerCityLabel.title = fullLabel;
+    prayerCityButton.title = fullLabel;
+    prayerCityButton.setAttribute("aria-label", fullLabel + " — Modifier la ville");
+  }
+
+  function showPrayerDate(timeZone) {
+    if (!prayerDate) return;
+    var formatted = new Intl.DateTimeFormat("fr-FR", {
+      timeZone: timeZone, weekday: "long", day: "numeric", month: "long"
+    }).format(new Date());
+    prayerDate.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    prayerDate.hidden = false;
+  }
+
+  function renderPrayerSchedule(schedule, active, next) {
+    if (!prayerSchedule) return;
+    var icons = { Fajr: "wb_twilight", Dhuhr: "light_mode", Asr: "wb_sunny", Maghrib: "wb_twilight", Isha: "dark_mode" };
+    prayerSchedule.textContent = "";
+    schedule.forEach(function (item) {
+      var slot = document.createElement("li");
+      slot.className = "prayer-slot";
+      slot.dataset.state = active && item.key === active.key ? "current" : next && item.key === next.key ? "next" : "other";
+      if (slot.dataset.state === "current") slot.setAttribute("aria-current", "time");
+      var icon = document.createElement("span");
+      icon.className = "material-symbols-rounded prayer-slot-icon";
+      icon.setAttribute("aria-hidden", "true");
+      icon.textContent = icons[item.key];
+      var name = document.createElement("span");
+      name.className = "prayer-slot-name";
+      name.textContent = item.name;
+      var time = document.createElement("strong");
+      time.className = "prayer-slot-time";
+      time.textContent = item.label;
+      slot.appendChild(icon);
+      slot.appendChild(name);
+      slot.appendChild(time);
+      prayerSchedule.appendChild(slot);
+    });
+    prayerSchedule.hidden = false;
   }
 
   function prayerVisible() {
@@ -334,13 +382,11 @@
     return match && Number(match[1]) < 24 && Number(match[2]) < 60 ? { label: match[1].padStart(2, "0") + ":" + match[2], minutes: Number(match[1]) * 60 + Number(match[2]) } : null;
   }
 
-  function markPrayerDone(message) {
+  function markPrayerDone() {
     if (!currentPrayer) return;
     prayerDone.hidden = true;
-    prayerReward.textContent = message || "Prière accomplie · +2 étoiles";
-    prayerCard.classList.remove("is-rewarded");
-    void prayerCard.offsetWidth;
-    prayerCard.classList.add("is-rewarded");
+    prayerReward.textContent = "Prière notée";
+    prayerCard.classList.add("is-completed");
   }
 
   function renderPrayerSource(data) {
@@ -364,6 +410,8 @@
   function renderOfficialPrayerCalendar(data, place, date) {
     resetPrayer("Horaires de la mosquée", place.label);
     prayerEyebrow.textContent = "GRANDE MOSQUÉE DE PARIS";
+    setPrayerCityLabel(place);
+    showPrayerDate("Europe/Paris");
     renderPrayerSource(data);
     var calendar = data.calendar;
     var valid = calendar && calendar.month === date.slice(0, 7)
@@ -411,7 +459,9 @@
     var active = started[started.length - 1] || null;
     currentPrayer = active ? { key: active.key, name: active.name, date: clock.date } : null;
 
-    prayerCityLabel.textContent = place.label;
+    setPrayerCityLabel(place);
+    showPrayerDate(zone);
+    renderPrayerSchedule(schedule, active, next);
     prayerStatus.textContent = "";
     renderPrayerSource(data);
     prayerReward.textContent = "";
@@ -419,10 +469,9 @@
       prayerEyebrow.textContent = "PRIÈRE EN COURS";
       prayerTitle.textContent = active.name + " · " + active.label;
       prayerCountdown.textContent = next ? "Prochaine : " + next.name + " à " + next.label : "Dernière prière du jour";
-      // L’aperçu doit toujours permettre de tester le bouton après un rechargement.
-      var alreadyDone = !isLocalPreview() && prayerPreference(rewardStorageKey(currentPrayer)) === "1";
+      var alreadyDone = prayerPreference(prayerCompletionKey(currentPrayer)) === "1";
       prayerDone.hidden = !activeChildId || alreadyDone;
-      if (alreadyDone) prayerReward.textContent = "Prière accomplie · +2 étoiles";
+      if (alreadyDone) markPrayerDone();
     } else {
       prayerEyebrow.textContent = "PROCHAINE PRIÈRE";
       prayerTitle.textContent = next ? next.name + " · " + next.label : "Horaires indisponibles";
@@ -694,7 +743,7 @@
       activeChildId = "preview-child";
       var guest = new URLSearchParams(location.search).get("guest") === "1";
       activeProfileKey = guest ? "guest" : "preview-child";
-      setProfile(guest ? "Découverte" : "toto", guest ? "d" : "t", guest ? 0 : (Number(localStorage.getItem("km-preview-star-balance")) || 12));
+      setProfile(guest ? "Découverte" : "toto", guest ? "d" : "t");
       if (guest) {
         var greeting = document.getElementById("childWelcomeTitle");
         if (greeting) greeting.textContent = "Bienvenue dans ton monde";
@@ -719,13 +768,7 @@
       activeProfileKey = active.id || ("parent:" + context.user.id);
       activeChildId = active.type === "child" ? active.id : "";
       var name = active.name || (active.type === "child" ? "Mon enfant" : "Maman");
-      var child = active.type === "child" ? active : context.children[0];
-      var balance = 0;
-      if (child) {
-        var shop = await KMAuth.getStarShop(child.id).catch(function () { return { balance: 0 }; });
-        balance = Number(shop && shop.balance) || 0;
-      }
-      setProfile(name, active.avatar || name.charAt(0).toLowerCase(), balance);
+      setProfile(name, active.avatar || name.charAt(0).toLowerCase());
       restoreRecent(activeChildId);
       reveal();
       initPrayer();
@@ -794,52 +837,17 @@
     }
     usePrayerPlace({ kind: "manual", city: city, label: city });
   });
-  if (prayerDone) prayerDone.addEventListener("click", async function () {
-    if (!currentPrayer || !activeChildId) return;
-    var completedPrayer = currentPrayer;
-    var completedProfileKey = activeProfileKey;
-    function stillCurrent() {
-      return currentPrayer && activeProfileKey === completedProfileKey
-        && currentPrayer.date === completedPrayer.date && currentPrayer.key === completedPrayer.key;
-    }
+  if (prayerDone) prayerDone.addEventListener("click", function () {
+    if (!currentPrayer || !activeChildId || prayerDone.disabled) return;
     prayerDone.disabled = true;
-    prayerDone.textContent = "Validation…";
     try {
-      var result;
-      if (isLocalPreview()) {
-        var previewAlreadyAwarded = localStorage.getItem(rewardStorageKey(completedPrayer, completedProfileKey)) === "1";
-        result = { awarded: previewAlreadyAwarded ? 0 : 2, balance: currentBalance + (previewAlreadyAwarded ? 0 : 2), reason: previewAlreadyAwarded ? "already_awarded" : "earned" };
-      } else {
-        result = await KMAuth.awardChildStars({
-          childId: activeChildId,
-          eventType: "prayer_complete",
-          sourceKey: "prayer:" + completedPrayer.date + ":" + completedPrayer.key,
-          description: "Prière de " + completedPrayer.name + " accomplie"
-        });
-      }
-      if (result.reason === "daily_limit") {
-        if (stillCurrent()) prayerReward.textContent = "Les 5 prières sont déjà récompensées aujourd’hui.";
-      } else {
-        localStorage.setItem(rewardStorageKey(completedPrayer, completedProfileKey), "1");
-        if (Number(result.balance) >= 0) {
-          setProfile(profileName.textContent, avatar.textContent, Number(result.balance));
-          if (isLocalPreview()) {
-            localStorage.setItem("km-preview-star-balance", String(result.balance));
-            if (Number(result.awarded) === 2) {
-              var previewHistory = [];
-              try { previewHistory = JSON.parse(localStorage.getItem("km-preview-star-history") || "[]"); } catch (historyError) { previewHistory = []; }
-              previewHistory.unshift({ amount: 2, description: "Prière de " + completedPrayer.name + " accomplie", created_at: new Date().toISOString() });
-              localStorage.setItem("km-preview-star-history", JSON.stringify(previewHistory.slice(0, 20)));
-            }
-          }
-        }
-        if (stillCurrent()) markPrayerDone(Number(result.awarded) === 2 ? "Bravo · +2 étoiles" : "Prière déjà validée");
-      }
+      // A simple device-local note, separate for each profile, date and prayer.
+      localStorage.setItem(prayerCompletionKey(currentPrayer), "1");
+      markPrayerDone();
     } catch (error) {
-      if (stillCurrent()) prayerReward.textContent = "Impossible de valider pour le moment.";
+      prayerReward.textContent = "La prière n’a pas pu être enregistrée sur cet appareil.";
     } finally {
       prayerDone.disabled = false;
-      prayerDone.textContent = "J’ai prié";
     }
   });
 

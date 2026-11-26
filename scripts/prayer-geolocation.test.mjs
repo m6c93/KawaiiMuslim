@@ -78,7 +78,8 @@ async function settle() {
 }
 
 function setup({ stored = {}, geolocation = true, permission = 'prompt', inactiveFrame = false,
-  authenticated = false, blockedRewardStorage = false, nowISO = '2026-11-26T12:00:00Z' } = {}) {
+  authenticated = false, blockedRewardStorage = false, blockedCompletionWrite = false,
+  childId = 'child-test', nowISO = '2026-11-26T12:00:00Z' } = {}) {
   let now = Date.parse(nowISO);
   let nextTimer = 0;
   const timers = new Map();
@@ -94,7 +95,7 @@ function setup({ stored = {}, geolocation = true, permission = 'prompt', inactiv
   };
   const document = Object.assign(target(), {
     readyState: 'complete', visibilityState: 'visible', hidden: false,
-    getElementById: get,
+    getElementById: id => ['todayStarBalance', 'todayStarUnit'].includes(id) ? null : get(id),
     createElement: tagName => element('', tagName),
     querySelector: () => null,
     querySelectorAll: () => [],
@@ -108,7 +109,10 @@ function setup({ stored = {}, geolocation = true, permission = 'prompt', inactiv
       if (blockedRewardStorage && key.startsWith('km-prayer-done:')) throw new Error('Storage access denied');
       return storage.get(key) ?? null;
     },
-    setItem: (key, value) => storage.set(key, String(value)),
+    setItem: (key, value) => {
+      if (blockedCompletionWrite && key.startsWith('km-prayer-done:')) throw new Error('Storage write denied');
+      storage.set(key, String(value));
+    },
     removeItem: key => storage.delete(key)
   };
   const navigator = {
@@ -140,11 +144,11 @@ function setup({ stored = {}, geolocation = true, permission = 'prompt', inactiv
     matchMedia: () => ({ matches: true }),
     setTimeout, clearTimeout
   });
-  const child = { id: 'child-test', type: 'child', name: 'Aya', avatar: 'a' };
+  const child = { id: childId, type: 'child', name: 'Aya', avatar: 'a' };
   const KMAuth = authenticated ? {
     getContext: async () => ({ user: { id: 'parent-test' }, children: [child] }),
     validateActiveProfile: () => child,
-    getStarShop: async () => ({ balance: 0 }),
+    getStarShop: async () => assert.fail('This prayer interface does not need a star balance'),
     awardChildStars: args => new Promise((resolve, reject) => awards.push({ args, resolve, reject }))
   } : undefined;
   if (KMAuth) window.KMAuth = KMAuth;
@@ -284,6 +288,32 @@ test('GPS success posts coordinates privately to the same-origin endpoint and re
   assert.equal(app.get('prayerCityForm').hidden, true);
   assert.equal(app.get('prayerLocateButton').disabled, false);
   assert.doesNotMatch(JSON.stringify([...app.storage]), /48\.9362|2\.3574|latitude|longitude/);
+});
+
+test('the five verified daily times stay in order and identify the current and next prayer', async () => {
+  const app = setup();
+  await settle();
+  await app.position();
+  assert.equal(app.get('prayerSchedule').hidden, true);
+  assert.equal(app.get('prayerSchedule').children.length, 0);
+  await app.answer();
+  const schedule = app.get('prayerSchedule');
+  assert.equal(schedule.hidden, false);
+  assert.deepEqual(schedule.children.map(slot => slot.querySelectorAll('span')[1].textContent), ['Fajr', 'Dhohr', 'Asr', 'Maghrib', 'Icha']);
+  assert.deepEqual(schedule.children.map(slot => slot.querySelector('strong').textContent), ['06:47', '12:37', '14:43', '16:58', '18:32']);
+  assert.deepEqual(schedule.children.map(slot => slot.dataset.state), ['other', 'current', 'next', 'other', 'other']);
+  assert.deepEqual(schedule.children.map(slot => slot.getAttribute('aria-current')), [null, 'time', null, null, null]);
+  assert.equal(app.get('prayerDate').textContent, 'Jeudi 26 novembre');
+
+  await app.advance(2 * 60 * 60 * 1000);
+  await app.position();
+  await app.answer();
+  assert.deepEqual(schedule.children.map(slot => slot.dataset.state), ['other', 'other', 'current', 'next', 'other']);
+  assert.deepEqual(schedule.children.map(slot => slot.getAttribute('aria-current')), [null, null, 'time', null, null]);
+  await app.city('Rabat, Maroc');
+  await app.failPrayer(502, 'timings_unavailable');
+  assert.equal(schedule.hidden, true);
+  assert.equal(schedule.children.length, 0, 'A failed location change must not retain the previous city’s numeric times');
 });
 
 for (const code of [1, 2, 3]) {
@@ -484,24 +514,47 @@ test('editing pauses automatic refreshes and cancelling restores the selected lo
   assert.match(app.get('prayerTitle').textContent, /Dhohr.*12:37/);
 });
 
-for (const finishWhileLoading of [true, false]) {
-  test(`a delayed reward stays attached to the prayer clicked before a location change; loading = ${finishWhileLoading}`, async () => {
-    const app = setup({ authenticated: true });
+for (const authenticated of [true, false]) {
+  test(`prayer completion is local, persistent and independent of other prayers, profiles and days; signed in = ${authenticated}`, async () => {
+    const stored = { 'km-preview-star-balance': '12', 'km-preview-star-history': '[{"amount":12}]' };
+    const app = setup({ authenticated, stored });
     await settle();
     await app.position();
     await app.answer();
     assert.match(app.get('prayerTitle').textContent, /Dhohr/);
     await app.emit(app.get('prayerDone'), 'click');
-    assert.equal(app.awards.length, 1);
-    assert.equal(app.awards[0].args.sourceKey, 'prayer:2026-11-26:Dhuhr');
-    await app.city('Lyon, France');
-    if (!finishWhileLoading) await app.answer(undefined, { asr: '12:55' });
-    app.awards[0].resolve({ awarded: 2, balance: 2, reason: 'earned' });
+    const profile = authenticated ? 'child-test' : 'guest';
+    assert.equal(app.storage.get(`km-prayer-done:${profile}:2026-11-26:Dhuhr`), '1');
+    assert.equal(app.get('prayerReward').textContent, 'Prière notée');
+    assert.equal(app.get('prayerDone').hidden, true);
+    assert.equal(app.awards.length, 0);
+    for (const [key, value] of Object.entries(stored)) assert.equal(app.storage.get(key), value);
+
+    const reloaded = setup({ authenticated, stored: Object.fromEntries(app.storage) });
     await settle();
-    assert.equal(app.storage.get('km-prayer-done:child-test:2026-11-26:Dhuhr'), '1');
-    assert.equal(app.storage.has('km-prayer-done:child-test:2026-11-26:Asr'), false);
+    await reloaded.position();
+    await reloaded.answer();
+    assert.equal(reloaded.get('prayerDone').hidden, true);
+    assert.equal(reloaded.get('prayerReward').textContent, 'Prière notée');
+
+    const otherProfile = setup({ authenticated: true, childId: 'other-child', stored: Object.fromEntries(app.storage) });
+    await settle();
+    await otherProfile.position();
+    await otherProfile.answer();
+    assert.equal(otherProfile.get('prayerDone').hidden, false);
+    assert.equal(otherProfile.get('prayerReward').textContent, '');
+
+    const nextDay = setup({ authenticated, nowISO: '2026-11-27T12:00:00Z', stored: Object.fromEntries(app.storage) });
+    await settle();
+    await nextDay.position();
+    await nextDay.answer(undefined, { date: '27-11-2026' });
+    assert.equal(nextDay.get('prayerDone').hidden, false);
+    assert.equal(nextDay.get('prayerReward').textContent, '');
+
+    await app.city('Lyon, France');
     assert.equal(app.get('prayerReward').textContent, '');
-    if (finishWhileLoading) await app.answer(undefined, { asr: '12:55' });
+    await app.answer(undefined, { asr: '12:55' });
+    assert.equal(app.storage.has(`km-prayer-done:${profile}:2026-11-26:Asr`), false);
     assert.match(app.get('prayerTitle').textContent, /Asr.*12:55/);
     assert.equal(app.get('prayerDone').hidden, false);
     assert.equal(app.get('prayerDone').disabled, false);
@@ -519,6 +572,11 @@ test('the request switches calendar day when the detected timezone has already p
   await app.answer(undefined, { zone: 'Europe/Paris', date: '27-11-2026' });
   assert.match(app.get('prayerTitle').textContent, /Fajr.*06:47/);
   assert.equal(app.get('prayerEyebrow').textContent, 'PROCHAINE PRIÈRE');
+  assert.equal(app.get('prayerDate').textContent, 'Vendredi 27 novembre');
+  const slots = app.get('prayerSchedule').children;
+  assert.equal(slots.length, 5);
+  assert.equal(slots[0].dataset.state, 'next');
+  assert.ok(slots.every(slot => !slot.hasAttribute('aria-current')));
 });
 
 test('an estimated city is requested explicitly and requires confirmation before loading prayer times', async () => {
@@ -660,7 +718,7 @@ test('the retry button reuses the detected coordinates without requesting GPS ag
   assert.equal(app.get('prayerRetryButton').hidden, true);
 });
 
-test('blocked access to saved prayer rewards does not hide otherwise valid prayer times', async () => {
+test('blocked access to saved prayer notes does not hide otherwise valid prayer times', async () => {
   const app = setup({ authenticated: true, blockedRewardStorage: true });
   await settle();
   await app.position();
@@ -670,6 +728,21 @@ test('blocked access to saved prayer rewards does not hide otherwise valid praye
   assert.equal(app.get('prayerDone').hidden, false);
   assert.equal(app.get('prayerStatus').textContent, '');
   assert.equal(app.get('prayerCityForm').hidden, true);
+});
+
+test('an unavailable note storage shows a retryable message without losing the prayer schedule', async () => {
+  const app = setup({ authenticated: true, blockedCompletionWrite: true });
+  await settle();
+  await app.position();
+  await app.answer();
+  await app.emit(app.get('prayerDone'), 'click');
+  assert.equal(app.get('prayerDone').hidden, false);
+  assert.equal(app.get('prayerDone').disabled, false);
+  assert.match(app.get('prayerReward').textContent, /pas pu être enregistrée/);
+  assert.match(app.get('prayerTitle').textContent, /Dhohr.*12:37/);
+  assert.equal(app.get('prayerSchedule').children.length, 5);
+  assert.equal(app.storage.has('km-prayer-done:child-test:2026-11-26:Dhuhr'), false);
+  assert.equal(app.awards.length, 0);
 });
 
 const saintDenis93 = {
@@ -760,7 +833,9 @@ test('an explicit city choice uses coordinates and persists across refreshes and
   assert.equal(savedPlace.cityId, saintDenis93.id);
   assert.equal(app.storage.get('km-prayer-location-mode:v1'), 'manual');
   await app.answer();
-  assert.equal(app.get('prayerCityLabel').textContent, saintDenis93.label);
+  assert.equal(app.get('prayerCityLabel').textContent, 'Saint-Denis (93)');
+  assert.equal(app.get('prayerCityLabel').title, saintDenis93.label);
+  assert.equal(app.get('prayerCityButton').getAttribute('aria-label'), saintDenis93.label + ' — Modifier la ville');
   assert.equal(app.get('prayerCityForm').hidden, true);
   await app.advance(61000);
   assert.equal(app.gps.length, 1);
@@ -773,7 +848,7 @@ test('an explicit city choice uses coordinates and persists across refreshes and
     assert.equal(reloaded.prayerRequests().at(-1).body.cityId, saintDenis93.id);
     assert.equal(reloaded.prayerRequests().at(-1).body.latitude, saintDenis93.latitude);
     await reloaded.answer();
-    assert.equal(reloaded.get('prayerCityLabel').textContent, saintDenis93.label);
+    assert.equal(reloaded.get('prayerCityLabel').textContent, 'Saint-Denis (93)');
   }
 });
 
@@ -932,10 +1007,13 @@ for (const hasCurrentPoster of [true, false]) {
     } }) });
     await settle();
     assert.equal(app.gps.length, 0);
-    assert.equal(app.get('prayerCityLabel').textContent, saintDenis93.label);
+    assert.equal(app.get('prayerCityLabel').textContent, 'Saint-Denis (93)');
     assert.equal(app.get('prayerTitle').textContent, 'Horaires de la mosquée');
     assert.equal(app.get('prayerDone').hidden, true, 'No invented current prayer or reward without verified numeric times');
     assert.equal(app.get('prayerCountdown').textContent, '');
+    assert.equal(app.get('prayerSchedule').hidden, true);
+    assert.equal(app.get('prayerSchedule').children.length, 0, 'The official image is never converted to invented numeric slots');
+    assert.equal(app.get('prayerDate').textContent, 'Mardi 1 décembre');
     assert.equal(app.get('prayerCalendar').hidden, !hasCurrentPoster);
     assert.equal(app.get('prayerSource').querySelector('a').href, 'https://www.grandemosqueedeparis.fr/horaire-des-prieres-paris');
     assert.equal(app.get('prayerCityForm').hidden, true, 'Changing month does not make users choose their city again');

@@ -1,0 +1,180 @@
+/* The prayer card has its own layout so it remains readable in the app shell. */
+#prayerCard {
+  --prayer-ink: #354f3f;
+  --prayer-muted: #737b70;
+  --prayer-green: #486c54;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+  width: 100%;
+  max-width: 720px;
+  min-height: 0;
+  margin: 0 auto;
+  padding: 24px;
+  border: 1px solid #e1e7dc;
+  border-radius: 28px;
+  background: linear-gradient(155deg, #fffdf7 12%, #f3f7ef 100%);
+  color: var(--prayer-ink);
+  box-shadow: 0 8px 24px rgba(57, 77, 48, .035);
+}
+
+#prayerCard [hidden] { display: none !important; }
+#prayerCard .prayer-header { display: flex; align-items: center; gap: 13px; }
+#prayerCard .prayer-heading { min-width: 0; }
+#prayerCard .prayer-icon {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  background: #f4e8ca;
+  color: #826c3d;
+}
+#prayerCard .prayer-icon .material-symbols-rounded { font-size: 28px; }
+#prayerHeading { margin: 0; font: 700 28px/1.1 "Baloo 2", sans-serif; }
+#prayerDate { margin: 3px 0 0; color: var(--prayer-muted); font-size: 13px; line-height: 1.4; }
+#prayerDate:empty { display: none; }
+#prayerDate::first-letter { text-transform: uppercase; }
+
+#prayerCard .prayer-location-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; align-items: stretch; }
+#prayerCard .prayer-city {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #e0e6da;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, .8);
+  color: var(--prayer-ink);
+  font: 800 13px/1.4 "Nunito", sans-serif;
+  text-align: left;
+}
+#prayerCard .prayer-city .material-symbols-rounded { flex: none; color: #829474; font-size: 18px; }
+#prayerCityLabel { min-width: 0; overflow-wrap: anywhere; }
+#prayerCard .prayer-edit { flex: none; margin-left: auto; padding-left: 3px; color: #69775f; font-size: 10px; white-space: nowrap; }
+#prayerCard .prayer-locate {
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid #d5dfce;
+  border-radius: 15px;
+  background: #edf2e7;
+  color: #486347;
+  font: 800 12px/1.3 "Nunito", sans-serif;
+  box-shadow: none;
+}
+
+#prayerCard .prayer-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 96px;
+  padding: 16px;
+  border: 1px solid #dce8d9;
+  border-radius: 20px;
+  background: #eaf2e5;
+}
+#prayerCard .prayer-copy { flex: 1; min-width: 0; }
+#prayerEyebrow { margin: 0 0 4px; color: #5f7d59; font-size: 10px; font-weight: 900; letter-spacing: .09em; line-height: 1.5; }
+#prayerTitle { margin: 0; color: #36533f; font: 700 29px/1.15 "Baloo 2", sans-serif; overflow-wrap: anywhere; }
+#prayerCard .prayer-countdown { margin: 5px 0 0; min-height: 0; color: #61745d; font-size: 12px; font-weight: 700; line-height: 1.4; letter-spacing: 0; white-space: normal; }
+#prayerCard .prayer-countdown:empty { display: none; }
+#prayerCard .prayer-action { flex: none; width: auto; min-width: 0; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 0; }
+#prayerCard .prayer-done {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: auto;
+  min-width: 105px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--prayer-green);
+  color: #fff;
+  font: 800 13px/1.3 "Nunito", sans-serif;
+  box-shadow: none;
+}
+#prayerCard .prayer-done::before { content: "✓"; font-size: 15px; }
+#prayerCard .prayer-done:hover { background: #35583f; }
+#prayerCard .prayer-reward {
+  max-width: 122px;
+  min-height: 0;
+  padding: 9px 10px;
+  border: 1px solid #cfdfc8;
+  border-radius: 14px;
+  background: #f4f8f0;
+  color: #46683e;
+  font: 800 12px/1.4 "Nunito", sans-serif;
+  text-align: center;
+  white-space: normal;
+  animation: none;
+}
+#prayerCard .prayer-reward:empty { display: none; }
+
+#prayerCard .prayer-schedule { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 9px; margin: 0; padding: 0; list-style: none; }
+#prayerCard .prayer-slot { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 0; padding: 12px 4px; border: 1px solid #e6e9df; border-radius: 17px; background: #fffefb; color: #6f776b; }
+#prayerCard .prayer-slot-icon { font-size: 21px; color: #a39c79; }
+#prayerCard .prayer-slot-name { font: 800 12px/1.2 "Nunito", sans-serif; }
+#prayerCard .prayer-slot-time { color: #3e5341; font: 700 24px/1.15 "Baloo 2", sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+#prayerCard .prayer-slot[data-state="current"] { border-color: var(--prayer-green); background: var(--prayer-green); color: #fff; }
+#prayerCard .prayer-slot[data-state="current"] .prayer-slot-icon { color: #f0dfb4; }
+#prayerCard .prayer-slot[data-state="current"] .prayer-slot-time { color: #fff; }
+#prayerCard .prayer-slot[data-state="next"] { border-color: #b7cbb0; background: #f3f7ee; }
+
+#prayerCard .prayer-source { margin: 0; color: var(--prayer-muted); font: 600 12px/1.6 "Nunito", sans-serif; }
+#prayerCard .prayer-source::before { content: "Source : "; }
+#prayerCard .prayer-source a { color: inherit; text-decoration: underline; text-decoration-color: #bac4b3; text-underline-offset: 3px; }
+#prayerCard .prayer-status { color: #67765e; font-size: 13px; line-height: 1.55; }
+#prayerCard .prayer-estimate { align-self: flex-start; }
+#prayerCard .prayer-calendar { margin: 0 auto; }
+#prayerCard .prayer-calendar a { border: 1px solid #e0e6da; border-radius: 16px; }
+
+#prayerCard .prayer-city-form { margin: 0; padding: 16px; border: 1px solid #e0e6da; border-radius: 19px; background: #fffefb; color: var(--prayer-ink); }
+#prayerCard .prayer-city-form label { font-size: 14px; }
+#prayerCard .prayer-city-controls { display: flex; flex-wrap: wrap; gap: 8px; }
+#prayerCard .prayer-city-form input { flex-basis: 100%; width: 100%; min-height: 46px; border-color: #c7d4bd; color: #354f3f; font-size: 16px; }
+#prayerCard .prayer-city-controls button { flex: 1; min-height: 44px; color: #fff; background: #486c54; }
+#prayerCard .prayer-city-controls .prayer-cancel { color: #617454; background: #ecf1e6; }
+#prayerCard .prayer-city-search-tools { gap: 10px; flex-wrap: wrap; }
+#prayerCard .prayer-city-search-tools span,
+#prayerCard .prayer-city-search-status { color: #718269; font-size: 12px; }
+#prayerCard .prayer-city-search-tools button { color: #486347; }
+#prayerCard .prayer-city-option { border-color: #e0e6da; background: #f7f9f3; color: #3f5c43; }
+#prayerCard .prayer-city-option:hover { border-color: #a9bda1; background: #edf3e7; }
+#prayerCard .prayer-city-attribution { color: #73806c; }
+#prayerCard :is(button, a, input):focus-visible { outline: 3px solid #8b9d75; outline-offset: 3px; }
+
+@media (max-width: 600px) {
+  #prayerCard { padding: 17px; gap: 13px; border-radius: 25px; }
+  #prayerHeading { font-size: 26px; }
+  #prayerDate { font-size: 12px; }
+  #prayerCard .prayer-current { padding: 13px; gap: 10px; border-radius: 18px; }
+  #prayerTitle { font-size: 25px; }
+  #prayerCard .prayer-countdown { font-size: 11px; }
+  #prayerCard .prayer-done { min-width: 92px; padding: 10px; font-size: 12px; }
+  #prayerCard .prayer-schedule { gap: 6px; }
+  #prayerCard .prayer-slot { gap: 4px; padding: 10px 3px; border-radius: 14px; }
+  #prayerCard .prayer-slot-name { font-size: 11px; }
+  #prayerCard .prayer-slot-time { font-size: 20px; }
+  #prayerCard .prayer-slot-icon { font-size: 19px; }
+  #prayerCard .prayer-source { font-size: 11px; }
+}
+
+@media (max-width: 360px) {
+  #prayerCard { padding: 13px; gap: 12px; }
+  #prayerCard .prayer-city { padding: 9px; gap: 4px; font-size: 12px; }
+  #prayerCard .prayer-locate { padding: 9px; font-size: 11px; }
+  #prayerCard .prayer-current { padding: 11px; }
+  #prayerTitle { font-size: 22px; }
+  #prayerCard .prayer-done { min-width: 84px; padding: 9px; }
+  #prayerCard .prayer-schedule { gap: 4px; }
+  #prayerCard .prayer-slot-time { font-size: 18px; }
+  #prayerCard .prayer-slot-name { font-size: 10px; }
+  #prayerCard .prayer-reward { max-width: 94px; font-size: 11px; }
+}
