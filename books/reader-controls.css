@@ -147,18 +147,16 @@ html.km-reader-turned {
 }
 .km-reader-clean input.progress::-moz-range-thumb { width: 15px; height: 15px; border-radius: 50%; border: 2px solid white; background: #39715d; }
 .km-reader-clean .preview-end:not([hidden]) {
-  display: flex; z-index: 21; position: absolute; left: auto; right: calc(var(--safe-right) + 8px);
-  top: calc(var(--safe-top) + 62px); bottom: auto; width: auto; max-width: 124px; margin: 0; padding: 0;
-  box-shadow: none; background: transparent; border: 0; transform: none;
+  position:static; display:flex; align-items:center; justify-content:center;
+  width:auto; max-width:100%; margin:0; padding:0; box-shadow:none; background:transparent; border:0; transform:none;
 }
-.km-reader-clean .preview-end a { white-space: normal; text-align: center; padding: 9px 12px; }
+.km-reader-clean .preview-end a {
+  display:grid; place-items:center; min-height:44px; padding:4px 8px; margin:0; width:100%;
+  border-radius:12px; text-align:center; white-space:normal; line-height:1.15;
+}
+.km-reader-clean .reader-dock:has(> .preview-end:not([hidden])) { grid-template-columns:44px minmax(0,1fr) 44px auto; }
 .km-reader-clean .drawer { z-index: 42; box-sizing: border-box; height: 100%; width: min(500px, 94%); max-width: 100%; padding-top: max(18px,var(--safe-top)); }
 .km-reader-clean .scrim { z-index: 41; }
-.km-reader-wide .preview-end:not([hidden]) {
-  width: min(95px, calc((var(--km-reader-width) - var(--km-page-width)) / 2 - var(--safe-right) - 12px));
-}
-.km-reader-wide .preview-end a { width: 100%; padding-inline: 4px; }
-
 /* Long-pressing an illustration should leave the reader in place on iOS. */
 .km-reader-clean #book :is(.paper, .cover-image, img) {
   -webkit-touch-callout: none;
@@ -168,6 +166,23 @@ html.km-reader-turned {
 }
 
 /* The landscape viewport owns the art and the controls while it is mounted. */
-html.km-apple-landscape .reader, html.km-apple-landscape .topbar { display:none!important; }
-.km-apple-landscape km-book-viewport [slot=left] > span { font:bold 21px/1 system-ui,sans-serif; }
-.km-apple-landscape km-book-viewport .paper img { pointer-events:none; -webkit-touch-callout:none; }
+html.km-landscape-controls .reader, html.km-landscape-controls .topbar { display:none!important; }
+.km-landscape-controls km-book-viewport [slot=tool] > span { font:bold 21px/1 system-ui,sans-serif; }
+.km-landscape-controls km-book-viewport .paper img { pointer-events:none; -webkit-touch-callout:none; }
+
+.km-landscape-controls .reader-settings summary {
+  width:100%; min-height:44px; height:auto; padding:3px; border-radius:12px;
+  font:700 11px/1.1 system-ui,sans-serif;
+}
+.km-landscape-controls .reader-settings[open] .actions {
+  position:static; inset:auto; width:100%; max-width:none; max-height:none; margin:4px 0 0;
+  transform:none; padding:2px; box-shadow:none; overflow:visible;
+}
+.km-landscape-controls .reader-settings .icon { gap:3px; padding:5px; }
+.km-landscape-controls .reader-settings .icon::after { overflow-wrap:anywhere; }
+.km-landscape-controls .preview-end a { color:#48213a; font:700 12px/1.1 system-ui,sans-serif; }
+.km-landscape-controls .reader-dock { container-type:inline-size; }
+@container (max-width:240px) {
+  .km-landscape-controls .reader-dock .progress-wrap { grid-template-columns:minmax(0,1fr); }
+  .km-landscape-controls .reader-dock #totalLabel { display:none; }
+}

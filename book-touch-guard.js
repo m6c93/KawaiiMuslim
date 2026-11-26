@@ -50,13 +50,14 @@
 
   const styles = document.createElement('link');
   styles.rel = 'stylesheet';
-  styles.href = '/books/reader-controls.css?v=book-zoom-1';
+  styles.href = '/books/reader-controls.css?v=reader-tools-2';
   document.head.append(styles);
 
   // The iPhone shell can also arrange the legacy reader elements. Keep the
   // book, page controls and settings in independent, clipped layout regions.
-  function createAppleLandscape({book, dock, home, pages, settings}) {
+  function createLandscapeControls({book, dock, home, pages, settings, offer, shellControls, guardTaps}) {
     const viewport = document.createElement('km-book-viewport');
+    viewport.classList.toggle('shell-controls', shellControls);
     const shadow = viewport.attachShadow({mode:'open'});
     shadow.innerHTML = `
       <style>
@@ -68,16 +69,24 @@
         }
         .layout {
           box-sizing:border-box; width:100%; height:100%; overflow:hidden;
-          display:grid; grid-template-columns:54px minmax(0,1fr) 58px;
-          grid-template-rows:minmax(0,1fr) auto; gap:var(--dock-gap,16px) 9px;
+          --rail:68px;
+          display:grid; grid-template-columns:var(--rail) minmax(0,1fr) var(--rail);
+          grid-template-rows:minmax(0,1fr) auto; gap:6px 7px;
           padding:calc(var(--safe-top) + 7px) calc(var(--safe-right) + 7px)
             calc(var(--safe-bottom) + 7px) calc(var(--safe-left) + 7px);
         }
         .art { position:relative; grid-area:1/2; min-width:0; min-height:0; display:grid; place-items:center;
           overflow:hidden; overflow:clip; isolation:isolate; }
-        .left,.right { align-self:center; justify-self:center; display:grid; place-items:center; gap:6px; }
-        .left { grid-area:1/1; } .right { grid-area:1/3; z-index:2; position:relative; }
-        .bottom { grid-area:2/2; display:grid; justify-items:center; align-items:end; min-width:0; }
+        .rail { position:relative; grid-area:1/1; min-width:0; min-height:0; overflow:auto;
+          display:flex; flex-direction:column; align-items:stretch; overscroll-behavior:contain; }
+        .tools { margin-block:auto; display:grid; align-items:start; gap:4px; }
+        .bottom { grid-area:2/1/3/-1; display:grid; justify-items:center; align-items:end; min-width:0; }
+        :host(.settings-open) .layout { grid-template-columns:min(162px,32%) minmax(0,1fr) 0; }
+        /* The app draws its own Options pill at bottom centre and its exit at bottom left. */
+        :host(.shell-controls) .bottom {
+          min-height:78px; justify-items:end; align-items:center;
+          padding-left:calc(var(--km-reader-width) / 2 + 58px - 7px - var(--safe-left)); box-sizing:border-box;
+        }
         ::slotted([slot=art]) {
           box-sizing:border-box!important; display:block!important; position:relative!important;
           inset:auto!important; margin:0!important; padding:0!important; min-width:0!important; min-height:0!important;
@@ -88,28 +97,35 @@
         ::slotted([slot=art]:not([aria-busy=true])) { transform:none!important; }
         ::slotted([slot=bottom]) {
           position:static!important; display:grid!important; inset:auto!important; transform:none!important;
-          grid-area:auto!important; width:min(100%,570px)!important; max-width:100%!important;
-          margin:0!important; align-self:end!important; justify-self:center!important;
+          grid-area:auto!important; width:min(100%,570px)!important; min-width:0!important; max-width:100%!important;
+          margin:0!important; align-self:center!important;
         }
-        ::slotted([slot=left]),::slotted([slot=right]) {
-          position:relative!important; inset:auto!important; transform:none!important; margin:0!important;
-          visibility:visible!important; opacity:1!important; pointer-events:auto!important;
+        ::slotted([slot=tool]) {
+          box-sizing:border-box!important; position:static!important; inset:auto!important; transform:none!important;
+          width:100%!important; max-width:100%!important; min-width:0!important; height:auto!important;
+          margin:0!important; pointer-events:auto!important;
         }
-        ::slotted([slot=left]) {
-          display:grid!important; align-content:center!important; justify-items:center!important; gap:1px!important;
-          box-sizing:border-box!important; width:54px!important; height:46px!important; padding:2px!important;
-          color:#25483d!important; background:#fffdf5!important; border:1px solid #91aaa0!important;
-          border-radius:12px!important; font:700 11px/1.1 system-ui,sans-serif!important; text-decoration:none!important;
+        ::slotted(.home),::slotted(#gridBtn) {
+          display:grid!important; place-content:center!important; justify-items:center!important; gap:1px!important;
+          min-height:44px!important; padding:2px!important; color:#25483d!important; background:#fffdf5!important;
+          border:1px solid #91aaa0!important; border-radius:12px!important;
+          font:700 11px/1.1 system-ui,sans-serif!important; text-decoration:none!important;
         }
+        :host(.settings-open) ::slotted([slot=tool]:not(.reader-settings)),
+        ::slotted(.preview-end[hidden]) { display:none!important; }
       </style>
       <div class="layout">
-        <div class="left"><slot name="left"></slot></div>
+        <div class="rail"><div class="tools"><slot name="tool"></slot></div></div>
         <div class="art"><slot name="art"></slot></div>
-        <div class="right"><slot name="right"></slot></div>
         <div class="bottom"><slot name="bottom"></slot></div>
       </div>`;
     const art = shadow.querySelector('.art');
-    const parts = [[book,'art'],[home,'left'],[pages,'left'],[settings,'right'],[dock,'bottom']];
+    const parts = [[book,'art'],[home,'tool'],[pages,'tool'],[settings,'tool'],[dock,'bottom']];
+    if (offer) parts.push([offer,'tool']);
+    function fitSettings() {
+      viewport.classList.toggle('settings-open', settings.open);
+    }
+    settings.addEventListener('toggle', fitSettings);
     const origins = new Map();
     let active = false;
     function size() {
@@ -126,8 +142,10 @@
       event.stopPropagation();
       if (event.cancelable) event.preventDefault();
     }
-    book.addEventListener('click', keepTapOnPage, true);
-    book.addEventListener('dblclick', keepTapOnPage, true);
+    if (guardTaps) {
+      book.addEventListener('click', keepTapOnPage, true);
+      book.addEventListener('dblclick', keepTapOnPage, true);
+    }
     return enabled => {
       if (enabled !== active) {
         active = enabled;
@@ -138,14 +156,15 @@
             node.before(marker); origins.set(node, marker);
             node.slot = slot; viewport.append(node);
           }
-          root.classList.add('km-apple-landscape');
+          root.classList.add('km-landscape-controls');
+          fitSettings();
           observer?.observe(art);
         } else {
           observer?.disconnect();
           for (const [node, marker] of origins) {
             node.removeAttribute('slot'); marker.replaceWith(node);
           }
-          origins.clear(); viewport.remove(); root.classList.remove('km-apple-landscape');
+          origins.clear(); viewport.remove(); root.classList.remove('km-landscape-controls');
         }
       }
       size();
@@ -174,7 +193,7 @@
 
     const settings = document.createElement('details');
     settings.className = 'reader-settings';
-    settings.innerHTML = '<summary aria-label="Réglages du lecteur"><span aria-hidden="true">⚙︎</span>Réglages</summary>';
+    settings.innerHTML = '<summary aria-label="Réglages du lecteur"><svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7h6m4 0h8M3 17h11m4 0h3"/><circle cx="11" cy="7" r="2"/><circle cx="16" cy="17" r="2"/></svg>Réglages</summary>';
     const actions = toolbar.querySelector('.actions');
     settings.append(actions);
     document.body.append(settings);
@@ -208,7 +227,7 @@
       if (offer.hasAttribute('data-discovery')) link.addEventListener('click', event => {
         if (window.KMDiscovery) { event.preventDefault(); window.KMDiscovery.openUnlock(); }
       });
-      document.body.append(offer);
+      dock.append(offer);
     }
     function syncPage() {
       range.setAttribute('aria-valuetext', label.textContent + ' · ' + total.textContent);
@@ -294,8 +313,10 @@
     const appleDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
       Boolean(window.webkit?.messageHandlers?.kmShell || window.KMApple);
-    const layoutApple = appleDevice && window.Element?.prototype.attachShadow
-      ? createAppleLandscape({book, dock, home, pages, settings}) : null;
+    const shellControls = Boolean(window.webkit?.messageHandlers?.kmShell || window.KMApple) ||
+      /iPhone|iPod/i.test(navigator.userAgent);
+    const landscapeControls = window.Element?.prototype.attachShadow
+      ? createLandscapeControls({book, dock, home, pages, settings, offer, shellControls, guardTaps:appleDevice}) : null;
     let fitFrame = 0, fitLater = 0;
     function fit() {
       const viewport = window.visualViewport;
@@ -314,7 +335,7 @@
       root.style.setProperty('--km-reader-height', height + 'px');
       measureStage();
       full.hidden = !(document.fullscreenEnabled || root.webkitRequestFullscreen);
-      layoutApple?.(width > height && width >= 430);
+      landscapeControls?.(width > height && width >= 430);
     }
     function queueFit() {
       cancelAnimationFrame(fitFrame);
