@@ -6,6 +6,8 @@
     const parts = new Intl.DateTimeFormat('en-GB', {timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now || new Date());
     const value = type => Number(parts.find(p => p.type === type).value);
     const day = Date.UTC(value('year'), value('month')-1, value('day'));
+    // Featured choice for this week; the usual Monday rotation then resumes.
+    if (day >= Date.UTC(2026,10,23) && day < Date.UTC(2026,10,30)) return 10;
     const weeks = Math.floor((day - Date.UTC(2026,9,12)) / (7 * 86400000));
     return ((weeks % names.length) + names.length) % names.length;
   }
