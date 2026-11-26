@@ -161,7 +161,7 @@
       .km-natural-book .spread{box-shadow:0 16px 34px #19382f45,0 2px 5px #19382f38;outline:1px solid #49645840;border-radius:8px}
       .km-natural-book .cover-stage{box-shadow:0 16px 34px #19382f50,0 2px 5px #19382f38;outline:1px solid #49645840}
       .km-natural-book .paper img{user-select:none;-webkit-user-drag:none}.km-print-trim .paper img{object-fit:cover;transform:scale(${1 / (1 - PAGE_TRIM * 2)});transform-origin:center}
-      html:has(.km-print-trim) #zoomPages > img,html:has(.km-print-trim) .thumb > img{clip-path:inset(${PAGE_TRIM * 100}%)}
+      html:has(.km-print-trim) .thumb > img{clip-path:inset(${PAGE_TRIM * 100}%)}
       .km-natural-book .binding{width:28px;background:linear-gradient(90deg,transparent,#271e1014 35%,#271e1038 49%,#fff9e84d 53%,#271e100a 68%,transparent)}
       .km-natural-book .km-paper-leaf{position:absolute;display:block;z-index:40;pointer-events:none;opacity:1;mix-blend-mode:normal}
       .km-paper-cast{position:absolute;top:1%;height:98%;width:50%;z-index:25;pointer-events:none;background:radial-gradient(ellipse at center,#21170945,transparent 73%);filter:blur(11px);opacity:0;will-change:opacity,transform}

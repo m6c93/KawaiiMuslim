@@ -60,7 +60,7 @@ html.km-reader-turned {
 }
 .km-reader-clean .book {
   width: var(--km-page-width) !important; height: calc(var(--km-page-width) / 2) !important;
-  aspect-ratio: 2 / 1; max-width: none; max-height: none; padding: 0; margin: 0; touch-action: manipulation;
+  aspect-ratio: 2 / 1; max-width: none; max-height: none; padding: 0; margin: 0; touch-action: none;
 }
 /* Refit in the same layout pass when Safari resizes its bars or text. */
 @supports (height: 1cqh) {
@@ -154,12 +154,6 @@ html.km-reader-turned {
 .km-reader-clean .preview-end a { white-space: normal; text-align: center; padding: 9px 12px; }
 .km-reader-clean .drawer { z-index: 42; box-sizing: border-box; height: 100%; width: min(500px, 94%); max-width: 100%; padding-top: max(18px,var(--safe-top)); }
 .km-reader-clean .scrim { z-index: 41; }
-.km-reader-turned #zoomDialog[open] {
-  position: fixed; inset: 50% auto auto 50%; margin: 0; width: calc(var(--km-reader-width) - 24px);
-  height: calc(var(--km-reader-height) - 24px); max-width: none; max-height: none; box-sizing: border-box;
-  transform: translate(-50%,-50%) rotate(90deg);
-}
-
 .km-reader-wide .preview-end:not([hidden]) {
   width: min(95px, calc((var(--km-reader-width) - var(--km-page-width)) / 2 - var(--safe-right) - 12px));
 }
@@ -170,7 +164,7 @@ html.km-reader-turned {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
-  touch-action: manipulation;
+  touch-action: none;
 }
 
 /* The landscape viewport owns the art and the controls while it is mounted. */

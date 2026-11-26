@@ -1,6 +1,8 @@
 (function () {
   "use strict";
 
+  // The shared picture reader owns its complete pointer sequence.
+  if (document.documentElement.hasAttribute("data-picture-reader")) return;
   var multiTouchGesture = false;
 
   document.addEventListener("touchstart", function (event) {
@@ -48,7 +50,7 @@
 
   const styles = document.createElement('link');
   styles.rel = 'stylesheet';
-  styles.href = '/books/reader-controls.css?v=auto-landscape-1';
+  styles.href = '/books/reader-controls.css?v=book-zoom-1';
   document.head.append(styles);
 
   // The iPhone shell can also arrange the legacy reader elements. Keep the
@@ -347,28 +349,6 @@
     window.visualViewport?.addEventListener('resize', queueFit);
     window.visualViewport?.addEventListener('scroll', queueFit);
 
-    // When the viewport is turned, the physical Y axis runs across the book.
-    let swipe = null;
-    book.addEventListener('touchstart', event => {
-      if (event.touches.length !== 1) { if (swipe) swipe.pinch = true; return; }
-      if (!root.classList.contains('km-reader-turned')) return;
-      const touch = event.touches[0]; swipe = {x:touch.clientX, y:touch.clientY};
-    }, {capture:true, passive:true});
-    book.addEventListener('touchmove', event => {
-      if (swipe && event.touches.length > 1) swipe.pinch = true;
-    }, {capture:true, passive:true});
-    book.addEventListener('touchend', event => {
-      if (!swipe) return;
-      event.stopImmediatePropagation();
-      if (event.touches.length) return;
-      const start = swipe; swipe = null;
-      if (start.pinch || !event.changedTouches.length) return;
-      const touch = event.changedTouches[0], dx = touch.clientY - start.y, dy = touch.clientX - start.x;
-      if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.35) {
-        event.preventDefault(); byId(dx < 0 ? 'nextBtn' : 'prevBtn').click();
-      }
-    }, {capture:true, passive:false});
-    book.addEventListener('touchcancel', () => { swipe = null; }, {capture:true, passive:true});
     fit();
   }
   document.addEventListener('km-reader-ready', mount);

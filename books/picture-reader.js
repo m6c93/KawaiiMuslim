@@ -24,7 +24,7 @@ function mountPictureReader(config) {
 
   document.body.insertAdjacentHTML("beforeend", pictureReaderLayout);
   const book = byId("book"), cover = byId("coverStage"), spread = byId("spread");
-  const range = byId("progress"), drawer = byId("drawer"), zoom = byId("zoomDialog");
+  const range = byId("progress"), drawer = byId("drawer");
   range.dataset.readingSlug = config.progressSlug || slug;
   range.dataset.readingTitle = config.title;
   if (config.discovery) range.dataset.readingPreview = "true";
@@ -184,22 +184,14 @@ function mountPictureReader(config) {
     pageSrc:index => index && index <= count ? (config.pageSource ? config.pageSource(index) : pages[index - 1]) : "",
     paintSide:(side, index) => showPaper(side === "right" ? 1 : 0, index)
   });
+  const gestures = bindBookGestures({book, cover, coverImage, spread, zoomButton:byId("zoomBtn"),
+    turn:direction => move(position + direction)});
   function move(value, animated = true) {
     const target = bound(value);
+    if (target !== position) gestures.reset();
     if (animated && paper) { paper.turn(target); return; }
     paper?.finish();
     if (target !== position) { position = target; render(); }
-  }
-  function openZoom(ids) {
-    const selectedImages = ids.filter(Boolean);
-    if (!selectedImages.length && position) return;
-    const images = selectedImages.length ? selectedImages.map(i => imageFor(i)) : [coverArtwork()];
-    if (!selectedImages.length) {
-      images[0].setAttribute("role", "img");
-      images[0].setAttribute("aria-label", "Couverture du livre " + config.title);
-    }
-    byId("zoomPages").replaceChildren(...images);
-    if (!zoom.open) zoom.showModal();
   }
   function closeDrawer() {
     drawer.classList.remove("open"); drawer.inert = true; drawer.setAttribute("aria-hidden", "true");
@@ -241,33 +233,150 @@ function mountPictureReader(config) {
   byId("gridBtn").onclick = openDrawer; byId("closeDrawer").onclick = byId("scrim").onclick = closeDrawer;
   range.oninput = () => move(range.value, false);
   byId("soundBtn").onclick = () => { sound = !sound; byId("soundBtn").setAttribute("aria-pressed", String(sound)); };
-  byId("zoomBtn").onclick = () => openZoom(indices(position)); byId("zoomClose").onclick = () => zoom.close();
   byId("fullscreenBtn").onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.(); };
-  let gesture = null, lastSwipe = -1000;
   for (const [side, paper] of papers.entries()) paper.addEventListener("click", event => {
-    if (event.pointerType === "touch" || event.pointerType === "pen" || performance.now() - lastSwipe < 450) return;
+    if (event.pointerType === "touch" || event.pointerType === "pen") return;
     // Touch readers keep the spread still on a tap; swipes and arrows turn it.
     if (matchMedia("(max-width:1024px), (pointer:coarse)").matches) return;
     move(position + (side ? 1 : -1));
   });
-  book.addEventListener("touchstart", e => { gesture = e.touches.length === 1 ? e.touches[0] : null; }, {passive:true});
-  book.addEventListener("touchmove", e => { if (e.touches.length > 1) gesture = null; }, {passive:true});
-  book.addEventListener("touchcancel", () => { gesture = null; }, {passive:true});
-  book.addEventListener("touchend", e => {
-    if (!gesture || e.touches.length) return;
-    const dx = e.changedTouches[0].clientX - gesture.clientX, dy = e.changedTouches[0].clientY - gesture.clientY;
-    gesture = null;
-    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.35) { lastSwipe = performance.now(); move(position + (dx < 0 ? 1 : -1)); }
-  }, {passive:true});
   document.addEventListener("keydown", e => {
     if (document.querySelector("dialog[open]")) return;
     if (!drawer.inert) { if (e.key === "Escape") closeDrawer(); return; }
     if (e.target.matches("input,textarea,select") || (e.key === " " && e.target.closest("button,a"))) return;
+    if (gestures.handleKey(e)) return;
     const commands = {ArrowRight:position + 1, PageDown:position + 1, " ":position + 1, ArrowLeft:position - 1, PageUp:position - 1, Home:0, End:lastSpread};
     if (Object.hasOwn(commands, e.key)) { e.preventDefault(); move(commands[e.key], !["Home","End"].includes(e.key)); }
   });
   render();
   document.dispatchEvent(new Event("km-reader-ready"));
 }
+/* All positions are in the unscaled book's coordinates, even in forced landscape. */
+function bindBookGestures({book, cover, coverImage, spread, zoomButton, turn}) {
+  const coverArt = coverImage.firstElementChild;
+  const pointers = new Map();
+  let scale = 1, x = 0, y = 0;
+  let start = null, usedGesture = false;
+  const viewport = () => cover.hidden ? book : coverImage;
+  const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
+
+  function apply(nextScale, nextX, nextY) {
+    const area = viewport();
+    scale = nextScale;
+    x = clamp(nextX, (1 - scale) * area.clientWidth, 0);
+    y = clamp(nextY, (1 - scale) * area.clientHeight, 0);
+    const enlarged = scale > 1;
+    const layer = cover.hidden ? spread : coverArt;
+    layer.style.transform = enlarged ? `translate(${x}px, ${y}px) scale(${scale})` : "";
+    book.classList.toggle("zoomed-spread", enlarged && cover.hidden);
+    book.classList.toggle("zoomed", enlarged);
+    const label = enlarged ? "Taille normale" : "Agrandir la page";
+    zoomButton.title = label;
+    zoomButton.setAttribute("aria-label", label);
+    zoomButton.setAttribute("aria-pressed", String(enlarged));
+  }
+  function reset() {
+    if (pointers.size) usedGesture = true;
+    pointers.clear();
+    start = null;
+    spread.style.transform = coverArt.style.transform = "";
+    apply(1, 0, 0);
+  }
+  function point(event) {
+    const area = viewport(), rect = area.getBoundingClientRect();
+    if (document.documentElement.classList.contains("km-reader-turned")) {
+      return {x:(event.clientY - rect.top) * area.clientWidth / rect.height,
+        y:(rect.right - event.clientX) * area.clientHeight / rect.width};
+    }
+    return {x:(event.clientX - rect.left) * area.clientWidth / rect.width,
+      y:(event.clientY - rect.top) * area.clientHeight / rect.height};
+  }
+  function grip() {
+    const [a, b] = pointers.values();
+    if (!b) return {x:a.x, y:a.y, distance:0};
+    return {x:(a.x + b.x) / 2, y:(a.y + b.y) / 2, distance:Math.hypot(a.x - b.x, a.y - b.y)};
+  }
+  function rebase() {
+    start = pointers.size ? {at:grip(), scale, x, y} : null;
+  }
+  book.addEventListener("pointerdown", event => {
+    if (event.button !== 0 || book.hasAttribute("aria-busy")) return;
+    if (!pointers.size) usedGesture = false;
+    pointers.set(event.pointerId, point(event));
+    if (pointers.size > 1) usedGesture = true;
+    event.target.setPointerCapture(event.pointerId);
+    rebase();
+  });
+  book.addEventListener("pointermove", event => {
+    if (!pointers.has(event.pointerId)) return;
+    pointers.set(event.pointerId, point(event));
+    const at = grip();
+    if (pointers.size === 2 && start.at.distance > 0) {
+      const next = clamp(start.scale * at.distance / start.at.distance, 1, 4);
+      const ratio = next / start.scale;
+      apply(next, at.x - (start.at.x - start.x) * ratio, at.y - (start.at.y - start.y) * ratio);
+    } else if (pointers.size === 1 && scale > 1) {
+      const dx = at.x - start.at.x, dy = at.y - start.at.y;
+      if (Math.hypot(dx, dy) > 4) usedGesture = true;
+      apply(scale, start.x + dx, start.y + dy);
+    }
+  });
+  function release(event) {
+    if (!pointers.has(event.pointerId)) return;
+    const swipe = event.type === "pointerup" && event.pointerType !== "mouse" &&
+      pointers.size === 1 && !usedGesture && scale === 1;
+    const origin = start.at;
+    pointers.delete(event.pointerId);
+    if (event.type !== "pointerup") usedGesture = true;
+    rebase();
+    if (swipe) {
+      const end = point(event), dx = end.x - origin.x, dy = end.y - origin.y;
+      if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.35) {
+        usedGesture = true;
+        turn(dx < 0 ? 1 : -1);
+      }
+    }
+  }
+  for (const name of ["pointerup", "pointercancel", "lostpointercapture"]) book.addEventListener(name, release);
+  book.addEventListener("click", event => {
+    if (!event.detail || (!usedGesture && (scale === 1 || event.target.closest(".book-page-action")))) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
+  // Also cancel Safari's native magnification when the reader is inside an app iframe.
+  const preventNativePinch = event => { if (event.touches.length > 1 && event.cancelable) event.preventDefault(); };
+  for (const name of ["touchstart", "touchmove"]) book.addEventListener(name, preventNativePinch, {passive:false});
+  zoomButton.onclick = () => {
+    if (book.hasAttribute("aria-busy")) return;
+    if (scale > 1) { reset(); return; }
+    const area = viewport();
+    // Frame the left-hand page when opening the zoom from settings.
+    apply(2, cover.hidden ? 0 : -area.clientWidth / 2, -area.clientHeight / 2);
+  };
+  function handleKey(event) {
+    if (scale === 1) return false;
+    const steps = {ArrowLeft:[64, 0], ArrowRight:[-64, 0], ArrowUp:[0, 64], ArrowDown:[0, -64]};
+    if (event.key === "Escape") reset();
+    else if (Object.hasOwn(steps, event.key)) {
+      const [dx, dy] = steps[event.key];
+      apply(scale, x + dx, y + dy);
+    } else return false;
+    event.preventDefault();
+    return true;
+  }
+  // A rotation can swap the gesture axes without changing the logical book size.
+  window.addEventListener("orientationchange", reset);
+  window.addEventListener("pagehide", reset);
+  if (window.ResizeObserver) {
+    let width = book.clientWidth, height = book.clientHeight;
+    new ResizeObserver(() => {
+      if (width !== book.clientWidth || height !== book.clientHeight) reset();
+      width = book.clientWidth; height = book.clientHeight;
+    }).observe(book);
+  }
+  reset();
+  return {reset, handleKey};
+}
+
 const pictureBookConfig = document.getElementById("bookConfig");
 if (pictureBookConfig) mountPictureReader(JSON.parse(pictureBookConfig.textContent));

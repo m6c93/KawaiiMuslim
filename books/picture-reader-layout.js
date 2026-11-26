@@ -49,5 +49,5 @@ const pictureReaderLayout = `
     <div class="drawer-head"><div><small>SOMMAIRE VISUEL</small><h2>Toutes les pages</h2></div><button class="close" id="closeDrawer" type="button" aria-label="Fermer">×</button></div>
     <div class="thumbs" id="thumbs"></div>
   </aside>
-  <div class="scrim" id="scrim" hidden></div><dialog id="zoomDialog"><button id="zoomClose" type="button">Fermer ×</button><div id="zoomPages"></div></dialog>
+  <div class="scrim" id="scrim" hidden></div>
 `;
