@@ -233,7 +233,7 @@ button:focus-visible {
 }
 
 .prayer-city .material-symbols-rounded { color: var(--today-gold); font-size: 16px; }
-.prayer-edit { margin-left: 3px; color: var(--today-pink-soft); font-size: 10px; }
+.prayer-edit { flex: none; white-space: nowrap; margin-left: 3px; color: var(--today-pink-soft); font-size: 10px; }
 .prayer-action { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 5px 8px; text-align: right; }
 .prayer-countdown { min-height: 15px; color: #d6d3eb; font-size: 11px; font-weight: 800; }
 
@@ -317,6 +317,7 @@ button:focus-visible {
 .prayer-status { grid-column: 1 / -1; margin: 0; color: #76505f; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
 .prayer-status:empty { display: none; }
 .child-prayer .prayer-city-form { color: #66545e; border-color: #e3d4d5; }
+.child-prayer .prayer-edit { color: #9b4769; }
 .child-prayer .prayer-city-form input { border-color: #d6c4cf; font-size: 16px; }
 .child-prayer .prayer-city-form .prayer-cancel { color: #66545e; background: #ece2e8; }
 .prayer-source { grid-column: 1 / -1; margin: 0; font-size: 11px; line-height: 1.5; color: #76505f; }
