@@ -4,9 +4,24 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const handler = require('../api/prayer-times.js');
+const catalogue = require('../data/prayer-fr-cities.json');
+const publishedCalendar = require('../data/prayer-gmp-2026-11.json');
 const host = 'www.kawaiimuslimworld.com';
 const input = { date: '2026-11-26', city: 'Montreuil, France' };
 const expectedTimes = { Fajr: '06:23', Dhuhr: '12:38', Asr: '14:41', Maghrib: '16:59', Isha: '18:46' };
+const calculatedSource = {
+  id: 'aladhan-mwl', label: 'Horaires calculés · Ligue islamique mondiale', url: 'https://aladhan.com/calculation-methods'
+};
+const publishedSource = {
+  id: 'gmp-calendar', label: 'Grande Mosquée de Paris · novembre 2026',
+  url: 'https://www.grandemosqueedeparis.fr/horaire-des-prieres-paris', validUntil: '2026-11-30'
+};
+
+function chosenCity(code, date = input.date) {
+  const row = catalogue.cities.find(city => city[0] === code);
+  assert.ok(row, 'Test commune is in the official catalogue: ' + code);
+  return { date, cityId: 'fr:' + code, latitude: row[4], longitude: row[3] };
+}
 
 function payload(date = '26-11-2026') {
   return { code: 200, status: 'OK', data: {
@@ -45,7 +60,7 @@ test('a confirmed city uses the fixed provider and returns only validated timing
   const response = await invoke({ body: JSON.stringify({ ...input, city: '  Montreuil, France  ' }) });
   assert.equal(response.code, 200);
   assert.deepEqual(response.body, { code: 200, data: {
-    timings: expectedTimes, meta: { timezone: 'Europe/Paris' }, date: { gregorian: { date: '26-11-2026' } }
+    timings: expectedTimes, meta: { timezone: 'Europe/Paris', source: calculatedSource }, date: { gregorian: { date: '26-11-2026' } }
   } });
   assert.equal(fetch.mock.callCount(), 1);
   const [url, options] = fetch.mock.calls[0].arguments;
@@ -62,7 +77,7 @@ test('a confirmed city uses the fixed provider and returns only validated timing
 
 test('GPS coordinates including zero are used without a default city or an address lookup', async t => {
   const fetch = t.mock.method(globalThis, 'fetch', async () => upstream());
-  for (const [latitude, longitude] of [[48.861, 2.443], [0, 0], [-33.868, 151.209], [90, -180]]) {
+  for (const [latitude, longitude] of [[45.764, 4.836], [0, 0], [-33.868, 151.209], [90, -180]]) {
     const response = await invoke({ body: { date: input.date, latitude, longitude } });
     assert.equal(response.code, 200);
     const url = new URL(fetch.mock.calls.at(-1).arguments[0]);
@@ -88,7 +103,11 @@ test('rejects malformed dates, bodies, mixed locations and invalid coordinates b
     { date: input.date, latitude: 48, longitude: -180.1 },
     { ...input, city: '' }, { ...input, city: '   ' }, { ...input, city: ['Paris'] },
     { ...input, city: 'P'.repeat(161) }, { ...input, city: '<Paris>' },
-    { ...input, city: 'Paris\nFrance' }, { ...input, city: 'Pa\u202Eris' }
+    { ...input, city: 'Paris\nFrance' }, { ...input, city: 'Pa\u202Eris' },
+    { ...input, cityId: 'fr:75056' },
+    { date: input.date, cityId: 'fr:75056' },
+    { date: input.date, cityId: 'fr:93999', latitude: 48.861, longitude: 2.443 },
+    { date: input.date, cityId: ['fr:75056'], latitude: 48.861, longitude: 2.443 }
   ]) {
     const response = await invoke({ body });
     assert.equal(response.code, 400, JSON.stringify(body));
@@ -197,7 +216,7 @@ test('distinguishes an explicit invalid address from a geocoding service failure
   assert.equal(response.code, 422);
   assert.deepEqual(response.body, { code: 422, error: 'location_not_found' });
   assertPrivate(response);
-  const gpsResponse = await invoke({ body: { date: input.date, latitude: 48.861, longitude: 2.443 } });
+  const gpsResponse = await invoke({ body: { date: input.date, latitude: 45.764, longitude: 4.836 } });
   assert.equal(gpsResponse.code, 502, 'A GPS request cannot be rejected as a misspelled city');
 });
 
@@ -241,4 +260,89 @@ test('does not read or forward visitor identity, IP headers, cookies or credenti
   assert.equal(JSON.stringify(response.body).includes('latitude'), false);
   assert.equal(JSON.stringify(response.body).includes('longitude'), false);
   for (const log of logs) assert.equal(log.mock.callCount(), 0);
+});
+
+test('chosen Paris and petite-couronne communes receive the published 26 November timetable without a provider request', async t => {
+  const fetch = t.mock.method(globalThis, 'fetch', () => assert.fail('The dated published timetable is local'));
+  for (const code of ['75056', '92012', '93066', '94028']) {
+    const response = await invoke({ body: chosenCity(code) });
+    assert.equal(response.code, 200);
+    assert.deepEqual(response.body, { code: 200, data: {
+      timings: { Fajr: '06:38', Dhuhr: '12:43', Asr: '14:39', Maghrib: '17:03', Isha: '18:30' },
+      meta: { timezone: 'Europe/Paris', source: publishedSource },
+      date: { gregorian: { date: '26-11-2026' } }
+    } });
+    assertPrivate(response);
+  }
+  assert.equal(fetch.mock.callCount(), 0);
+});
+
+test('the official image transcription preserves verified values on 10, 17 and 30 November', async t => {
+  t.mock.method(globalThis, 'fetch', () => assert.fail('The published November dates must not call Aladhan'));
+  const expected = {
+    '2026-11-10': { Fajr: '06:15', Dhuhr: '12:39', Asr: '14:52', Maghrib: '17:20', Isha: '18:47' },
+    '2026-11-17': { Fajr: '06:25', Dhuhr: '12:41', Asr: '14:46', Maghrib: '17:11', Isha: '18:38' },
+    '2026-11-30': { Fajr: '06:43', Dhuhr: '12:44', Asr: '14:38', Maghrib: '17:00', Isha: '18:27' }
+  };
+  for (const [date, timings] of Object.entries(expected)) {
+    const response = await invoke({ body: chosenCity('75056', date) });
+    assert.equal(response.code, 200);
+    assert.deepEqual(response.body.data.timings, timings);
+  }
+  assert.equal(publishedCalendar.days['2026-11-03'][1], '07:40');
+  assert.equal(publishedCalendar.days['2026-11-17'][1], '08:02');
+  assert.equal(publishedCalendar.days['2026-11-28'][1], '08:18');
+  assert.equal(Object.keys(publishedCalendar.days).length, 30);
+});
+
+test('the published reference never repeats into another month or year and calculated fallback remains labelled', async t => {
+  const fetch = t.mock.method(globalThis, 'fetch', async url => upstream(payload(new URL(url).pathname.split('/').at(-1))));
+  for (const date of ['2026-10-31', '2026-12-01', '2025-11-26', '2027-11-26']) {
+    const response = await invoke({ body: chosenCity('75056', date) });
+    assert.equal(response.code, 200);
+    assert.deepEqual(response.body.data.meta.source, calculatedSource);
+    assert.equal(response.body.data.date.gregorian.date, date.split('-').reverse().join('-'));
+    const url = new URL(fetch.mock.calls.at(-1).arguments[0]);
+    assert.equal(url.searchParams.get('method'), '3');
+    assert.equal(url.pathname, '/v1/timings/' + date.split('-').reverse().join('-'));
+  }
+  assert.equal(fetch.mock.callCount(), 4);
+  const start = await invoke({ body: chosenCity('75056', '2026-11-01') });
+  assert.equal(start.body.data.meta.source.id, 'gmp-calendar');
+  assert.equal(start.body.data.timings.Fajr, '06:01');
+  assert.equal(fetch.mock.callCount(), 4);
+});
+
+test('city IDs are resolved against the catalogue rather than accepting a supplied location or a department prefix', async t => {
+  const fetch = t.mock.method(globalThis, 'fetch', async () => upstream());
+  const lyon = chosenCity('69123');
+  const response = await invoke({ body: { ...lyon, latitude: 48.8566, longitude: 2.3522 } });
+  assert.equal(response.code, 200);
+  assert.deepEqual(response.body.data.meta.source, calculatedSource);
+  const url = new URL(fetch.mock.calls[0].arguments[0]);
+  assert.equal(url.searchParams.get('latitude'), String(lyon.latitude));
+  assert.equal(url.searchParams.get('longitude'), String(lyon.longitude));
+  const paris = await invoke({ body: { ...chosenCity('75056'), latitude: lyon.latitude, longitude: lyon.longitude } });
+  assert.equal(paris.body.data.meta.source.id, 'gmp-calendar', 'The selected city ID takes precedence over stale coordinates');
+  const unknown = await invoke({ body: { date: input.date, cityId: 'fr:75999', latitude: 48.8566, longitude: 2.3522 } });
+  assert.equal(unknown.code, 400);
+  assert.equal(fetch.mock.callCount(), 1);
+});
+
+test('GPS uses the published reference only near a covered commune and never applies Paris times to other cities', async t => {
+  const fetch = t.mock.method(globalThis, 'fetch', async () => upstream());
+  const nearParis = await invoke({ body: { date: input.date, latitude: 48.842377, longitude: 2.354827 } });
+  assert.equal(nearParis.body.data.meta.source.id, 'gmp-calendar');
+  assert.equal(fetch.mock.callCount(), 0);
+  for (const body of [
+    { date: input.date, latitude: 45.764, longitude: 4.836 },
+    { date: input.date, latitude: 48.85, longitude: 2.9 },
+    chosenCity('97411'),
+    { date: input.date, city: 'Paris, France' }
+  ]) {
+    const response = await invoke({ body });
+    assert.equal(response.code, 200);
+    assert.deepEqual(response.body.data.meta.source, calculatedSource);
+  }
+  assert.equal(fetch.mock.callCount(), 4, 'Unresolved free text must not be matched to Paris just by its name');
 });

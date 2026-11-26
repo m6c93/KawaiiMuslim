@@ -1,0 +1,32 @@
+{
+  "frenchCatalogue": {
+    "publisher": "DINUM / Etalab, Insee, IGN",
+    "url": "https://geo.api.gouv.fr/communes?fields=nom,code,codesPostaux,departement,centre,population",
+    "documentation": "https://geo.api.gouv.fr/decoupage-administratif/communes",
+    "retrievedAt": "2026-11-26T21:32:02.611288+00:00",
+    "sourceSha256": "cd2f63620c0c972f8a2158ed2a504ef19c2eaceff09813d0d5fa96450a7c2e12",
+    "count": 34875,
+    "coverage": "France métropolitaine et DROM. Les collectivités d’outre-mer restent accessibles par la recherche mondiale.",
+    "license": "Licence Ouverte / Open Licence",
+    "licenseUrl": "https://www.data.gouv.fr/pages/legal/licences/etalab-2-0",
+    "attribution": "Source : DINUM / Etalab, Insee, IGN (API Découpage administratif), extraction du 2026-11-26.",
+    "administrativeDataSource": "https://github.com/datagouv/decoupage-administratif",
+    "geometrySource": "https://github.com/datagouv/contours-administratifs",
+    "geometryNote": "Centres mathématiques des communes calculés à partir d’IGN ADMIN EXPRESS ; pas des positions personnelles. Seuls les départements de métropole et les DROM sont embarqués pour conserver un catalogue sous Licence Ouverte. Les géométries COM pouvant utiliser OpenStreetMap ne sont pas incluses.",
+    "transformations": [
+      "Champs réduits aux noms, identifiants INSEE, départements, centres WGS84, population et codes postaux.",
+      "Catalogue de recherche local ; aucun choix de ville automatique."
+    ]
+  },
+  "worldSearch": {
+    "provider": "Photon public demo, operated by komoot",
+    "endpoint": "https://photon.komoot.io/api/",
+    "documentation": "https://github.com/komoot/photon/blob/master/docs/api-v1.md",
+    "usagePolicy": "https://github.com/komoot/photon#demo-server",
+    "usageNote": "Recherche mondiale explicitement demandée, localités uniquement, cache mémoire borné, pas de garantie de disponibilité. Aucun en-tête ou position du visiteur transmis.",
+    "dataLicense": "Open Database License (ODbL)",
+    "attribution": "© OpenStreetMap contributors",
+    "attributionUrl": "https://www.openstreetmap.org/copyright",
+    "softwareLicense": "Apache-2.0"
+  }
+}

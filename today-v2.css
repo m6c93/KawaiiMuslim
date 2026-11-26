@@ -295,7 +295,7 @@ button:focus-visible {
 }
 
 .prayer-city-form label { display: block; margin-bottom: 7px; font-weight: 900; }
-.prayer-city-form > div { display: flex; gap: 8px; }
+.prayer-city-controls { display: flex; gap: 8px; }
 .prayer-city-form input {
   min-width: 0;
   flex: 1;
@@ -319,6 +319,19 @@ button:focus-visible {
 .child-prayer .prayer-city-form { color: #66545e; border-color: #e3d4d5; }
 .child-prayer .prayer-city-form input { border-color: #d6c4cf; font-size: 16px; }
 .child-prayer .prayer-city-form .prayer-cancel { color: #66545e; background: #ece2e8; }
+.prayer-source { grid-column: 1 / -1; margin: 0; font-size: 11px; line-height: 1.5; color: #76505f; }
+.prayer-source a { color: inherit; text-underline-offset: 3px; }
+.prayer-city-search-tools { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 5px; }
+.prayer-city-search-tools span, .prayer-city-search-status { font-size: 12px; line-height: 1.5; }
+.prayer-city-search-tools button { flex: none; padding: 5px 2px; background: transparent; color: #76445d; font-size: 12px; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }
+.prayer-city-search-status { margin: 4px 0 8px; }
+.prayer-city-search-status:empty { display: none; }
+.prayer-city-suggestions { display: grid; gap: 6px; }
+.prayer-city-suggestions[hidden] { display: none; }
+.prayer-city-form .prayer-city-option { width: 100%; min-height: 48px; padding: 11px 12px; text-align: left; font: 800 13px/1.5 "Nunito", sans-serif; color: #5e3c50; background: #fffaf5; border: 1px solid #e3d4d5; overflow-wrap: anywhere; }
+.prayer-city-option:hover, .prayer-city-option:focus-visible { background: #fff0d8; border-color: #cb9d54; }
+.prayer-city-attribution { margin: 8px 0 0; font-size: 10px; line-height: 1.5; color: #76505f; }
+.prayer-city-attribution a { color: inherit; text-underline-offset: 2px; }
 
 .faith-journey {
   position: relative;
@@ -760,9 +773,9 @@ button:focus-visible {
   .prayer-star-unit { display: none; }
   .prayer-done { width: auto; min-width: 112px; min-height: 38px; padding: 7px 15px; }
   .prayer-reward { max-width: 100%; overflow-wrap: normal; }
-  .prayer-city-form > div { flex-wrap: wrap; }
+  .prayer-city-controls { flex-wrap: wrap; }
   .prayer-city-form input { flex-basis: 100%; }
-  .prayer-city-form button { flex: 1; }
+  .prayer-city-controls button { flex: 1; }
   .faith-path { display: none; }
   .faith-journey { gap: 22px; margin-top: 10px; }
   .journey-step,

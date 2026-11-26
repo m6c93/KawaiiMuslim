@@ -1,7 +1,17 @@
 'use strict';
 
 const PRAYERS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-const REQUEST_KEYS = new Set(['date', 'city', 'latitude', 'longitude']);
+const REQUEST_KEYS = new Set(['date', 'city', 'cityId', 'latitude', 'longitude']);
+const GMP_CALENDAR = require('../data/prayer-gmp-2026-11.json');
+const FRENCH_CITIES = require('../data/prayer-fr-cities.json');
+const CITIES_BY_ID = new Map(FRENCH_CITIES.cities.map(city => ['fr:' + city[0], city]));
+const GMP_DEPARTMENTS = new Set(['75', '92', '93', '94']);
+const GMP_CENTRES = FRENCH_CITIES.cities.filter(city => GMP_DEPARTMENTS.has(city[2]));
+const CALCULATED_SOURCE = {
+  id: 'aladhan-mwl',
+  label: 'Horaires calculés · Ligue islamique mondiale',
+  url: 'https://aladhan.com/calculation-methods'
+};
 
 function isSameOrigin(headers) {
   const site = headers['sec-fetch-site'];
@@ -31,19 +41,54 @@ function readRequest(body) {
   if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== body.date) return null;
 
   const hasCity = Object.hasOwn(body, 'city');
+  const hasCityId = Object.hasOwn(body, 'cityId');
   const hasLatitude = Object.hasOwn(body, 'latitude');
   const hasLongitude = Object.hasOwn(body, 'longitude');
   const date = body.date.split('-').reverse().join('-');
   if (hasCity) {
-    if (hasLatitude || hasLongitude || typeof body.city !== 'string' || body.city.length > 1024) return null;
+    if (hasCityId || hasLatitude || hasLongitude || typeof body.city !== 'string' || body.city.length > 1024) return null;
     const city = body.city.normalize('NFC').trim();
     if (!city || [...city].length > 160 || /[<>\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u.test(city)) return null;
-    return { date, city };
+    return { date, isoDate: body.date, city };
   }
   if (!hasLatitude || !hasLongitude || typeof body.latitude !== 'number' || typeof body.longitude !== 'number'
     || !Number.isFinite(body.latitude) || !Number.isFinite(body.longitude)
     || Math.abs(body.latitude) > 90 || Math.abs(body.longitude) > 180) return null;
-  return { date, latitude: body.latitude, longitude: body.longitude };
+  if (hasCityId) {
+    if (typeof body.cityId !== 'string') return null;
+    const city = CITIES_BY_ID.get(body.cityId);
+    if (!city) return null;
+    // A chosen commune is identified by the catalogue, never by untrusted
+    // coordinates supplied alongside its ID (which may also be stale).
+    return { date, isoDate: body.date, cityId: body.cityId, department: city[2], latitude: city[4], longitude: city[3] };
+  }
+  return { date, isoDate: body.date, latitude: body.latitude, longitude: body.longitude };
+}
+
+function withinThreeKilometres(latitude, longitude, city) {
+  const radians = Math.PI / 180;
+  const dLatitude = (city[4] - latitude) * radians;
+  const dLongitude = (city[3] - longitude) * radians;
+  const a = Math.sin(dLatitude / 2) ** 2
+    + Math.cos(latitude * radians) * Math.cos(city[4] * radians) * Math.sin(dLongitude / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(Math.max(0, 1 - a))) <= 3;
+}
+
+function publishedTimings(input) {
+  if (input.isoDate < GMP_CALENDAR.source.validFrom || input.isoDate > GMP_CALENDAR.source.validUntil) return null;
+  const row = GMP_CALENDAR.days[input.isoDate];
+  if (!row || input.city !== undefined) return null;
+  const covered = input.cityId
+    ? GMP_DEPARTMENTS.has(input.department)
+    : GMP_CENTRES.some(city => withinThreeKilometres(input.latitude, input.longitude, city));
+  if (!covered) return null;
+  const timings = Object.fromEntries(PRAYERS.map(key => [key, row[GMP_CALENDAR.columns.indexOf(key)]]));
+  const { id, label, url, validUntil } = GMP_CALENDAR.source;
+  return {
+    timings,
+    meta: { timezone: GMP_CALENDAR.timezone, source: { id, label, url, validUntil } },
+    date: { gregorian: { date: input.date } }
+  };
 }
 
 function validatedData(payload, date) {
@@ -61,7 +106,7 @@ function validatedData(payload, date) {
     timings[key] = match[1].padStart(2, '0') + ':' + match[2];
   }
   // Do not expose the provider's coordinates, address or additional metadata.
-  return { timings, meta: { timezone }, date: { gregorian: { date } } };
+  return { timings, meta: { timezone, source: { ...CALCULATED_SOURCE } }, date: { gregorian: { date } } };
 }
 
 function addressNotFound(payload) {
@@ -86,6 +131,8 @@ module.exports = async function prayerTimes(req, res) {
     || !/^application\/json(?:\s*;|\s*$)/i.test(headers['content-type'])) return fail(400, 'invalid_request');
   const input = readRequest(req.body);
   if (!input) return fail(400, 'invalid_request');
+  const published = publishedTimings(input);
+  if (published) return res.status(200).json({ code: 200, data: published });
 
   const manual = input.city !== undefined;
   const url = new URL('https://api.aladhan.com/v1/' + (manual ? 'timingsByAddress/' : 'timings/') + input.date);
